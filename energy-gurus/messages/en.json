@@ -1,0 +1,21 @@
+{
+    "Metadata": {
+        "title": "EnergyGurus - Energy Insights for Pakistan",
+        "description": "Weekly podcast, expert audits, real‑time monitoring and O&M services for smarter energy decisions in Pakistan."
+    },
+    "HomePage": {
+        "title": "Energy insights for Pakistan — analysis, action, impact.",
+        "subtitle": "Weekly podcast, expert audits, real‑time monitoring and O&M services for smarter energy decisions.",
+        "cta_podcast": "Listen to latest episode",
+        "cta_audit": "Request an Audit"
+    },
+    "Navbar": {
+        "podcast": "Podcast",
+        "audit": "Audit",
+        "monitoring": "Monitoring",
+        "om": "O&M",
+        "resources": "Resources",
+        "about": "About",
+        "dashboard": "Dashboard"
+    }
+}
