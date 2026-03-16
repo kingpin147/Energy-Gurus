@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, FileText, BarChart, Search, Zap, PieChart, ShieldCheck, HelpCircle, ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { Input } from "@/components/ui/input";
+import { AuditRequestForm } from "@/components/forms/audit-request-form";
 
 export default function AuditPage() {
     return (
@@ -79,36 +80,7 @@ export default function AuditPage() {
                         </div>
 
                         <Card className="shadow-2xl">
-                            <CardContent className="p-8 space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">Full Name</label>
-                                        <Input placeholder="John Doe" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">Phone Number</label>
-                                        <Input placeholder="+92 3XX XXXXXXX" />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Email Address</label>
-                                    <Input placeholder="john@example.com" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Site Address</label>
-                                    <Input placeholder="Plot #, Street, City" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Energy Goal</label>
-                                    <select className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">
-                                        <option>Reduce Monthly Bills</option>
-                                        <option>Solar Feasibility</option>
-                                        <option>Power Backup/UPS Audit</option>
-                                        <option>Commercial Efficiency</option>
-                                    </select>
-                                </div>
-                                <Button className="w-full font-bold" size="lg">Submit Audit Request</Button>
-                            </CardContent>
+                            <AuditRequestForm />
                         </Card>
                     </div>
                 </div>

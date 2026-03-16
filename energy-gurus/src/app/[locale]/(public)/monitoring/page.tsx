@@ -29,7 +29,7 @@ export default function MonitoringOverviewPage() {
                             <Button size="lg" variant="accent" className="font-bold px-8 shadow-lg shadow-accent/20" asChild>
                                 <Link href="/dashboard">Access Live Demo & Dashboard</Link>
                             </Button>
-                            <Button size="lg" variant="outline" className="font-bold border-white text-white hover:bg-white hover:text-primary transition-all">
+                            <Button size="lg" variant="outline" className="bg-transparent font-bold border-white text-white hover:bg-white hover:text-primary transition-all">
                                 Request Trial
                             </Button>
                         </div>

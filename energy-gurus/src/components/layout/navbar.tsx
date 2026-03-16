@@ -3,7 +3,7 @@
 import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { useTranslations, useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
-// import { UserButton, SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
+import { UserButton, SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import { Mic, Search, Globe, Menu, X } from "lucide-react";
 import { useState } from "react";
 
@@ -99,15 +99,19 @@ export function Navbar() {
                         <Link href="/audit">Request Audit</Link>
                     </Button>
 
-                    {/* Auth Actions Hidden */}
-                    {/* <SignedIn>
-                        <UserButton afterSignOutUrl="/" />
-                    </SignedIn>
-                    <SignedOut>
-                        <SignInButton mode="modal">
-                            <Button size="sm" variant="outline">Sign In</Button>
-                        </SignInButton>
-                    </SignedOut> */}
+                    {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
+                        process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY !== 'pk_test_...' && (
+                            <>
+                                <SignedIn>
+                                    <UserButton afterSignOutUrl="/" />
+                                </SignedIn>
+                                <SignedOut>
+                                    <SignInButton mode="modal">
+                                        <Button size="sm" variant="outline">Sign In</Button>
+                                    </SignInButton>
+                                </SignedOut>
+                            </>
+                        )}
 
                     {/* Mobile Menu Toggle */}
                     <button

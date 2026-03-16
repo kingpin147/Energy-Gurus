@@ -29,7 +29,7 @@ export default function OMPage() {
                         </p>
                         <div className="flex flex-wrap gap-4">
                             <Button size="lg" variant="accent" className="font-bold px-8">Request a Quote</Button>
-                            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary font-bold">View Packages</Button>
+                            <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-primary font-bold">View Packages</Button>
                         </div>
                     </div>
                 </div>

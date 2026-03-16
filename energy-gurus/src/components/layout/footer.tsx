@@ -2,6 +2,7 @@ import { Link } from "@/i18n/routing";
 import { Mic, Facebook, Twitter, Linkedin, Youtube, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NewsletterForm } from "@/components/forms/newsletter-form";
 
 export function Footer() {
     return (
@@ -56,10 +57,7 @@ export function Footer() {
                             Get the latest energy news and podcast episodes delivered to your inbox.
                         </p>
                         <div className="flex space-x-2">
-                            <Input type="email" placeholder="Email address" className="max-w-[200px]" />
-                            <Button size="sm">
-                                <Mail className="h-4 w-4 mr-2" /> Join
-                            </Button>
+                            <NewsletterForm variant="minimal" />
                         </div>
                     </div>
                 </div>

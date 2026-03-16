@@ -53,7 +53,7 @@ export default async function PodcastListingPage() {
                                             <Play className="w-5 h-5 fill-current" /> Listen Now
                                         </Link>
                                     </Button>
-                                    <Button variant="outline" size="lg" className="rounded-full border-white text-white hover:bg-white hover:text-primary px-8" asChild>
+                                    <Button variant="outline" size="lg" className="bg-transparent rounded-full border-white text-white hover:bg-white hover:text-primary px-8" asChild>
                                         <Link href={`/podcast/${episodes[0].id}#transcript`}>Read Transcript</Link>
                                     </Button>
                                 </div>

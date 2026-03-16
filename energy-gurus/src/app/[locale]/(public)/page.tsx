@@ -17,6 +17,7 @@ import {
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
+import { NewsletterForm } from "@/components/forms/newsletter-form";
 
 export default function Homepage() {
     const t = useTranslations("HomePage");
@@ -171,9 +172,8 @@ export default function Homepage() {
                         <p className="text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto">
                             Subscribe to our newsletter for weekly podcast summaries, policy alerts, and energy-saving tips delivered to your inbox.
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
-                            <Input placeholder="Enter your email address" className="h-12 text-lg px-6 rounded-full" />
-                            <Button size="lg" className="rounded-full h-12 px-10 font-bold bg-primary text-primary-foreground">Subscribe Now</Button>
+                        <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto w-full">
+                            <NewsletterForm />
                         </div>
                         <p className="text-sm text-muted-foreground">Join 5,000+ energy stakeholders in Pakistan.</p>
                     </div>
