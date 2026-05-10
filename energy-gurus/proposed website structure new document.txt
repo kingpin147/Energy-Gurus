@@ -1,0 +1,84 @@
+Final Website Structure 
+1. Podcast 
+A dedicated section for industry discussions and expert interviews. 
+Features 
+• Embedded YouTube podcast videos  
+• Guest name & designation  
+• Episode title  
+• Short description  
+• Share buttons  
+• YouTube channel link  
+2. EPCs / Installers 
+Directory of certified EPC companies and installers. 
+EPC Profile Includes 
+• Company profile  
+• Logo  
+• About section  
+• Work portfolio/images  
+• Customer ratings & reviews  
+• Social media icons  
+• Website icon  
+• InMail/contact option  
+EPC Dashboard 
+Separate login for each EPC/Installer to: 
+• View customer inquiries  
+• Reply to messages  
+• Upload portfolio  
+• View ratings & feedback  
+3. Brands 
+Directory of solar and energy brands. 
+Brand Profile Includes 
+• Brand profile  
+• Representatives  
+• Customer care numbers  
+• Product showcase (without pricing)  
+• Datasheets upload  
+• Customer ratings & reviews  
+• Reply to comments  
+• Social media icons  
+• Website icon  
+• InMail/contact option  
+Product Verification Tab 
+Inside every brand profile: 
+• Product serial number verification  
+• QR verification  
+• Warranty verification link  
+Brand Dashboard 
+Separate login for each brand to: 
+• Manage products  
+• Upload datasheets  
+• View inquiries  
+• Reply to customer feedback  
+• Manage verification section  
+4. EnergyGurus.Online Live QA Session 
+Weekly live Q&A session on trending industry topics. 
+Features 
+• Weekly topic announcement  
+• Live YouTube session embed/link  
+• Audience questions  
+• Guest expert participation  
+• Previous sessions archive  
+Example Topics 
+• Net Metering  
+• Hybrid Inverters  
+• Battery Storage  
+• Fake Products  
+• Solar Policies  
+• Installation Standards  
+Homepage Layout 
+Simple homepage with 4 main sections: 
+1. Podcast  
+2. EPCs / Installers  
+3. Brands  
+4. Weekly Live QA Session  
+Minimal and professional. 
+Suggested Website Style 
+• Clean white background  
+• Green/blue energy theme  
+• Mobile responsive  
+• Fast loading  
+• Easy navigation  
+• Professional corporate look  
+Suggested Tagline 
+EnergyGurus.Online 
+“Authenticity Guaranteed” 

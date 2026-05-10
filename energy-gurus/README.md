@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Energy Gurus - Advanced Energy Dashboard & Directory
 
-## Getting Started
+Energy Gurus is a high-performance, full-stack platform designed to bridge the gap between energy stakeholders, certified installers (EPCs), and brands. It features a robust role-based dashboard for managing EPC profiles, product verifications, and YouTube-integrated podcasts.
 
-First, run the development server:
+## 🚀 Technology Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Framework:** [Next.js 15+ (App Router)](https://nextjs.org/)
+- **Database:** [Neon (Serverless Postgres)](https://neon.tech/)
+- **ORM:** [Drizzle ORM](https://orm.drizzle.team/)
+- **Authentication:** [Clerk](https://clerk.com/)
+- **Caching:** [Upstash Redis](https://upstash.com/)
+- **File Storage:** [UploadThing](https://uploadthing.com/)
+- **Styling:** Tailwind CSS + Lucide Icons
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Core Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 👤 Role-Based Access Control (RBAC)
+Strictly isolated dashboards for different user types:
+- **Super Admin:** Full system control, user management (promoting/demoting admins), and content moderation.
+- **Admin:** Manage website users and update dynamic content like YouTube podcasts/QA.
+- **EPC (Installer):** Manage company branding, about section, and upload work portfolios.
+- **Brand:** Manage brand profile and product verification codes.
+- **User:** Browse directories and send inquiries.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 🏢 EPC Directory
+- Public listing of verified EPC companies.
+- Detailed profile pages with portfolio galleries and contact options.
+- Lead generation for installers via inquiry forms.
 
-## Learn More
+### 🎙️ Podcast & Live QA Integration
+- Dynamic homepage updates fetching latest episodes directly from the database.
+- YouTube embed integration managed via the Admin Dashboard.
 
-To learn more about Next.js, take a look at the following resources:
+### 🔐 Secure User Management
+- Custom dashboard interface to assign roles without leaving the website.
+- Seamless sync between Clerk metadata and the local Postgres database.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Getting Started
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Prerequisites
+- Node.js 20+
+- A Neon DB account (Postgres)
+- A Clerk account
+- An UploadThing account
 
-## Deploy on Vercel
+### Installation
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/kingpin147/Energy-Gurus.git
+   cd Energy-Gurus
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Configure Environment Variables:**
+   Create a `.env` file in the root directory (refer to `.env.example`):
+   ```env
+   DATABASE_URL=your_neon_db_url
+   CLERK_SECRET_KEY=your_clerk_secret
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_pub_key
+   UPLOADTHING_SECRET=your_uploadthing_secret
+   ```
+
+4. **Push Database Schema:**
+   ```bash
+   npx drizzle-kit push
+   ```
+
+5. **Run Development Server:**
+   ```bash
+   npm run dev
+   ```
+
+## 📂 Project Structure
+
+- `/src/app`: Next.js App Router (Pages & API routes)
+- `/src/db`: Database schema and connection configuration
+- `/src/lib`: Shared utilities, roles logic, and server actions
+- `/src/components`: Reusable UI components
+- `/docs`: Implementation plans and project walkthroughs
+
+## 📄 License
+Internal project for Energy Gurus. All rights reserved.

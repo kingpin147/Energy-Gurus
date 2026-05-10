@@ -19,8 +19,15 @@ import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { NewsletterForm } from "@/components/forms/newsletter-form";
 
-export default function Homepage() {
+import { db } from "@/db";
+import { podcasts, liveQA } from "@/db/schema";
+import { desc } from "drizzle-orm";
+
+export default async function Homepage() {
     const t = useTranslations("HomePage");
+
+    const [latestPodcast] = await db.select().from(podcasts).orderBy(desc(podcasts.createdAt)).limit(1);
+    const [latestQA] = await db.select().from(liveQA).orderBy(desc(liveQA.createdAt)).limit(1);
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -53,35 +60,55 @@ export default function Homepage() {
                 <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-background to-transparent" />
             </section>
 
-            {/* Latest Podcast Preview - Sticky Bar / Small Section */}
-            <section className="bg-secondary/20 py-12 border-b">
-                <div className="container mx-auto px-4">
-                    <Card className="bg-card border-none shadow-xl overflow-hidden">
-                        <CardContent className="p-0 flex flex-col md:flex-row items-stretch">
-                            <div className="flex-1 p-8 md:p-12 space-y-6">
-                                <span className="text-accent font-bold uppercase tracking-widest text-xs">Latest Podcast Episode</span>
-                                <h2 className="text-3xl font-bold font-heading">Building Pakistan's Solar Future</h2>
-                                <p className="text-muted-foreground leading-relaxed">
-                                    In this episode, we talk with leading policy experts about the current state of net-metering and what it means for consumers in 2026.
-                                </p>
-                                <div className="flex items-center gap-6">
-                                    <Button variant="primary" size="lg" className="rounded-full gap-2 px-6 font-bold" asChild>
-                                        <Link href="/podcast/e1"><Play className="w-4 h-4 fill-current" /> Play Now</Link>
-                                    </Button>
-                                    <Button variant="link" className="text-primary font-bold p-0" asChild>
-                                        <Link href="/podcast/e1">Show Notes & Transcript →</Link>
-                                    </Button>
+            {/* Latest Podcast Preview */}
+            {latestPodcast && (
+                <section className="bg-secondary/20 py-12 border-b">
+                    <div className="container mx-auto px-4">
+                        <Card className="bg-card border-none shadow-xl overflow-hidden">
+                            <CardContent className="p-0 flex flex-col md:flex-row items-stretch">
+                                <div className="flex-1 p-8 md:p-12 space-y-6">
+                                    <span className="text-accent font-bold uppercase tracking-widest text-xs">Latest Podcast Episode</span>
+                                    <h2 className="text-3xl font-bold font-heading">{latestPodcast.title}</h2>
+                                    <p className="text-muted-foreground leading-relaxed line-clamp-3">
+                                        {latestPodcast.description}
+                                    </p>
+                                    <div className="flex items-center gap-6">
+                                        <Button variant="primary" size="lg" className="rounded-full gap-2 px-6 font-bold" asChild>
+                                            <a href={latestPodcast.youtubeUrl} target="_blank"><Play className="w-4 h-4 fill-current" /> Watch on YouTube</a>
+                                        </Button>
+                                        <div className="text-sm">
+                                            <p className="font-bold">{latestPodcast.guestName}</p>
+                                            <p className="text-muted-foreground text-xs">{latestPodcast.guestDesignation}</p>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="w-full md:w-1/3 bg-slate-200 min-h-[300px] relative">
-                                <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                                    <Mic className="w-32 h-32" />
+                                <div className="w-full md:w-1/3 bg-slate-900 min-h-[300px] relative flex items-center justify-center">
+                                    <VideoEmbed url={latestPodcast.youtubeUrl} />
                                 </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </section>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </section>
+            )}
+
+            {/* Weekly Live QA Section */}
+            {latestQA && (
+                <section className="py-24 bg-secondary/10">
+                    <div className="container mx-auto px-4 text-center max-w-4xl">
+                        <span className="text-primary font-bold uppercase tracking-widest text-xs">Live QA Sessions</span>
+                        <h2 className="text-4xl font-bold mt-4 mb-6">{latestQA.topic}</h2>
+                        <div className="aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl mb-12">
+                            <VideoEmbed url={latestQA.youtubeUrl} />
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <p className="text-lg text-muted-foreground mb-6">Featuring guest expert: <span className="text-foreground font-bold">{latestQA.expertName}</span></p>
+                            <Button size="lg" className="rounded-full font-bold px-8" asChild>
+                                <a href={latestQA.youtubeUrl} target="_blank">Join Discussion</a>
+                            </Button>
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* Services Grid */}
             <section className="py-24 bg-background">
@@ -106,11 +133,11 @@ export default function Homepage() {
                             bullets={["Live power flow", "Historical analytics", "Smart SMS alerts"]}
                         />
                         <ServiceCard
-                            title="O&M Services"
-                            description="Preventive and corrective maintenance with transparent SLAs and guarantees."
-                            icon={<Settings2 className="w-10 h-10 text-primary" />}
-                            link="/om"
-                            bullets={["Quarterly inspections", "Inverter health checks", "24h Response SLA"]}
+                            title="EPC Directory"
+                            description="Browse verified EPC companies and installers for your solar projects."
+                            icon={<Users className="w-10 h-10 text-primary" />}
+                            link="/epcs"
+                            bullets={["Verified installers", "Work portfolios", "Customer reviews"]}
                         />
                     </div>
                 </div>
@@ -182,6 +209,23 @@ export default function Homepage() {
         </div>
     );
 }
+
+function VideoEmbed({ url }: { url: string }) {
+    // Basic YouTube ID extraction
+    const videoId = url.split("v=")[1]?.split("&")[0] || url.split("/").pop();
+    if (!videoId) return null;
+    
+    return (
+        <iframe
+            className="w-full h-full"
+            src={`https://www.youtube.com/embed/${videoId}`}
+            title="YouTube video player"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+        />
+    );
+}
+
 
 function ServiceCard({ title, description, icon, link, bullets }: { title: string, description: string, icon: React.ReactNode, link: string, bullets: string[] }) {
     return (

@@ -1,0 +1,181 @@
+EnergyGurus Website Design 
+Domain: www.energygurus.online 
+Purpose: A professional, credible hub for podcast episodes and resources focused on 
+Pakistan’s energy landscape — delivering analysis and recommendations to end users, 
+policymakers, and energy solution providers. Includes dedicated sections for Energy Audit 
+services, Online Monitoring (real-time telemetry & dashboards), and Operations & 
+Maintenance (O&M) services. 
+Core goals 
+1. Showcase the podcast as the central content driver — easy discovery, listening, 
+and subscription. 
+2. Present Energy Audit, Online Monitoring, and O&M offerings clearly with service 
+pages, case studies, and lead capture. 
+3. Build trust with policymakers and solution providers via whitepapers, policy notes, 
+and data-driven insights. 
+4. Convert visitors into subscribers, leads (for audits/O&M), and podcast listeners. 
+Target audiences 
+• Residential & commercial end users researching solar, storage, and energy 
+efficiency. 
+• Policymakers and regulators seeking independent analysis and policy 
+recommendations. 
+• Energy solution providers, EPCs, manufacturers and investors. 
+• Researchers, students and media looking for credible commentary on Pakistan 
+energy issues. 
+Information architecture (Sitemap) 
+• Home 
+• Podcast 
+o Episodes (listing with filters: topic, guest, date, length) 
+o Episode page (player, show notes, transcript, resources, sponsor) 
+o Subscribe (RSS, Apple, Spotify, Google Podcasts) 
+• Audit (Service page) 
+o Residential Audit 
+o Commercial Audit 
+o Audit Process (methodology & sample report) 
+o Case Studies 
+o Pricing / Request Audit (lead form) 
+• Online Monitoring 
+o Overview (features & benefits) 
+o Platform (dashboards, alerts, API, integrations) 
+o Live Demo (secure demo / sample dashboard) 
+o Pricing / Request Trial 
+• Operations & Maintenance (O&M) 
+o Preventive O&M 
+o Corrective O&M 
+o SLA & Reporting 
+o Packages & Pricing 
+o Request Quote 
+• Resources 
+o Whitepapers & Policy Notes 
+o Guides & How-tos (e.g., “How to read your net-metering bill”) 
+o Tools & Calculators 
+• About 
+o Team 
+o Partners & Sponsors 
+o Media & Press 
+• Contact 
+o Contact form 
+o Request a Consultation 
+• Footer 
+o Newsletter sign-up 
+o Social links 
+o Legal (Privacy, Terms) 
+Homepage — Wireframe & Content Blocks 
+1. Topbar / Utility: language toggle (Urdu/EN), contact phone, quick ‘Request Audit’ 
+button. 
+2. Header / Nav: logo (EnergyGurus), nav links, search icon, podcast subscribe CTA. 
+3. Hero: large headline + subhead 
+o Headline: “Energy insights for Pakistan — analysis, action, impact.” 
+o Subhead: “Weekly podcast, expert audits, real‑time monitoring and O&M 
+services for smarter energy decisions.” 
+o Primary CTAs: Listen to latest episode | Request an Audit 
+o Visual: podcast host image or illustrative hero (solar + grid + analytics) 
+4. Latest Episode preview: audio player (embedded), short show notes, link to 
+episode page. 
+5. Services quick links: Audit | Online Monitoring | O&M — 3 cards with short bullets + 
+CTA. 
+6. Why EnergyGurus: 3–4 trust points (independent analysis, policy engagement, 
+certified auditors, partner logos). 
+7. Featured Resources / Policy Brief: carousel of latest whitepaper or insight. 
+8. Case Studies / Results: short outcomes/stats (kWh saved, % uptime 
+improvement). 
+9. Subscribe & Social: newsletter signup, podcast subscription links, social proof 
+(reviews). 
+10. Footer: links, contact, small sitemap, legal. 
+Podcast Section — Details & Best Practices 
+• Episode Listing: card layout with image, title, guest, duration, tags, short excerpt, 
+play button and “Read Transcript” link. 
+• Filtering: by topic (Policy, Residential, Industry, Storage), by guest type (Regulator, 
+Academic, Installer), and by date. 
+• Episode Page: 
+o Embedded audio player (hosted on site + mirror on podcast host) 
+o Download MP3 link 
+o Show notes with timestamps (chapter markers) 
+o Full transcript (SEO & accessibility) 
+o Links to resources mentioned, guest bios, social links 
+o CTA: “Request Audit” or “Request a Demo” if episode mentions services 
+o Share buttons and subscribe options 
+• Schema & SEO: implement Podcast structured data (RSS feed, episode schema) 
+and include transcript snippets for better search visibility. 
+Audit — Service Page Content 
+Sections to include: - Overview: what an energy audit includes (site visit, data logging, solar 
+feasibility, load analysis). - Process: Discovery → On‑site data collection → Analysis → 
+Recommendations → Report & ROI - Deliverables: sample dashboard, PDF report, 
+prioritized measures, payback analysis. - Pricing: packaged pricing + custom quotes for 
+bigger systems. - Lead capture: “Request an Audit” form capturing contact details, site 
+address, system details, budget range. - Case Studies / Sample Report (downloadable, 
+gated for lead capture). - FAQ (timeline, certifications, travel, scope). 
+Online Monitoring — Platform Features 
+• Real-time & historical telemetry (power, energy, SOC, inverter status) 
+• Alerts & notifications (SMS, email, webhook) 
+• Custom dashboards for site, portfolio and region 
+• API & integrations (inverter brands, IoT gateways, weather) 
+• Analytics: performance ratio (PR), downtime tracking, yield vs expected 
+• Role-based access (owner, O&M, Distributor) 
+• Pricing: per-site, per-asset, or portfolio subscription tiers 
+• Demo: embed read-only sample dashboard or screenshots (use image carousel) 
+Operations & Maintenance (O&M) 
+• Offerings: preventive maintenance, corrective maintenance, spare parts 
+management, performance optimization 
+• Transparent SLAs: response time, resolution time, uptime guarantees 
+• Reporting cadence: weekly/monthly performance reports, quarterly site visit 
+reports 
+• Contract models: retainer-based, pay-per-visit, outcome-based (performance 
+guarantees) 
+• Customer portal: tickets, technician dispatching, history logs 
+Lead Capture & Conversion 
+• Optimized forms on Audit, Online Monitoring and O&M pages 
+• Micro-conversions: newsletter signup, episode email signup, download whitepaper 
+• Live chat / WhatsApp integration for quick queries 
+• Exit-intent modal offering “Free site audit checklist” in exchange for email 
+UX / UI Guidelines 
+• Clean, modern layout, mobile-first responsive design 
+• Typography: Robust readable typeface for Urdu+English support 
+• Colors: professional energy-themed palette (sample below) 
+• Accessibility: keyboard navigation, transcripts, alt text, color contrast 
+Sample palette: - Primary: Deep teal (#006d6d) or rich green-blue - Accent: Solar yellow 
+(#FFC84D) - Neutral: Off-white (#F7F9FA), Dark Slate (#2D3A3A) 
+Typography: - Headings: Inter or Poppins (supports Latin) - Body: Noto Sans (good Urdu 
+support) for bilingual content 
+Technical & Hosting Recommendations 
+• CMS: WordPress (for ease) or Next.js + headless CMS (Strapi/Sanity) for scalability 
+• Podcast hosting: Transistor, Libsyn, or Podbean (host RSS + analytics) 
+• Monitoring platform: integrate with InfluxDB/Grafana if building custom, or use 
+ready solutions (Emoncms, Solar Analytics, SiteWatch) 
+• Analytics: Google Analytics 4 + Search Console, and Hotjar for UX insights 
+• Security: HTTPS, CSP headers, regular backups 
+• Performance: CDN for audio files and large assets, lazy loading for images 
+SEO & Content Strategy 
+• Keyword focus: “solar monitoring Pakistan”, “energy audit Pakistan”, “solar O&M 
+Pakistan”, “net metering Pakistan” 
+• Produce repurposed content: podcast → blog post → transcript → infographic → 
+social clips 
+• Build authority with long-form policy notes and local case studies 
+• Local SEO: GMB listing for services, include service area pages (Lahore, Karachi, 
+Islamabad) 
+Analytics & KPIs 
+Track: - Podcast: downloads per episode, subscribers, listener retention - Site: traffic, 
+organic keywords, conversions (audit requests, demo requests) - Monitoring: demo 
+signups, trial-to-paid conversion rate - O&M: SLA compliance, ticket resolution times, 
+customer NPS 
+Sample Page Content (short) 
+Hero headline — Home: > Energy insights for Pakistan. Weekly podcast, independent 
+audits, and smart monitoring to power better decisions. 
+Audit Intro (Audit page): > Our energy audits combine on-site measurements and data 
+analytics to reveal how you can reduce bills, increase uptime and maximize ROI from solar 
+and storage investments. 
+Conversion assets to prepare 
+• Podcast cover art (square 3000×3000 px) 
+• Episode thumbnails 
+• Audit sample report (PDF) 
+• Dashboard screenshots / demo data 
+• Case study write-ups with before/after metrics 
+• Privacy policy & GDPR/PDPA compliance text 
+Next steps / Deliverables I can prepare for you 
+1. Full homepage HTML or React component (Tailwind) with hero + latest episode 
+player. 
+2. A WordPress theme layout + page templates (Home, Podcast, Audit, Monitoring, 
+O&M). 
+3. Content-first SEO copy for top 5 pages. 
+4. Wireframes (mobile + desktop) in PNG or Figma spec. 
+If you want any of the above, tell me which deliverable you’d like and I will build it next. 
+End of design brief.

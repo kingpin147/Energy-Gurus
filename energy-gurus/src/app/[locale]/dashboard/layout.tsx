@@ -1,32 +1,15 @@
-"use client";
+import { Link } from "@/i18n/routing";
+import { ArrowLeft, Mic } from "lucide-react";
+import { getUserRole } from "@/lib/roles";
+import Sidebar from "./Sidebar";
+import { UserButton } from "@clerk/nextjs";
 
-import { Link, usePathname } from "@/i18n/routing";
-import {
-    LayoutDashboard,
-    Activity,
-    FileText,
-    Settings,
-    ArrowLeft,
-    Mic
-} from "lucide-react";
-
-import { currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-
-export default function DashboardLayout({
+export default async function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    const pathname = usePathname();
-    // const user = await currentUser();
-    // const primaryEmail = user?.emailAddresses[0]?.emailAddress;
-    // const ADMIN_EMAIL = "nomiking0072012@gmail.com";
-
-    // Access control: Only the main email can access the dashboard for now
-    // if (primaryEmail !== ADMIN_EMAIL) {
-    //     redirect("/");
-    // }
+    const role = await getUserRole();
 
     return (
         <div className="flex h-screen bg-secondary/10">
@@ -41,12 +24,7 @@ export default function DashboardLayout({
                     </Link>
                 </div>
 
-                <nav className="flex-1 p-4 space-y-2">
-                    <SidebarLink href="/dashboard" icon={<LayoutDashboard className="w-4 h-4" />} label="Overview" active={pathname === '/dashboard'} />
-                    <SidebarLink href="/dashboard/monitoring" icon={<Activity className="w-4 h-4" />} label="Live Telemetry" active={pathname === '/dashboard/monitoring'} />
-                    <SidebarLink href="/dashboard/reports" icon={<FileText className="w-4 h-4" />} label="Reports" active={pathname === '/dashboard/reports'} />
-                    <SidebarLink href="/dashboard/settings" icon={<Settings className="w-4 h-4" />} label="Settings" active={pathname === '/dashboard/settings'} />
-                </nav>
+                <Sidebar role={role} />
 
                 <div className="p-4 border-t space-y-4">
                     <Link
@@ -56,10 +34,10 @@ export default function DashboardLayout({
                         <ArrowLeft className="w-4 h-4" />
                         <span>Back to Site</span>
                     </Link>
-                    {/* <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between">
                         <span className="text-xs font-medium uppercase text-muted-foreground">Account</span>
-                        <UserButton afterSignOutUrl="/" />
-                    </div> */}
+                        <UserButton />
+                    </div>
                 </div>
             </aside>
 
@@ -68,20 +46,5 @@ export default function DashboardLayout({
                 {children}
             </main>
         </div>
-    );
-}
-
-function SidebarLink({ href, icon, label, active = false }: { href: string, icon: React.ReactNode, label: string, active?: boolean }) {
-    return (
-        <Link
-            href={href}
-            className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${active
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-secondary hover:text-primary"
-                }`}
-        >
-            {icon}
-            <span>{label}</span>
-        </Link>
     );
 }
