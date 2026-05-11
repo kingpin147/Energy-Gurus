@@ -9,9 +9,9 @@ import { useState } from "react";
 
 const navLinks = [
     { key: "podcast", href: "/podcast" },
-    { key: "audit", href: "/audit" },
-    { key: "monitoring", href: "/monitoring" },
-    { key: "om", href: "/om" },
+    { key: "epcs", href: "/epcs" },
+    { key: "brands", href: "/brands" },
+    { key: "live_qa", href: "/live-qa" },
     { key: "resources", href: "/resources" },
     { key: "about", href: "/about" },
     { key: "dashboard", href: "/dashboard" },

@@ -11,38 +11,58 @@ import {
     Video,
     Briefcase,
     Building2,
-    Package
+    Package,
+    MessageSquare,
+    ShieldCheck
 } from "lucide-react";
 import { UserRole } from "@/db/schema";
 
 export default function Sidebar({ role }: { role: UserRole }) {
     const pathname = usePathname();
 
-    const links = [
-        { href: "/dashboard", icon: <LayoutDashboard className="w-4 h-4" />, label: "Overview", roles: ["super-admin", "admin", "epc", "brand", "user"] },
-        { href: "/dashboard/users", icon: <Users className="w-4 h-4" />, label: "User Management", roles: ["super-admin", "admin"] },
-        { href: "/dashboard/podcasts", icon: <Video className="w-4 h-4" />, label: "Podcast & Live QA", roles: ["super-admin", "admin"] },
-        { href: "/dashboard/epc", icon: <Briefcase className="w-4 h-4" />, label: "EPC Branding", roles: ["super-admin", "admin", "epc"] },
-        { href: "/dashboard/brand", icon: <Building2 className="w-4 h-4" />, label: "Brand Management", roles: ["super-admin", "admin", "brand"] },
-        { href: "/dashboard/products", icon: <Package className="w-4 h-4" />, label: "Products", roles: ["super-admin", "admin", "brand"] },
-        { href: "/dashboard/monitoring", icon: <Activity className="w-4 h-4" />, label: "Live Telemetry", roles: ["super-admin", "admin"] },
-        { href: "/dashboard/reports", icon: <FileText className="w-4 h-4" />, label: "Reports", roles: ["super-admin", "admin", "epc", "brand"] },
-        { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings", roles: ["super-admin", "admin", "epc", "brand", "user"] },
+    const isAdmin = role === 'super-admin' || role === 'admin';
+
+    const adminLinks = [
+        { href: "/dashboard", icon: <LayoutDashboard className="w-4 h-4" />, label: "Overview" },
+        { href: "/dashboard/users", icon: <Users className="w-4 h-4" />, label: "Manage Users" },
+        { href: "/dashboard/moderation", icon: <ShieldCheck className="w-4 h-4" />, label: "Content Moderation" },
+        { href: "/dashboard/content", icon: <Video className="w-4 h-4" />, label: "Content (Podcast/QA)" },
+        { href: "/dashboard/brands", icon: <Building2 className="w-4 h-4" />, label: "Manage Brands" },
+        { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings" },
     ];
+
+    const epcLinks = [
+        { href: "/dashboard", icon: <LayoutDashboard className="w-4 h-4" />, label: "Overview" },
+        { href: "/dashboard/epc", icon: <Briefcase className="w-4 h-4" />, label: "My EPC Profile" },
+        { href: "/dashboard/inquiries", icon: <MessageSquare className="w-4 h-4" />, label: "My Inquiries" },
+        { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings" },
+    ];
+
+    const brandLinks = [
+        { href: "/dashboard", icon: <LayoutDashboard className="w-4 h-4" />, label: "Overview" },
+        { href: "/dashboard/brand", icon: <Building2 className="w-4 h-4" />, label: "My Brand Profile" },
+        { href: "/dashboard/inquiries", icon: <MessageSquare className="w-4 h-4" />, label: "My Inquiries" },
+        { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings" },
+    ];
+
+    const links = role === 'super-admin' || role === 'admin' 
+        ? adminLinks 
+        : role === 'brand' 
+            ? brandLinks 
+            : epcLinks;
+
 
     return (
         <nav className="flex-1 p-4 space-y-2">
-            {links
-                .filter(link => link.roles.includes(role))
-                .map((link) => (
-                    <SidebarLink
-                        key={link.href}
-                        href={link.href}
-                        icon={link.icon}
-                        label={link.label}
-                        active={pathname === link.href}
-                    />
-                ))}
+            {links.map((link) => (
+                <SidebarLink
+                    key={link.href}
+                    href={link.href}
+                    icon={link.icon}
+                    label={link.label}
+                    active={pathname === link.href}
+                />
+            ))}
         </nav>
     );
 }

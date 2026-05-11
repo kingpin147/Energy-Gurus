@@ -7,13 +7,15 @@
         "title": "Energy insights for Pakistan — analysis, action, impact.",
         "subtitle": "Weekly podcast, expert audits, real‑time monitoring and O&M services for smarter energy decisions.",
         "cta_podcast": "Listen to latest episode",
-        "cta_audit": "Request an Audit"
+        "cta_audit": "Request an Audit",
+        "cta_brands": "Explore Brands",
+        "cta_live": "Join Live QA"
     },
     "Navbar": {
         "podcast": "Podcast",
-        "audit": "Audit",
-        "monitoring": "Monitoring",
-        "om": "O&M",
+        "epcs": "EPCs",
+        "brands": "Brands",
+        "live_qa": "Live QA",
         "resources": "Resources",
         "about": "About",
         "dashboard": "Dashboard"

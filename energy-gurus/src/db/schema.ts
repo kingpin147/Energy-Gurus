@@ -32,6 +32,7 @@ export const brands = pgTable('brands', {
   userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
   brandName: text('brand_name').notNull(),
   logoUrl: text('logo_url'),
+  photos: jsonb('photos').$type<string[]>().default([]),
   reps: jsonb('reps').$type<{ name: string; designation: string }[]>().default([]),
   customerCare: text('customer_care'),
   website: text('website'),
@@ -57,6 +58,7 @@ export const podcasts = pgTable('podcasts', {
   title: text('title').notNull(),
   description: text('description'),
   youtubeUrl: text('youtube_url').notNull(),
+  thumbnailUrl: text('thumbnail_url'),
   guestName: text('guest_name'),
   guestDesignation: text('guest_designation'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -66,6 +68,7 @@ export const liveQA = pgTable('live_qa', {
   id: uuid('id').defaultRandom().primaryKey(),
   topic: text('topic').notNull(),
   youtubeUrl: text('youtube_url').notNull(),
+  thumbnailUrl: text('thumbnail_url'),
   expertName: text('expert_name'),
   sessionDate: timestamp('session_date'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -74,18 +77,37 @@ export const liveQA = pgTable('live_qa', {
 export const inquiries = pgTable('inquiries', {
   id: uuid('id').defaultRandom().primaryKey(),
   senderId: uuid('sender_id').references(() => users.id),
-  receiverId: uuid('receiver_id').references(() => users.id).notNull(), // Can be EPC or Brand user
+  receiverId: uuid('receiver_id').references(() => users.id).notNull(),
   message: text('message').notNull(),
-  status: text('status').default('pending').notNull(), // pending, replied, closed
+  status: text('status').default('new').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 export const reviews = pgTable('reviews', {
   id: uuid('id').defaultRandom().primaryKey(),
   authorId: uuid('author_id').references(() => users.id).notNull(),
-  targetId: uuid('target_id').notNull(), // Can be EPC or Brand ID
+  targetId: uuid('target_id').notNull(),
   targetType: text('target_type').$type<'epc' | 'brand'>().notNull(),
   rating: integer('rating').notNull(),
   comment: text('comment'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
+
+export const productSerials = pgTable('product_serials', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  productId: uuid('product_id').references(() => products.id, { onDelete: 'cascade' }).notNull(),
+  serialNumber: text('serial_number').notNull().unique(),
+  status: text('status').$type<'genuine' | 'stolen' | 'expired'>().default('genuine').notNull(),
+  warrantyExpiry: timestamp('warranty_expiry'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const invitations = pgTable('invitations', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  email: text('email').notNull().unique(),
+  role: text('role').$type<UserRole>().notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+
+

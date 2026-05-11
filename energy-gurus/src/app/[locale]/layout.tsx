@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import { Inter, Noto_Sans_Arabic } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "../globals.css";
+import "@uploadthing/react/styles.css";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -59,9 +60,10 @@ export default async function RootLayout({
   );
 
   return (
-    <html lang={locale} className="scroll-smooth">
+    <html lang={locale} className="scroll-smooth" suppressHydrationWarning>
       <body
         className={`${inter.variable} ${notoArabic.variable} font-sans antialiased`}
+        suppressHydrationWarning
       >
         {isClerkConfigured ? (
           <ClerkProvider>{content}</ClerkProvider>

@@ -15,19 +15,35 @@ import {
     Mail
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
-import { Input } from "@/components/ui/input";
+import { getTranslations } from "next-intl/server";
 import { NewsletterForm } from "@/components/forms/newsletter-form";
+import { VerificationTool } from "@/components/verification/verification-tool";
+import { getProfileRating } from "@/lib/actions/reviews";
 
 import { db } from "@/db";
 import { podcasts, liveQA } from "@/db/schema";
 import { desc } from "drizzle-orm";
 
 export default async function Homepage() {
-    const t = useTranslations("HomePage");
+    const t = await getTranslations("HomePage");
 
-    const [latestPodcast] = await db.select().from(podcasts).orderBy(desc(podcasts.createdAt)).limit(1);
-    const [latestQA] = await db.select().from(liveQA).orderBy(desc(liveQA.createdAt)).limit(1);
+    let latestPodcast = null;
+    let latestQA = null;
+    let topEpcs: any[] = [];
+
+    try {
+        [latestPodcast] = await db.select().from(podcasts).orderBy(desc(podcasts.createdAt)).limit(1);
+        [latestQA] = await db.select().from(liveQA).orderBy(desc(liveQA.createdAt)).limit(1);
+
+        // Fetch top 3 EPCs with their ratings
+        const allEpcs = await db.query.epcInstallers.findMany({ limit: 3 });
+        topEpcs = await Promise.all(allEpcs.map(async (epc) => {
+            const ratingData = await getProfileRating(epc.id);
+            return { ...epc, ...ratingData };
+        }));
+    } catch (error) {
+        console.error("Homepage data fetch failed:", error);
+    }
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -46,10 +62,10 @@ export default async function Homepage() {
                         </p>
                         <div className="flex flex-wrap gap-5">
                             <Button size="lg" variant="accent" className="font-bold h-14 px-8 text-lg rounded-full" asChild>
-                                <Link href="/podcast">{t('cta_podcast')}</Link>
+                                <Link href="/epcs">{t('cta_brands')}</Link>
                             </Button>
                             <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-primary h-14 px-8 text-lg rounded-full font-bold" asChild>
-                                <Link href="/audit">{t('cta_audit')}</Link>
+                                <Link href="/podcast">{t('cta_podcast')}</Link>
                             </Button>
                         </div>
                     </div>
@@ -110,35 +126,72 @@ export default async function Homepage() {
                 </section>
             )}
 
-            {/* Services Grid */}
+            {/* Interactive Verification Section */}
+            <section className="py-24 bg-primary text-primary-foreground relative overflow-hidden">
+                <div className="container mx-auto px-4 relative z-10">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                        <div>
+                            <span className="text-accent font-bold uppercase tracking-widest text-xs">Authenticity Shield</span>
+                            <h2 className="text-4xl font-bold mt-4 mb-6">Verify your hardware instantly.</h2>
+                            <p className="text-xl opacity-80 leading-relaxed mb-8">
+                                Protect your investment by verifying product serial numbers against our global brand database. Ensure you're getting genuine parts and valid warranties.
+                            </p>
+                            <div className="flex gap-8">
+                                <div className="space-y-2">
+                                    <p className="text-3xl font-bold text-accent">Real-time</p>
+                                    <p className="text-sm opacity-60 uppercase tracking-widest">Global Database</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <p className="text-3xl font-bold text-accent">Official</p>
+                                    <p className="text-sm opacity-60 uppercase tracking-widest">Brand Validation</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="bg-white text-foreground rounded-[3rem] p-4 shadow-2xl">
+                            <VerificationTool brandName="EnergyGurus" />
+                        </div>
+                    </div>
+                </div>
+                <div className="absolute top-0 right-0 w-1/4 h-full bg-white/5 -skew-x-12 transform translate-x-1/2" />
+            </section>
+
+            {/* Featured EPCs */}
             <section className="py-24 bg-background">
                 <div className="container mx-auto px-4">
-                    <div className="text-center max-w-2xl mx-auto mb-20">
-                        <h2 className="text-4xl font-bold mb-4">Our Services</h2>
-                        <p className="text-muted-foreground text-lg">Comprehensive solutions for the entire energy asset lifecycle.</p>
+                    <div className="flex items-end justify-between mb-16">
+                        <div className="max-w-2xl">
+                            <h2 className="text-4xl font-bold mb-4">Top Rated EPCs</h2>
+                            <p className="text-muted-foreground text-lg">Verified solar installers with a track record of excellence.</p>
+                        </div>
+                        <Button variant="outline" className="rounded-full font-bold h-12" asChild>
+                            <Link href="/epcs">View All Installers <ArrowRight className="ml-2 w-4 h-4" /></Link>
+                        </Button>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                        <ServiceCard
-                            title="Energy Audit"
-                            description="Site visits, load analysis, and solar feasibility for residential & commercial sites."
-                            icon={<Zap className="w-10 h-10 text-primary" />}
-                            link="/audit"
-                            bullets={["Solar feasibility", "Load profile logging", "ROI analysis"]}
-                        />
-                        <ServiceCard
-                            title="Online Monitoring"
-                            description="Real-time telemetry & dashboards for power, energy, and performance tracking."
-                            icon={<BarChart3 className="w-10 h-10 text-primary" />}
-                            link="/monitoring"
-                            bullets={["Live power flow", "Historical analytics", "Smart SMS alerts"]}
-                        />
-                        <ServiceCard
-                            title="EPC Directory"
-                            description="Browse verified EPC companies and installers for your solar projects."
-                            icon={<Users className="w-10 h-10 text-primary" />}
-                            link="/epcs"
-                            bullets={["Verified installers", "Work portfolios", "Customer reviews"]}
-                        />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {topEpcs.map((epc) => (
+                            <Card key={epc.id} className="border-none shadow-sm bg-secondary/5 rounded-3xl overflow-hidden hover:shadow-xl transition-all group">
+                                <div className="h-3 bg-primary" />
+                                <CardContent className="p-8">
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <div className="w-16 h-16 rounded-2xl border bg-white flex items-center justify-center overflow-hidden p-2 group-hover:scale-110 transition-transform">
+                                            {epc.logoUrl ? <img src={epc.logoUrl} className="max-h-full max-w-full object-contain" alt="" /> : <Users className="w-8 h-8 text-primary/20" />}
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-lg">{epc.companyName}</h4>
+                                            <div className="flex items-center text-yellow-500 gap-1 text-xs font-bold">
+                                                <Play className="w-3 h-3 fill-current" /> {epc.rating} ({epc.count} Reviews)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground line-clamp-3 mb-8 leading-relaxed">
+                                        {epc.about || "Leading energy solution provider committed to quality solar installations."}
+                                    </p>
+                                    <Button className="w-full rounded-xl font-bold" variant="secondary" asChild>
+                                        <Link href={`/epcs/${epc.id}`}>View Profile</Link>
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        ))}
                     </div>
                 </div>
             </section>

@@ -3,13 +3,21 @@ import { ArrowLeft, Mic } from "lucide-react";
 import { getUserRole } from "@/lib/roles";
 import Sidebar from "./Sidebar";
 import { UserButton } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
+import { InvitationCheck } from "@/components/dashboard/invitation-check";
+import { SecurityGuard } from "@/components/auth/security-guard";
 
 export default async function DashboardLayout({
     children,
+    params
 }: {
     children: React.ReactNode;
+    params: Promise<{ locale: string }>;
 }) {
+    const { locale } = await params;
     const role = await getUserRole();
+    const user = await currentUser();
+    const email = user?.emailAddresses[0]?.emailAddress;
 
     return (
         <div className="flex h-screen bg-secondary/10">
@@ -41,8 +49,10 @@ export default async function DashboardLayout({
                 </div>
             </aside>
 
-            {/* Main Content */}
+             {/* Main Content */}
             <main className="flex-1 overflow-y-auto overflow-x-hidden">
+                <SecurityGuard locale={locale} />
+                {user && email && <InvitationCheck userId={user.id} email={email} />}
                 {children}
             </main>
         </div>
