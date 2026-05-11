@@ -5,10 +5,9 @@ import { redirect } from "next/navigation";
 import { eq, count } from "drizzle-orm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Building2, Package, Hash, Plus, Globe, Users, ShieldCheck, Trash2 } from "lucide-react";
+import { Building2, Package, Hash, Plus, Globe, ShieldCheck } from "lucide-react";
 import { bulkImportSerials } from "@/lib/actions/serials";
-import { revalidatePath } from "next/cache";
-import { UploadButton } from "@/lib/uploadthing";
+import { BrandGalleryUpload } from "@/components/dashboard/brand-gallery-upload";
 
 export default async function BrandDashboard() {
     const { userId: clerkId, sessionClaims } = await auth();
@@ -89,34 +88,8 @@ export default async function BrandDashboard() {
 
                         <Button variant="outline" className="w-full rounded-xl font-bold h-11 border-2">Edit Brand Details</Button>
 
-                        <div className="pt-6 border-t space-y-4">
-                            <label className="text-xs font-bold uppercase tracking-widest opacity-60">Brand Gallery</label>
-                            <div className="grid grid-cols-2 gap-2">
-                                {myBrand.photos?.map((url, i) => (
-                                    <div key={i} className="aspect-square rounded-xl border overflow-hidden relative group">
-                                        <img src={url} className="w-full h-full object-cover" alt="" />
-                                        <form action={async () => {
-                                            "use server";
-                                            const filtered = myBrand.photos?.filter(p => p !== url) || [];
-                                            await db.update(brands).set({ photos: filtered }).where(eq(brands.id, myBrand.id));
-                                            revalidatePath("/dashboard/brand");
-                                        }}>
-                                            <button className="absolute inset-0 bg-red-600/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                                                <Trash2 className="w-5 h-5" />
-                                            </button>
-                                        </form>
-                                    </div>
-                                ))}
-                            </div>
-                            <UploadButton
-                                endpoint="brandLogo"
-                                onClientUploadComplete={async (res) => {
-                                    const newPhotos = [...(myBrand.photos || []), ...res.map(f => f.url)];
-                                    await db.update(brands).set({ photos: newPhotos }).where(eq(brands.id, myBrand.id));
-                                    revalidatePath("/dashboard/brand");
-                                }}
-                            />
-                        </div>
+                            <BrandGalleryUpload initialPhotos={myBrand.photos} />
+
                     </CardContent>
                 </Card>
 

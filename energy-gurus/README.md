@@ -62,7 +62,7 @@ Strictly isolated dashboards for different user types:
    DATABASE_URL=your_neon_db_url
    CLERK_SECRET_KEY=your_clerk_secret
    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_pub_key
-   UPLOADTHING_SECRET=your_uploadthing_secret
+   UPLOADTHING_TOKEN=your_uploadthing_token
    ```
 
 4. **Push Database Schema:**
