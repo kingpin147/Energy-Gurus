@@ -9,6 +9,7 @@ export async function ReviewList({ targetId }: { targetId: string }) {
         id: reviews.id,
         rating: reviews.rating,
         comment: reviews.comment,
+        reply: reviews.reply,
         createdAt: reviews.createdAt,
         userName: users.name,
     })
@@ -49,6 +50,13 @@ export async function ReviewList({ targetId }: { targetId: string }) {
                         <p className="text-muted-foreground leading-relaxed italic">
                             "{review.comment}"
                         </p>
+                        
+                        {(review as any).reply && (
+                            <div className="mt-6 p-6 bg-primary/5 rounded-2xl border-l-4 border-primary space-y-2">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-primary opacity-60">Company Reply</p>
+                                <p className="text-sm text-foreground leading-relaxed">{(review as any).reply}</p>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             ))}

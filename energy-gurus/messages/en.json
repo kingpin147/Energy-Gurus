@@ -1,23 +1,23 @@
 {
     "Metadata": {
-        "title": "EnergyGurus - Energy Insights for Pakistan",
-        "description": "Weekly podcast, expert audits, real‑time monitoring and O&M services for smarter energy decisions in Pakistan."
+        "title": "EnergyGurus.Online - Authenticity Guaranteed",
+        "description": "Pakistan's premier platform for verified energy insights, EPC installers, and brand authenticity."
     },
     "HomePage": {
-        "title": "Energy insights for Pakistan — analysis, action, impact.",
-        "subtitle": "Weekly podcast, expert audits, real‑time monitoring and O&M services for smarter energy decisions.",
-        "cta_podcast": "Listen to latest episode",
-        "cta_audit": "Request an Audit",
+        "title": "EnergyGurus.Online <accent>Authenticity Guaranteed</accent>",
+        "subtitle": "Your trusted platform for verified solar installers, genuine hardware validation, and expert energy insights through our weekly podcast and live sessions.",
+        "cta_podcast": "Latest Podcast",
+        "cta_audit": "Request Audit",
         "cta_brands": "Explore Brands",
         "cta_live": "Join Live QA"
     },
     "Navbar": {
+        "home": "Home",
         "podcast": "Podcast",
-        "epcs": "EPCs",
+        "epcs": "EPCs / Installers",
         "brands": "Brands",
-        "live_qa": "Live QA",
-        "resources": "Resources",
-        "about": "About",
+        "live_qa": "Weekly Live QA",
+        "about": "About Us",
         "dashboard": "Dashboard"
     }
 }

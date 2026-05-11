@@ -43,3 +43,19 @@ export async function getProfileRating(targetId: string) {
         count: result[0].total
     };
 }
+
+export async function replyToReview(formData: FormData) {
+    const reviewId = formData.get("reviewId") as string;
+    const reply = formData.get("reply") as string;
+    const targetType = formData.get("targetType") as string;
+    const targetId = formData.get("targetId") as string;
+
+    if (!reviewId || !reply) return;
+
+    await db.update(reviews)
+        .set({ reply })
+        .where(eq(reviews.id, reviewId));
+
+    revalidatePath(`/dashboard/${targetType}`);
+    revalidatePath(`/(public)/${targetType}s/${targetId}`);
+}

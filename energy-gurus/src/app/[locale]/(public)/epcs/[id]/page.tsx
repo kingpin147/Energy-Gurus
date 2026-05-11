@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { epcInstallers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import { Globe, Mail, Star, ShieldCheck, ArrowLeft, Image as ImageIcon } from "lucide-react";
+import { Globe, Mail, Star, ShieldCheck, ArrowLeft, Image as ImageIcon, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -139,6 +139,22 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
                       <Globe className="w-5 h-5" /> Visit Website
                     </a>
                   </Button>
+                )}
+
+                {installer.socialLinks && (installer.socialLinks as any[]).length > 0 && (
+                  <div className="flex justify-center gap-4 pt-4">
+                    {(installer.socialLinks as { platform: string; url: string }[]).map((link, i) => {
+                      const Icon = link.platform === "Facebook" ? Facebook : 
+                                  link.platform === "Twitter" ? Twitter : 
+                                  link.platform === "Instagram" ? Instagram : 
+                                  link.platform === "LinkedIn" ? Linkedin : Globe;
+                      return (
+                        <a key={i} href={link.url} target="_blank" className="p-3 bg-white/10 rounded-xl hover:bg-white/20 transition-colors">
+                          <Icon className="w-5 h-5 text-white" />
+                        </a>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
               

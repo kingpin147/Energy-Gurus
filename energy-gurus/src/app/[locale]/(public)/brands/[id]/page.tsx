@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { brands, products, reviews } from "@/db/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import { Globe, Mail, Phone, ShieldCheck, Star, Download, QrCode, CheckCircle2, ArrowLeft } from "lucide-react";
+import { Globe, Mail, Phone, ShieldCheck, Star, Download, QrCode, CheckCircle2, ArrowLeft, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -222,6 +222,22 @@ export default async function BrandProfilePage({ params, searchParams }: { param
                                         <a href={brand.website || "#"} target="_blank" className="text-lg font-medium hover:underline">{brand.website ? new URL(brand.website).hostname : "N/A"}</a>
                                     </div>
                                 </div>
+
+                                {brand.socialLinks && (brand.socialLinks as any[]).length > 0 && (
+                                    <div className="flex justify-center gap-4 pt-6 border-t border-white/10">
+                                        {(brand.socialLinks as { platform: string; url: string }[]).map((link, i) => {
+                                            const Icon = link.platform === "Facebook" ? Facebook : 
+                                                        link.platform === "Twitter" ? Twitter : 
+                                                        link.platform === "Instagram" ? Instagram : 
+                                                        link.platform === "LinkedIn" ? Linkedin : Globe;
+                                            return (
+                                                <a key={i} href={link.url} target="_blank" className="p-3 bg-white/10 rounded-xl hover:bg-white/20 transition-colors">
+                                                    <Icon className="w-5 h-5 text-accent" />
+                                                </a>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
                             <Dialog>
                                 <DialogTrigger asChild>

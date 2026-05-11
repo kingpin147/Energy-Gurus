@@ -76,29 +76,44 @@ export default async function Homepage() {
                 <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-background to-transparent" />
             </section>
 
-            {/* Latest Podcast Preview */}
+            {/* Section 1: Latest Podcast */}
             {latestPodcast && (
-                <section className="bg-secondary/20 py-12 border-b">
+                <section id="podcast" className="bg-secondary/20 py-24 border-b">
                     <div className="container mx-auto px-4">
-                        <Card className="bg-card border-none shadow-xl overflow-hidden">
+                        <div className="text-center mb-16">
+                            <span className="text-accent font-bold uppercase tracking-widest text-xs">Featured Content</span>
+                            <h2 className="text-4xl font-bold mt-4">The Energy Podcast</h2>
+                            <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">Deep dives into Pakistan's energy landscape with industry experts and policy makers.</p>
+                        </div>
+                        <Card className="bg-card border-none shadow-2xl overflow-hidden rounded-[2rem]">
                             <CardContent className="p-0 flex flex-col md:flex-row items-stretch">
-                                <div className="flex-1 p-8 md:p-12 space-y-6">
-                                    <span className="text-accent font-bold uppercase tracking-widest text-xs">Latest Podcast Episode</span>
-                                    <h2 className="text-3xl font-bold font-heading">{latestPodcast.title}</h2>
-                                    <p className="text-muted-foreground leading-relaxed line-clamp-3">
-                                        {latestPodcast.description}
+                                <div className="flex-1 p-8 md:p-16 space-y-8">
+                                    <div className="flex items-center gap-3 text-accent">
+                                        <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
+                                            <Mic className="w-4 h-4" />
+                                        </div>
+                                        <span className="font-bold uppercase tracking-widest text-[10px]">Latest Episode</span>
+                                    </div>
+                                    <h3 className="text-3xl md:text-4xl font-bold font-heading leading-tight">{latestPodcast.title}</h3>
+                                    <p className="text-muted-foreground text-lg leading-relaxed line-clamp-4 italic">
+                                        "{latestPodcast.description}"
                                     </p>
-                                    <div className="flex items-center gap-6">
-                                        <Button variant="primary" size="lg" className="rounded-full gap-2 px-6 font-bold" asChild>
-                                            <a href={latestPodcast.youtubeUrl} target="_blank"><Play className="w-4 h-4 fill-current" /> Watch on YouTube</a>
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-8 pt-4">
+                                        <Button variant="primary" size="lg" className="rounded-full gap-3 px-8 h-14 font-bold shadow-lg shadow-primary/20" asChild>
+                                            <a href={latestPodcast.youtubeUrl} target="_blank"><Play className="w-4 h-4 fill-current" /> Watch Full Episode</a>
                                         </Button>
-                                        <div className="text-sm">
-                                            <p className="font-bold">{latestPodcast.guestName}</p>
-                                            <p className="text-muted-foreground text-xs">{latestPodcast.guestDesignation}</p>
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center font-bold text-primary">
+                                                {latestPodcast.guestName?.charAt(0)}
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-foreground">{latestPodcast.guestName}</p>
+                                                <p className="text-muted-foreground text-xs uppercase tracking-widest font-medium">{latestPodcast.guestDesignation || "Guest Expert"}</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="w-full md:w-1/3 bg-slate-900 min-h-[300px] relative flex items-center justify-center">
+                                <div className="w-full md:w-[40%] bg-slate-900 min-h-[350px] relative flex items-center justify-center overflow-hidden">
                                     <VideoEmbed url={latestPodcast.youtubeUrl} />
                                 </div>
                             </CardContent>
@@ -107,87 +122,41 @@ export default async function Homepage() {
                 </section>
             )}
 
-            {/* Weekly Live QA Section */}
-            {latestQA && (
-                <section className="py-24 bg-secondary/10">
-                    <div className="container mx-auto px-4 text-center max-w-4xl">
-                        <span className="text-primary font-bold uppercase tracking-widest text-xs">Live QA Sessions</span>
-                        <h2 className="text-4xl font-bold mt-4 mb-6">{latestQA.topic}</h2>
-                        <div className="aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl mb-12">
-                            <VideoEmbed url={latestQA.youtubeUrl} />
-                        </div>
-                        <div className="flex flex-col items-center">
-                            <p className="text-lg text-muted-foreground mb-6">Featuring guest expert: <span className="text-foreground font-bold">{latestQA.expertName}</span></p>
-                            <Button size="lg" className="rounded-full font-bold px-8" asChild>
-                                <a href={latestQA.youtubeUrl} target="_blank">Join Discussion</a>
-                            </Button>
-                        </div>
-                    </div>
-                </section>
-            )}
-
-            {/* Interactive Verification Section */}
-            <section className="py-24 bg-primary text-primary-foreground relative overflow-hidden">
-                <div className="container mx-auto px-4 relative z-10">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                        <div>
-                            <span className="text-accent font-bold uppercase tracking-widest text-xs">Authenticity Shield</span>
-                            <h2 className="text-4xl font-bold mt-4 mb-6">Verify your hardware instantly.</h2>
-                            <p className="text-xl opacity-80 leading-relaxed mb-8">
-                                Protect your investment by verifying product serial numbers against our global brand database. Ensure you're getting genuine parts and valid warranties.
-                            </p>
-                            <div className="flex gap-8">
-                                <div className="space-y-2">
-                                    <p className="text-3xl font-bold text-accent">Real-time</p>
-                                    <p className="text-sm opacity-60 uppercase tracking-widest">Global Database</p>
-                                </div>
-                                <div className="space-y-2">
-                                    <p className="text-3xl font-bold text-accent">Official</p>
-                                    <p className="text-sm opacity-60 uppercase tracking-widest">Brand Validation</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="bg-white text-foreground rounded-[3rem] p-4 shadow-2xl">
-                            <VerificationTool brandName="EnergyGurus" />
-                        </div>
-                    </div>
-                </div>
-                <div className="absolute top-0 right-0 w-1/4 h-full bg-white/5 -skew-x-12 transform translate-x-1/2" />
-            </section>
-
-            {/* Featured EPCs */}
-            <section className="py-24 bg-background">
+            {/* Section 2: Top Rated EPCs / Installers */}
+            <section id="epcs" className="py-32 bg-background">
                 <div className="container mx-auto px-4">
-                    <div className="flex items-end justify-between mb-16">
+                    <div className="flex flex-col md:flex-row items-end justify-between mb-20 gap-8">
                         <div className="max-w-2xl">
-                            <h2 className="text-4xl font-bold mb-4">Top Rated EPCs</h2>
-                            <p className="text-muted-foreground text-lg">Verified solar installers with a track record of excellence.</p>
+                            <span className="text-primary font-bold uppercase tracking-widest text-xs">Verified Partners</span>
+                            <h2 className="text-5xl font-bold mt-4 mb-6">Top Rated EPCs & Installers</h2>
+                            <p className="text-muted-foreground text-xl leading-relaxed">We vet and monitor solar installers based on technical standards, financial stability, and customer feedback.</p>
                         </div>
-                        <Button variant="outline" className="rounded-full font-bold h-12" asChild>
-                            <Link href="/epcs">View All Installers <ArrowRight className="ml-2 w-4 h-4" /></Link>
+                        <Button variant="outline" className="rounded-full font-bold h-14 px-8 border-2" asChild>
+                            <Link href="/epcs">Explore All Installers <ArrowRight className="ml-2 w-5 h-5" /></Link>
                         </Button>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                         {topEpcs.map((epc) => (
-                            <Card key={epc.id} className="border-none shadow-sm bg-secondary/5 rounded-3xl overflow-hidden hover:shadow-xl transition-all group">
+                            <Card key={epc.id} className="border-none shadow-sm bg-secondary/5 rounded-[2.5rem] overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all group">
                                 <div className="h-3 bg-primary" />
-                                <CardContent className="p-8">
-                                    <div className="flex items-center gap-4 mb-6">
-                                        <div className="w-16 h-16 rounded-2xl border bg-white flex items-center justify-center overflow-hidden p-2 group-hover:scale-110 transition-transform">
-                                            {epc.logoUrl ? <img src={epc.logoUrl} className="max-h-full max-w-full object-contain" alt="" /> : <Users className="w-8 h-8 text-primary/20" />}
+                                <CardContent className="p-10">
+                                    <div className="flex items-center gap-5 mb-8">
+                                        <div className="w-20 h-20 rounded-3xl border-2 border-primary/5 bg-white flex items-center justify-center overflow-hidden p-3 group-hover:scale-105 transition-transform shadow-sm">
+                                            {epc.logoUrl ? <img src={epc.logoUrl} className="max-h-full max-w-full object-contain" alt="" /> : <Users className="w-10 h-10 text-primary/10" />}
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-lg">{epc.companyName}</h4>
-                                            <div className="flex items-center text-yellow-500 gap-1 text-xs font-bold">
-                                                <Play className="w-3 h-3 fill-current" /> {epc.rating} ({epc.count} Reviews)
+                                            <h4 className="font-bold text-xl leading-tight mb-1">{epc.companyName}</h4>
+                                            <div className="flex items-center text-yellow-500 gap-1.5 text-sm font-black">
+                                                <Zap className="w-4 h-4 fill-current" /> {epc.rating?.toFixed(1) || "5.0"}
+                                                <span className="text-muted-foreground font-medium ml-1">({epc.count || 0} Reviews)</span>
                                             </div>
                                         </div>
                                     </div>
-                                    <p className="text-sm text-muted-foreground line-clamp-3 mb-8 leading-relaxed">
-                                        {epc.about || "Leading energy solution provider committed to quality solar installations."}
+                                    <p className="text-muted-foreground line-clamp-3 mb-10 leading-relaxed min-h-[4.5rem]">
+                                        {epc.about || "Leading energy solution provider committed to quality solar installations and exceptional service."}
                                     </p>
-                                    <Button className="w-full rounded-xl font-bold" variant="secondary" asChild>
-                                        <Link href={`/epcs/${epc.id}`}>View Profile</Link>
+                                    <Button className="w-full rounded-2xl font-bold h-14 text-base" variant="secondary" asChild>
+                                        <Link href={`/epcs/${epc.id}`}>View Company Profile</Link>
                                     </Button>
                                 </CardContent>
                             </Card>
@@ -196,69 +165,107 @@ export default async function Homepage() {
                 </div>
             </section>
 
-            {/* Why EnergyGurus / Trust Points */}
-            <section className="py-24 bg-secondary/20">
-                <div className="container mx-auto px-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                        <div className="space-y-8">
-                            <h2 className="text-4xl font-bold leading-tight">Why do stakeholders trust EnergyGurus?</h2>
-                            <div className="space-y-6">
-                                <TrustPoint icon={<ShieldCheck className="w-7 h-7" />} title="Independent Analysis" description="Unbiased commentary on policy and technology for regulators and end-users." />
-                                <TrustPoint icon={<Users className="w-7 h-7" />} title="Policy Engagement" description="Actively participating in whitepapers and policy notes for Pakistan's energy transition." />
-                                <TrustPoint icon={<CheckCircle2 className="w-7 h-7" />} title="Certified Auditors" description="All audits are performed by engineers with decades of combined field experience." />
-                            </div>
-                        </div>
-                        <div className="bg-primary rounded-3xl p-10 text-primary-foreground space-y-10 shadow-2xl">
-                            <h3 className="text-2xl font-bold mb-6">Real Results, Delivered.</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                                <Metric icon={<TrendingUp />} value="98.5%" label="Uptime Improvement" />
-                                <Metric icon={<Zap />} value="~25%" label="Avg. Bill Reduction" />
-                                <Metric icon={<CheckCircle2 />} value="500+" label="Audits Completed" />
-                                <Metric icon={<Users />} value="10k+" label="Monthly Listeners" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Featured Resource Carousel Preview */}
-            <section className="py-24 bg-background">
-                <div className="container mx-auto px-4">
-                    <div className="flex items-end justify-between mb-16">
+            {/* Section 3: Brands & Authenticity */}
+            <section id="brands" className="py-32 bg-primary text-primary-foreground relative overflow-hidden">
+                <div className="container mx-auto px-4 relative z-10">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
                         <div className="max-w-xl">
-                            <h2 className="text-3xl font-bold mb-4">Latest Insights & Policy Briefs</h2>
-                            <p className="text-muted-foreground">Stay informed with our long-form analysis and technical resources.</p>
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 mb-8">
+                                <ShieldCheck className="w-5 h-5 text-accent" />
+                                <span className="text-accent font-bold uppercase tracking-widest text-[10px]">EnergyGurus Shield</span>
+                            </div>
+                            <h2 className="text-5xl md:text-6xl font-bold mb-8 leading-[1.1]">Authenticity <br /><span className="text-accent italic">Guaranteed.</span></h2>
+                            <p className="text-xl opacity-80 leading-relaxed mb-12">
+                                Don't risk your investment with counterfeit hardware. Verify your panels and inverters instantly against our direct brand manufacturing database.
+                            </p>
+                            <div className="grid grid-cols-2 gap-10">
+                                <div className="space-y-3">
+                                    <div className="text-4xl font-bold text-accent">Real-time</div>
+                                    <div className="text-[10px] opacity-60 uppercase font-black tracking-[0.2em]">Global Database</div>
+                                    <div className="h-1 w-12 bg-accent/30 rounded-full" />
+                                </div>
+                                <div className="space-y-3">
+                                    <div className="text-4xl font-bold text-accent">Official</div>
+                                    <div className="text-[10px] opacity-60 uppercase font-black tracking-[0.2em]">Brand Partnerships</div>
+                                    <div className="h-1 w-12 bg-accent/30 rounded-full" />
+                                </div>
+                            </div>
                         </div>
-                        <Button variant="outline" className="hidden md:flex gap-2" asChild>
-                            <Link href="/resources">View all resources <ArrowRight className="w-4 h-4" /></Link>
-                        </Button>
+                        <div className="bg-white text-foreground rounded-[4rem] p-6 md:p-10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] relative group">
+                            <div className="absolute -top-6 -right-6 w-32 h-32 bg-accent rounded-full flex items-center justify-center transform rotate-12 group-hover:rotate-0 transition-transform hidden md:flex border-8 border-primary">
+                                <span className="text-primary font-black text-center leading-none text-sm uppercase">Verify <br /> Now</span>
+                            </div>
+                            <VerificationTool brandName="EnergyGurus" />
+                            <div className="mt-8 pt-8 border-t flex items-center justify-between">
+                                <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Supported Brands</p>
+                                <div className="flex gap-4 opacity-30 grayscale">
+                                    <div className="w-8 h-8 rounded bg-slate-200" />
+                                    <div className="w-8 h-8 rounded bg-slate-200" />
+                                    <div className="w-8 h-8 rounded bg-slate-200" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <ResourceCard title="Net-Metering 2.0" category="Policy Note" excerpt="Analyzing the impact of the upcoming 2026 regulatory changes..." />
-                        <ResourceCard title="Battery Storage Guide" category="Technical" excerpt="Choosing the right storage architecture for industrial backup..." />
-                        <ResourceCard title="Annual Energy Outlook" category="Whitepaper" excerpt="A comprehensive review of Pakistan's grid stability in 2025..." />
+                </div>
+                {/* Abstract Background Element */}
+                <div className="absolute top-0 right-0 w-1/3 h-full bg-white/5 -skew-x-12 transform translate-x-1/4" />
+                <div className="absolute bottom-10 left-10 w-64 h-64 bg-accent/10 rounded-full blur-3xl" />
+            </section>
+
+            {/* Section 4: Weekly Live QA Session */}
+            {latestQA && (
+                <section id="live-qa" className="py-32 bg-secondary/5 border-b">
+                    <div className="container mx-auto px-4 max-w-5xl">
+                        <div className="text-center mb-16">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 text-red-600 mb-6">
+                                <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Weekly Live Session</span>
+                            </div>
+                            <h2 className="text-5xl font-bold mb-8">{latestQA.topic}</h2>
+                            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Get your technical questions answered in real-time by the experts leading Pakistan's energy transition.</p>
+                        </div>
+                        <div className="aspect-video bg-black rounded-[3rem] overflow-hidden shadow-[0_48px_80px_-24px_rgba(0,0,0,0.2)] mb-16 relative group">
+                            <VideoEmbed url={latestQA.youtubeUrl} />
+                            <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                        </div>
+                        <div className="flex flex-col md:flex-row items-center justify-between p-10 bg-white rounded-[2.5rem] shadow-sm border border-secondary/10">
+                            <div className="flex items-center gap-6 mb-8 md:mb-0">
+                                <div className="w-16 h-16 rounded-2xl bg-secondary/20 flex items-center justify-center text-2xl font-bold text-primary">
+                                    {latestQA.expertName?.charAt(0)}
+                                </div>
+                                <div>
+                                    <p className="text-xs font-black uppercase tracking-[0.2em] opacity-40 mb-1">Featured Expert</p>
+                                    <p className="text-2xl font-bold">{latestQA.expertName}</p>
+                                </div>
+                            </div>
+                            <Button size="lg" className="rounded-2xl font-bold px-12 h-16 text-lg shadow-xl shadow-primary/20" asChild>
+                                <a href={latestQA.youtubeUrl} target="_blank">Join Live Discussion</a>
+                            </Button>
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* Simple Final CTA / Newsletter */}
+            <section className="py-32 bg-background">
+                <div className="container mx-auto px-4 max-w-4xl text-center">
+                    <div className="p-10 md:p-24 bg-primary text-primary-foreground rounded-[4rem] shadow-2xl relative overflow-hidden">
+                        <div className="relative z-10 space-y-10">
+                            <h2 className="text-4xl md:text-5xl font-bold">Stay Powered Up</h2>
+                            <p className="text-xl opacity-80 leading-relaxed max-w-xl mx-auto">
+                                Join 5,000+ energy stakeholders. Get weekly podcast summaries and policy alerts directly in your inbox.
+                            </p>
+                            <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto w-full">
+                                <NewsletterForm />
+                            </div>
+                        </div>
+                        {/* Background Decor */}
+                        <div className="absolute -top-24 -left-24 w-64 h-64 bg-accent/20 rounded-full blur-3xl" />
+                        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
                     </div>
                 </div>
             </section>
 
-            {/* Newsletter / Social Subscribe */}
-            <section className="py-24 bg-accent/10 border-t">
-                <div className="container mx-auto px-4 max-w-4xl text-center">
-                    <div className="p-8 md:p-16 bg-white rounded-3xl shadow-xl border space-y-8">
-                        <div className="bg-primary/10 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                            <Mail className="w-8 h-8 text-primary" />
-                        </div>
-                        <h2 className="text-3xl md:text-4xl font-bold">Stay Powered Up</h2>
-                        <p className="text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto">
-                            Subscribe to our newsletter for weekly podcast summaries, policy alerts, and energy-saving tips delivered to your inbox.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto w-full">
-                            <NewsletterForm />
-                        </div>
-                        <p className="text-sm text-muted-foreground">Join 5,000+ energy stakeholders in Pakistan.</p>
-                    </div>
-                </div>
-            </section>
         </div>
     );
 }

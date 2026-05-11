@@ -4,6 +4,7 @@ import { desc } from "drizzle-orm";
 import { Youtube, Calendar, Users, MessageCircle, PlayCircle, History, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { submitLiveQuestion } from "@/lib/actions/live-qa";
 
 export default async function LiveQAPage() {
     const sessions = await db.select().from(liveQA).orderBy(desc(liveQA.createdAt));
@@ -72,8 +73,25 @@ export default async function LiveQAPage() {
                                         <h4 className="font-bold">Audience Questions</h4>
                                     </div>
                                     <p className="text-sm opacity-80 leading-relaxed">
-                                        Submit your questions during the live session via the YouTube chat or send them in advance to our experts.
+                                        Have a question for our experts? Submit it below.
                                     </p>
+                                    <form action={submitLiveQuestion} className="space-y-3">
+                                        <input type="hidden" name="sessionId" value={latestSession.id} />
+                                        <input 
+                                            name="userName" 
+                                            placeholder="Your Name" 
+                                            className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-sm placeholder:text-white/40 focus:ring-2 focus:ring-accent outline-none"
+                                            required 
+                                        />
+                                        <textarea 
+                                            name="question" 
+                                            placeholder="Your Question..." 
+                                            rows={3}
+                                            className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-sm placeholder:text-white/40 focus:ring-2 focus:ring-accent outline-none"
+                                            required 
+                                        />
+                                        <Button type="submit" variant="accent" className="w-full rounded-xl font-bold text-xs h-10">Submit Question</Button>
+                                    </form>
                                 </div>
                             </CardContent>
                         </Card>

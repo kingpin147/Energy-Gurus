@@ -39,20 +39,37 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
     })
     .where(eq(brands.userId, targetUserId));
 
+  // Invalidate Cache
+  const [b] = await db.select().from(brands).where(eq(brands.userId, targetUserId));
+  if (b) await redis.del(CACHE_KEYS.BRAND_DETAILS(b.id));
+
   revalidatePath("/dashboard/brand");
 }
 
+export async function addProductModel(formData: FormData) {
+    const { userId: clerkId } = await auth();
+    if (!clerkId) throw new Error("Unauthorized");
 
+    const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId));
+    if (!user) throw new Error("User not found");
 
-export async function addProduct(data: typeof products.$inferInsert) {
-  const role = await getUserRole();
-  if (role !== "brand" && role !== "admin" && role !== "super-admin") {
-    throw new Error("Unauthorized");
-  }
+    const [brand] = await db.select().from(brands).where(eq(brands.userId, user.id));
+    if (!brand) throw new Error("Brand not found");
 
-  await db.insert(products).values(data);
-  revalidatePath("/dashboard/brand");
-  revalidatePath("/dashboard/products");
+    const name = formData.get("name") as string;
+    const description = formData.get("description") as string;
+    const serialNumber = formData.get("serialNumber") as string;
+    const datasheetUrl = formData.get("datasheetUrl") as string;
+
+    await db.insert(products).values({
+        brandId: brand.id,
+        name,
+        description,
+        serialNumber,
+        datasheetUrl
+    });
+
+    revalidatePath("/dashboard/brand");
 }
 
 export async function registerGlobalBrand(formData: FormData) {

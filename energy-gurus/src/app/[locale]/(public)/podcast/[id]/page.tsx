@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { podcasts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { Metadata } from "next";
+import { PodcastShare } from "@/components/podcast/podcast-share";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params;
@@ -68,14 +69,12 @@ export default async function EpisodePage({ params }: { params: Promise<{ id: st
                         </div>
 
                         <div className="flex gap-4 mt-6">
-                            <Button variant="outline" size="sm" className="gap-2" asChild>
+                            <Button variant="outline" size="sm" className="gap-2 h-12 px-6 rounded-full" asChild>
                                 <a href={episode.youtubeUrl} target="_blank">
                                     <Youtube className="w-4 h-4 text-red-600" /> Watch on YouTube
                                 </a>
                             </Button>
-                            <Button variant="outline" size="sm" className="gap-2">
-                                <Share2 className="w-4 h-4" /> Share Episode
-                            </Button>
+                            <PodcastShare title={episode.title} />
                         </div>
                     </div>
 

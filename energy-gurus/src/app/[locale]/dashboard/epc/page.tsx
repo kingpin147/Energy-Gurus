@@ -9,8 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardInquiryList } from "@/components/dashboard/inquiry-list";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Briefcase, MessageSquare, Star, Settings } from "lucide-react";
-import { ReviewList } from "@/components/reviews/review-list";
 import { PortfolioUpload } from "@/components/dashboard/portfolio-upload";
+import { DashboardReviewList } from "@/components/dashboard/dashboard-review-list";
 
 export default async function EpcDashboard() {
   const { userId: clerkId } = await auth();
@@ -146,7 +146,7 @@ export default async function EpcDashboard() {
                     <p className="text-muted-foreground text-sm">Monitor what customers are saying about your installations.</p>
                 </div>
             </div>
-            <ReviewList targetId={epc.id} />
+            <DashboardReviewList targetId={epc.id} targetType="epc" />
           </div>
         </TabsContent>
       </Tabs>

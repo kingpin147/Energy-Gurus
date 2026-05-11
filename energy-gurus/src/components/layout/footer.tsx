@@ -15,10 +15,10 @@ export function Footer() {
                             <div className="bg-primary p-1 rounded-lg">
                                 <Mic className="h-5 w-5 text-white" />
                             </div>
-                            <span className="text-xl font-bold tracking-tight text-primary">EnergyGurus</span>
+                            <span className="text-xl font-bold tracking-tight text-primary">EnergyGurus.Online</span>
                         </Link>
                         <p className="text-sm text-muted-foreground leading-relaxed">
-                            Energy insights for Pakistan. Delivering expert analysis, weekly podcast episodes, and real‑time telemetry solutions.
+                            Energy insights for Pakistan. Delivering expert analysis, weekly podcast episodes, and verified hardware validation.
                         </p>
                         <div className="flex space-x-4">
                             <Link href="#" className="text-muted-foreground hover:text-primary"><Facebook className="h-5 w-5" /></Link>
@@ -32,11 +32,12 @@ export function Footer() {
                     <div>
                         <h4 className="font-bold mb-4">Sitemap</h4>
                         <ul className="space-y-2 text-sm text-muted-foreground">
+                            <li><Link href="/" className="hover:text-primary">Home</Link></li>
                             <li><Link href="/podcast" className="hover:text-primary">Podcast</Link></li>
                             <li><Link href="/epcs" className="hover:text-primary">EPCs & Installers</Link></li>
                             <li><Link href="/brands" className="hover:text-primary">Solar Brands</Link></li>
                             <li><Link href="/live-qa" className="hover:text-primary">Live QA Sessions</Link></li>
-                            <li><Link href="/resources" className="hover:text-primary">Resources</Link></li>
+                            <li><Link href="/about" className="hover:text-primary">About Us</Link></li>
                         </ul>
                     </div>
 

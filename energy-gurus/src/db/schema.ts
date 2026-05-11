@@ -36,6 +36,7 @@ export const brands = pgTable('brands', {
   reps: jsonb('reps').$type<{ name: string; designation: string }[]>().default([]),
   customerCare: text('customer_care'),
   website: text('website'),
+  socialLinks: jsonb('social_links').$type<{ platform: string; url: string }[]>().default([]),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -90,6 +91,7 @@ export const reviews = pgTable('reviews', {
   targetType: text('target_type').$type<'epc' | 'brand'>().notNull(),
   rating: integer('rating').notNull(),
   comment: text('comment'),
+  reply: text('reply'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -106,6 +108,14 @@ export const invitations = pgTable('invitations', {
   id: uuid('id').defaultRandom().primaryKey(),
   email: text('email').notNull().unique(),
   role: text('role').$type<UserRole>().notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const liveQaQuestions = pgTable('live_qa_questions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  sessionId: uuid('session_id').references(() => liveQA.id, { onDelete: 'cascade' }).notNull(),
+  userName: text('user_name').notNull(),
+  question: text('question').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 

@@ -8,11 +8,11 @@ import { Mic, Search, Globe, Menu, X } from "lucide-react";
 import { useState } from "react";
 
 const navLinks = [
+    { key: "home", href: "/" },
     { key: "podcast", href: "/podcast" },
     { key: "epcs", href: "/epcs" },
     { key: "brands", href: "/brands" },
     { key: "live_qa", href: "/live-qa" },
-    { key: "resources", href: "/resources" },
     { key: "about", href: "/about" },
     { key: "dashboard", href: "/dashboard" },
 ];
