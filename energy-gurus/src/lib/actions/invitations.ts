@@ -2,15 +2,15 @@
 
 import { db } from "@/db";
 import { invitations, users, UserRole } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
-import { auth, createClerkClient } from "@clerk/nextjs/server";
+import { eq } from "drizzle-orm";
+import { createClerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { getUserRole } from "@/lib/roles";
 
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
 export async function createInvitation(email: string, role: UserRole) {
-    const { sessionClaims } = await auth();
-    const currentRole = (sessionClaims?.metadata as { role?: string })?.role || "user";
+    const currentRole = await getUserRole();
     
     if (currentRole !== 'super-admin' && currentRole !== 'admin') {
         throw new Error("Unauthorized");

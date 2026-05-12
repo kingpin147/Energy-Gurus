@@ -14,9 +14,9 @@
     "Navbar": {
         "home": "Home",
         "podcast": "Podcast",
-        "epcs": "EPCs / Installers",
-        "brands": "Brands",
-        "live_qa": "Weekly Live QA",
+        "epcs": "EPCs & Installers",
+        "brands": "Solar Brands",
+        "live_qa": "Live QA Sessions",
         "about": "About Us",
         "dashboard": "Dashboard"
     }
