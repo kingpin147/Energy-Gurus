@@ -7,9 +7,15 @@ import { Button } from "@/components/ui/button";
 import { submitLiveQuestion } from "@/lib/actions/live-qa";
 
 export default async function LiveQAPage() {
+    // Fetch all sessions
     const sessions = await db.select().from(liveQA).orderBy(desc(liveQA.createdAt));
-    const latestSession = sessions[0];
-    const previousSessions = sessions.slice(1);
+    
+    // Prioritize Live session, then Upcoming, then Archived
+    const liveSession = sessions.find(s => s.status === 'live');
+    const upcomingSession = sessions.find(s => s.status === 'upcoming');
+    const latestSession = liveSession || upcomingSession || sessions[0];
+    
+    const previousSessions = sessions.filter(s => s.id !== latestSession?.id);
 
     return (
         <div className="container mx-auto py-12 px-4">
@@ -26,14 +32,31 @@ export default async function LiveQAPage() {
                         <div className="aspect-video bg-black rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-secondary/5">
                             <VideoEmbed url={latestSession.youtubeUrl} />
                         </div>
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                            <div className="space-y-2">
-                                <span className="bg-red-100 text-red-600 text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-2 w-fit">
-                                    <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse" /> Latest Session
-                                </span>
-                                <h2 className="text-3xl font-bold">{latestSession.topic}</h2>
+                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                            <div className="space-y-4 max-w-xl">
+                                <div className="flex items-center gap-3">
+                                    {latestSession.status === 'live' ? (
+                                        <span className="bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-2 w-fit animate-pulse">
+                                            <span className="w-2 h-2 bg-white rounded-full" /> Live Now
+                                        </span>
+                                    ) : latestSession.status === 'upcoming' ? (
+                                        <span className="bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-2 w-fit">
+                                            <Calendar className="w-3 h-3" /> Upcoming Session
+                                        </span>
+                                    ) : (
+                                        <span className="bg-secondary text-secondary-foreground text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-2 w-fit">
+                                            <History className="w-3 h-3" /> Archive
+                                        </span>
+                                    )}
+                                </div>
+                                <h2 className="text-3xl md:text-4xl font-bold">{latestSession.topic}</h2>
+                                {latestSession.description && (
+                                    <p className="text-muted-foreground leading-relaxed">
+                                        {latestSession.description}
+                                    </p>
+                                )}
                             </div>
-                            <Button size="lg" className="rounded-2xl font-bold h-14 px-8 gap-2" asChild>
+                            <Button size="lg" className="rounded-2xl font-bold h-14 px-8 gap-2 shrink-0 shadow-lg shadow-primary/20" asChild>
                                 <a href={latestSession.youtubeUrl} target="_blank">
                                     <Youtube className="w-5 h-5" /> Join Live Chat
                                 </a>
@@ -42,55 +65,62 @@ export default async function LiveQAPage() {
                     </div>
 
                     <div className="space-y-8">
-                        <Card className="border-none shadow-sm bg-secondary/10 rounded-[2rem]">
+                        <Card className="border-none shadow-sm bg-secondary/10 rounded-[2rem] overflow-hidden">
                             <CardHeader className="p-8 pb-4">
                                 <CardTitle className="text-xl font-bold">Session Details</CardTitle>
                             </CardHeader>
                             <CardContent className="p-8 pt-4 space-y-6">
                                 <div className="space-y-4">
-                                    <div className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-secondary/20">
+                                    <div className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-secondary/20 transition-transform hover:scale-[1.02]">
                                         <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
                                             <Calendar className="w-6 h-6 text-primary" />
                                         </div>
                                         <div>
                                             <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">When</p>
-                                            <p className="font-bold text-sm">{latestSession.sessionDate ? new Date(latestSession.sessionDate).toLocaleString() : "Every Wednesday"}</p>
+                                            <p className="font-bold text-sm">{latestSession.sessionDate ? new Date(latestSession.sessionDate).toLocaleString() : "TBD"}</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-secondary/20">
+                                    <div className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-secondary/20 transition-transform hover:scale-[1.02]">
                                         <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center">
                                             <Users className="w-6 h-6 text-accent" />
                                         </div>
                                         <div>
                                             <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">Expert</p>
-                                            <p className="font-bold text-sm">{latestSession.expertName || "Guest Expert"}</p>
+                                            <p className="font-bold text-sm leading-tight">{latestSession.expertName || "Guest Expert"}</p>
+                                            {latestSession.expertTitle && (
+                                                <p className="text-[10px] text-muted-foreground font-medium">{latestSession.expertTitle}</p>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
-                                <div className="p-6 bg-primary text-primary-foreground rounded-2xl space-y-4">
+                                <div className="p-8 bg-[#003e3e] text-white rounded-[2rem] space-y-6 shadow-xl shadow-[#003e3e]/20">
                                     <div className="flex items-center gap-3">
-                                        <MessageCircle className="w-5 h-5 text-accent" />
-                                        <h4 className="font-bold">Audience Questions</h4>
+                                        <MessageCircle className="w-6 h-6 text-accent" />
+                                        <h4 className="text-lg font-bold">Audience Questions</h4>
                                     </div>
                                     <p className="text-sm opacity-80 leading-relaxed">
-                                        Have a question for our experts? Submit it below.
+                                        Have a question for our experts? Submit it below and we'll answer it live!
                                     </p>
-                                    <form action={submitLiveQuestion} className="space-y-3">
+                                    <form action={submitLiveQuestion} className="space-y-4">
                                         <input type="hidden" name="sessionId" value={latestSession.id} />
-                                        <input 
-                                            name="userName" 
-                                            placeholder="Your Name" 
-                                            className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-sm placeholder:text-white/40 focus:ring-2 focus:ring-accent outline-none"
-                                            required 
-                                        />
-                                        <textarea 
-                                            name="question" 
-                                            placeholder="Your Question..." 
-                                            rows={3}
-                                            className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-sm placeholder:text-white/40 focus:ring-2 focus:ring-accent outline-none"
-                                            required 
-                                        />
-                                        <Button type="submit" variant="accent" className="w-full rounded-xl font-bold text-xs h-10">Submit Question</Button>
+                                        <div className="space-y-3">
+                                            <input 
+                                                name="userName" 
+                                                placeholder="Your Name" 
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm placeholder:text-white/30 focus:ring-2 focus:ring-accent outline-none transition-all"
+                                                required 
+                                            />
+                                            <textarea 
+                                                name="question" 
+                                                placeholder="Ask anything..." 
+                                                rows={3}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm placeholder:text-white/30 focus:ring-2 focus:ring-accent outline-none transition-all resize-none"
+                                                required 
+                                            />
+                                        </div>
+                                        <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl font-bold text-sm h-12 shadow-lg shadow-accent/10">
+                                            Submit Question
+                                        </Button>
                                     </form>
                                 </div>
                             </CardContent>
@@ -112,36 +142,43 @@ export default async function LiveQAPage() {
                     <div className="w-12 h-12 bg-secondary rounded-2xl flex items-center justify-center">
                         <History className="w-6 h-6 text-primary" />
                     </div>
-                    <h2 className="text-3xl font-bold font-heading tracking-tight">Previous Sessions</h2>
+                    <h2 className="text-3xl font-bold font-heading tracking-tight">Archive Explorer</h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                     {previousSessions.map((session) => (
-                        <Card key={session.id} className="group border-none shadow-sm hover:shadow-xl transition-all duration-300 bg-secondary/5 rounded-3xl overflow-hidden">
-                            <div className="aspect-video bg-black relative">
+                        <Card key={session.id} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 bg-white rounded-[2rem] overflow-hidden">
+                            <div className="aspect-video bg-black relative overflow-hidden">
                                 <VideoEmbed url={session.youtubeUrl} />
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                    <PlayCircle className="w-16 h-16 text-white" />
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center pointer-events-none">
+                                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md">
+                                        <PlayCircle className="w-10 h-10 text-white" />
+                                    </div>
                                 </div>
                             </div>
                             <CardContent className="p-8">
-                                <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-widest mb-3">
-                                    <Calendar className="w-3.5 h-3.5" />
-                                    <span>{session.sessionDate ? new Date(session.sessionDate).toLocaleDateString() : "Archive"}</span>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="px-3 py-1 bg-secondary/50 rounded-full flex items-center gap-2">
+                                        <Calendar className="w-3 h-3 text-primary" />
+                                        <span className="text-[10px] font-bold uppercase tracking-wider">{session.sessionDate ? new Date(session.sessionDate).toLocaleDateString() : "Archive"}</span>
+                                    </div>
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">{session.status}</span>
                                 </div>
-                                <h3 className="text-xl font-bold mb-4 line-clamp-2">{session.topic}</h3>
-                                <p className="text-sm text-muted-foreground mb-6 line-clamp-2 font-medium">
-                                    Featuring <span className="text-foreground">{session.expertName}</span>
+                                <h3 className="text-xl font-bold mb-4 line-clamp-2 leading-snug group-hover:text-primary transition-colors">{session.topic}</h3>
+                                <p className="text-sm text-muted-foreground mb-6 line-clamp-2 font-medium leading-relaxed">
+                                    {session.description || `Discussion with ${session.expertName}.`}
                                 </p>
-                                <Button variant="link" className="p-0 h-auto text-primary font-bold gap-2 group-hover:translate-x-1 transition-transform">
-                                    Watch Archive <ArrowRight className="w-4 h-4" />
+                                <Button variant="link" className="p-0 h-auto text-primary font-black text-xs gap-2 group-hover:gap-4 transition-all" asChild>
+                                    <a href={session.youtubeUrl} target="_blank">
+                                        WATCH SESSION <ArrowRight className="w-4 h-4" />
+                                    </a>
                                 </Button>
                             </CardContent>
                         </Card>
                     ))}
                     {previousSessions.length === 0 && !latestSession && (
-                         <div className="col-span-full py-12 text-center border-2 border-dashed rounded-3xl">
-                             <p className="text-muted-foreground font-medium">Archive is currently empty.</p>
+                         <div className="col-span-full py-16 text-center border-2 border-dashed border-secondary/30 rounded-[3rem]">
+                             <p className="text-muted-foreground font-bold">Archive is currently empty.</p>
                          </div>
                     )}
                 </div>
