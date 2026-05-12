@@ -50,7 +50,7 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
               <div className="flex items-center gap-4 text-sm">
                 <div className="flex items-center text-yellow-500">
                   <Star className="w-4 h-4 fill-current" />
-                  <span className="ml-1 font-bold text-foreground">{rating} ({count} Reviews)</span>
+                  <span className="ml-1 font-bold text-foreground">{rating?.toFixed(1) || "5.0"} ({count} Reviews)</span>
                 </div>
                 <span className="text-muted-foreground">•</span>
                 <div className="flex items-center gap-1.5 text-green-600 font-medium">
@@ -172,7 +172,7 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
                   <div className="flex justify-between items-center text-sm">
                     <span className="opacity-70 font-medium">Avg. Rating</span>
                     <div className="flex items-center gap-1 font-bold text-yellow-400">
-                        <Star className="w-4 h-4 fill-current" /> {rating}
+                        <Star className="w-4 h-4 fill-current" /> {rating?.toFixed(1) || "5.0"}
                     </div>
                   </div>
                 </div>

@@ -39,7 +39,7 @@ export async function getProfileRating(targetId: string) {
     .where(eq(reviews.targetId, targetId));
 
     return {
-        rating: parseFloat(result[0].average || "0").toFixed(1),
+        rating: result[0].average ? parseFloat(result[0].average) : null,
         count: result[0].total
     };
 }

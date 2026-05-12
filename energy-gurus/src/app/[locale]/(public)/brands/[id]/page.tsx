@@ -79,7 +79,7 @@ export default async function BrandProfilePage({ params, searchParams }: { param
                             <div className="flex items-center gap-4 text-sm">
                                 <div className="flex items-center text-yellow-500">
                                     <Star className="w-4 h-4 fill-current" />
-                                    <span className="ml-1 font-bold text-foreground">{rating} ({count} Reviews)</span>
+                                    <span className="ml-1 font-bold text-foreground">{rating?.toFixed(1) || "5.0"} ({count} Reviews)</span>
                                 </div>
                                 <span className="text-muted-foreground">•</span>
                                 <div className="flex items-center gap-1.5 text-primary font-medium">
@@ -261,7 +261,7 @@ export default async function BrandProfilePage({ params, searchParams }: { param
                         </CardHeader>
                         <CardContent className="p-8 pt-4 space-y-6">
                             <div className="flex items-end gap-2">
-                                <span className="text-5xl font-bold leading-none">{rating}</span>
+                                <span className="text-5xl font-bold leading-none">{rating?.toFixed(1) || "5.0"}</span>
                                 <div className="flex flex-col gap-1">
                                     <div className="flex text-yellow-500">
                                         {[1, 2, 3, 4, 5].map((s) => <Star key={s} className={`w-4 h-4 ${Number(rating) >= s ? "fill-current" : "opacity-30"}`} />)}
