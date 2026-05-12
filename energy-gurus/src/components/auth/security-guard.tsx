@@ -8,7 +8,7 @@ export async function SecurityGuard({ locale }: { locale: string }) {
     if (user) {
         const email = user.emailAddresses[0].emailAddress;
         try {
-            const allowed = await isUserAllowed(email);
+            const allowed = await isUserAllowed(email, user.id, user.fullName || user.firstName || "");
             if (!allowed) {
                 redirect(`/${locale}/reject-access?error=not_invited`);
             }

@@ -48,18 +48,35 @@ export async function checkAndApplyInvitation(userId: string, email: string) {
     return null;
 }
 
-export async function isUserAllowed(email: string) {
+export async function isUserAllowed(email: string, clerkId?: string, name?: string) {
     // 1. Check if they are already in the users table
     const [dbUser] = await db.select().from(users).where(eq(users.email, email.toLowerCase()));
     if (dbUser) return true;
 
     // 2. Check if they have a pending invitation
     const [invitation] = await db.select().from(invitations).where(eq(invitations.email, email.toLowerCase()));
-    if (invitation) return true;
-
+    
     // 3. Hardcoded super-admin whitelist for initial setup
     const whitelist = ["nomiking0072012@gmail.com", "energygurusonline@gmail.com"];
-    if (whitelist.includes(email.toLowerCase())) return true;
+    const isWhitelisted = whitelist.includes(email.toLowerCase());
+
+    if (invitation || isWhitelisted) {
+        // Automatically create them in the DB if they don't exist yet but are allowed
+        if (clerkId) {
+            const role = isWhitelisted ? 'super-admin' : invitation?.role || 'user';
+            try {
+                await db.insert(users).values({
+                    clerkId,
+                    email: email.toLowerCase(),
+                    name: name || email.split("@")[0],
+                    role: role as UserRole
+                }).onConflictDoNothing();
+            } catch (e) {
+                console.error("Failed to auto-create allowed user:", e);
+            }
+        }
+        return true;
+    }
 
     return false;
 }
