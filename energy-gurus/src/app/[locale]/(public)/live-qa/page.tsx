@@ -1,7 +1,7 @@
 import { db } from "@/db";
-import { liveQA } from "@/db/schema";
-import { desc } from "drizzle-orm";
-import { Youtube, Calendar, Users, MessageCircle, PlayCircle, History, ArrowRight } from "lucide-react";
+import { liveQA, liveQaQuestions } from "@/db/schema";
+import { desc, eq, and } from "drizzle-orm";
+import { Youtube, Calendar, Users, MessageCircle, PlayCircle, History, ArrowRight, Star } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { submitLiveQuestion } from "@/lib/actions/live-qa";
@@ -16,6 +16,17 @@ export default async function LiveQAPage() {
     const latestSession = liveSession || upcomingSession || sessions[0];
     
     const previousSessions = sessions.filter(s => s.id !== latestSession?.id);
+    
+    // Fetch Highlighted Question if session is live/upcoming
+    let highlightedQuestion = null;
+    if (latestSession) {
+        highlightedQuestion = await db.query.liveQaQuestions.findFirst({
+            where: and(
+                eq(liveQaQuestions.sessionId, latestSession.id),
+                eq(liveQaQuestions.isHighlighted, true)
+            )
+        });
+    }
 
     return (
         <div className="container mx-auto py-12 px-4">
@@ -29,8 +40,23 @@ export default async function LiveQAPage() {
             {latestSession ? (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-20">
                     <div className="lg:col-span-2 space-y-8">
-                        <div className="aspect-video bg-black rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-secondary/5">
+                        <div className="aspect-video bg-black rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-secondary/5 relative">
                             <VideoEmbed url={latestSession.youtubeUrl} />
+                            
+                            {/* Highlighted Question Overlay */}
+                            {latestSession.status === 'live' && highlightedQuestion && (
+                                <div className="absolute bottom-6 left-6 right-6 bg-[#003e3e]/90 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-2xl animate-in slide-in-from-bottom-10 duration-700">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center shrink-0">
+                                            <Star className="w-5 h-5 text-accent-foreground fill-current" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-[10px] font-bold text-accent uppercase tracking-widest mb-1">Live Question from {highlightedQuestion.userName}</p>
+                                            <p className="text-white font-bold leading-tight line-clamp-2">{highlightedQuestion.question}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                             <div className="space-y-4 max-w-xl">
@@ -81,8 +107,12 @@ export default async function LiveQAPage() {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-secondary/20 transition-transform hover:scale-[1.02]">
-                                        <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center">
-                                            <Users className="w-6 h-6 text-accent" />
+                                        <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center overflow-hidden">
+                                            {latestSession.expertPhotoUrl ? (
+                                                <img src={latestSession.expertPhotoUrl} className="w-full h-full object-cover" alt="" />
+                                            ) : (
+                                                <Users className="w-6 h-6 text-accent" />
+                                            )}
                                         </div>
                                         <div>
                                             <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">Expert</p>
