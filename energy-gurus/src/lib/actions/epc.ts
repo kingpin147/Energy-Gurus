@@ -15,9 +15,9 @@ export async function updateEpcProfile(data: FormData | Partial<typeof epcInstal
   if (!user) throw new Error("User not found");
 
   const role = await getUserRole();
-  if (role !== "epc" && role !== "admin" && role !== "super-admin") {
-    throw new Error("Insufficient permissions");
-  }
+  // Allow any authenticated user with an EPC record to update their own profile.
+  // Admins/super-admins can update any EPC profile.
+  const isAdmin = role === "admin" || role === "super-admin";
 
   const isFormData = data instanceof FormData;
   const updateData = isFormData ? {
@@ -26,11 +26,15 @@ export async function updateEpcProfile(data: FormData | Partial<typeof epcInstal
     website: data.get("website") as string,
   } : data;
 
-  // Ensure we only update the EPC profile belonging to the user (unless admin)
+  // Always scope updates to the current user's EPC unless admin is overriding
   let targetUserId = user.id;
-  if (!isFormData && data.userId && (role === "admin" || role === "super-admin")) {
-    targetUserId = data.userId;
+  if (!isFormData && (data as any).userId && isAdmin) {
+    targetUserId = (data as any).userId;
   }
+
+  // Verify the EPC profile actually belongs to this user (security check)
+  const [existingEpc] = await db.select().from(epcInstallers).where(eq(epcInstallers.userId, targetUserId));
+  if (!existingEpc) throw new Error("EPC profile not found");
 
   await db.update(epcInstallers)
     .set({ ...updateData, updatedAt: new Date() })

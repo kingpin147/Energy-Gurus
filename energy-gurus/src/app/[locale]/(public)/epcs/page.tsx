@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 
 export default async function EpcListingPage() {
   const installers = await db.query.epcInstallers.findMany({
-    where: (epc, { eq }) => eq(epc.isVerified, true),
+    orderBy: (epc, { desc }) => [desc(epc.createdAt)],
   });
 
   return (

@@ -2,33 +2,57 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-    CheckCircle2,
-    CreditCard,
-    History,
-    Zap,
-    ShieldCheck,
-    Globe,
-    AlertCircle,
-    ArrowUpRight,
-    User,
-    Bell
-} from "lucide-react";
+import { Globe, User, Save, Loader2 } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
+import { useState } from "react";
 
-import { UserProfile, useUser } from "@clerk/nextjs";
+const roleLabels: Record<string, string> = {
+    "super-admin": "System Administrator",
+    "admin": "Administrator",
+    "epc": "EPC Installer",
+    "brand": "Brand Partner",
+    "user": "Member",
+};
 
 export default function SettingsPage() {
-    const { user } = useUser();
+    const { user, isLoaded } = useUser();
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [saving, setSaving] = useState(false);
+    const [saved, setSaved] = useState(false);
+
+    // Populate once user loads
+    if (isLoaded && user && firstName === "" && lastName === "") {
+        setFirstName(user.firstName || "");
+        setLastName(user.lastName || "");
+    }
+
+    const role = (user?.publicMetadata?.role as string) || "user";
+    const roleLabel = roleLabels[role] || "Member";
+
+    const handleSaveName = async () => {
+        if (!user) return;
+        setSaving(true);
+        try {
+            await user.update({ firstName, lastName });
+            setSaved(true);
+            setTimeout(() => setSaved(false), 3000);
+        } catch (e) {
+            console.error("Failed to update name:", e);
+        } finally {
+            setSaving(false);
+        }
+    };
 
     return (
-        <div className="p-8 space-y-8 max-w-6xl mx-auto">
+        <div className="p-8 space-y-8 max-w-4xl mx-auto">
             <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center">
                     <User className="w-6 h-6 text-primary" />
                 </div>
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Account Settings</h1>
-                    <p className="text-muted-foreground">Manage your personal information, security, and preferences.</p>
+                    <p className="text-muted-foreground">Manage your personal information and preferences.</p>
                 </div>
             </div>
 
@@ -37,51 +61,60 @@ export default function SettingsPage() {
                 <Card className="lg:col-span-2 border-none shadow-sm rounded-3xl overflow-hidden">
                     <CardHeader className="bg-secondary/5 border-b">
                         <CardTitle className="text-xl">Profile Information</CardTitle>
-                        <CardDescription>Your public and private account details.</CardDescription>
+                        <CardDescription>Your public account details.</CardDescription>
                     </CardHeader>
                     <CardContent className="p-8 space-y-8">
+                        {/* Avatar + identity */}
                         <div className="flex items-center gap-6">
-                            <div className="w-24 h-24 rounded-3xl bg-primary flex items-center justify-center text-white text-3xl font-bold border-4 border-white shadow-xl">
-                                {user?.firstName?.charAt(0) || user?.emailAddresses[0].emailAddress.charAt(0).toUpperCase()}
+                            <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center text-white text-2xl font-bold border-4 border-white shadow-xl shrink-0">
+                                {user?.firstName?.charAt(0) || user?.emailAddresses[0]?.emailAddress?.charAt(0)?.toUpperCase() || "?"}
                             </div>
                             <div>
-                                <h3 className="text-2xl font-bold">{user?.fullName || "Energy Guru"}</h3>
-                                <p className="text-muted-foreground">{user?.emailAddresses[0].emailAddress}</p>
+                                <h3 className="text-xl font-bold">{user?.fullName || "Energy Guru"}</h3>
+                                <p className="text-muted-foreground text-sm">{user?.emailAddresses[0]?.emailAddress}</p>
                                 <span className="mt-2 inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary border border-primary/20">
-                                    System Administrator
+                                    {roleLabel}
                                 </span>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-8 border-t">
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase tracking-widest opacity-60">First Name</label>
-                                <div className="p-3 bg-secondary/10 rounded-xl border font-medium">{user?.firstName || "N/A"}</div>
+                        {/* Name edit form */}
+                        <div className="space-y-6 pt-6 border-t">
+                            <h4 className="text-sm font-bold uppercase tracking-widest opacity-60">Update Your Name</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold uppercase tracking-widest opacity-60">First Name</label>
+                                    <input
+                                        value={firstName}
+                                        onChange={e => setFirstName(e.target.value)}
+                                        className="w-full p-3 border rounded-xl bg-secondary/5 focus:ring-2 focus:ring-primary outline-none font-medium"
+                                        placeholder="First Name"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold uppercase tracking-widest opacity-60">Last Name</label>
+                                    <input
+                                        value={lastName}
+                                        onChange={e => setLastName(e.target.value)}
+                                        className="w-full p-3 border rounded-xl bg-secondary/5 focus:ring-2 focus:ring-primary outline-none font-medium"
+                                        placeholder="Last Name"
+                                    />
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase tracking-widest opacity-60">Last Name</label>
-                                <div className="p-3 bg-secondary/10 rounded-xl border font-medium">{user?.lastName || "N/A"}</div>
-                            </div>
+                            <Button
+                                onClick={handleSaveName}
+                                disabled={saving}
+                                className="h-12 px-8 rounded-xl font-bold gap-2"
+                            >
+                                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                {saved ? "Saved!" : saving ? "Saving..." : "Save Name"}
+                            </Button>
                         </div>
-
-
                     </CardContent>
                 </Card>
 
-                {/* Preferences Sidebar */}
+                {/* Locale Sidebar */}
                 <div className="space-y-6">
-                    <Card className="border-none shadow-sm rounded-3xl">
-                        <CardHeader>
-                            <CardTitle className="text-lg flex items-center gap-2">
-                                <Bell className="w-5 h-5 text-primary" /> Notifications
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <PreferenceToggle label="System Alerts" active={true} />
-                            <PreferenceToggle label="Weekly Reports" active={false} />
-                        </CardContent>
-                    </Card>
-
                     <Card className="border-none shadow-sm rounded-3xl bg-secondary/5">
                         <CardHeader>
                             <CardTitle className="text-lg flex items-center gap-2">
@@ -98,70 +131,5 @@ export default function SettingsPage() {
                 </div>
             </div>
         </div>
-    );
-}
-
-function PreferenceToggle({ label, active }: { label: string, active: boolean }) {
-    return (
-        <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">{label}</span>
-            <div className={`w-10 h-5 rounded-full relative transition-colors ${active ? 'bg-primary' : 'bg-secondary'}`}>
-                <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${active ? 'left-6' : 'left-1'}`} />
-            </div>
-        </div>
-    );
-}
-
-
-function FeatureItem({ label }: { label: string }) {
-    return (
-        <li className="flex items-center gap-2 text-sm">
-            <CheckCircle2 className="w-4 h-4 text-primary" />
-            <span>{label}</span>
-        </li>
-    );
-}
-
-function InvoiceItem({ date, amount, status }: { date: string, amount: string, status: string }) {
-    return (
-        <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-secondary/5 transition-colors cursor-pointer group">
-            <div className="space-y-1">
-                <div className="text-sm font-bold tracking-tight">{date}</div>
-                <div className="text-[10px] font-bold text-green-600 uppercase tracking-widest">{status}</div>
-            </div>
-            <div className="text-right">
-                <div className="text-sm font-bold mb-1">{amount}</div>
-                <ArrowUpRight className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors inline" />
-            </div>
-        </div>
-    );
-}
-
-function PlanCard({ title, price, description, features, active }: { title: string, price: string, description: string, features: string[], active: boolean }) {
-    return (
-        <Card className={`relative flex flex-col p-6 transition-all hover:shadow-xl ${active ? 'border-primary border-2 ring-4 ring-primary/5' : ''}`}>
-            {active && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
-                    Current Active
-                </div>
-            )}
-            <div className="flex justify-between items-start mb-4">
-                <h4 className="font-bold text-lg">{title}</h4>
-                <div className="text-right">
-                    <div className="font-bold text-xl text-primary">{price}</div>
-                </div>
-            </div>
-            <p className="text-xs text-muted-foreground mb-6 line-clamp-2">{description}</p>
-            <ul className="space-y-3 mb-8 flex-1">
-                {features.map((f, i) => (
-                    <li key={i} className="flex items-center gap-2 text-xs">
-                        <CheckCircle2 className="w-3 h-3 text-primary opacity-60" /> {f}
-                    </li>
-                ))}
-            </ul>
-            <Button variant={active ? "secondary" : "outline"} disabled={active} className="w-full font-bold">
-                {active ? "Active" : "Switch to Plan"}
-            </Button>
-        </Card>
     );
 }
