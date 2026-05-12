@@ -128,8 +128,24 @@ export default async function ContentManagementPage() {
                                             )}
                                         </div>
                                         <div className="flex-1">
-                                            <h4 className="font-bold mb-1">{session.topic}</h4>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <h4 className="font-bold">{session.topic}</h4>
+                                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                                                    session.status === 'live' ? 'bg-red-500 text-white animate-pulse' : 
+                                                    session.status === 'upcoming' ? 'bg-blue-500 text-white' : 
+                                                    'bg-gray-500 text-white'
+                                                }`}>
+                                                    {session.status}
+                                                </span>
+                                            </div>
                                             <p className="text-xs text-muted-foreground">{session.expertName} • {session.sessionDate ? new Date(session.sessionDate).toLocaleString() : "TBD"}</p>
+                                            <div className="mt-3 flex items-center gap-3">
+                                                <Button variant="outline" size="sm" className="h-8 rounded-lg text-[10px] font-bold gap-1.5" asChild>
+                                                    <a href={`/dashboard/content/live-qa/${session.id}/questions`}>
+                                                        <Mic className="w-3 h-3" /> View Questions
+                                                    </a>
+                                                </Button>
+                                            </div>
                                         </div>
                                         <form action={async () => {
                                             "use server";

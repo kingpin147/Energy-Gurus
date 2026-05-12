@@ -18,6 +18,10 @@ export function LiveQAForm() {
                 <input name="topic" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none" required />
             </div>
             <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest opacity-60">Description</label>
+                <textarea name="description" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none h-24" />
+            </div>
+            <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">YouTube URL</label>
                 <input name="youtubeUrl" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none" required />
             </div>
@@ -63,13 +67,29 @@ export function LiveQAForm() {
                     <input type="hidden" name="thumbnailUrl" value={thumbnailUrl} required />
                 </div>
             </div>
-            <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest opacity-60">Expert Name</label>
-                <input name="expertName" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none" />
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest opacity-60">Expert Name</label>
+                    <input name="expertName" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none" />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest opacity-60">Expert Title</label>
+                    <input name="expertTitle" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none" placeholder="e.g. Solar Engineer" />
+                </div>
             </div>
-            <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest opacity-60">Session Date/Time</label>
-                <input name="sessionDate" type="datetime-local" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none" />
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest opacity-60">Status</label>
+                    <select name="status" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none appearance-none">
+                        <option value="upcoming">Upcoming</option>
+                        <option value="live">Live Now</option>
+                        <option value="archived">Archived</option>
+                    </select>
+                </div>
+                <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest opacity-60">Session Date/Time</label>
+                    <input name="sessionDate" type="datetime-local" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none" />
+                </div>
             </div>
             <Button 
                 type="submit" 

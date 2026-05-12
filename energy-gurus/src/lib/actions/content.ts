@@ -48,16 +48,24 @@ export async function addLiveQA(formData: FormData) {
     await checkAdmin();
     
     const topic = formData.get("topic") as string;
+    const description = formData.get("description") as string;
     const youtubeUrl = formData.get("youtubeUrl") as string;
     const thumbnailUrl = formData.get("thumbnailUrl") as string;
     const expertName = formData.get("expertName") as string;
+    const expertTitle = formData.get("expertTitle") as string;
+    const expertPhotoUrl = formData.get("expertPhotoUrl") as string;
+    const status = (formData.get("status") as 'upcoming' | 'live' | 'archived') || 'upcoming';
     const sessionDate = formData.get("sessionDate") ? new Date(formData.get("sessionDate") as string) : null;
 
     await db.insert(liveQA).values({
         topic,
+        description,
         youtubeUrl,
         thumbnailUrl,
         expertName,
+        expertTitle,
+        expertPhotoUrl,
+        status,
         sessionDate
     });
 

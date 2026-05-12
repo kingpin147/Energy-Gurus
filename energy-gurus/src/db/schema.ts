@@ -71,9 +71,13 @@ export const podcasts = pgTable('podcasts', {
 export const liveQA = pgTable('live_qa', {
   id: uuid('id').defaultRandom().primaryKey(),
   topic: text('topic').notNull(),
+  description: text('description'),
   youtubeUrl: text('youtube_url').notNull(),
   thumbnailUrl: text('thumbnail_url'),
   expertName: text('expert_name'),
+  expertTitle: text('expert_title'),
+  expertPhotoUrl: text('expert_photo_url'),
+  status: text('status').$type<'upcoming' | 'live' | 'archived'>().default('upcoming').notNull(),
   sessionDate: timestamp('session_date'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
@@ -119,6 +123,8 @@ export const liveQaQuestions = pgTable('live_qa_questions', {
   sessionId: uuid('session_id').references(() => liveQA.id, { onDelete: 'cascade' }).notNull(),
   userName: text('user_name').notNull(),
   question: text('question').notNull(),
+  isAnswered: boolean('is_answered').default(false).notNull(),
+  isHighlighted: boolean('is_highlighted').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
