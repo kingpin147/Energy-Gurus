@@ -58,12 +58,9 @@ export default async function Dashboard() {
             { title: "System Health", value: "99.9%", unit: "Operational", icon: <Activity className="w-4 h-4 text-green-500" /> },
         ];
     } else {
-        // Default User Monitoring Stats
+        // Fallback: redirect unknown roles to access-denied
         stats = [
-            { title: "Power Output", value: "4.2 kW", unit: "Current", icon: <Sun className="w-4 h-4 text-primary" /> },
-            { title: "Daily Energy", value: "28.5 kWh", unit: "Total", icon: <BarChart3 className="w-4 h-4 text-primary" /> },
-            { title: "Battery SOC", value: "82%", unit: "Standard", icon: <Battery className="w-4 h-4 text-primary" /> },
-            { title: "Active Alerts", value: "0", unit: "All clear", icon: <AlertTriangle className="w-4 h-4 text-primary" /> },
+            { title: "No Access", value: "—", unit: "Contact admin", icon: <Activity className="w-4 h-4 text-muted-foreground" /> },
         ];
     }
 
@@ -91,7 +88,7 @@ export default async function Dashboard() {
                     <CardHeader className="p-8 pb-4">
                         <CardTitle className="text-xl font-bold flex items-center gap-2">
                             <Activity className="w-5 h-5 text-primary" />
-                            {role === 'user' ? 'Energy Production History' : 'Engagement Trends (7d)'}
+                            {'Engagement Trends (7d)'}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-8 pt-4">
@@ -137,12 +134,7 @@ export default async function Dashboard() {
                                 <button className="w-full h-12 bg-white/10 hover:bg-white/20 rounded-xl text-left px-4 text-sm font-bold transition-colors">Generate QR Codes</button>
                              </>
                         )}
-                        {role === 'user' && (
-                             <>
-                                <button className="w-full h-12 bg-white/10 hover:bg-white/20 rounded-xl text-left px-4 text-sm font-bold transition-colors">Export Daily Report</button>
-                                <button className="w-full h-12 bg-white/10 hover:bg-white/20 rounded-xl text-left px-4 text-sm font-bold transition-colors">System Health Check</button>
-                             </>
-                        )}
+
                         <button className="w-full h-12 bg-white text-primary rounded-xl text-center text-sm font-bold shadow-lg mt-4">Help & Support</button>
                     </CardContent>
                 </Card>

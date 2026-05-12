@@ -63,7 +63,7 @@ export async function isUserAllowed(email: string, clerkId?: string, name?: stri
     if (invitation || isWhitelisted) {
         // Automatically create them in the DB if they don't exist yet but are allowed
         if (clerkId) {
-            const role = isWhitelisted ? 'super-admin' : invitation?.role || 'user';
+            const role = isWhitelisted ? 'super-admin' : invitation?.role || 'epc';
             try {
                 await db.insert(users).values({
                     clerkId,

@@ -13,5 +13,5 @@ export async function getUserRole(): Promise<UserRole> {
     return "super-admin";
   }
 
-  return (sessionClaims?.metadata as { role?: UserRole })?.role || "user";
+  return (sessionClaims?.metadata as { role?: UserRole })?.role || "epc";
 }

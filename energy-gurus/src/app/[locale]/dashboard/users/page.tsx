@@ -81,11 +81,10 @@ export default async function UserManagementPage() {
                             <div className="space-y-2">
                                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">Assign Role</label>
                                 <select name="role" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none">
-                                    <option value="user">User</option>
-                                    <option value="epc">EPC Installer</option>
-                                    <option value="admin">Admin</option>
-                                    <option value="brand">Solar Brand</option>
-                                </select>
+                                                    <option value="epc">EPC Installer</option>
+                                                    <option value="brand">Solar Brand</option>
+                                                    <option value="admin">Admin</option>
+                                                </select>
                             </div>
                             <Button type="submit" className="w-full rounded-xl font-bold h-12 gap-2 shadow-lg shadow-primary/20">
                                 Send Invite / Assign
@@ -183,7 +182,7 @@ export default async function UserManagementPage() {
                                                     {!isSuperAdmin && role === 'super-admin' && (
                                                         <form action={async (formData) => {
                                                             "use server";
-                                                            const targetRole = user.role === 'admin' ? 'user' : 'admin';
+                                                            const targetRole = user.role === 'admin' ? 'epc' : 'admin';
                                                             await updateUserRole(user.id, targetRole);
                                                         }}>
                                                             <Button variant="outline" size="sm" className="h-9 px-4 rounded-xl gap-2 font-bold">

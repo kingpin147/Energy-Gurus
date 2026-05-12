@@ -1,6 +1,6 @@
 import { pgTable, text, timestamp, uuid, jsonb, integer, boolean } from 'drizzle-orm/pg-core';
 
-export const userRoleEnum = ['super-admin', 'admin', 'epc', 'brand', 'user'] as const;
+export const userRoleEnum = ['super-admin', 'admin', 'epc', 'brand'] as const;
 export type UserRole = (typeof userRoleEnum)[number];
 
 export const users = pgTable('users', {
@@ -8,7 +8,7 @@ export const users = pgTable('users', {
   clerkId: text('clerk_id').notNull().unique(),
   email: text('email').notNull().unique(),
   name: text('name'),
-  role: text('role').$type<UserRole>().default('user').notNull(),
+  role: text('role').$type<UserRole>().default('epc').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

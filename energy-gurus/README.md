@@ -20,7 +20,6 @@ Strictly isolated dashboards for different user types:
 - **Admin:** Manage website users and update dynamic content like YouTube podcasts/QA.
 - **EPC (Installer):** Manage company branding, about section, and upload work portfolios.
 - **Brand:** Manage brand profile and product verification codes.
-- **User:** Browse directories and send inquiries.
 
 ### 🏢 EPC Directory
 - Public listing of verified EPC companies.
