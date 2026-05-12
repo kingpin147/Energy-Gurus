@@ -10,7 +10,7 @@ export async function SecurityGuard({ locale }: { locale: string }) {
         try {
             const allowed = await isUserAllowed(email);
             if (!allowed) {
-                redirect(`/${locale}/access-denied`);
+                redirect(`/${locale}/reject-access?error=not_invited`);
             }
         } catch (error) {
             console.error("Security Guard Check Failed:", error);

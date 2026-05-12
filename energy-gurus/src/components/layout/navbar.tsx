@@ -73,7 +73,7 @@ export function Navbar() {
                 </Link>
 
                 {/* Desktop Nav */}
-                <nav className="hidden lg:flex items-center space-x-6">
+                <nav className="hidden md:flex items-center space-x-6">
                     {navLinks.map((link) => (
                         <Link
                             key={link.href}
@@ -106,16 +106,16 @@ export function Navbar() {
                                     <UserButton afterSignOutUrl="/" />
                                 </SignedIn>
                                 <SignedOut>
-                                    <SignInButton mode="modal">
-                                        <Button size="sm" variant="outline">Sign In</Button>
-                                    </SignInButton>
+                                    <Button size="sm" variant="outline" asChild>
+                                        <Link href="/sign-in">Sign In</Link>
+                                    </Button>
                                 </SignedOut>
                             </>
                         )}
 
                     {/* Mobile Menu Toggle */}
                     <button
-                        className="lg:hidden p-2 text-muted-foreground"
+                        className="md:hidden p-2 text-muted-foreground"
                         onClick={() => setIsOpen(!isOpen)}
                     >
                         {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -125,7 +125,7 @@ export function Navbar() {
 
             {/* Mobile Nav Overlay */}
             {isOpen && (
-                <div className="lg:hidden border-t bg-background p-4 space-y-4">
+                <div className="md:hidden border-t bg-background p-4 space-y-4">
                     {navLinks.map((link) => (
                         <Link
                             key={link.href}
