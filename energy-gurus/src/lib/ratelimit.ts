@@ -2,23 +2,35 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { redis } from "./redis";
 
 /**
- * Global Rate Limiter
- * 20 requests per 10 seconds for general API/Dashboard
+ * Page Navigation Rate Limiter
+ * 200 requests per 60 seconds — generous enough for normal browsing
+ * and Next.js prefetching without hitting 429 errors.
  */
 export const ratelimit = new Ratelimit({
   redis: redis,
-  limiter: Ratelimit.slidingWindow(20, "10 s"),
+  limiter: Ratelimit.slidingWindow(200, "60 s"),
   analytics: true,
-  prefix: "@upstash/ratelimit",
+  prefix: "@upstash/ratelimit-pages",
 });
 
 /**
- * Strict Rate Limiter (for sensitive actions like uploads or logins)
- * 5 requests per 1 minute
+ * API / Mutation Rate Limiter
+ * 30 requests per 60 seconds — for form submissions, uploads, etc.
+ */
+export const apiRatelimit = new Ratelimit({
+  redis: redis,
+  limiter: Ratelimit.slidingWindow(30, "60 s"),
+  analytics: true,
+  prefix: "@upstash/ratelimit-api",
+});
+
+/**
+ * Strict Rate Limiter (for sensitive actions like auth or invitations)
+ * 10 requests per 1 minute
  */
 export const strictRatelimit = new Ratelimit({
   redis: redis,
-  limiter: Ratelimit.slidingWindow(5, "1 m"),
+  limiter: Ratelimit.slidingWindow(10, "1 m"),
   analytics: true,
   prefix: "@upstash/ratelimit-strict",
 });

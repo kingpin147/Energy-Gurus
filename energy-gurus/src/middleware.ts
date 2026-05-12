@@ -2,7 +2,7 @@ import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
-import { ratelimit } from './lib/ratelimit';
+import { apiRatelimit } from './lib/ratelimit';
 
 const isProtectedRoute = createRouteMatcher([
     '/:locale/dashboard(.*)',
@@ -15,7 +15,11 @@ const isClerkConfigured = clerkKey && clerkKey.startsWith('pk_') && !clerkKey.in
 
 export default function middleware(req: any) {
     const ip = req.ip ?? "127.0.0.1";
-    const isApiRoute = req.nextUrl.pathname.startsWith('/api');
+    const pathname = req.nextUrl.pathname;
+    
+    // Only rate-limit actual API routes, NOT page navigation
+    // Page navigation caused false 429s due to Next.js prefetching
+    const isApiRoute = pathname.startsWith('/api');
 
     // If Clerk is not properly configured, just run the i18n middleware directly
     if (!isClerkConfigured) {
@@ -24,18 +28,22 @@ export default function middleware(req: any) {
 
     // Otherwise, use Clerk's middleware wrapper
     return clerkMiddleware(async (auth, req) => {
-        // Rate limiting for API and Dashboard
-        if (isApiRoute || req.nextUrl.pathname.includes('/dashboard')) {
-            const { success } = await ratelimit.limit(ip);
+        // Only rate-limit API calls, not page navigation
+        if (isApiRoute) {
+            const { success } = await apiRatelimit.limit(ip);
             if (!success) {
-                return new NextResponse("Too Many Requests", { status: 429 });
+                // Return a JSON error for API routes
+                return NextResponse.json(
+                    { error: "Too many requests. Please slow down." },
+                    { status: 429 }
+                );
             }
+            // Skip intl middleware for API routes to avoid /en/api redirects
+            return;
         }
 
+        // Protect dashboard routes with Clerk auth
         if (isProtectedRoute(req)) await auth.protect();
-        
-        // Skip intl middleware for API routes to avoid /en/api redirects
-        if (isApiRoute) return;
 
         return intlMiddleware(req);
     })(req, {} as any);

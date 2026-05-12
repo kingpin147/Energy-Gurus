@@ -12,8 +12,7 @@ import {
     AlertCircle,
     ArrowUpRight,
     User,
-    Bell,
-    Lock
+    Bell
 } from "lucide-react";
 
 import { UserProfile, useUser } from "@clerk/nextjs";
@@ -65,9 +64,7 @@ export default function SettingsPage() {
                             </div>
                         </div>
 
-                        <Button variant="outline" className="rounded-xl font-bold h-12 gap-2 border-2" onClick={() => window.open(user?.id ? `https://accounts.clerk.com` : '#', '_blank')}>
-                            <Lock className="w-4 h-4" /> Edit Account Security
-                        </Button>
+
                     </CardContent>
                 </Card>
 
@@ -80,7 +77,6 @@ export default function SettingsPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <PreferenceToggle label="Inquiry Emails" active={true} />
                             <PreferenceToggle label="System Alerts" active={true} />
                             <PreferenceToggle label="Weekly Reports" active={false} />
                         </CardContent>
