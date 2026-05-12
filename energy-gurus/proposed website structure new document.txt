@@ -8,6 +8,7 @@ Features
 • Short description  
 • Share buttons  
 • YouTube channel link  
+
 2. EPCs / Installers 
 Directory of certified EPC companies and installers. 
 EPC Profile Includes 
@@ -17,14 +18,16 @@ EPC Profile Includes
 • Work portfolio/images  
 • Customer ratings & reviews  
 • Social media icons  
-• Website icon  
-• InMail/contact option  
+• Website icon /links
+• InMail/contact option 
+
 EPC Dashboard 
 Separate login for each EPC/Installer to: 
 • View customer inquiries  
 • Reply to messages  
 • Upload portfolio  
-• View ratings & feedback  
+• View ratings & feedback 
+
 3. Brands 
 Directory of solar and energy brands. 
 Brand Profile Includes 
@@ -37,12 +40,14 @@ Brand Profile Includes
 • Reply to comments  
 • Social media icons  
 • Website icon  
-• InMail/contact option  
+• InMail/contact option 
+
 Product Verification Tab 
 Inside every brand profile: 
 • Product serial number verification  
 • QR verification  
 • Warranty verification link  
+
 Brand Dashboard 
 Separate login for each brand to: 
 • Manage products  
@@ -50,6 +55,8 @@ Separate login for each brand to:
 • View inquiries  
 • Reply to customer feedback  
 • Manage verification section  
+
+
 4. EnergyGurus.Online Live QA Session 
 Weekly live Q&A session on trending industry topics. 
 Features 
@@ -64,7 +71,8 @@ Example Topics
 • Battery Storage  
 • Fake Products  
 • Solar Policies  
-• Installation Standards  
+• Installation Standards 
+
 Homepage Layout 
 Simple homepage with 4 main sections: 
 1. Podcast  

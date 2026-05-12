@@ -71,6 +71,11 @@ export async function isUserAllowed(email: string, clerkId?: string, name?: stri
                     name: name || email.split("@")[0],
                     role: role as UserRole
                 }).onConflictDoNothing();
+
+                // ✅ Auto-cleanup: remove the invitation now that the user has registered
+                if (invitation) {
+                    await db.delete(invitations).where(eq(invitations.id, invitation.id));
+                }
             } catch (e) {
                 console.error("Failed to auto-create allowed user:", e);
             }

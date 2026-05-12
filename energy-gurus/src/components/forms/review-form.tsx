@@ -36,7 +36,21 @@ export function ReviewForm({ targetId, targetType }: { targetId: string, targetT
         <form onSubmit={handleSubmit} className="space-y-6 bg-secondary/5 p-8 rounded-[2.5rem] border border-secondary/10 shadow-sm">
             <input type="hidden" name="targetId" value={targetId} />
             <input type="hidden" name="targetType" value={targetType} />
-            
+
+            {/* Required name field */}
+            <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest opacity-60">
+                    Your Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                    name="reviewerName"
+                    placeholder="e.g. Ahmed Khan"
+                    required
+                    className="w-full p-4 rounded-2xl border bg-white focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm text-sm"
+                />
+            </div>
+
+            {/* Star rating */}
             <div className="space-y-4">
                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">Your Rating</label>
                 <div className="flex gap-2">
@@ -49,30 +63,31 @@ export function ReviewForm({ targetId, targetType }: { targetId: string, targetT
                             onMouseEnter={() => setHover(star)}
                             onMouseLeave={() => setHover(0)}
                         >
-                            <Star 
+                            <Star
                                 className={`w-8 h-8 ${
-                                    (hover || rating) >= star 
-                                    ? "text-yellow-500 fill-current shadow-yellow-500/20" 
+                                    (hover || rating) >= star
+                                    ? "text-yellow-500 fill-current shadow-yellow-500/20"
                                     : "text-secondary-foreground/20"
-                                }`} 
+                                }`}
                             />
                         </button>
                     ))}
                 </div>
             </div>
 
+            {/* Comment */}
             <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">Your Experience</label>
-                <textarea 
-                    name="comment" 
+                <textarea
+                    name="comment"
                     placeholder="Tell others about the quality of service, installation, or products..."
                     className="w-full min-h-[120px] p-4 rounded-2xl border bg-white focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm"
                     required
                 />
             </div>
 
-            <Button 
-                type="submit" 
+            <Button
+                type="submit"
                 className="w-full h-14 rounded-2xl font-bold text-lg gap-2 shadow-xl shadow-primary/20"
                 disabled={status === 'loading'}
             >

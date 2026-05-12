@@ -84,7 +84,7 @@ export default async function BrandProfilePage({ params, searchParams }: { param
                                 <span className="text-muted-foreground">•</span>
                                 <div className="flex items-center gap-1.5 text-primary font-medium">
                                     <ShieldCheck className="w-4 h-4" />
-                                    <span>Official Verified Brand</span>
+                                    <span>{brand.isVerified ? "Verified Partner" : "Registered Brand"}</span>
                                 </div>
                             </div>
                         </div>
@@ -103,6 +103,11 @@ export default async function BrandProfilePage({ params, searchParams }: { param
                                 {brandProducts.map((product: typeof products.$inferSelect) => (
                                     <Card key={product.id} className="border-none shadow-sm bg-secondary/5 overflow-hidden rounded-2xl">
                                         <CardHeader className="p-6 pb-2">
+                                            {product.imageUrl && (
+                                                <div className="aspect-video w-full mb-4 rounded-xl overflow-hidden border">
+                                                    <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                                                </div>
+                                            )}
                                             <CardTitle className="text-xl">{product.name}</CardTitle>
                                         </CardHeader>
                                         <CardContent className="p-6 pt-2 space-y-4">
@@ -155,9 +160,7 @@ export default async function BrandProfilePage({ params, searchParams }: { param
                             <section>
                                 <h3 className="text-2xl font-bold mb-4">About the Brand</h3>
                                 <p className="text-muted-foreground leading-relaxed">
-                                    {brand.brandName} is committed to delivering excellence in sustainable energy solutions. 
-                                    With a focus on innovation and quality, they have become a trusted name for stakeholders 
-                                    across the energy value chain.
+                                    {brand.about || `${brand.brandName} is committed to delivering excellence in sustainable energy solutions.`}
                                 </p>
                             </section>
 

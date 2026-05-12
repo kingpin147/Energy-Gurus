@@ -21,7 +21,13 @@ export default async function UserManagementPage() {
     }
 
     let allUsers = await db.select().from(users).orderBy(users.createdAt);
-    const pendingInvites = await db.select().from(invitations).orderBy(invitations.createdAt);
+    const allInvites = await db.select().from(invitations).orderBy(invitations.createdAt);
+
+    // Only show invitations for emails that have NOT yet registered
+    const registeredEmails = new Set(allUsers.map(u => u.email.toLowerCase()));
+    const pendingInvites = allInvites.filter(
+        inv => !registeredEmails.has(inv.email.toLowerCase())
+    );
 
     // Force include super admins in display list even if not in DB yet
     const whitelist = ["nomiking0072012@gmail.com", "energygurusonline@gmail.com"];

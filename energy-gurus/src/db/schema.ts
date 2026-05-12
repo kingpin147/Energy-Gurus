@@ -32,11 +32,13 @@ export const brands = pgTable('brands', {
   userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
   brandName: text('brand_name').notNull(),
   logoUrl: text('logo_url'),
+  about: text('about'),
   photos: jsonb('photos').$type<string[]>().default([]),
   reps: jsonb('reps').$type<{ name: string; designation: string }[]>().default([]),
   customerCare: text('customer_care'),
   website: text('website'),
   socialLinks: jsonb('social_links').$type<{ platform: string; url: string }[]>().default([]),
+  isVerified: boolean('is_verified').default(false),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -50,6 +52,7 @@ export const products = pgTable('products', {
   serialNumber: text('serial_number'),
   qrCode: text('qr_code'),
   warrantyLink: text('warranty_link'),
+  imageUrl: text('image_url'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

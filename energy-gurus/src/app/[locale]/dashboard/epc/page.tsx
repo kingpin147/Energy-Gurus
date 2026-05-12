@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Briefcase, MessageSquare, Star, Settings } from "lucide-react";
 import { PortfolioUpload } from "@/components/dashboard/portfolio-upload";
 import { DashboardReviewList } from "@/components/dashboard/dashboard-review-list";
+import { EpcProfileForm } from "@/components/dashboard/epc-profile-form";
 
 export default async function EpcDashboard() {
   const { userId: clerkId } = await auth();
@@ -61,38 +62,12 @@ export default async function EpcDashboard() {
                 <CardTitle>Company Details</CardTitle>
               </CardHeader>
               <CardContent>
-                <form action={updateEpcProfile} className="space-y-4">
-                  <input type="hidden" name="id" value={epc.id} />
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Company Name</label>
-                    <input 
-                      name="companyName" 
-                      defaultValue={epc.companyName} 
-                      className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none"
-                      required 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">About Company</label>
-                    <textarea 
-                      name="about" 
-                      defaultValue={epc.about || ""} 
-                      rows={4}
-                      className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Website URL</label>
-                    <input 
-                      name="website" 
-                      defaultValue={epc.website || ""} 
-                      className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none"
-                    />
-                  </div>
-                  <button className="w-full bg-primary text-primary-foreground h-12 rounded-xl font-bold hover:opacity-90 transition-opacity">
-                    Save Changes
-                  </button>
-                </form>
+                <EpcProfileForm
+                  epcId={epc.id}
+                  defaultCompanyName={epc.companyName}
+                  defaultAbout={epc.about || ""}
+                  defaultWebsite={epc.website || ""}
+                />
               </CardContent>
             </Card>
 
