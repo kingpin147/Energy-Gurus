@@ -5,6 +5,7 @@ import { routing } from '@/i18n/routing';
 import type { Metadata } from "next";
 import { Inter, Noto_Sans_Arabic } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Analytics } from '@vercel/analytics/next';
 import "../globals.css";
 import "@uploadthing/react/styles.css";
 
@@ -70,6 +71,7 @@ export default async function RootLayout({
         ) : (
           content
         )}
+        <Analytics />
       </body>
     </html>
   );
