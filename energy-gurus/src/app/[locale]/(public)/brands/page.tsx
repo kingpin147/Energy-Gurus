@@ -1,18 +1,46 @@
 import { db } from "@/db";
-import { brands, products } from "@/db/schema";
+import { brands, products, reviews } from "@/db/schema";
 import { Link } from "@/i18n/routing";
-import { ShieldCheck, Shield } from "lucide-react";
+import { ShieldCheck, Shield, Star, Search } from "lucide-react";
 import { redis } from "@/lib/redis";
 import { SidebarVerification } from "@/components/brands/sidebar-verification";
+import { ListSort } from "@/components/shared/list-sort";
+import { desc, asc, eq, sql } from "drizzle-orm";
+import { Input } from "@/components/ui/input";
 
-// Use a versioned cache key to bust stale cache
-const BRANDS_LIST_CACHE_KEY = "brands:all:v5";
+export default async function BrandsListingPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ sort?: string }>;
+}) {
+    const { sort } = await searchParams;
+    const sortVal = sort || "latest";
+    const BRANDS_LIST_CACHE_KEY = `brands:all:${sortVal}:v7`;
 
-export default async function BrandsListingPage() {
     let brandList: any[] | null = await redis.get(BRANDS_LIST_CACHE_KEY);
 
     if (!brandList) {
-        const brandsData = await db.select().from(brands).orderBy(brands.brandName);
+        const brandsData = await db
+            .select({
+                id: brands.id,
+                brandName: brands.brandName,
+                logoUrl: brands.logoUrl,
+                about: brands.about,
+                isVerified: brands.isVerified,
+                customerCare: brands.customerCare,
+                createdAt: brands.createdAt,
+                avgRating: sql<number>`CAST(AVG(${reviews.rating}) AS FLOAT)`.as('avg_rating'),
+            })
+            .from(brands)
+            .leftJoin(reviews, eq(reviews.targetId, brands.id))
+            .groupBy(brands.id)
+            .orderBy((t) => {
+                if (sort === "top-rated") return desc(t.avgRating);
+                if (sort === "lowest-rated") return asc(t.avgRating);
+                if (sort === "oldest") return asc(t.createdAt);
+                return desc(t.createdAt);
+            });
+
         const allProducts = await db.select().from(products);
 
         brandList = brandsData.map(brand => ({
@@ -21,9 +49,6 @@ export default async function BrandsListingPage() {
         }));
 
         await redis.set(BRANDS_LIST_CACHE_KEY, brandList, { ex: 3600 });
-        console.log("🗄️ Public Brands Cache Miss (v5)");
-    } else {
-        console.log("🚀 Public Brands Cache Hit (v5)");
     }
 
     return (
@@ -70,13 +95,29 @@ export default async function BrandsListingPage() {
 
                     {/* Brand Listing Area */}
                     <div className="flex-1 min-w-0 w-full space-y-12">
-                        <div className="flex items-center justify-between border-b border-[#bec9c8] pb-4">
-                            <h2 className="text-2xl font-bold text-[#005353] font-inter">
-                                Featured Partners
-                            </h2>
-                            <span className="text-[10px] font-bold text-[#3e4948]/60 uppercase tracking-widest font-inter">
-                                {brandList.length} Brands Available
-                            </span>
+                        <div className="flex flex-col md:flex-row items-center justify-between border-b border-[#bec9c8] pb-6 gap-4">
+                            <div>
+                                <h2 className="text-2xl font-bold text-[#005353] font-inter">
+                                    Featured Partners
+                                </h2>
+                                <span className="text-[10px] font-bold text-[#3e4948]/60 uppercase tracking-widest font-inter">
+                                    {brandList.length} Brands Available
+                                </span>
+                            </div>
+                            <div className="flex gap-3 w-full md:w-auto">
+                                <div className="relative flex-1 md:w-64">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                    <Input placeholder="Search brands..." className="pl-10 h-11 bg-white border-[#bec9c8]/50 rounded-xl font-medium" />
+                                </div>
+                                <ListSort 
+                                    options={[
+                                        { label: "Latest", value: "latest" },
+                                        { label: "Oldest", value: "oldest" },
+                                        { label: "Top Rated", value: "top-rated" },
+                                        { label: "Lowest Rated", value: "lowest-rated" },
+                                    ]} 
+                                />
+                            </div>
                         </div>
 
                         <div className="flex flex-col gap-8">
@@ -114,6 +155,10 @@ export default async function BrandsListingPage() {
                                                                 Verified
                                                             </div>
                                                         )}
+                                                        <div className="flex items-center gap-1 px-3 py-1 bg-[#fdc74c]/20 text-[#715300] rounded-full text-[10px] font-black font-inter uppercase tracking-tighter">
+                                                            <Star className="w-3 h-3 fill-current" />
+                                                            {brand.avgRating ? brand.avgRating.toFixed(1) : "N/A"}
+                                                        </div>
                                                     </div>
                                                     <p className="text-sm md:text-base text-[#3e4948] leading-relaxed font-medium">
                                                         {brand.about || "Leading global provider of high-efficiency energy solutions and smart technology."}

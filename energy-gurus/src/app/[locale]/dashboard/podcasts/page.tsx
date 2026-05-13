@@ -3,21 +3,30 @@ import { redirect } from "next/navigation";
 import { addPodcast, addLiveQA } from "@/lib/actions/content";
 import { db } from "@/db";
 import { podcasts, liveQA } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { ListSort } from "@/components/shared/list-sort";
+import { desc, asc } from "drizzle-orm";
 
-export default async function PodcastsPage() {
+export default async function PodcastsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sort?: string }>;
+}) {
+  const { sort } = await searchParams;
   const role = await getUserRole();
   if (role !== "super-admin" && role !== "admin") {
     redirect("/dashboard");
   }
 
+  const order = sort === "oldest" ? asc(podcasts.createdAt) : desc(podcasts.createdAt);
+  const qaOrder = sort === "oldest" ? asc(liveQA.createdAt) : desc(liveQA.createdAt);
+
   const existingPodcasts = await db.query.podcasts.findMany({
-    orderBy: [desc(podcasts.createdAt)],
+    orderBy: [order],
     limit: 10,
   });
 
   const existingQA = await db.query.liveQA.findMany({
-    orderBy: [desc(liveQA.createdAt)],
+    orderBy: [qaOrder],
     limit: 10,
   });
 
@@ -42,21 +51,29 @@ export default async function PodcastsPage() {
             </form>
           </div>
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Recent Podcasts</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Recent Podcasts</h2>
+              <ListSort 
+                options={[
+                  { label: "Latest", value: "latest" },
+                  { label: "Oldest", value: "oldest" },
+                ]} 
+              />
+            </div>
             {existingPodcasts.map((p) => (
-              <div key={p.id} className="border p-3 rounded-lg flex justify-between items-center">
+              <div key={p.id} className="border p-3 rounded-lg flex justify-between items-center bg-white shadow-sm">
                 <div>
                   <p className="font-medium text-sm">{p.title}</p>
                   <p className="text-xs text-muted-foreground">{p.guestName}</p>
                 </div>
-                <a href={p.youtubeUrl} target="_blank" className="text-primary text-xs hover:underline">View</a>
+                <a href={p.youtubeUrl} target="_blank" className="text-primary text-xs font-bold hover:underline">View</a>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <hr />
+      <hr className="opacity-10" />
 
       <div>
         <h1 className="text-2xl font-bold mb-6">Live QA Management</h1>
@@ -67,20 +84,28 @@ export default async function PodcastsPage() {
               <input name="topic" placeholder="Session Topic" className="w-full border rounded p-2" required />
               <input name="youtubeUrl" placeholder="YouTube URL" className="w-full border rounded p-2" required />
               <input name="expertName" placeholder="Expert Name" className="w-full border rounded p-2" />
-              <button className="bg-primary text-primary-foreground w-full py-2 rounded font-medium hover:opacity-90">
+              <button className="bg-primary text-primary-foreground w-full py-2 rounded font-medium hover:opacity-90 transition-opacity">
                 Save QA Session
               </button>
             </form>
           </div>
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Recent QA Sessions</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Recent QA Sessions</h2>
+              <ListSort 
+                options={[
+                  { label: "Latest", value: "latest" },
+                  { label: "Oldest", value: "oldest" },
+                ]} 
+              />
+            </div>
             {existingQA.map((q) => (
-              <div key={q.id} className="border p-3 rounded-lg flex justify-between items-center">
+              <div key={q.id} className="border p-3 rounded-lg flex justify-between items-center bg-white shadow-sm">
                 <div>
                   <p className="font-medium text-sm">{q.topic}</p>
                   <p className="text-xs text-muted-foreground">{q.expertName}</p>
                 </div>
-                <a href={q.youtubeUrl} target="_blank" className="text-primary text-xs hover:underline">View</a>
+                <a href={q.youtubeUrl} target="_blank" className="text-primary text-xs font-bold hover:underline">View</a>
               </div>
             ))}
           </div>

@@ -6,38 +6,48 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Video, Youtube, Trash2, Calendar, Mic } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { deletePodcast, deleteLiveQA } from "@/lib/actions/content";
-import { desc } from "drizzle-orm";
+import { desc, asc } from "drizzle-orm";
 import { PodcastForm } from "@/components/forms/podcast-form";
 import { LiveQAForm } from "@/components/forms/live-qa-form";
-
 import { redis, CACHE_KEYS } from "@/lib/redis";
 import { getUserRole } from "@/lib/roles";
+import { ListSort } from "@/components/shared/list-sort";
+import { ListSearch } from "@/components/shared/list-search";
+import { like, and, or } from "drizzle-orm";
 
-export default async function ContentManagementPage() {
+export default async function ContentManagementPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ sort?: string; q?: string }>;
+}) {
+    const { sort, q } = await searchParams;
+    const sortVal = sort || "latest";
     const role = await getUserRole();
 
     if (role !== 'super-admin' && role !== 'admin') {
         redirect("/dashboard");
     }
 
-    // Podcast Caching
-    let allPodcasts: any[] | null = await redis.get(CACHE_KEYS.PODCASTS_LIST);
+    const order = sortVal === "oldest" ? asc(podcasts.createdAt) : desc(podcasts.createdAt);
+    const qaOrder = sortVal === "oldest" ? asc(liveQA.createdAt) : desc(liveQA.createdAt);
+
+    const podcastWhere = q ? like(podcasts.title, `%${q}%`) : undefined;
+    const qaWhere = q ? like(liveQA.topic, `%${q}%`) : undefined;
+
+    // Podcast Caching (Key includes sort and search)
+    const PODCAST_CACHE_KEY = `${CACHE_KEYS.PODCASTS_LIST}:${sortVal}:${q || ""}`;
+    let allPodcasts: (typeof podcasts.$inferSelect)[] | null = await redis.get(PODCAST_CACHE_KEY);
     if (!allPodcasts) {
-        allPodcasts = await db.select().from(podcasts).orderBy(desc(podcasts.createdAt));
-        await redis.set(CACHE_KEYS.PODCASTS_LIST, allPodcasts, { ex: 3600 });
-        console.log("🗄️ Podcasts Cache Miss");
-    } else {
-        console.log("🚀 Podcasts Cache Hit");
+        allPodcasts = await db.select().from(podcasts).where(podcastWhere).orderBy(order);
+        await redis.set(PODCAST_CACHE_KEY, allPodcasts, { ex: 3600 });
     }
 
-    // Live QA Caching
-    let allLiveQA: any[] | null = await redis.get(CACHE_KEYS.LIVE_QA_LIST);
+    // Live QA Caching (Key includes sort and search)
+    const QA_CACHE_KEY = `${CACHE_KEYS.LIVE_QA_LIST}:${sortVal}:${q || ""}`;
+    let allLiveQA: (typeof liveQA.$inferSelect)[] | null = await redis.get(QA_CACHE_KEY);
     if (!allLiveQA) {
-        allLiveQA = await db.select().from(liveQA).orderBy(desc(liveQA.createdAt));
-        await redis.set(CACHE_KEYS.LIVE_QA_LIST, allLiveQA, { ex: 3600 });
-        console.log("🗄️ Live QA Cache Miss");
-    } else {
-        console.log("🚀 Live QA Cache Hit");
+        allLiveQA = await db.select().from(liveQA).where(qaWhere).orderBy(qaOrder);
+        await redis.set(QA_CACHE_KEY, allLiveQA, { ex: 3600 });
     }
 
     return (
@@ -80,32 +90,53 @@ export default async function ContentManagementPage() {
                         </Card>
 
                         <div className="lg:col-span-2 space-y-4">
-                            <h3 className="text-xl font-bold mb-4">Existing Episodes</h3>
-                            {allPodcasts.map((podcast) => (
-                                <Card key={podcast.id} className="border-none shadow-sm rounded-2xl overflow-hidden group">
-                                    <CardContent className="p-4 md:p-6 flex flex-col sm:flex-row items-center sm:items-center gap-4 md:gap-6">
-                                        <div className="w-full sm:w-32 aspect-video bg-black rounded-xl overflow-hidden flex items-center justify-center relative shrink-0">
-                                            {podcast.thumbnailUrl ? (
-                                                <img src={podcast.thumbnailUrl} className="w-full h-full object-cover" alt="" />
-                                            ) : (
-                                                <Youtube className="w-8 h-8 text-red-600" />
-                                            )}
-                                        </div>
-                                        <div className="flex-1">
-                                            <h4 className="font-bold mb-1">{podcast.title}</h4>
-                                            <p className="text-xs text-muted-foreground line-clamp-1">{podcast.guestName} • {podcast.youtubeUrl}</p>
-                                        </div>
-                                        <form action={async () => {
-                                            "use server";
-                                            await deletePodcast(podcast.id);
-                                        }}>
-                                            <Button variant="ghost" size="sm" className="h-10 w-10 p-0 rounded-xl text-red-500 hover:text-red-600 hover:bg-red-50">
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </form>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                                <h3 className="text-xl font-bold">Existing Episodes</h3>
+                                <div className="flex gap-2 w-full sm:w-auto">
+                                    <ListSearch placeholder="Search title..." />
+                                    <ListSort 
+                                        options={[
+                                            { label: "Latest", value: "latest" },
+                                            { label: "Oldest", value: "oldest" },
+                                        ]} 
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {allPodcasts.map((podcast) => (
+                                    <Card key={podcast.id} className="border-none shadow-sm rounded-3xl overflow-hidden group hover:shadow-md transition-all">
+                                        <CardContent className="p-0">
+                                            <div className="aspect-video bg-black flex items-center justify-center relative">
+                                                {podcast.thumbnailUrl ? (
+                                                    <img src={podcast.thumbnailUrl} className="w-full h-full object-cover" alt="" />
+                                                ) : (
+                                                    <Youtube className="w-12 h-12 text-red-600" />
+                                                )}
+                                                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <form action={async () => {
+                                                        "use server";
+                                                        await deletePodcast(podcast.id);
+                                                    }}>
+                                                        <Button variant="destructive" size="sm" className="h-8 w-8 p-0 rounded-lg shadow-lg">
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <div className="p-6">
+                                                <h4 className="font-bold text-lg mb-1 line-clamp-1">{podcast.title}</h4>
+                                                <p className="text-xs text-muted-foreground font-medium mb-4">{podcast.guestName}</p>
+                                                <div className="flex items-center justify-between">
+                                                    <p className="text-[10px] text-muted-foreground font-mono truncate max-w-[120px] opacity-60">{podcast.youtubeUrl}</p>
+                                                    <Button variant="ghost" size="sm" className="h-8 rounded-lg text-[10px] font-bold" asChild>
+                                                        <a href={podcast.youtubeUrl} target="_blank" rel="noopener noreferrer">View</a>
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </TabsContent>
@@ -122,48 +153,66 @@ export default async function ContentManagementPage() {
                         </Card>
 
                         <div className="lg:col-span-2 space-y-4">
-                            <h3 className="text-xl font-bold mb-4">Live Archives</h3>
-                            {allLiveQA.map((session) => (
-                                <Card key={session.id} className="border-none shadow-sm rounded-2xl overflow-hidden group">
-                                    <CardContent className="p-4 md:p-6 flex flex-col sm:flex-row items-center sm:items-center gap-4 md:gap-6">
-                                        <div className="w-full sm:w-32 aspect-video bg-black rounded-xl overflow-hidden flex items-center justify-center relative shrink-0">
-                                            {session.thumbnailUrl ? (
-                                                <img src={session.thumbnailUrl} className="w-full h-full object-cover" alt="" />
-                                            ) : (
-                                                <Calendar className="w-8 h-8 text-primary" />
-                                            )}
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <h4 className="font-bold">{session.topic}</h4>
-                                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                                                    session.status === 'live' ? 'bg-red-500 text-white animate-pulse' : 
-                                                    session.status === 'upcoming' ? 'bg-blue-500 text-white' : 
-                                                    'bg-gray-500 text-white'
-                                                }`}>
-                                                    {session.status}
-                                                </span>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                                <h3 className="text-xl font-bold">Live Archives</h3>
+                                <div className="flex gap-2 w-full sm:w-auto">
+                                    <ListSearch placeholder="Search topic..." />
+                                    <ListSort 
+                                        options={[
+                                            { label: "Latest", value: "latest" },
+                                            { label: "Oldest", value: "oldest" },
+                                        ]} 
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {allLiveQA.map((session) => (
+                                    <Card key={session.id} className="border-none shadow-sm rounded-3xl overflow-hidden group hover:shadow-md transition-all">
+                                        <CardContent className="p-0">
+                                            <div className="aspect-video bg-black flex items-center justify-center relative">
+                                                {session.thumbnailUrl ? (
+                                                    <img src={session.thumbnailUrl} className="w-full h-full object-cover" alt="" />
+                                                ) : (
+                                                    <Calendar className="w-12 h-12 text-primary" />
+                                                )}
+                                                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <form action={async () => {
+                                                        "use server";
+                                                        await deleteLiveQA(session.id);
+                                                    }}>
+                                                        <Button variant="destructive" size="sm" className="h-8 w-8 p-0 rounded-lg shadow-lg">
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                    </form>
+                                                </div>
+                                                <div className="absolute bottom-4 left-4">
+                                                    <span className={`text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest shadow-lg ${
+                                                        session.status === 'live' ? 'bg-red-500 text-white animate-pulse' : 
+                                                        session.status === 'upcoming' ? 'bg-blue-500 text-white' : 
+                                                        'bg-gray-500 text-white'
+                                                    }`}>
+                                                        {session.status}
+                                                    </span>
+                                                </div>
                                             </div>
-                                            <p className="text-xs text-muted-foreground">{session.expertName} • {session.sessionDate ? new Date(session.sessionDate).toLocaleString() : "TBD"}</p>
-                                            <div className="mt-3 flex items-center gap-3">
-                                                <Button variant="outline" size="sm" className="h-8 rounded-lg text-[10px] font-bold gap-1.5" asChild>
-                                                    <a href={`/dashboard/content/live-qa/${session.id}/questions`}>
-                                                        <Mic className="w-3 h-3" /> View Questions
-                                                    </a>
-                                                </Button>
+                                            <div className="p-6">
+                                                <h4 className="font-bold text-lg mb-1 line-clamp-1">{session.topic}</h4>
+                                                <p className="text-xs text-muted-foreground font-medium mb-4">{session.expertName}</p>
+                                                <div className="flex items-center justify-between">
+                                                    <p className="text-[10px] text-muted-foreground font-medium opacity-60">
+                                                        {session.sessionDate ? new Date(session.sessionDate).toLocaleDateString() : "TBD"}
+                                                    </p>
+                                                    <Button variant="ghost" size="sm" className="h-8 rounded-lg text-[10px] font-bold gap-1.5" asChild>
+                                                        <a href={`/dashboard/content/live-qa/${session.id}/questions`}>
+                                                            <Mic className="w-3 h-3" /> Questions
+                                                        </a>
+                                                    </Button>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <form action={async () => {
-                                            "use server";
-                                            await deleteLiveQA(session.id);
-                                        }}>
-                                            <Button variant="ghost" size="sm" className="h-10 w-10 p-0 rounded-xl text-red-500 hover:text-red-600 hover:bg-red-50">
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </form>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </TabsContent>

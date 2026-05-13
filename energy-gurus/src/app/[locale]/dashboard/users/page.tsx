@@ -1,6 +1,5 @@
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,18 +8,30 @@ import { deleteUser, updateUserRole } from "@/lib/actions/users";
 import { createInvitation } from "@/lib/actions/invitations";
 import { invitations } from "@/db/schema";
 import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
-
+import { ListSort } from "@/components/shared/list-sort";
+import { ListSearch } from "@/components/shared/list-search";
+import { eq, asc, desc, like, or, and } from "drizzle-orm";
 import { getUserRole } from "@/lib/roles";
 
-export default async function UserManagementPage() {
-    const role = await getUserRole();
+export default async function UserManagementPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ sort?: string; role?: string; q?: string }>;
+}) {
+    const { sort, role: roleFilter, q } = await searchParams;
+    const userRole = await getUserRole();
 
-    if (role !== 'super-admin' && role !== 'admin') {
+    if (userRole !== 'super-admin' && userRole !== 'admin') {
         redirect("/dashboard");
     }
 
-    let allUsers = await db.select().from(users).orderBy(users.createdAt);
+    const order = sort === "oldest" ? asc(users.createdAt) : desc(users.createdAt);
+    const roleCondition = roleFilter ? eq(users.role, roleFilter as "admin" | "epc" | "brand" | "super-admin") : undefined;
+    const searchCondition = q ? or(like(users.name, `%${q}%`), like(users.email, `%${q}%`)) : undefined;
+    const where = and(roleCondition, searchCondition);
+
+    const baseUsers = await db.select().from(users).where(where).orderBy(order);
+    const allUsers = [...baseUsers];
     const allInvites = await db.select().from(invitations).orderBy(invitations.createdAt);
 
     // Only show invitations for emails that have NOT yet registered
@@ -30,24 +41,24 @@ export default async function UserManagementPage() {
     );
 
     // Force include super admins in display list even if not in DB yet
-    const whitelist = ["nomiking0072012@gmail.com", "energygurusonline@gmail.com"];
-    whitelist.forEach((email, index) => {
+    const adminWhitelist = ["nomiking0072012@gmail.com", "energygurusonline@gmail.com"];
+    adminWhitelist.forEach((email, index) => {
         if (!allUsers.find(u => u.email.toLowerCase() === email.toLowerCase())) {
             allUsers.push({
                 id: `system-admin-${index}`,
                 email: email,
                 name: "Super Admin (System)",
-                role: "super-admin",
+                role: "super-admin" as const,
                 clerkId: "system",
                 createdAt: new Date(),
                 updatedAt: new Date()
-            } as any);
+            } as typeof users.$inferSelect);
         }
     });
 
     return (
         <div className="p-8 space-y-8">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center">
                         <UsersIcon className="w-6 h-6 text-white" />
@@ -55,6 +66,27 @@ export default async function UserManagementPage() {
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
                         <p className="text-muted-foreground">Manage platform access, roles, and administrative permissions.</p>
+                    </div>
+                </div>
+                <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+                    <ListSearch placeholder="Search name or email..." />
+                    <div className="flex gap-3">
+                        <ListSort 
+                            label="Filter by Role"
+                            defaultValue="all"
+                            options={[
+                                { label: "All Roles", value: "" },
+                                { label: "Admin", value: "admin" },
+                                { label: "EPC Installer", value: "epc" },
+                                { label: "Solar Brand", value: "brand" },
+                            ]} 
+                        />
+                        <ListSort 
+                            options={[
+                                { label: "Latest", value: "latest" },
+                                { label: "Oldest", value: "oldest" },
+                            ]} 
+                        />
                     </div>
                 </div>
             </div>
@@ -71,8 +103,8 @@ export default async function UserManagementPage() {
                         <form action={async (formData) => {
                             "use server";
                             const email = formData.get("email") as string;
-                            const role = formData.get("role") as any;
-                            await createInvitation(email, role);
+                            const selectedRole = formData.get("role") as "admin" | "epc" | "brand";
+                            await createInvitation(email, selectedRole);
                         }} className="space-y-4">
                             <div className="space-y-2">
                                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">Email Address</label>
@@ -179,8 +211,8 @@ export default async function UserManagementPage() {
                                             </td>
                                             <td className="p-6">
                                                 <div className="flex items-center justify-end gap-2">
-                                                    {!isSuperAdmin && role === 'super-admin' && (
-                                                        <form action={async (formData) => {
+                                                    {!isSuperAdmin && userRole === 'super-admin' && (
+                                                        <form action={async () => {
                                                             "use server";
                                                             const targetRole = user.role === 'admin' ? 'epc' : 'admin';
                                                             await updateUserRole(user.id, targetRole);
@@ -193,7 +225,7 @@ export default async function UserManagementPage() {
                                                     )}
                                                     
                                                     {/* Only Super Admin can delete other Admins, but NO ONE can delete Super Admins */}
-                                                    {!isSuperAdmin && (role === 'super-admin' || (role === 'admin' && user.role !== 'admin' && user.role !== 'super-admin')) && (
+                                                    {!isSuperAdmin && (userRole === 'super-admin' || (userRole === 'admin' && user.role !== 'admin' && user.role !== 'super-admin')) && (
                                                         <form action={async () => {
                                                             "use server";
                                                             await deleteUser(user.id);

@@ -52,20 +52,20 @@ export function CountdownTimer({ targetDate }: { targetDate: Date | null }) {
 
 function TimeUnit({ value, label }: { value: number; label: string }) {
     return (
-        <div className="flex flex-col items-center w-[70px]">
-            <div className="relative h-12 w-full flex items-center justify-center overflow-hidden">
+        <div className="flex flex-col items-center w-[60px] md:w-[70px] shrink-0">
+            <div className="relative h-10 md:h-12 w-full flex items-center justify-center overflow-hidden">
                 <span 
                     key={value}
-                    className="text-4xl tabular-nums tracking-tighter transition-all duration-300 animate-in fade-in slide-in-from-bottom-2"
+                    className="text-3xl md:text-4xl tabular-nums tracking-tighter transition-all duration-300 animate-in fade-in slide-in-from-bottom-2"
                 >
                     {String(value).padStart(2, '0')}
                 </span>
             </div>
-            <span className="text-[10px] text-[#a4d6d2] uppercase tracking-widest mt-1 opacity-80">{label}</span>
+            <span className="text-[9px] md:text-[10px] text-[#a4d6d2] uppercase tracking-[0.2em] mt-1 opacity-70 font-black">{label}</span>
         </div>
     );
 }
 
 function Separator() {
-    return <span className="text-xl md:text-3xl mb-6 text-[#a4d6d2] opacity-30">:</span>;
+    return <span className="text-xl md:text-3xl mb-5 md:mb-6 text-[#a4d6d2] opacity-20">:</span>;
 }

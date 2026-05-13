@@ -30,19 +30,19 @@ export default async function LiveQAPage() {
                 
                 {/* Top Banner */}
                 {latestSession && (
-                <div className="bg-[#0b655f] text-white rounded-xl p-8 md:p-12 mb-6 flex flex-col md:flex-row justify-between items-center relative overflow-hidden shadow-sm">
+                <div className="bg-[#0b655f] text-white rounded-3xl p-8 md:p-10 lg:p-12 mb-6 flex flex-col lg:flex-row justify-between items-center lg:items-start gap-10 relative overflow-hidden shadow-sm border border-white/5">
                     <div className="absolute top-0 right-0 opacity-5 pointer-events-none">
-                        <PlayCircle className="w-96 h-96 -mt-32 -mr-32" />
+                        <PlayCircle className="w-[500px] h-[500px] -mt-32 -mr-32" />
                     </div>
-                    <div className="md:w-3/5 z-10">
-                        <span className="inline-block bg-[#bd7d19] text-white text-[10px] font-bold px-3 py-1 rounded-sm uppercase tracking-widest mb-6">
+                    <div className="flex-1 z-10 w-full text-center lg:text-left">
+                        <span className="inline-block bg-[#bd7d19] text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] mb-6 shadow-lg shadow-[#bd7d19]/20">
                             {latestSession.status === 'live' ? 'Live Session' : latestSession.status === 'upcoming' ? 'Upcoming Session' : 'Archived Session'}
                         </span>
-                        <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">{latestSession.topic}</h1>
-                        <p className="text-[#a4d6d2] text-[15px] mb-8 leading-relaxed max-w-xl">
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-[1.1] tracking-tight">{latestSession.topic}</h1>
+                        <p className="text-[#a4d6d2] text-sm md:text-base mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0 opacity-90">
                             {latestSession.description || "Deep dive into the latest policy updates and market trends. Understanding the impact and identifying new opportunities."}
                         </p>
-                        <div className="flex items-center gap-2 text-[#d1e8e6] text-xs font-semibold">
+                        <div className="flex items-center justify-center lg:justify-start gap-3 text-[#d1e8e6] text-sm font-bold bg-white/5 w-fit mx-auto lg:mx-0 px-5 py-2.5 rounded-full backdrop-blur-sm border border-white/5">
                             <Calendar className="w-4 h-4 text-[#d88d22]" />
                             <span>
                                 {latestSession.sessionDate ? new Date(latestSession.sessionDate).toLocaleString('en-US', { weekday: 'long', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }) : "Date TBD"}
@@ -50,9 +50,9 @@ export default async function LiveQAPage() {
                         </div>
                     </div>
                     {latestSession.status === 'upcoming' && latestSession.sessionDate && (
-                    <div className="md:w-2/5 mt-8 md:mt-0 flex justify-end z-10 w-full md:w-auto">
-                         <div className="bg-[#3e8580] bg-opacity-40 p-6 rounded-xl text-center w-full max-w-sm border border-[#52948f]/50">
-                            <p className="text-[#a4d6d2] text-[11px] font-bold tracking-widest uppercase mb-3">Starting In</p>
+                    <div className="lg:w-[400px] z-10 w-full">
+                         <div className="bg-white/5 backdrop-blur-md p-8 lg:p-10 rounded-[2.5rem] text-center w-full border border-white/10 shadow-2xl">
+                            <p className="text-[#a4d6d2] text-[10px] font-black tracking-[0.3em] uppercase mb-6 opacity-70">Starting In</p>
                             <CountdownTimer targetDate={latestSession.sessionDate} />
                         </div>
                     </div>
@@ -124,29 +124,31 @@ export default async function LiveQAPage() {
                             {/* Question List */}
                             <div className="space-y-4">
                                 {questions.map(q => (
-                                    <div key={q.id} className="flex gap-4 p-5 bg-white rounded-sm border border-[#eef5f5] shadow-sm">
-                                        <div className="flex flex-col items-center bg-[#eef5f5] p-2 rounded-sm h-fit min-w-[40px]">
-                                            <ChevronUp className="w-4 h-4 text-gray-400 cursor-pointer hover:text-[#0b655f]" />
-                                            <span className="font-bold text-[#0b655f] text-xs my-1">
-                                                {q.isHighlighted ? '42' : '18'} {/* Dummy upvote counts matching screenshot logic */}
+                                    <div key={q.id} className="flex flex-col sm:flex-row gap-4 p-4 md:p-6 bg-white rounded-2xl border border-[#eef5f5] shadow-sm hover:shadow-md transition-all">
+                                        <div className="flex flex-row sm:flex-col items-center justify-center sm:justify-start bg-[#f1f7f7] p-2 md:p-3 rounded-xl h-fit min-w-[48px] gap-3 sm:gap-1">
+                                            <ChevronUp className="w-5 h-5 text-gray-400 cursor-pointer hover:text-[#0b655f] transition-colors" />
+                                            <span className="font-black text-[#0b655f] text-sm leading-none">
+                                                {q.isHighlighted ? '42' : '18'}
                                             </span>
-                                            <ChevronUp className="w-4 h-4 text-gray-400 cursor-pointer hover:text-[#0b655f] rotate-180" />
+                                            <ChevronUp className="w-5 h-5 text-gray-400 cursor-pointer hover:text-[#0b655f] rotate-180 transition-colors" />
                                         </div>
                                         <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-1.5">
-                                                <span className="font-bold text-[#333] text-[13px]">{q.userName}</span>
-                                                <span className="text-[11px] text-gray-400 font-medium">• {new Date(q.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-bold text-[#1a1a1a] text-sm">{q.userName}</span>
+                                                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">• {new Date(q.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                                </div>
+                                                {q.isHighlighted && (
+                                                    <span className="bg-[#faebce] text-[#9c6a15] text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest border border-[#9c6a15]/10">Priority Thread</span>
+                                                )}
                                             </div>
-                                            <p className="text-[#444] text-[13px] mb-3 leading-relaxed">
+                                            <p className="text-[#4a4a4a] text-sm leading-relaxed mb-4">
                                                 {q.question}
                                             </p>
                                             <div className="flex items-center gap-4">
-                                                <button className="text-[11px] font-bold text-[#0b655f] flex items-center gap-1 hover:underline">
-                                                    <ArrowRight className="w-3 h-3" /> Reply
+                                                <button className="text-[11px] font-black text-[#0b655f] flex items-center gap-1.5 hover:underline uppercase tracking-widest">
+                                                    <ArrowRight className="w-3.5 h-3.5" /> Reply
                                                 </button>
-                                                {q.isHighlighted && (
-                                                    <span className="bg-[#faebce] text-[#9c6a15] text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider">Priority Thread</span>
-                                                )}
                                             </div>
                                         </div>
                                     </div>

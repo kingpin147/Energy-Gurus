@@ -83,18 +83,7 @@ export default async function EpisodePage({ params }: { params: Promise<{ id: st
                         <p className="text-lg leading-relaxed text-muted-foreground mb-8">
                             {episode.description}
                         </p>
-
-                        <h3 id="transcript" className="text-2xl font-bold mb-4">Episode Highlights</h3>
-                        <div className="bg-secondary/10 p-8 rounded-xl space-y-6 text-muted-foreground italic leading-relaxed">
-                            <p>This episode features <strong>{episode.guestName}</strong> ({episode.guestDesignation}) discussing the latest trends in the energy sector.</p>
-                            <p>Key topics covered:</p>
-                            <ul className="not-italic list-disc pl-6 space-y-2">
-                                <li>Policy updates for 2026</li>
-                                <li>Technological advancements in solar energy</li>
-                                <li>Grid stability and distribution challenges</li>
-                            </ul>
-                        </div>
-                    </div>
+                   </div>
                 </div>
 
                 {/* Right Column: Sidebar / CTAs */}

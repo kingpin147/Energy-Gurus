@@ -1,26 +1,33 @@
 import { db } from "@/db";
 import { brands, products, productSerials } from "@/db/schema";
-import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, Plus, Trash2, Globe, Package, ShieldCheck, ArrowLeft, Hash } from "lucide-react";
 import { revalidatePath } from "next/cache";
-import { eq, count } from "drizzle-orm";
+import { eq, count, desc, asc, like } from "drizzle-orm";
 import { Link } from "@/i18n/routing";
 import { bulkImportSerials } from "@/lib/actions/serials";
 import { BrandRegistrationForm } from "@/components/forms/brand-registration-form";
 import { redis, CACHE_KEYS } from "@/lib/redis";
-
 import { getUserRole } from "@/lib/roles";
+import { ListSort } from "@/components/shared/list-sort";
+import { ListSearch } from "@/components/shared/list-search";
 
-export default async function BrandManagementPage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
-    const { id: selectedBrandId } = await searchParams;
+export default async function BrandManagementPage({ 
+    searchParams 
+}: { 
+    searchParams: Promise<{ id?: string; sort?: string; q?: string }> 
+}) {
+    const { id: selectedBrandId, sort, q } = await searchParams;
     const role = await getUserRole();
 
     if (role !== 'super-admin' && role !== 'admin') {
         redirect("/dashboard");
     }
+
+    const where = selectedBrandId ? eq(brands.id, selectedBrandId) : (q ? like(brands.brandName, `%${q}%`) : undefined);
+    const order = sort === "oldest" ? asc(brands.createdAt) : desc(brands.createdAt);
 
     // 1. If a brand is selected, show Product & Serial management for that brand
     if (selectedBrandId) {
@@ -130,17 +137,28 @@ export default async function BrandManagementPage({ searchParams }: { searchPara
     }
 
     // 2. Main Brand Listing (Default View)
-    const allBrands = await db.select().from(brands).orderBy(brands.brandName);
+    const allBrands = await db.select().from(brands).where(where).orderBy(order);
 
     return (
         <div className="p-8 space-y-8">
-            <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center">
-                    <Building2 className="w-6 h-6 text-white" />
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center">
+                        <Building2 className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">Brand Management</h1>
+                        <p className="text-muted-foreground">Manage the global directory of Solar & Energy Brands.</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Brand Management</h1>
-                    <p className="text-muted-foreground">Manage the global directory of Solar & Energy Brands.</p>
+                <div className="flex gap-3 w-full md:w-auto">
+                    <ListSearch placeholder="Search brands..." />
+                    <ListSort 
+                        options={[
+                            { label: "Latest", value: "latest" },
+                            { label: "Oldest", value: "oldest" },
+                        ]} 
+                    />
                 </div>
             </div>
 

@@ -2,18 +2,29 @@ import { db } from "@/db";
 import { inquiries, users } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { eq, desc } from "drizzle-orm";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ListSort } from "@/components/shared/list-sort";
+import { ListSearch } from "@/components/shared/list-search";
+import { eq, desc, asc, and, or, like } from "drizzle-orm";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Clock, CheckCircle2, Trash2, Mail, User } from "lucide-react";
 import { updateInquiryStatus, deleteInquiry } from "@/lib/actions/inquiries";
 
-export default async function InquiriesPage() {
+export default async function InquiriesPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ sort?: string; status?: string; q?: string }>;
+}) {
+    const { sort, status, q } = await searchParams;
     const { userId: clerkId } = await auth();
     if (!clerkId) redirect("/sign-in");
 
     const [dbUser] = await db.select().from(users).where(eq(users.clerkId, clerkId));
     if (!dbUser) redirect("/dashboard");
+
+    const order = sort === "oldest" ? asc(inquiries.createdAt) : desc(inquiries.createdAt);
+    const statusCondition = status ? eq(inquiries.status, status as "new" | "in-progress" | "closed") : undefined;
+    const searchCondition = q ? or(like(inquiries.message, `%${q}%`), like(users.name, `%${q}%`)) : undefined;
 
     const myInquiries = await db.select({
         inquiry: inquiries,
@@ -21,18 +32,46 @@ export default async function InquiriesPage() {
     })
     .from(inquiries)
     .leftJoin(users, eq(inquiries.senderId, users.id))
-    .where(eq(inquiries.receiverId, dbUser.id))
-    .orderBy(desc(inquiries.createdAt));
+    .where(and(
+        eq(inquiries.receiverId, dbUser.id),
+        statusCondition,
+        searchCondition
+    ))
+    .orderBy(order);
 
     return (
         <div className="p-8 space-y-8">
-            <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center">
-                    <MessageSquare className="w-6 h-6 text-white" />
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center">
+                        <MessageSquare className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">Lead Management</h1>
+                        <p className="text-muted-foreground">Track and respond to customer inquiries from your public profile.</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Lead Management</h1>
-                    <p className="text-muted-foreground">Track and respond to customer inquiries from your public profile.</p>
+                <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+                    <ListSearch placeholder="Search leads..." />
+                    <div className="flex gap-3">
+                        <ListSort 
+                            label="Filter by Status"
+                            defaultValue="all"
+                            options={[
+                                { label: "All Statuses", value: "" },
+                                { label: "New", value: "new" },
+                                { label: "In-Progress", value: "in-progress" },
+                                { label: "Resolved", value: "closed" },
+                            ]} 
+                            
+                        />
+                        <ListSort 
+                            options={[
+                                { label: "Latest", value: "latest" },
+                                { label: "Oldest", value: "oldest" },
+                            ]} 
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -67,7 +106,7 @@ export default async function InquiriesPage() {
                                     </div>
 
                                     <div className="bg-secondary/5 p-6 rounded-2xl border italic text-muted-foreground">
-                                        "{inquiry.message}"
+                                        &quot;{inquiry.message}&quot;
                                     </div>
 
                                     <div className="flex items-center gap-6 text-xs text-muted-foreground font-medium">
