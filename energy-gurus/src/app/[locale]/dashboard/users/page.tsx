@@ -135,7 +135,8 @@ export default async function UserManagementPage({
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-0">
-                                <table className="w-full text-left">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left min-w-[600px]">
                                     <thead>
                                         <tr className="bg-secondary/5 border-b">
                                             <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Email</th>
@@ -167,6 +168,7 @@ export default async function UserManagementPage({
                                         ))}
                                     </tbody>
                                 </table>
+                                </div>
                             </CardContent>
                         </Card>
                     )}
@@ -180,7 +182,7 @@ export default async function UserManagementPage({
                         </CardHeader>
                 <CardContent className="p-0">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                        <table className="w-full text-left border-collapse min-w-[800px]">
                             <thead>
                                 <tr className="bg-secondary/5 border-b">
                                     <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Name</th>
@@ -197,16 +199,16 @@ export default async function UserManagementPage({
                                     
                                     return (
                                         <tr key={user.id} className="border-b hover:bg-secondary/5 transition-colors">
-                                            <td className="p-6 font-bold">{user.name || "N/A"}</td>
-                                            <td className="p-6 text-muted-foreground">{user.email}</td>
+                                            <td className="p-6 font-bold whitespace-nowrap">{user.name || "N/A"}</td>
+                                            <td className="p-6 text-muted-foreground whitespace-nowrap">{user.email}</td>
                                             <td className="p-6">
-                                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border whitespace-nowrap ${
                                                     displayRole === 'super-admin' ? 'bg-red-100 text-red-600 border-red-200' :
                                                     displayRole === 'admin' ? 'bg-blue-100 text-blue-600 border-blue-200' :
                                                     displayRole === 'epc' ? 'bg-green-100 text-green-600 border-green-200' :
                                                     'bg-secondary text-muted-foreground border-secondary-foreground/10'
                                                 }`}>
-                                                    {displayRole}
+                                                    {displayRole.replace('-', ' ')}
                                                 </span>
                                             </td>
                                             <td className="p-6">

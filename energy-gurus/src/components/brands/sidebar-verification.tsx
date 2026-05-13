@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { verifySerialNumber } from "@/lib/actions/verify";
+import { QrCode, ShieldCheck, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 
 export function SidebarVerification() {
     const [sn, setSn] = useState("");
@@ -21,46 +22,53 @@ export function SidebarVerification() {
     }
 
     return (
-        <div className="flex flex-col gap-4">
-            <div className="relative">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#3e4948]/60 !text-lg">qr_code_scanner</span>
+        <div className="flex flex-col gap-5 items-center">
+            <div className="relative w-full group">
+                <QrCode className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors w-5 h-5" />
                 <input 
                     type="text" 
                     value={sn}
                     onChange={(e) => setSn(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2.5 border border-[#bec9c8] bg-[#e8f6f6] rounded-lg focus:ring-2 focus:ring-[#005353] focus:border-transparent text-sm placeholder:text-[#3e4948]/40 outline-none transition-all" 
+                    className="w-full pl-12 pr-4 h-14 bg-white/50 backdrop-blur-xl border border-border/50 rounded-2xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-base placeholder:text-muted-foreground/40 outline-none transition-all font-medium shadow-sm" 
                     placeholder="Serial Number..." 
                 />
             </div>
+            
             <button 
                 onClick={handleVerify}
                 disabled={loading || !sn}
-                className="w-full bg-[#7a5900] text-white px-6 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-[#5c4300] active:scale-[0.98] transition-all text-xs disabled:opacity-50 disabled:pointer-events-none uppercase tracking-wider font-inter shadow-sm"
+                className="w-full h-14 bg-primary text-white rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-primary/90 active:scale-[0.98] transition-all text-[10px] disabled:opacity-50 disabled:pointer-events-none uppercase tracking-[0.2em] shadow-xl shadow-primary/20"
             >
-                <span className="material-symbols-outlined !text-base">verified_user</span>
-                {loading ? "VERIFYING..." : "VERIFY NOW"}
+                {loading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <ShieldCheck className="w-4 h-4" />
+                )}
+                {loading ? "Verifying..." : "Verify Now"}
             </button>
 
             {result && (
-                <div className={`p-4 rounded-lg text-xs font-bold border animate-in fade-in slide-in-from-top-2 duration-300 ${
+                <div className={`w-full p-6 rounded-[2rem] text-sm font-bold border animate-in zoom-in duration-500 ${
                     result.status === 'genuine' 
-                    ? 'bg-green-50 text-green-700 border-green-200 shadow-sm' 
-                    : 'bg-red-50 text-red-700 border-red-200 shadow-sm'
+                    ? 'bg-green-500/5 text-green-600 border-green-500/20' 
+                    : 'bg-red-500/5 text-red-600 border-red-500/20'
                 }`}>
-                    <div className="flex items-start gap-2">
-                        <span className="material-symbols-outlined !text-base shrink-0 mt-0.5">
-                            {result.status === 'genuine' ? 'check_circle' : 'error'}
-                        </span>
+                    <div className="flex flex-col items-center gap-3 text-center">
+                        {result.status === 'genuine' ? (
+                          <CheckCircle2 className="w-8 h-8" />
+                        ) : (
+                          <AlertCircle className="w-8 h-8" />
+                        )}
                         <div>
                             {result.status === 'genuine' ? (
                                 <>
-                                    <p className="mb-1 uppercase tracking-tight">Genuine Product Found!</p>
-                                    <p className="opacity-80 font-normal">Validated: {result.brandName}</p>
+                                    <p className="text-[10px] uppercase tracking-[0.2em] mb-1">Authentic Asset</p>
+                                    <p className="text-lg font-black tracking-tight">{result.brandName}</p>
                                 </>
                             ) : (
                                 <>
-                                    <p className="mb-1 uppercase tracking-tight">Verification Failed</p>
-                                    <p className="opacity-80 font-normal">Serial number not found in manufacturer database.</p>
+                                    <p className="text-[10px] uppercase tracking-[0.2em] mb-1">Verification Failed</p>
+                                    <p className="text-sm font-medium opacity-80 leading-relaxed">The serial number provided was not found in our manufacturer database.</p>
                                 </>
                             )}
                         </div>
@@ -68,8 +76,8 @@ export function SidebarVerification() {
                 </div>
             )}
 
-            <p className="text-[10px] text-[#3e4948]/50 italic text-center font-medium mt-1">
-                Secure bilingual authentication system
+            <p className="text-[10px] text-muted-foreground/40 italic text-center font-black uppercase tracking-[0.2em] mt-2">
+                Secure Global Authentication
             </p>
         </div>
     );

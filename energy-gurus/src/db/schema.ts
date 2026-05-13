@@ -85,6 +85,7 @@ export const products = pgTable('products', {
   qrCode: text('qr_code'),
   warrantyLink: text('warranty_link'),
   imageUrl: text('image_url'),
+  series: text('series'), // e.g. "Hi-MO 6", "N-Type"
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -160,5 +161,11 @@ export const liveQaQuestions = pgTable('live_qa_questions', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
-
-
+export const brandCertifications = pgTable('brand_certifications', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  brandId: uuid('brand_id').references(() => brands.id, { onDelete: 'cascade' }).notNull(),
+  name: text('name').notNull(),
+  issuingBody: text('issuing_body'),
+  expiryDate: timestamp('expiry_date'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});

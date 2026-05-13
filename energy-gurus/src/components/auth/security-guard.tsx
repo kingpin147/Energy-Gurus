@@ -1,9 +1,9 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { getCurrentUser } from "@/lib/user";
 import { isUserAllowed } from "@/lib/actions/invitations";
 import { redirect } from "next/navigation";
 
 export async function SecurityGuard({ locale }: { locale: string }) {
-    const user = await currentUser();
+    const user = await getCurrentUser();
     
     if (user) {
         const email = user.emailAddresses[0].emailAddress;

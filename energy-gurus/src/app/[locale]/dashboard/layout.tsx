@@ -2,7 +2,7 @@ import { Link } from "@/i18n/routing";
 import { ArrowLeft, Mic } from "lucide-react";
 import { getUserRole } from "@/lib/roles";
 import Sidebar from "./Sidebar";
-import { currentUser } from "@clerk/nextjs/server";
+import { getCurrentUser } from "@/lib/user";
 import { UserNav } from "@/components/layout/user-nav";
 import { InvitationCheck } from "@/components/dashboard/invitation-check";
 import { SecurityGuard } from "@/components/auth/security-guard";
@@ -16,7 +16,7 @@ export default async function DashboardLayout({
 }) {
     const { locale } = await params;
     const role = await getUserRole();
-    const user = await currentUser();
+    const user = await getCurrentUser();
     const email = user?.emailAddresses[0]?.emailAddress;
 
     return (
