@@ -41,23 +41,29 @@ export default async function ContentManagementPage() {
     }
 
     return (
-        <div className="p-8 space-y-8">
-            <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center">
+        <div className="p-4 md:p-8 space-y-8">
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
+                <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shrink-0">
                     <Video className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Content Management</h1>
-                    <p className="text-muted-foreground">Manage your YouTube video embeds for Podcasts and Live QA sessions.</p>
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Content Management</h1>
+                    <p className="text-muted-foreground text-sm md:text-base">Manage your YouTube video embeds for Podcasts and Live QA sessions.</p>
                 </div>
             </div>
 
             <Tabs defaultValue="podcasts" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 h-14 p-1 bg-secondary/20 rounded-xl mb-8">
-                    <TabsTrigger value="podcasts" className="rounded-lg font-bold gap-2">
+                <TabsList className="flex flex-wrap w-fit bg-secondary/20 p-1.5 rounded-2xl mb-12 border border-secondary/30">
+                    <TabsTrigger 
+                        value="podcasts" 
+                        className="px-6 md:px-10 py-3 rounded-xl font-bold gap-3 transition-all text-muted-foreground hover:bg-primary/5 hover:text-primary data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20"
+                    >
                         <Mic className="w-4 h-4" /> Podcasts
                     </TabsTrigger>
-                    <TabsTrigger value="liveqa" className="rounded-lg font-bold gap-2">
+                    <TabsTrigger 
+                        value="liveqa" 
+                        className="px-6 md:px-10 py-3 rounded-xl font-bold gap-3 transition-all text-muted-foreground hover:bg-primary/5 hover:text-primary data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20"
+                    >
                         <Video className="w-4 h-4" /> Live QA
                     </TabsTrigger>
                 </TabsList>
@@ -77,8 +83,8 @@ export default async function ContentManagementPage() {
                             <h3 className="text-xl font-bold mb-4">Existing Episodes</h3>
                             {allPodcasts.map((podcast) => (
                                 <Card key={podcast.id} className="border-none shadow-sm rounded-2xl overflow-hidden group">
-                                    <CardContent className="p-6 flex items-center gap-6">
-                                        <div className="w-32 aspect-video bg-black rounded-xl overflow-hidden flex items-center justify-center relative">
+                                    <CardContent className="p-4 md:p-6 flex flex-col sm:flex-row items-center sm:items-center gap-4 md:gap-6">
+                                        <div className="w-full sm:w-32 aspect-video bg-black rounded-xl overflow-hidden flex items-center justify-center relative shrink-0">
                                             {podcast.thumbnailUrl ? (
                                                 <img src={podcast.thumbnailUrl} className="w-full h-full object-cover" alt="" />
                                             ) : (
@@ -119,8 +125,8 @@ export default async function ContentManagementPage() {
                             <h3 className="text-xl font-bold mb-4">Live Archives</h3>
                             {allLiveQA.map((session) => (
                                 <Card key={session.id} className="border-none shadow-sm rounded-2xl overflow-hidden group">
-                                    <CardContent className="p-6 flex items-center gap-6">
-                                        <div className="w-32 aspect-video bg-black rounded-xl overflow-hidden flex items-center justify-center relative">
+                                    <CardContent className="p-4 md:p-6 flex flex-col sm:flex-row items-center sm:items-center gap-4 md:gap-6">
+                                        <div className="w-full sm:w-32 aspect-video bg-black rounded-xl overflow-hidden flex items-center justify-center relative shrink-0">
                                             {session.thumbnailUrl ? (
                                                 <img src={session.thumbnailUrl} className="w-full h-full object-cover" alt="" />
                                             ) : (

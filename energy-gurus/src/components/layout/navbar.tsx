@@ -2,7 +2,8 @@
 
 import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { useLocale } from "next-intl";
-import { UserButton, SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
+import { UserNav } from "@/components/layout/user-nav";
 import { Menu, X, LayoutDashboard } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -77,19 +78,7 @@ export function Navbar() {
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
                     {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
                         process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY !== "pk_test_..." && (
-                            <>
-                                <SignedIn>
-                                    <UserButton afterSignOutUrl="/" />
-                                </SignedIn>
-                                <SignedOut>
-                                    <Link
-                                        href="/sign-in"
-                                        style={{ backgroundColor: "#006d6d", color: "#c8f5f5", padding: "6px 20px", borderRadius: "8px", fontWeight: 700, fontSize: "14px", whiteSpace: "nowrap", textDecoration: "none", display: "inline-block" }}
-                                    >
-                                        Sign In
-                                    </Link>
-                                </SignedOut>
-                            </>
+                                <UserNav />
                         )}
 
                     {isMobile && (

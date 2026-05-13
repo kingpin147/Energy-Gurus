@@ -1,0 +1,72 @@
+"use client";
+
+import { useUser, useClerk } from "@clerk/nextjs";
+import { Link } from "@/i18n/routing";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { LogOut, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+export function UserNav() {
+  const { user, isLoaded } = useUser();
+  const { signOut } = useClerk();
+  const router = useRouter();
+
+  if (!isLoaded) {
+    return (
+      <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      </Button>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Link
+        href="/sign-in"
+        style={{ backgroundColor: "#006d6d", color: "#c8f5f5", padding: "6px 20px", borderRadius: "8px", fontWeight: 700, fontSize: "14px", whiteSpace: "nowrap", textDecoration: "none", display: "inline-block" }}
+      >
+        Sign In
+      </Link>
+    );
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="relative h-10 max-w-[200px] lg:max-w-[240px] flex items-center justify-start gap-2 pl-1 pr-3 rounded-full border border-gray-200 hover:bg-gray-100 overflow-hidden">
+          <Avatar className="h-8 w-8 shrink-0">
+            <AvatarImage src={user.imageUrl} alt={user.fullName ?? ""} />
+            <AvatarFallback className="bg-[#006d6d] text-white">
+              {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-sm font-semibold text-[#005353] truncate">{user.fullName}</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">{user.fullName}</p>
+            <p className="text-xs leading-none text-muted-foreground">
+              {user.primaryEmailAddress?.emailAddress}
+            </p>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => signOut(() => router.push("/"))} className="cursor-pointer">
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Sign out</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}

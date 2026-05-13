@@ -65,13 +65,13 @@ export default async function Dashboard() {
     }
 
     return (
-        <div className="p-8 space-y-8 max-w-7xl mx-auto">
-            <div className="flex justify-between items-end">
+        <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
                 <div>
-                    <h1 className="text-4xl font-bold tracking-tight mb-2">{title}</h1>
-                    <p className="text-muted-foreground text-lg">{subtitle}</p>
+                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">{title}</h1>
+                    <p className="text-muted-foreground text-base md:text-lg">{subtitle}</p>
                 </div>
-                <div className="bg-green-500/10 text-green-600 px-4 py-2 rounded-2xl text-sm font-bold flex items-center gap-2 border border-green-500/20">
+                <div className="w-fit bg-green-500/10 text-green-600 px-4 py-2 rounded-2xl text-sm font-bold flex items-center gap-2 border border-green-500/20">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                     LIVE DATA ACTIVE
                 </div>
@@ -85,14 +85,14 @@ export default async function Dashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <Card className="lg:col-span-2 border-none shadow-sm rounded-3xl overflow-hidden bg-white">
-                    <CardHeader className="p-8 pb-4">
+                    <CardHeader className="p-6 md:p-8 pb-4">
                         <CardTitle className="text-xl font-bold flex items-center gap-2">
                             <Activity className="w-5 h-5 text-primary" />
                             {'Engagement Trends (7d)'}
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-8 pt-4">
-                        <div className="h-[350px] w-full bg-secondary/5 rounded-2xl flex items-end p-6 gap-3 border">
+                    <CardContent className="p-6 md:p-8 pt-4">
+                        <div className="h-[250px] md:h-[350px] w-full bg-secondary/5 rounded-2xl flex items-end p-4 md:p-6 gap-1.5 md:gap-3 border">
                             {[40, 60, 45, 70, 85, 100, 90, 75, 50, 30].map((h, i) => (
                                 <div
                                     key={i}

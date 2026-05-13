@@ -5,16 +5,12 @@ import { users } from "@/db/schema";
 import { eq, and, ne } from "drizzle-orm";
 import { auth, createClerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { getUserRole } from "@/lib/roles";
 
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
-async function getAuthRole() {
-    const { sessionClaims } = await auth();
-    return (sessionClaims?.metadata as { role?: string })?.role || "user";
-}
-
 export async function deleteUser(userId: string) {
-    const currentUserRole = await getAuthRole();
+    const currentUserRole = await getUserRole();
     if (currentUserRole !== 'super-admin' && currentUserRole !== 'admin') {
         throw new Error("Unauthorized");
     }
@@ -31,7 +27,13 @@ export async function deleteUser(userId: string) {
     }
 
     // Delete from Clerk first
-    await clerkClient.users.deleteUser(userToDelete.clerkId);
+    if (userToDelete.clerkId) {
+        try {
+            await clerkClient.users.deleteUser(userToDelete.clerkId);
+        } catch (error: any) {
+            console.warn("Could not delete user from Clerk (may not exist):", error.message);
+        }
+    }
 
     // Delete from DB
     await db.delete(users).where(eq(users.id, userId));
@@ -40,7 +42,7 @@ export async function deleteUser(userId: string) {
 }
 
 export async function updateUserRole(userId: string, newRole: any) {
-    const currentUserRole = await getAuthRole();
+    const currentUserRole = await getUserRole();
     if (currentUserRole !== 'super-admin' && currentUserRole !== 'admin') {
         throw new Error("Unauthorized");
     }

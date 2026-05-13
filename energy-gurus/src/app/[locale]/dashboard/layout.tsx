@@ -2,8 +2,8 @@ import { Link } from "@/i18n/routing";
 import { ArrowLeft, Mic } from "lucide-react";
 import { getUserRole } from "@/lib/roles";
 import Sidebar from "./Sidebar";
-import { UserButton } from "@clerk/nextjs";
 import { currentUser } from "@clerk/nextjs/server";
+import { UserNav } from "@/components/layout/user-nav";
 import { InvitationCheck } from "@/components/dashboard/invitation-check";
 import { SecurityGuard } from "@/components/auth/security-guard";
 
@@ -42,9 +42,9 @@ export default async function DashboardLayout({
                         <ArrowLeft className="w-4 h-4" />
                         <span>Back to Site</span>
                     </Link>
-                    <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium uppercase text-muted-foreground">Account</span>
-                        <UserButton />
+                    <div className="flex flex-col gap-3">
+                        <span className="text-xs font-medium uppercase text-muted-foreground px-1">Account</span>
+                        <UserNav />
                     </div>
                 </div>
             </aside>
