@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { epcInstallers, users } from "@/db/schema";
+import { epcInstallers, users, epcOffices, epcProjects } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { updateEpcProfile } from "@/lib/actions/epc";
@@ -8,10 +8,12 @@ import { UploadButton } from "@/lib/uploadthing";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardInquiryList } from "@/components/dashboard/inquiry-list";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Briefcase, MessageSquare, Star, Settings } from "lucide-react";
+import { Briefcase, MessageSquare, Star, Settings, MapPin, LayoutGrid } from "lucide-react";
 import { PortfolioUpload } from "@/components/dashboard/portfolio-upload";
 import { DashboardReviewList } from "@/components/dashboard/dashboard-review-list";
 import { EpcProfileForm } from "@/components/dashboard/epc-profile-form";
+import { OfficeManagement } from "@/components/dashboard/office-management";
+import { ProjectManagement } from "@/components/dashboard/project-management";
 
 export default async function EpcDashboard() {
   const { userId: clerkId } = await auth();
@@ -30,6 +32,9 @@ export default async function EpcDashboard() {
     }).returning();
   }
 
+  const offices = await db.select().from(epcOffices).where(eq(epcOffices.epcId, epc.id));
+  const projects = await db.select().from(epcProjects).where(eq(epcProjects.epcId, epc.id));
+
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8">
       <div className="flex items-center gap-4">
@@ -43,15 +48,21 @@ export default async function EpcDashboard() {
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 h-14 p-1 bg-secondary/20 rounded-xl mb-8">
+        <TabsList className="grid w-full grid-cols-5 h-14 p-1 bg-secondary/20 rounded-xl mb-8">
           <TabsTrigger value="profile" className="rounded-lg font-bold gap-2">
-            <Settings className="w-4 h-4" /> Profile & Portfolio
+            <Settings className="w-4 h-4" /> Profile
+          </TabsTrigger>
+          <TabsTrigger value="offices" className="rounded-lg font-bold gap-2">
+            <MapPin className="w-4 h-4" /> Offices
+          </TabsTrigger>
+          <TabsTrigger value="projects" className="rounded-lg font-bold gap-2">
+            <LayoutGrid className="w-4 h-4" /> Showcase
           </TabsTrigger>
           <TabsTrigger value="inquiries" className="rounded-lg font-bold gap-2">
             <MessageSquare className="w-4 h-4" /> Inquiries
           </TabsTrigger>
           <TabsTrigger value="reviews" className="rounded-lg font-bold gap-2">
-            <Star className="w-4 h-4" /> Ratings & Feedback
+            <Star className="w-4 h-4" /> Reviews
           </TabsTrigger>
         </TabsList>
 
@@ -65,6 +76,8 @@ export default async function EpcDashboard() {
                 <EpcProfileForm
                   epcId={epc.id}
                   defaultCompanyName={epc.companyName}
+                  defaultCeoName={epc.ceoName || ""}
+                  defaultSectors={epc.sectors || []}
                   defaultAbout={epc.about || ""}
                   defaultWebsite={epc.website || ""}
                 />
@@ -122,6 +135,14 @@ export default async function EpcDashboard() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="offices">
+            <OfficeManagement epcId={epc.id} initialOffices={offices} />
+        </TabsContent>
+
+        <TabsContent value="projects">
+            <ProjectManagement epcId={epc.id} initialProjects={projects} />
         </TabsContent>
 
         <TabsContent value="inquiries">

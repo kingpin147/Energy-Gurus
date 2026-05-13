@@ -94,9 +94,19 @@ export default async function BrandDashboard() {
                                     <DialogTitle className="text-2xl font-bold mb-4">Add Product Model</DialogTitle>
                                 </DialogHeader>
                                 <form action={addProductModel} className="space-y-4">
-                                    <div>
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Model Name</label>
-                                        <input name="name" placeholder="e.g. Hi-MO 6" className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" required />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Model Name</label>
+                                            <input name="name" placeholder="e.g. Hi-MO 6" className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" required />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Category</label>
+                                            <select name="category" className="w-full border rounded-xl p-3 bg-secondary/5 outline-none">
+                                                <option>Solar Panels</option>
+                                                <option>Inverters</option>
+                                                <option>Batteries</option>
+                                            </select>
+                                        </div>
                                     </div>
                                     <div>
                                         <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Description</label>
@@ -124,7 +134,10 @@ export default async function BrandDashboard() {
                                 <CardContent className="p-8">
                                     <div className="flex justify-between items-start mb-6">
                                         <div className="space-y-1">
-                                            <h4 className="font-bold text-xl">{product.name}</h4>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest">{product.category}</span>
+                                                <h4 className="font-bold text-xl">{product.name}</h4>
+                                            </div>
                                             <p className="text-sm text-muted-foreground">{product.description || "No model description"}</p>
                                         </div>
                                         <div className="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
@@ -180,15 +193,27 @@ export default async function BrandDashboard() {
                                         <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Brand Name</label>
                                         <input name="brandName" defaultValue={myBrand.brandName} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" required />
                                     </div>
-                                    <div>
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Customer Care Number</label>
-                                        <input name="customerCare" defaultValue={myBrand.customerCare || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Country Head Name</label>
+                                            <input name="countryHead" defaultValue={myBrand.countryHead || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Customer Care Head</label>
+                                            <input name="customerCareHead" defaultValue={myBrand.customerCareHead || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Official Website</label>
-                                        <input name="website" defaultValue={myBrand.website || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Customer Care Number</label>
+                                            <input name="customerCare" defaultValue={myBrand.customerCare || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Official Website</label>
+                                            <input name="website" defaultValue={myBrand.website || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
+                                        </div>
                                     </div>
-                                    <Button type="submit" className="w-full h-12 rounded-xl font-bold">Update Profile</Button>
+                                    <Button type="submit" className="w-full h-12 rounded-xl font-bold mt-2">Update Profile</Button>
                                 </form>
                             </CardContent>
                         </Card>

@@ -17,6 +17,8 @@ export const epcInstallers = pgTable('epc_installers', {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
   companyName: text('company_name').notNull(),
+  ceoName: text('ceo_name'),
+  sectors: jsonb('sectors').$type<string[]>().default([]),
   logoUrl: text('logo_url'),
   about: text('about'),
   portfolio: jsonb('portfolio').$type<string[]>().default([]),
@@ -27,10 +29,39 @@ export const epcInstallers = pgTable('epc_installers', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+export const epcOffices = pgTable('epc_offices', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  epcId: uuid('epc_id').references(() => epcInstallers.id, { onDelete: 'cascade' }).notNull(),
+  officeNumber: text('office_number'),
+  block: text('block'),
+  area: text('area'),
+  city: text('city').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const epcProjects = pgTable('epc_projects', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  epcId: uuid('epc_id').references(() => epcInstallers.id, { onDelete: 'cascade' }).notNull(),
+  name: text('name').notNull(),
+  city: text('city'),
+  segmentType: text('segment_type'), // Residential, Commercial, etc.
+  systemSize: text('system_size'), // e.g. "10kW"
+  systemType: text('system_type'), // Hybrid, Grid Tied, etc.
+  inverterModel: text('inverter_model'),
+  batteryModel: text('battery_model'),
+  solarPanelModel: text('solar_panel_model'),
+  images: jsonb('images').$type<string[]>().default([]),
+  videos: jsonb('videos').$type<string[]>().default([]),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 export const brands = pgTable('brands', {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
   brandName: text('brand_name').notNull(),
+  countryHead: text('country_head'),
+  customerCareHead: text('customer_care_head'),
   logoUrl: text('logo_url'),
   about: text('about'),
   photos: jsonb('photos').$type<string[]>().default([]),
@@ -47,6 +78,7 @@ export const products = pgTable('products', {
   id: uuid('id').defaultRandom().primaryKey(),
   brandId: uuid('brand_id').references(() => brands.id, { onDelete: 'cascade' }).notNull(),
   name: text('name').notNull(),
+  category: text('category'), // Solar Panels, Inverters, Batteries
   description: text('description'),
   datasheetUrl: text('datasheet_url'),
   serialNumber: text('serial_number'),

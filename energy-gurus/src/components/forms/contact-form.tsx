@@ -5,7 +5,7 @@ import { sendInquiry } from "@/lib/actions/inquiry";
 import { Button } from "@/components/ui/button";
 import { Mail, Send, CheckCircle2 } from "lucide-react";
 
-export function ContactForm({ receiverId, receiverName }: { receiverId: string, receiverName: string }) {
+export function ContactForm({ receiverId, receiverName, initialMessage }: { receiverId: string, receiverName: string, initialMessage?: string }) {
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -45,6 +45,7 @@ export function ContactForm({ receiverId, receiverName }: { receiverId: string, 
                     placeholder={`Write your inquiry for ${receiverName}...`}
                     className="w-full min-h-[150px] p-4 rounded-2xl border bg-secondary/5 focus:ring-2 focus:ring-primary outline-none transition-all"
                     required
+                    defaultValue={initialMessage}
                 />
             </div>
             <Button 

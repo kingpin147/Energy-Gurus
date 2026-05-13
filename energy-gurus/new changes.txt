@@ -1,0 +1,213 @@
+EPC / Installer Profile Structure — EnergyGurus.Online
+Basic Company Information
+Company Details
+Company Name
+Chief Executive Officer / Owner Name
+Sector Selection (Tick Options)
+Residential
+Commercial
+Industrial
+Agriculture
+Office Information
+
+The company can add multiple offices.
+
+Office Details
+Office Number
+Block
+Area
+City
+Features
+Add Multiple Offices
+Multiple Cities Support
+Showcase Projects Section
+
+Each EPC/Installer can upload multiple projects.
+
+Project Details
+Project Information
+Project Name
+City
+Segment Type
+
+(Tick Option)
+
+Residential
+Commercial
+Industrial
+Agriculture
+Technical Details
+System Size (kW)
+System Type
+Hybrid
+Grid Tied
+Off Grid
+VFD Tube Well
+Equipment Used
+Inverter Brand/Model
+Battery Brand/Model
+Solar Panels Brand/Model
+Media Upload
+Project Images
+Project Videos
+Contact & Communication
+Website
+Company Web Address
+Social Media Icons
+
+Clickable icons for:
+
+Facebook
+LinkedIn
+Instagram
+YouTube
+WhatsApp Tab
+
+Direct WhatsApp contact button.
+
+Inbox
+
+Internal messaging/InMail system for customer inquiries.
+
+Customer Interaction Features
+Ratings & Reviews
+
+Customers can:
+
+Rate workmanship
+Share feedback
+Upload review/comments
+EPC Reply Option
+
+Installer can reply publicly to customer comments.
+
+EPC Dashboard Features
+
+Separate login/dashboard for every EPC/Installer.
+
+Dashboard Functions
+Manage profile
+Add/edit offices
+Upload projects
+View customer messages
+Manage reviews
+Update social links
+Update contact details
+Suggested Profile Layout
+Top Section
+Company Logo
+Company Name
+Chief Executive Officer / Owner
+Sector Tags
+Middle Section
+About Company
+Offices
+Social Icons
+WhatsApp Button
+Inbox Button
+Bottom Section
+Showcase Projects
+Ratings & Reviews
+Customer Feedback
+
+
+Brands Profile Structure — EnergyGurus.Online
+Brand Profile
+Basic Information
+Brand Details
+Brand Name
+Brand Logo
+Office Information
+Head Office
+Management Information
+Country Head
+Customer Care Head
+Contact & Communication
+Website
+Official Website Link
+Social Media Icons
+
+Clickable icons for:
+
+Facebook
+LinkedIn
+Instagram
+YouTube
+WhatsApp Contact
+WhatsApp Number/Button to approach brand directly
+Products Showcase
+
+Brands can showcase products without pricing.
+
+Product Categories
+
+(Tick Option)
+
+Solar Panels
+Inverters
+Batteries
+Product Details
+
+Each product listing includes:
+
+Product Information
+Product Name
+Product Image
+Product Data Sheet (PDF Upload)
+Inquiry Feature
+“Inquire” Button for customer interest
+
+When customer clicks:
+
+Inquiry goes to brand dashboard inbox
+Brand can respond directly
+Customer Ratings & Feedback
+
+Customers can:
+
+Rate product quality
+Rate after-sales services
+Share product feedback
+Share service experience/comments
+Brand Reply Option
+
+Brands can reply publicly below customer comments and feedback.
+
+Product Verification Tab
+
+Inside every brand profile:
+
+Verification Features
+Serial Number Verification
+QR Verification
+Warranty Verification Link
+Brand Dashboard
+
+Separate login/dashboard for every brand.
+
+Dashboard Functions
+Manage brand profile
+Upload products
+Upload datasheets
+Receive customer inquiries
+Manage ratings & feedback
+Reply to customer comments
+Manage WhatsApp & social links
+Update verification section
+Suggested Brand Profile Layout
+Top Section
+Logo
+Brand Name
+Country Head
+Customer Care Head
+Middle Section
+Contact Information
+Social Media Icons
+Website
+WhatsApp Button
+Bottom Section
+Product Showcase
+Datasheets
+Inquiry Buttons
+Customer Ratings & Feedback
+Product Verification Tab

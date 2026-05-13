@@ -7,18 +7,30 @@ import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 interface EpcProfileFormProps {
     epcId: string;
     defaultCompanyName: string;
+    defaultCeoName?: string;
+    defaultSectors?: string[];
     defaultAbout: string;
     defaultWebsite: string;
 }
 
-export function EpcProfileForm({ epcId, defaultCompanyName, defaultAbout, defaultWebsite }: EpcProfileFormProps) {
+export function EpcProfileForm({ epcId, defaultCompanyName, defaultCeoName, defaultSectors = [], defaultAbout, defaultWebsite }: EpcProfileFormProps) {
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
     const [errorMsg, setErrorMsg] = useState("");
+    const [selectedSectors, setSelectedSectors] = useState<string[]>(defaultSectors);
+
+    const sectors = ["Residential", "Commercial", "Industrial", "Agriculture"];
+
+    const toggleSector = (sector: string) => {
+        setSelectedSectors(prev => 
+            prev.includes(sector) ? prev.filter(s => s !== sector) : [...prev, sector]
+        );
+    };
 
     const handleSubmit = async (formData: FormData) => {
         setStatus("loading");
         setErrorMsg("");
         try {
+            formData.set("sectors", JSON.stringify(selectedSectors));
             await updateEpcProfile(formData);
             setStatus("success");
             setTimeout(() => setStatus("idle"), 4000);
@@ -33,14 +45,44 @@ export function EpcProfileForm({ epcId, defaultCompanyName, defaultAbout, defaul
         <form action={handleSubmit} className="space-y-4">
             <input type="hidden" name="id" value={epcId} />
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Company Name</label>
+                    <input
+                        name="companyName"
+                        defaultValue={defaultCompanyName}
+                        className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none"
+                        required
+                    />
+                </div>
+                <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">CEO / Owner Name</label>
+                    <input
+                        name="ceoName"
+                        defaultValue={defaultCeoName}
+                        className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none"
+                    />
+                </div>
+            </div>
+
             <div>
-                <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Company Name</label>
-                <input
-                    name="companyName"
-                    defaultValue={defaultCompanyName}
-                    className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none"
-                    required
-                />
+                <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Sectors Covered</label>
+                <div className="flex flex-wrap gap-2">
+                    {sectors.map(sector => (
+                        <button
+                            key={sector}
+                            type="button"
+                            onClick={() => toggleSector(sector)}
+                            className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                                selectedSectors.includes(sector) 
+                                ? "bg-primary text-white" 
+                                : "bg-secondary/10 text-muted-foreground hover:bg-secondary/20"
+                            }`}
+                        >
+                            {sector}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             <div>

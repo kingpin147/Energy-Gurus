@@ -23,6 +23,8 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
   const isFormData = data instanceof FormData;
   const updateData = isFormData ? {
     brandName: data.get("brandName") as string,
+    countryHead: data.get("countryHead") as string,
+    customerCareHead: data.get("customerCareHead") as string,
     customerCare: data.get("customerCare") as string,
     website: data.get("website") as string,
   } : data;
@@ -57,6 +59,7 @@ export async function addProductModel(formData: FormData) {
     if (!brand) throw new Error("Brand not found");
 
     const name = formData.get("name") as string;
+    const category = formData.get("category") as string;
     const description = formData.get("description") as string;
     const serialNumber = formData.get("serialNumber") as string;
     const datasheetUrl = formData.get("datasheetUrl") as string;
@@ -64,6 +67,7 @@ export async function addProductModel(formData: FormData) {
     await db.insert(products).values({
         brandId: brand.id,
         name,
+        category,
         description,
         serialNumber,
         datasheetUrl
