@@ -11,6 +11,8 @@ import { ContactForm } from "@/components/forms/contact-form";
 import { ReviewForm } from "@/components/forms/review-form";
 import { ReviewList } from "@/components/reviews/review-list";
 import { getProfileRating } from "@/lib/actions/reviews";
+import { TrackedLink, TrackedInteraction } from "@/components/shared/AnalyticsTracker";
+import { SocialLinkTracker } from "@/components/brands/SocialLinkTracker";
 
 export default async function EpcProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -299,9 +301,14 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
 
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button className="w-full h-16 rounded-[1.5rem] font-black text-lg bg-white text-black hover:bg-white/90 gap-3 shadow-lg shadow-white/5 group transition-all">
+                        <TrackedInteraction 
+                          as="button" 
+                          className="w-full h-16 rounded-[1.5rem] font-black text-lg bg-white text-black hover:bg-white/90 gap-3 shadow-lg shadow-white/5 group transition-all flex items-center justify-center"
+                          eventName="epc_contact_click"
+                          eventProperties={{ epcId: installer.id, companyName: installer.companyName }}
+                        >
                           <Mail className="w-6 h-6 group-hover:scale-110 transition-transform" /> Send InMail
-                        </Button>
+                        </TrackedInteraction>
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-[550px] rounded-[3.5rem] p-12 border-none shadow-2xl bg-white/95 backdrop-blur-3xl">
                         <DialogHeader>
@@ -312,11 +319,15 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
                     </Dialog>
 
                     {installer.website ? (
-                      <Button variant="outline" className="w-full h-16 rounded-[1.5rem] font-black bg-white/5 border-white/10 hover:bg-white/10 text-white gap-3 transition-all" asChild>
-                        <a href={installer.website} target="_blank">
-                          <Globe className="w-6 h-6" /> Visit Portfolio <ExternalLink className="w-3 h-3 opacity-30" />
-                        </a>
-                      </Button>
+                      <TrackedLink 
+                        href={installer.website} 
+                        target="_blank"
+                        className="w-full h-16 rounded-[1.5rem] font-black bg-white/5 border border-white/10 hover:bg-white/10 text-white gap-3 transition-all inline-flex items-center justify-center"
+                        eventName="epc_website_click"
+                        eventProperties={{ epcId: installer.id, companyName: installer.companyName, url: installer.website }}
+                      >
+                        <Globe className="w-6 h-6" /> Visit Portfolio <ExternalLink className="w-3 h-3 opacity-30" />
+                      </TrackedLink>
                     ) : (
                       <div className="py-4 text-center text-white/20 text-[10px] font-black uppercase tracking-widest border border-dashed border-white/10 rounded-[1.5rem]">
                         Digital Portal: N/A
@@ -325,17 +336,14 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
 
                     {installer.socialLinks && (installer.socialLinks as any[]).length > 0 && (
                       <div className="flex justify-center gap-4 pt-6 border-t border-white/5">
-                        {(installer.socialLinks as { platform: string; url: string }[]).map((link, i) => {
-                          const Icon = link.platform === "Facebook" ? Facebook :
-                                      link.platform === "Twitter" ? Twitter :
-                                      link.platform === "Instagram" ? Instagram :
-                                      link.platform === "LinkedIn" ? Linkedin : Globe;
-                          return (
-                            <a key={i} href={link.url} target="_blank" className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center hover:bg-primary hover:text-white transition-all border border-white/5 group">
-                              <Icon className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
-                            </a>
-                          );
-                        })}
+                        {(installer.socialLinks as { platform: string; url: string }[]).map((link, i) => (
+                          <SocialLinkTracker 
+                            key={i} 
+                            link={link} 
+                            brandId={installer.id} 
+                            brandName={installer.companyName} 
+                          />
+                        ))}
                       </div>
                     )}
                   </div>

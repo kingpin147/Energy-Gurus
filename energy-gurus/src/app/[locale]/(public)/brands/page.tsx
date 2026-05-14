@@ -8,6 +8,8 @@ import { ListSort } from "@/components/shared/list-sort";
 import { desc, asc, eq, sql } from "drizzle-orm";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { TrackedLink } from "@/components/shared/AnalyticsTracker";
+
 
 export default async function BrandsListingPage({
     searchParams,
@@ -146,12 +148,17 @@ export default async function BrandsListingPage({
                                                     </div>
                                                 </div>
 
-                                                <Link 
+                                                <TrackedLink 
                                                     href={`/brands/${brand.id}` as any} 
                                                     className="inline-flex items-center gap-3 px-8 py-4 bg-foreground text-background rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-primary transition-all duration-500 group/btn shadow-xl active:scale-95"
+                                                    eventName="brand_portfolio_view"
+                                                    eventProperties={{
+                                                        brandId: brand.id,
+                                                        brandName: brand.brandName
+                                                    }}
                                                 >
                                                     Access Portfolio <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-2 transition-transform duration-300" />
-                                                </Link>
+                                                </TrackedLink>
                                             </div>
 
                                             {/* Product Showcase */}

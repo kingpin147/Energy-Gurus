@@ -24,6 +24,7 @@ export default function Sidebar({ role }: { role: UserRole }) {
 
     const adminLinks = [
         { href: "/dashboard", icon: <LayoutDashboard className="w-4 h-4" />, label: "Overview" },
+        { href: "/dashboard/analytics", icon: <Activity className="w-4 h-4" />, label: "Analytics" },
         { href: "/dashboard/users", icon: <Users className="w-4 h-4" />, label: "Manage Users" },
         { href: "/dashboard/moderation", icon: <ShieldCheck className="w-4 h-4" />, label: "Content Moderation" },
         { href: "/dashboard/content", icon: <Video className="w-4 h-4" />, label: "Content (Podcast/QA)" },

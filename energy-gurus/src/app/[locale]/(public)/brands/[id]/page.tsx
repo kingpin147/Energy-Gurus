@@ -9,6 +9,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ReviewForm } from "@/components/forms/review-form";
 import { ReviewList } from "@/components/reviews/review-list";
 import { getProfileRating } from "@/lib/actions/reviews";
+import { TrackedLink, trackEngagement } from "@/components/shared/AnalyticsTracker";
+import { SocialLinkTracker } from "@/components/brands/SocialLinkTracker";
 
 export default async function BrandProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -273,38 +275,42 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
 
                   <div className="space-y-4 pt-10 border-t border-white/5">
                     {brand.website ? (
-                      <Button className="w-full h-16 rounded-[1.8rem] font-black text-lg bg-white text-black hover:bg-white/90 gap-4 transition-all hover:scale-[1.02]" asChild>
-                        <a href={brand.website} target="_blank">
-                          <Globe className="w-6 h-6" /> Official Portal
-                        </a>
-                      </Button>
+                      <TrackedLink
+                        href={brand.website}
+                        target="_blank"
+                        className="w-full h-16 rounded-[1.8rem] font-black text-lg bg-white text-black hover:bg-white/90 gap-4 transition-all hover:scale-[1.02] inline-flex items-center justify-center"
+                        eventName="brand_website_click"
+                        eventProperties={{ brandId: brand.id, brandName: brand.brandName, url: brand.website }}
+                      >
+                        <Globe className="w-6 h-6" /> Official Portal
+                      </TrackedLink>
                     ) : (
                       <div className="py-5 text-center text-white/10 text-[10px] font-black uppercase tracking-widest border border-dashed border-white/10 rounded-[1.8rem]">
                         Digital Presence: N/A
                       </div>
                     )}
                     
-                    <Button variant="outline" className="w-full h-16 rounded-[1.8rem] font-black bg-white/5 border-white/10 hover:bg-white/10 text-white gap-4 transition-all" asChild>
-                      <Link href="/contact">
-                        <Mail className="w-6 h-6" /> Direct InMail
-                      </Link>
-                    </Button>
+                    <TrackedLink 
+                      href="/contact"
+                      className="w-full h-16 rounded-[1.8rem] font-black bg-white/5 border-white/10 hover:bg-white/10 text-white gap-4 transition-all border inline-flex items-center justify-center"
+                      eventName="brand_contact_click"
+                      eventProperties={{ brandId: brand.id, brandName: brand.brandName }}
+                    >
+                      <Mail className="w-6 h-6" /> Direct InMail
+                    </TrackedLink>
                   </div>
 
                   {/* Social Network */}
                   {brand.socialLinks && (brand.socialLinks as any[]).length > 0 && (
                     <div className="flex justify-center gap-5 pt-10 border-t border-white/5">
-                      {(brand.socialLinks as { platform: string; url: string }[]).map((link, i) => {
-                        const Icon = link.platform === "Facebook" ? Facebook :
-                                    link.platform === "Twitter" ? Twitter :
-                                    link.platform === "Instagram" ? Instagram :
-                                    link.platform === "LinkedIn" ? Linkedin : Globe;
-                        return (
-                          <a key={i} href={link.url} target="_blank" className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center hover:bg-primary hover:text-white transition-all border border-white/5 group">
-                            <Icon className="w-7 h-7 text-white group-hover:scale-110 transition-transform" />
-                          </a>
-                        );
-                      })}
+                      {(brand.socialLinks as { platform: string; url: string }[]).map((link, i) => (
+                        <SocialLinkTracker 
+                          key={i} 
+                          link={link} 
+                          brandId={brand.id} 
+                          brandName={brand.brandName} 
+                        />
+                      ))}
                     </div>
                   )}
                 </CardContent>

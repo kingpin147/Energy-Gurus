@@ -3,6 +3,7 @@ import { epcInstallers, reviews } from "@/db/schema";
 import { Link } from "@/i18n/routing";
 import { Briefcase, MapPin, Star, ShieldCheck, ArrowRight, Search, Zap, Globe, MessageSquare } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { TrackedLink } from "@/components/shared/AnalyticsTracker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ListSort } from "@/components/shared/list-sort";
@@ -81,10 +82,15 @@ export default async function EpcListingPage({
         {/* Listing Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
           {installers.map((installer) => (
-            <Link 
+            <TrackedLink 
               key={installer.id} 
               href={`/epcs/${installer.id}` as any}
               className="group relative"
+              eventName="epc_profile_view"
+              eventProperties={{
+                epcId: installer.id,
+                companyName: installer.companyName
+              }}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
@@ -152,7 +158,7 @@ export default async function EpcListingPage({
                   </div>
                 </CardContent>
               </Card>
-            </Link>
+            </TrackedLink>
           ))}
         </div>
 

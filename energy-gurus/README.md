@@ -8,11 +8,19 @@ Energy Gurus is a high-performance, full-stack platform designed to bridge the g
 - **Database:** [Neon (Serverless Postgres)](https://neon.tech/)
 - **ORM:** [Drizzle ORM](https://orm.drizzle.team/)
 - **Authentication:** [Clerk](https://clerk.com/)
+- **Analytics:** [PostHog Cloud](https://posthog.com/)
 - **Caching:** [Upstash Redis](https://upstash.com/)
 - **File Storage:** [UploadThing](https://uploadthing.com/)
 - **Styling:** Tailwind CSS + Lucide Icons
 
 ## ✨ Core Features
+
+### 📊 Real-Time Analytics Dashboard
+- **Engagement Hub:** Advanced tracking of user interactions across the platform using PostHog.
+- **Brand Performance Matrix:** Detailed table showing views, website clicks, and social media engagement for all brands.
+- **EPC Installer Ranking:** Monitor profile views and contact inquiries for installation partners.
+- **Smart Sorting:** Filter entities by Highest Engagement, Lowest Engagement, or A-Z.
+- **Zero-DB Overhead:** Analytics are fetched via PostHog's HogQL API, ensuring no performance impact on the primary database.
 
 ### 👤 Role-Based Access Control (RBAC)
 Strictly isolated dashboards for different user types:
@@ -62,6 +70,12 @@ Strictly isolated dashboards for different user types:
    CLERK_SECRET_KEY=your_clerk_secret
    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_pub_key
    UPLOADTHING_TOKEN=your_uploadthing_token
+
+   # Analytics (PostHog)
+   NEXT_PUBLIC_POSTHOG_KEY=your_phc_key
+   NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+   POSTHOG_API_KEY=your_phx_key_with_insight_read
+   NEXT_POSTHOG_PROJECT_ID=your_project_id
    ```
 
 4. **Push Database Schema:**

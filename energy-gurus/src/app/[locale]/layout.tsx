@@ -5,7 +5,9 @@ import { routing } from '@/i18n/routing';
 import type { Metadata } from "next";
 import { Inter, Noto_Sans_Arabic } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { CSPostHogProvider } from '@/components/providers/PostHogProvider';
 import "../globals.css";
+
 import "@uploadthing/react/styles.css";
 
 const inter = Inter({
@@ -32,6 +34,7 @@ export async function generateMetadata({
   };
 }
 
+
 export default async function RootLayout({
   children,
   params
@@ -54,9 +57,11 @@ export default async function RootLayout({
   const isClerkConfigured = clerkKey && clerkKey.startsWith('pk_') && !clerkKey.includes('your_') && clerkKey !== 'pk_test_...';
 
   const content = (
-    <NextIntlClientProvider messages={messages}>
-      {children}
-    </NextIntlClientProvider>
+    <CSPostHogProvider>
+      <NextIntlClientProvider messages={messages}>
+        {children}
+      </NextIntlClientProvider>
+    </CSPostHogProvider>
   );
 
   return (
@@ -74,3 +79,4 @@ export default async function RootLayout({
     </html>
   );
 }
+
