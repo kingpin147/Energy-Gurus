@@ -31,3 +31,20 @@ export async function bulkImportSerials(productId: string, rawSerials: string) {
 
     revalidatePath("/dashboard/brand");
 }
+
+export async function verifySerialNumber(serialNumber: string) {
+    if (!serialNumber) return null;
+    
+    const result = await db.query.productSerials.findFirst({
+        where: (serials, { eq }) => eq(serials.serialNumber, serialNumber),
+        with: {
+            product: {
+                with: {
+                    brand: true
+                }
+            }
+        }
+    });
+
+    return result;
+}

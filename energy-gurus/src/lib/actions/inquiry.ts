@@ -18,6 +18,9 @@ export async function sendInquiry(formData: FormData) {
 
     const receiverId = formData.get("receiverId") as string;
     const message = formData.get("message") as string;
+    const guestName = formData.get("guestName") as string;
+    const guestEmail = formData.get("guestEmail") as string;
+    const guestPhone = formData.get("guestPhone") as string;
 
     if (!receiverId || !message) {
         throw new Error("Missing required fields");
@@ -26,6 +29,9 @@ export async function sendInquiry(formData: FormData) {
     await db.insert(inquiries).values({
         senderId,
         receiverId,
+        guestName,
+        guestEmail,
+        guestPhone,
         message,
         status: 'pending',
     });

@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { updateInquiryStatus } from "@/lib/actions/inquiry";
 
+import { Mail, Phone, ExternalLink } from "lucide-react";
+
 export async function DashboardInquiryList({ receiverId }: { receiverId: string }) {
     const inquiryList = await db.select()
         .from(inquiries)
@@ -25,13 +27,13 @@ export async function DashboardInquiryList({ receiverId }: { receiverId: string 
                 {inquiryList.map((inquiry) => (
                     <Card key={inquiry.id} className={`border-none shadow-sm ${inquiry.status === 'pending' ? 'bg-white border-l-4 border-l-accent' : 'bg-secondary/5 opacity-80'}`}>
                         <CardContent className="p-6">
-                            <div className="flex justify-between items-start mb-4">
+                            <div className="flex justify-between items-start mb-6">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center">
                                         <User className="w-5 h-5 text-primary" />
                                     </div>
                                     <div>
-                                        <p className="font-bold text-sm">Potential Customer</p>
+                                        <p className="font-bold text-sm">{(inquiry as any).guestName || "Potential Customer"}</p>
                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                             <Clock className="w-3 h-3" />
                                             <span>{new Date(inquiry.createdAt).toLocaleString()}</span>
@@ -44,18 +46,44 @@ export async function DashboardInquiryList({ receiverId }: { receiverId: string 
                                     {inquiry.status}
                                 </div>
                             </div>
-                            <p className="text-sm text-muted-foreground leading-relaxed mb-6 italic">
+
+                            <p className="text-sm text-foreground leading-relaxed mb-6 bg-secondary/5 p-4 rounded-xl border italic">
                                 "{inquiry.message}"
                             </p>
+
+                            {((inquiry as any).guestEmail || (inquiry as any).guestPhone) && (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                                    {(inquiry as any).guestEmail && (
+                                        <a href={`mailto:${(inquiry as any).guestEmail}`} className="flex items-center gap-2 text-xs font-bold text-primary hover:underline">
+                                            <Mail className="w-4 h-4" /> {(inquiry as any).guestEmail}
+                                        </a>
+                                    )}
+                                    {(inquiry as any).guestPhone && (
+                                        <a href={`https://wa.me/${(inquiry as any).guestPhone.replace(/\D/g, "")}`} target="_blank" className="flex items-center gap-2 text-xs font-bold text-green-600 hover:underline">
+                                            <Phone className="w-4 h-4" /> {(inquiry as any).guestPhone}
+                                        </a>
+                                    )}
+                                </div>
+                            )}
+
                             {inquiry.status === 'pending' && (
-                                <form action={async () => {
-                                    "use server";
-                                    await updateInquiryStatus(inquiry.id, 'replied');
-                                }}>
-                                    <Button size="sm" className="w-full gap-2 rounded-xl">
-                                        <CheckCircle2 className="w-4 h-4" /> Mark as Replied
-                                    </Button>
-                                </form>
+                                <div className="flex gap-2">
+                                    <form action={async () => {
+                                        "use server";
+                                        await updateInquiryStatus(inquiry.id, 'replied');
+                                    }} className="flex-1">
+                                        <Button size="sm" className="w-full gap-2 rounded-xl">
+                                            <CheckCircle2 className="w-4 h-4" /> Mark as Replied
+                                        </Button>
+                                    </form>
+                                    {(inquiry as any).guestPhone && (
+                                        <Button variant="outline" size="sm" className="rounded-xl border-green-200 text-green-700 hover:bg-green-50" asChild>
+                                            <a href={`https://wa.me/${(inquiry as any).guestPhone.replace(/\D/g, "")}`} target="_blank">
+                                                <ExternalLink className="w-4 h-4 mr-2" /> WhatsApp Reply
+                                            </a>
+                                        </Button>
+                                    )}
+                                </div>
                             )}
                         </CardContent>
                     </Card>

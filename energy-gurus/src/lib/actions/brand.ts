@@ -26,7 +26,10 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
     countryHead: data.get("countryHead") as string,
     customerCareHead: data.get("customerCareHead") as string,
     customerCare: data.get("customerCare") as string,
+    headOffice: data.get("headOffice") as string,
     website: data.get("website") as string,
+    warrantyUrl: data.get("warrantyUrl") as string,
+    qrUrl: data.get("qrUrl") as string,
   } : data;
 
   let targetUserId = user.id;

@@ -41,13 +41,15 @@ export function TrackedLink({
   )
 }
 
-interface TrackedButtonProps {
+interface TrackedButtonProps extends React.HTMLAttributes<HTMLElement> {
   onClick?: (e: any) => void
   children: ReactNode
   className?: string
   eventName: string
   eventProperties?: Record<string, any>
-  as?: 'button' | 'div'
+  as?: 'button' | 'div' | 'a' | 'span'
+  href?: string
+  target?: string
 }
 
 export const TrackedInteraction = React.forwardRef<any, TrackedButtonProps>(({

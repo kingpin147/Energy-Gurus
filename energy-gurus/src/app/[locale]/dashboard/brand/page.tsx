@@ -193,6 +193,10 @@ export default async function BrandDashboard() {
                                         <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Brand Name</label>
                                         <input name="brandName" defaultValue={myBrand.brandName} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" required />
                                     </div>
+                                    <div>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Head Office Address</label>
+                                        <input name="headOffice" defaultValue={myBrand.headOffice || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" placeholder="123 Energy St, Solar City" />
+                                    </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Country Head Name</label>
@@ -213,6 +217,16 @@ export default async function BrandDashboard() {
                                             <input name="website" defaultValue={myBrand.website || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
                                         </div>
                                     </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Warranty Registry URL</label>
+                                            <input name="warrantyUrl" defaultValue={myBrand.warrantyUrl || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" placeholder="https://..." />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">QR Verification URL</label>
+                                            <input name="qrUrl" defaultValue={myBrand.qrUrl || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" placeholder="https://..." />
+                                        </div>
+                                    </div>
                                     <Button type="submit" className="w-full h-12 rounded-xl font-bold mt-2">Update Profile</Button>
                                 </form>
                             </CardContent>
@@ -220,7 +234,7 @@ export default async function BrandDashboard() {
 
                         <Card className="border-none shadow-sm rounded-3xl">
                             <CardHeader>
-                                <CardTitle>Media & Gallery</CardTitle>
+                                <CardTitle>Media & Socials</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 <BrandGalleryUpload initialPhotos={myBrand.photos} />
@@ -233,14 +247,22 @@ export default async function BrandDashboard() {
                                             { platform: "Facebook", url: formData.get("facebook") as string },
                                             { platform: "LinkedIn", url: formData.get("linkedin") as string },
                                             { platform: "Instagram", url: formData.get("instagram") as string },
+                                            { platform: "YouTube", url: formData.get("youtube") as string },
+                                            { platform: "WhatsApp", url: formData.get("whatsapp") as string },
                                         ].filter(l => l.url);
                                         await updateBrandProfile({ socialLinks: links });
                                     }} className="space-y-4">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <input name="facebook" placeholder="Facebook URL" defaultValue={(myBrand.socialLinks as any[])?.find(l => l.platform === "Facebook")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none" />
                                             <input name="linkedin" placeholder="LinkedIn URL" defaultValue={(myBrand.socialLinks as any[])?.find(l => l.platform === "LinkedIn")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none" />
+                                            <input name="instagram" placeholder="Instagram URL" defaultValue={(myBrand.socialLinks as any[])?.find(l => l.platform === "Instagram")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none" />
+                                            <input name="youtube" placeholder="YouTube URL" defaultValue={(myBrand.socialLinks as any[])?.find(l => l.platform === "YouTube")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none" />
                                         </div>
-                                        <Button className="w-full bg-secondary text-secondary-foreground">Update Links</Button>
+                                        <div>
+                                            <label className="text-[8px] font-black uppercase tracking-[0.2em] opacity-30 mb-2 block">WhatsApp Contact Number</label>
+                                            <input name="whatsapp" placeholder="+92 3XX XXXXXXX" defaultValue={(myBrand.socialLinks as any[])?.find(l => l.platform === "WhatsApp")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none font-bold text-green-600" />
+                                        </div>
+                                        <Button className="w-full bg-secondary text-secondary-foreground rounded-xl font-bold h-11">Update Network Links</Button>
                                     </form>
                                 </div>
                             </CardContent>

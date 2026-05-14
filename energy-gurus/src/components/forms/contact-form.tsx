@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useUser } from "@clerk/nextjs";
 import { sendInquiry } from "@/lib/actions/inquiry";
 import { Button } from "@/components/ui/button";
 import { Mail, Send, CheckCircle2 } from "lucide-react";
 
 export function ContactForm({ receiverId, receiverName, initialMessage }: { receiverId: string, receiverName: string, initialMessage?: string }) {
+    const { user, isLoaded } = useUser();
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -36,14 +38,34 @@ export function ContactForm({ receiverId, receiverName, initialMessage }: { rece
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
             <input type="hidden" name="receiverId" value={receiverId} />
+            
+            {isLoaded && !user && (
+                <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-500">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase tracking-widest opacity-60">Your Name</label>
+                            <input name="guestName" placeholder="Full Name" className="w-full p-3 rounded-xl border bg-secondary/5 outline-none focus:ring-2 focus:ring-primary" required />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase tracking-widest opacity-60">Email Address</label>
+                            <input name="guestEmail" type="email" placeholder="email@example.com" className="w-full p-3 rounded-xl border bg-secondary/5 outline-none focus:ring-2 focus:ring-primary" required />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest opacity-60">Phone / WhatsApp (Optional)</label>
+                        <input name="guestPhone" placeholder="+92 3XX XXXXXXX" className="w-full p-3 rounded-xl border bg-secondary/5 outline-none focus:ring-2 focus:ring-primary" />
+                    </div>
+                </div>
+            )}
+
             <div className="space-y-2">
-                <label className="text-sm font-bold uppercase tracking-widest opacity-60">Message</label>
+                <label className="text-[10px] font-black uppercase tracking-widest opacity-60">Your Inquiry</label>
                 <textarea 
                     name="message" 
-                    placeholder={`Write your inquiry for ${receiverName}...`}
-                    className="w-full min-h-[150px] p-4 rounded-2xl border bg-secondary/5 focus:ring-2 focus:ring-primary outline-none transition-all"
+                    placeholder={`Describe what you need from ${receiverName}...`}
+                    className="w-full min-h-[120px] p-4 rounded-2xl border bg-secondary/5 focus:ring-2 focus:ring-primary outline-none transition-all resize-none"
                     required
                     defaultValue={initialMessage}
                 />

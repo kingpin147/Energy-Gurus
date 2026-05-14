@@ -2,15 +2,19 @@ import { db } from "@/db";
 import { brands, products, brandCertifications } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import { Globe, Mail, Star, ShieldCheck, ArrowLeft, Image as ImageIcon, Facebook, Twitter, Instagram, Linkedin, Zap, Shield, Award, MapPin, Building2, Package, CheckCircle2, Info } from "lucide-react";
+import { Globe, Mail, Star, ShieldCheck, ArrowLeft, Image as ImageIcon, Facebook, Twitter, Instagram, Linkedin, Zap, Shield, Award, MapPin, Building2, Package, CheckCircle2, Info, MessageSquare, ExternalLink } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ReviewForm } from "@/components/forms/review-form";
 import { ReviewList } from "@/components/reviews/review-list";
 import { getProfileRating } from "@/lib/actions/reviews";
-import { TrackedLink, trackEngagement } from "@/components/shared/AnalyticsTracker";
+import { TrackedLink, trackEngagement, TrackedInteraction } from "@/components/shared/AnalyticsTracker";
 import { SocialLinkTracker } from "@/components/brands/SocialLinkTracker";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProductVerification } from "@/components/brands/ProductVerification";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ContactForm } from "@/components/forms/contact-form";
 
 export default async function BrandProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -122,63 +126,101 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
               </div>
             </section>
 
-            {/* Product Architecture Section */}
-            <section className="space-y-12">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-6">
-                  <div className="w-3 h-12 bg-primary rounded-full shadow-[0_0_30px_rgba(0,109,109,0.5)]" />
-                  <h2 className="text-5xl font-black tracking-tighter uppercase text-gradient">Product Portfolio</h2>
-                </div>
-                <div className="hidden md:flex items-center gap-3 px-6 py-2 bg-secondary/10 rounded-full border border-border/50 text-[10px] font-black uppercase tracking-widest opacity-40">
-                  <Package className="w-4 h-4" /> {brandProducts.length} Certified Units
-                </div>
-              </div>
+            {/* Product & Verification Tabs */}
+            <Tabs defaultValue="portfolio" className="w-full space-y-12">
+              <TabsList className="h-16 p-1 bg-white/50 backdrop-blur-xl border border-border/50 rounded-2xl inline-flex w-auto mb-8">
+                <TabsTrigger value="portfolio" className="px-8 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
+                  <Package className="w-4 h-4" /> Portfolio
+                </TabsTrigger>
+                <TabsTrigger value="verification" className="px-8 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
+                  <ShieldCheck className="w-4 h-4" /> Verification
+                </TabsTrigger>
+              </TabsList>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                {brandProducts.map((product) => (
-                  <div key={product.id} className="group relative rounded-[3.5rem] overflow-hidden bg-white border border-border/50 premium-shadow transition-all duration-700 hover:-translate-y-4">
-                    <div className="aspect-[4/3] relative overflow-hidden bg-secondary/5 p-8 flex items-center justify-center">
-                      {product.imageUrl ? (
-                        <img src={product.imageUrl} className="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform duration-1000 ease-out" alt={product.name} />
-                      ) : (
-                        <Zap className="w-24 h-24 text-primary/5" />
-                      )}
-                      <div className="absolute bottom-8 left-8 right-8">
-                        <div className="bg-white/90 backdrop-blur-xl px-6 py-3 rounded-2xl flex items-center justify-between border border-border/50 shadow-xl">
-                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Certified Spec</span>
-                          <CheckCircle2 className="w-4 h-4 text-primary" />
+              <TabsContent value="portfolio" className="space-y-12 outline-none">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-6">
+                    <div className="w-3 h-12 bg-primary rounded-full shadow-[0_0_30px_rgba(0,109,109,0.5)]" />
+                    <h2 className="text-5xl font-black tracking-tighter uppercase text-gradient">Product Portfolio</h2>
+                  </div>
+                  <div className="hidden md:flex items-center gap-3 px-6 py-2 bg-secondary/10 rounded-full border border-border/50 text-[10px] font-black uppercase tracking-widest opacity-40">
+                    <Package className="w-4 h-4" /> {brandProducts.length} Certified Units
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  {brandProducts.map((product) => (
+                    <div key={product.id} className="group relative rounded-[3.5rem] overflow-hidden bg-white border border-border/50 premium-shadow transition-all duration-700 hover:-translate-y-4">
+                      <div className="aspect-[4/3] relative overflow-hidden bg-secondary/5 p-8 flex items-center justify-center">
+                        {product.imageUrl ? (
+                          <img src={product.imageUrl} className="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform duration-1000 ease-out" alt={product.name} />
+                        ) : (
+                          <Zap className="w-24 h-24 text-primary/5" />
+                        )}
+                        <div className="absolute bottom-8 left-8 right-8">
+                          <div className="bg-white/90 backdrop-blur-xl px-6 py-3 rounded-2xl flex items-center justify-between border border-border/50 shadow-xl">
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Certified Spec</span>
+                            <CheckCircle2 className="w-4 h-4 text-primary" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-12 space-y-8">
+                        <div className="space-y-3">
+                          <h4 className="text-3xl font-black tracking-tight leading-none">{product.name}</h4>
+                          <p className="text-muted-foreground font-bold text-xs uppercase tracking-[0.2em] opacity-40">Series: {product.series || "Standard"}</p>
+                        </div>
+                        
+                        <div className="py-8 border-y border-border/50">
+                          <p className="text-sm text-muted-foreground leading-relaxed font-medium">
+                            {product.description || "Detailed technical specifications for this unit are available upon request through verified channels."}
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <Button variant="outline" className="h-14 rounded-2xl border-primary/20 text-primary font-black uppercase tracking-widest text-[10px] hover:bg-primary/5 transition-all" asChild>
+                            <a href={product.datasheetUrl || "#"} target="_blank">
+                              Datasheet
+                            </a>
+                          </Button>
+                          
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <TrackedInteraction
+                                as="button"
+                                className="h-14 rounded-2xl bg-[#0F172A] text-white font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
+                                eventName="brand_inquiry_click"
+                                eventProperties={{ brandId: brand.id, productId: product.id, productName: product.name }}
+                              >
+                                <MessageSquare className="w-4 h-4" /> Inquire
+                              </TrackedInteraction>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[550px] rounded-[3.5rem] p-12 border-none shadow-2xl bg-white/95 backdrop-blur-3xl">
+                              <DialogHeader>
+                                <DialogTitle className="text-4xl font-black tracking-tighter mb-6">Product Inquiry</DialogTitle>
+                              </DialogHeader>
+                              <ContactForm receiverId={brand.userId} receiverName={brand.brandName} initialMessage={`I am interested in the ${product.name} model.`} />
+                            </DialogContent>
+                          </Dialog>
                         </div>
                       </div>
                     </div>
-
-                    <div className="p-12 space-y-8">
-                      <div className="space-y-3">
-                        <h4 className="text-3xl font-black tracking-tight leading-none">{product.name}</h4>
-                        <p className="text-muted-foreground font-bold text-xs uppercase tracking-[0.2em] opacity-40">Series: {product.series || "Standard"}</p>
-                      </div>
-                      
-                      <div className="py-8 border-y border-border/50">
-                        <p className="text-sm text-muted-foreground leading-relaxed font-medium">
-                          {product.description || "Detailed technical specifications for this unit are available upon request through verified channels."}
-                        </p>
-                      </div>
-
-                      <Button variant="outline" className="w-full h-14 rounded-2xl border-primary/20 text-primary font-black uppercase tracking-widest text-[10px] hover:bg-primary hover:text-white transition-all">
-                        Technical Datasheet
-                      </Button>
+                  ))}
+                  
+                  {brandProducts.length === 0 && (
+                    <div className="col-span-full py-32 text-center bg-white/40 backdrop-blur-xl rounded-[4rem] border-4 border-dashed border-border/50">
+                      <Package className="w-20 h-20 text-primary/10 mx-auto mb-8" />
+                      <p className="text-2xl font-black text-muted-foreground tracking-tighter">Inventory Architecture: N/A</p>
+                      <p className="text-[10px] text-muted-foreground/40 uppercase tracking-[0.3em] mt-3">Syncing with global logistics</p>
                     </div>
-                  </div>
-                ))}
-                
-                {brandProducts.length === 0 && (
-                  <div className="col-span-full py-32 text-center bg-white/40 backdrop-blur-xl rounded-[4rem] border-4 border-dashed border-border/50">
-                    <Package className="w-20 h-20 text-primary/10 mx-auto mb-8" />
-                    <p className="text-2xl font-black text-muted-foreground tracking-tighter">Inventory Architecture: N/A</p>
-                    <p className="text-[10px] text-muted-foreground/40 uppercase tracking-[0.3em] mt-3">Syncing with global logistics</p>
-                  </div>
-                )}
-              </div>
-            </section>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="verification" className="outline-none">
+                <ProductVerification brandId={brand.id} />
+              </TabsContent>
+            </Tabs>
 
             {/* Certifications & Compliance */}
             <section className="space-y-12">
@@ -274,11 +316,33 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
                   </div>
 
                   <div className="space-y-4 pt-10 border-t border-white/5">
+                    {(() => {
+                      const socialLinks = brand.socialLinks as { platform: string; url: string }[] | null;
+                      const whatsapp = socialLinks?.find(l => l.platform === "WhatsApp");
+
+                      if (whatsapp) {
+                        const waNumber = whatsapp.url.replace(/\D/g, "");
+                        return (
+                          <TrackedInteraction
+                            as="a"
+                            href={`https://wa.me/${waNumber}`}
+                            target="_blank"
+                            className="w-full h-16 rounded-[1.8rem] font-black text-lg bg-[#25D366] text-white hover:bg-[#20bd5a] gap-4 transition-all hover:scale-[1.02] inline-flex items-center justify-center shadow-lg shadow-[#25D366]/20"
+                            eventName="brand_whatsapp_click"
+                            eventProperties={{ brandId: brand.id, brandName: brand.brandName }}
+                          >
+                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                            WhatsApp Direct
+                          </TrackedInteraction>
+                        );
+                      }
+                    })()}
+
                     {brand.website ? (
                       <TrackedLink
                         href={brand.website}
                         target="_blank"
-                        className="w-full h-16 rounded-[1.8rem] font-black text-lg bg-white text-black hover:bg-white/90 gap-4 transition-all hover:scale-[1.02] inline-flex items-center justify-center"
+                        className="w-full h-16 rounded-[1.8rem] font-black text-lg bg-white text-black hover:bg-white/90 gap-4 transition-all hover:scale-[1.02] inline-flex items-center justify-center shadow-lg"
                         eventName="brand_website_click"
                         eventProperties={{ brandId: brand.id, brandName: brand.brandName, url: brand.website }}
                       >
@@ -290,14 +354,24 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
                       </div>
                     )}
                     
-                    <TrackedLink 
-                      href="/contact"
-                      className="w-full h-16 rounded-[1.8rem] font-black bg-white/5 border-white/10 hover:bg-white/10 text-white gap-4 transition-all border inline-flex items-center justify-center"
-                      eventName="brand_contact_click"
-                      eventProperties={{ brandId: brand.id, brandName: brand.brandName }}
-                    >
-                      <Mail className="w-6 h-6" /> Direct InMail
-                    </TrackedLink>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <TrackedInteraction 
+                          as="button"
+                          className="w-full h-16 rounded-[1.8rem] font-black bg-white/5 border-white/10 hover:bg-white/10 text-white gap-4 transition-all border inline-flex items-center justify-center"
+                          eventName="brand_contact_click"
+                          eventProperties={{ brandId: brand.id, brandName: brand.brandName }}
+                        >
+                          <Mail className="w-6 h-6" /> Direct InMail
+                        </TrackedInteraction>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[550px] rounded-[3.5rem] p-12 border-none shadow-2xl bg-white/95 backdrop-blur-3xl">
+                        <DialogHeader>
+                          <DialogTitle className="text-4xl font-black tracking-tighter mb-6">Manufacturer Support</DialogTitle>
+                        </DialogHeader>
+                        <ContactForm receiverId={brand.userId} receiverName={brand.brandName} />
+                      </DialogContent>
+                    </Dialog>
                   </div>
 
                   {/* Social Network */}
