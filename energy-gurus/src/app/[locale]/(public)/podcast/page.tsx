@@ -4,10 +4,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Image from "next/image";
 import { db } from "@/db";
 import { podcasts } from "@/db/schema";
 import { desc, asc } from "drizzle-orm";
 import { ListSort } from "@/components/shared/list-sort";
+import { unstable_cache } from "next/cache";
+
+const getPodcasts = unstable_cache(
+    async (sortOrder: "asc" | "desc") => {
+        const order = sortOrder === "asc" ? asc(podcasts.createdAt) : desc(podcasts.createdAt);
+        return await db.select().from(podcasts).orderBy(order);
+    },
+    ['podcasts-list'],
+    { revalidate: 3600, tags: ['podcasts'] }
+);
 
 export default async function PodcastListingPage({
     searchParams,
@@ -15,9 +26,9 @@ export default async function PodcastListingPage({
     searchParams: Promise<{ sort?: string }>;
 }) {
     const { sort } = await searchParams;
-    const order = sort === "oldest" ? asc(podcasts.createdAt) : desc(podcasts.createdAt);
+    const sortOrder = sort === "oldest" ? "asc" : "desc";
     
-    const episodes = await db.select().from(podcasts).orderBy(order);
+    const episodes = await getPodcasts(sortOrder);
 
     const getYouTubeId = (url: string) => {
         return url.split("v=")[1]?.split("&")[0] || url.split("/").pop();
@@ -40,10 +51,12 @@ export default async function PodcastListingPage({
                         {/* Video Thumbnail Side */}
                         <div className="lg:col-span-7 relative group">
                             <div className="aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl bg-black relative">
-                                <img 
+                                <Image 
                                     src={getThumbnail(episodes[0])} 
                                     alt={episodes[0].title}
-                                    className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
+                                    fill
+                                    className="object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
+                                    priority
                                 />
                                 <div className="absolute inset-0 flex items-center justify-center">
                                     <div className="w-20 h-20 bg-accent text-accent-foreground rounded-full flex items-center justify-center shadow-2xl transform group-hover:scale-110 transition-transform duration-300">
@@ -150,10 +163,11 @@ export default async function PodcastListingPage({
                                 
                                 <Card key={episode.id} className="group border-none shadow-none hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 rounded-2xl overflow-hidden bg-white">
                                     <div className="aspect-[16/10] relative overflow-hidden">
-                                        <img 
+                                        <Image 
                                             src={getThumbnail(episode)} 
                                             alt={episode.title}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
                                         />
                                         <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-lg text-[10px] font-bold text-primary shadow-sm uppercase">
                                             EP {episodes.length - index}

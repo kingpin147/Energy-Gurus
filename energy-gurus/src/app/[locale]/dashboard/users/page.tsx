@@ -3,8 +3,8 @@ import { users } from "@/db/schema";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users as UsersIcon, ShieldAlert, Trash2, UserCog, MailPlus, Clock } from "lucide-react";
-import { deleteUser, updateUserRole } from "@/lib/actions/users";
+import { Users as UsersIcon, ShieldAlert, Trash2, UserCog, MailPlus, Clock, Power, PowerOff } from "lucide-react";
+import { deleteUser, updateUserRole, toggleUserStatus } from "@/lib/actions/users";
 import { createInvitation } from "@/lib/actions/invitations";
 import { invitations } from "@/db/schema";
 import { revalidatePath } from "next/cache";
@@ -213,7 +213,20 @@ export default async function UserManagementPage({
                                             </td>
                                             <td className="p-6">
                                                 <div className="flex items-center justify-end gap-2">
-                                                    {!isSuperAdmin && userRole === 'super-admin' && (
+                                                    {!isSuperAdmin && (user.role === 'epc' || user.role === 'brand') && (
+                                                        <form action={toggleUserStatus.bind(null, user.id)}>
+                                                            <Button 
+                                                                variant={user.isActive ? "outline" : "default"} 
+                                                                size="sm" 
+                                                                className={`h-9 px-4 rounded-xl gap-2 font-bold ${user.isActive ? "text-green-600 border-green-200 hover:bg-green-50" : "bg-red-600 hover:bg-red-700 text-white"}`}
+                                                            >
+                                                                {user.isActive ? <Power className="w-4 h-4" /> : <PowerOff className="w-4 h-4" />}
+                                                                {user.isActive ? "Active" : "Inactive"}
+                                                            </Button>
+                                                        </form>
+                                                    )}
+
+                                                    {!isSuperAdmin && userRole === 'super-admin' && (user.role === 'admin' || user.role === 'epc' || user.role === 'brand') && (
                                                         <form action={async () => {
                                                             "use server";
                                                             const targetRole = user.role === 'admin' ? 'epc' : 'admin';

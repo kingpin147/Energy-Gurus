@@ -13,7 +13,9 @@ import {
     Building2,
     Package,
     MessageSquare,
-    ShieldCheck
+    ShieldCheck,
+    Inbox,
+    HeadphonesIcon
 } from "lucide-react";
 import { UserRole } from "@/db/schema";
 
@@ -24,6 +26,7 @@ export default function Sidebar({ role }: { role: UserRole }) {
 
     const adminLinks = [
         { href: "/dashboard", icon: <LayoutDashboard className="w-4 h-4" />, label: "Overview" },
+        { href: "/dashboard/inbox", icon: <Inbox className="w-4 h-4" />, label: "Support Inbox" },
         { href: "/dashboard/analytics", icon: <Activity className="w-4 h-4" />, label: "Analytics" },
         { href: "/dashboard/users", icon: <Users className="w-4 h-4" />, label: "Manage Users" },
         { href: "/dashboard/moderation", icon: <ShieldCheck className="w-4 h-4" />, label: "Content Moderation" },
@@ -35,12 +38,14 @@ export default function Sidebar({ role }: { role: UserRole }) {
     const epcLinks = [
         { href: "/dashboard/epc", icon: <Briefcase className="w-4 h-4" />, label: "My EPC Profile" },
         { href: "/dashboard/inquiries", icon: <MessageSquare className="w-4 h-4" />, label: "My Inquiries" },
+        { href: "/dashboard/support", icon: <HeadphonesIcon className="w-4 h-4" />, label: "Contact Support" },
         { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings" },
     ];
 
     const brandLinks = [
         { href: "/dashboard/brand", icon: <Building2 className="w-4 h-4" />, label: "My Brand Profile" },
         { href: "/dashboard/inquiries", icon: <MessageSquare className="w-4 h-4" />, label: "My Inquiries" },
+        { href: "/dashboard/support", icon: <HeadphonesIcon className="w-4 h-4" />, label: "Contact Support" },
         { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings" },
     ];
 

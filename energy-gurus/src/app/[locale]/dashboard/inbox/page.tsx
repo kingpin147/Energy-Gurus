@@ -2,25 +2,28 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { users, inquiries } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, or } from "drizzle-orm";
 import { InquiriesTable } from "@/components/dashboard/inquiries-table";
-import { Inbox, Mail } from "lucide-react";
+import { Inbox, Mail, ShieldAlert } from "lucide-react";
 
-export default async function InquiriesPage() {
+export default async function AdminInboxPage() {
     const { userId: clerkId } = await auth();
     if (!clerkId) redirect("/sign-in");
 
     const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId));
-    if (!user) redirect("/sign-in");
+    if (!user || (user.role !== "admin" && user.role !== "super-admin")) {
+        redirect("/dashboard");
+    }
 
-    const myInquiries = await db.select().from(inquiries)
+    // Admins see all support inquiries addressed to them
+    const supportInquiries = await db.select().from(inquiries)
         .where(and(
             eq(inquiries.receiverId, user.id),
-            eq(inquiries.inquiryType, "client")
+            eq(inquiries.inquiryType, "support")
         ))
         .orderBy(desc(inquiries.createdAt));
 
-    const unreadCount = myInquiries.filter(i => !i.isRead).length;
+    const unreadCount = supportInquiries.filter(i => !i.isRead).length;
 
     return (
         <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
@@ -28,23 +31,23 @@ export default async function InquiriesPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
-                        <Inbox className="w-7 h-7 text-primary" />
-                        My Inquiries
+                        <ShieldAlert className="w-7 h-7 text-primary" />
+                        Admin Inbox
                     </h1>
                     <p className="text-muted-foreground text-sm mt-1">
-                        Customer messages received from your public profile
+                        Support requests from EPCs and Brands
                     </p>
                 </div>
                 {unreadCount > 0 && (
-                    <div className="w-fit flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-xl text-sm font-bold">
+                    <div className="w-fit flex items-center gap-2 bg-red-100 text-red-700 px-4 py-2 rounded-xl text-sm font-bold">
                         <Mail className="w-4 h-4" />
-                        {unreadCount} unread message{unreadCount !== 1 ? "s" : ""}
+                        {unreadCount} unread request{unreadCount !== 1 ? "s" : ""}
                     </div>
                 )}
             </div>
 
             {/* Inquiries Table */}
-            <InquiriesTable inquiries={myInquiries} />
+            <InquiriesTable inquiries={supportInquiries} />
         </div>
     );
 }

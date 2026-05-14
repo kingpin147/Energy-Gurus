@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/user";
 import { UserNav } from "@/components/layout/user-nav";
 import { InvitationCheck } from "@/components/dashboard/invitation-check";
 import { SecurityGuard } from "@/components/auth/security-guard";
+import { MobileDashboardNav } from "@/components/dashboard/mobile-nav";
 
 export default async function DashboardLayout({
     children,
@@ -20,9 +21,14 @@ export default async function DashboardLayout({
     const email = user?.emailAddresses[0]?.emailAddress;
 
     return (
-        <div className="flex h-screen bg-secondary/10">
-            {/* Sidebar */}
-            <aside className="w-64 border-r bg-card flex flex-col">
+        <div className="dashboard-layout">
+            {/* Mobile Nav — only visible below 1024px */}
+            <div className="mobile-nav-wrapper">
+                <MobileDashboardNav role={role} />
+            </div>
+
+            {/* Desktop Sidebar — only visible at 1024px+ */}
+            <aside className="desktop-sidebar">
                 <div className="h-16 flex items-center px-6 border-b">
                     <Link href="/" className="flex items-center space-x-2">
                         <div className="bg-primary p-1 rounded-lg">
@@ -49,12 +55,49 @@ export default async function DashboardLayout({
                 </div>
             </aside>
 
-             {/* Main Content */}
-            <main className="flex-1 overflow-y-auto overflow-x-hidden">
+            {/* Main Content */}
+            <main className="dashboard-main">
                 <SecurityGuard locale={locale} />
                 {user && email && <InvitationCheck userId={user.id} email={email} />}
                 {children}
             </main>
+
+            <style>{`
+                .dashboard-layout {
+                    display: flex;
+                    flex-direction: column;
+                    height: 100vh;
+                    background: hsl(var(--secondary) / 0.1);
+                    overflow: hidden;
+                }
+                .mobile-nav-wrapper {
+                    display: block;
+                }
+                .desktop-sidebar {
+                    display: none;
+                    width: 256px;
+                    border-right: 1px solid hsl(var(--border));
+                    background: hsl(var(--card));
+                    flex-direction: column;
+                    flex-shrink: 0;
+                }
+                .dashboard-main {
+                    flex: 1;
+                    overflow-y: auto;
+                    overflow-x: hidden;
+                }
+                @media (min-width: 1024px) {
+                    .dashboard-layout {
+                        flex-direction: row;
+                    }
+                    .mobile-nav-wrapper {
+                        display: none;
+                    }
+                    .desktop-sidebar {
+                        display: flex;
+                    }
+                }
+            `}</style>
         </div>
     );
 }

@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { brands, products, brandCertifications } from "@/db/schema";
+import { brands, products, brandCertifications, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Globe, Mail, Star, ShieldCheck, ArrowLeft, Image as ImageIcon, Facebook, Twitter, Instagram, Linkedin, Zap, Shield, Award, MapPin, Building2, Package, CheckCircle2, Info, MessageSquare, ExternalLink } from "lucide-react";
@@ -15,19 +15,49 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductVerification } from "@/components/brands/ProductVerification";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ContactForm } from "@/components/forms/contact-form";
+import { redis, CACHE_KEYS } from "@/lib/redis";
+import { InferSelectModel } from "drizzle-orm";
+
+type Brand = InferSelectModel<typeof brands>;
+type Product = InferSelectModel<typeof products>;
+type Certification = InferSelectModel<typeof brandCertifications>;
+
+interface BrandProfileData {
+  brand: Brand;
+  brandProducts: Product[];
+  certifications: Certification[];
+  rating: number | null;
+  count: number;
+}
 
 export default async function BrandProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   
-  const brand = await db.query.brands.findFirst({
-    where: eq(brands.id, id),
-  });
+  const cacheKey = CACHE_KEYS.BRAND_DETAILS(id);
+  let profileData: BrandProfileData | null = await redis.get<BrandProfileData>(cacheKey);
 
-  if (!brand) notFound();
+  if (!profileData) {
+    const brand = await db.query.brands.findFirst({
+      where: eq(brands.id, id),
+    });
 
-  const brandProducts = await db.select().from(products).where(eq(products.brandId, id));
-  const certifications = await db.select().from(brandCertifications).where(eq(brandCertifications.brandId, id));
-  const { rating, count } = await getProfileRating(id);
+    if (!brand) notFound();
+
+    const brandProducts = await db.select().from(products).where(eq(products.brandId, id));
+    const certifications = await db.select().from(brandCertifications).where(eq(brandCertifications.brandId, id));
+    const { rating, count } = await getProfileRating(id);
+
+    profileData = { brand, brandProducts, certifications, rating, count };
+    await redis.set(cacheKey, profileData, { ex: 3600 });
+  }
+
+  if (!profileData) return notFound();
+
+  const { brand, brandProducts, certifications, rating, count } = profileData;
+
+  // Always check if the user is active, even if coming from cache
+  const [userData] = await db.select({ isActive: users.isActive }).from(users).where(eq(users.id, brand.userId));
+  if (!userData?.isActive) notFound();
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/20 pb-32">
@@ -186,18 +216,20 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
                           
                           <Dialog>
                             <DialogTrigger asChild>
-                              <TrackedInteraction
-                                as="button"
+                              <button
                                 className="h-14 rounded-2xl bg-[#0F172A] text-white font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
-                                eventName="brand_inquiry_click"
-                                eventProperties={{ brandId: brand.id, productId: product.id, productName: product.name }}
+                                onClick={() => {
+                                  if (typeof window !== 'undefined' && (window as any).posthog) {
+                                    (window as any).posthog.capture("brand_inquiry_click", { brandId: brand.id, productId: product.id, productName: product.name })
+                                  }
+                                }}
                               >
                                 <MessageSquare className="w-4 h-4" /> Inquire
-                              </TrackedInteraction>
+                              </button>
                             </DialogTrigger>
-                            <DialogContent className="sm:max-w-[550px] rounded-[3.5rem] p-12 border-none shadow-2xl bg-white/95 backdrop-blur-3xl">
+                            <DialogContent className="border-none shadow-2xl bg-white/95 backdrop-blur-3xl">
                               <DialogHeader>
-                                <DialogTitle className="text-4xl font-black tracking-tighter mb-6">Product Inquiry</DialogTitle>
+                                <DialogTitle className="text-3xl sm:text-4xl font-black tracking-tighter mb-4 sm:mb-6">Product Inquiry</DialogTitle>
                               </DialogHeader>
                               <ContactForm receiverId={brand.userId} receiverName={brand.brandName} initialMessage={`I am interested in the ${product.name} model.`} />
                             </DialogContent>
@@ -317,7 +349,7 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
 
                   <div className="space-y-4 pt-10 border-t border-white/5">
                     {(() => {
-                      const socialLinks = brand.socialLinks as { platform: string; url: string }[] | null;
+                      const socialLinks = brand.socialLinks;
                       const whatsapp = socialLinks?.find(l => l.platform === "WhatsApp");
 
                       if (whatsapp) {

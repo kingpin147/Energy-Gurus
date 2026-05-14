@@ -46,7 +46,10 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
 
   // Invalidate Cache
   const [b] = await db.select().from(brands).where(eq(brands.userId, targetUserId));
-  if (b) await redis.del(CACHE_KEYS.BRAND_DETAILS(b.id));
+  if (b) {
+    await redis.del(CACHE_KEYS.BRAND_DETAILS(b.id));
+    await redis.del(CACHE_KEYS.BRANDS_LIST);
+  }
 
   revalidatePath("/dashboard/brand");
 }
@@ -75,6 +78,9 @@ export async function addProductModel(formData: FormData) {
         serialNumber,
         datasheetUrl
     });
+
+    // Invalidate Cache
+    await redis.del(CACHE_KEYS.BRAND_DETAILS(brand.id));
 
     revalidatePath("/dashboard/brand");
 }

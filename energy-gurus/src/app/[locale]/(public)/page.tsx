@@ -1,41 +1,47 @@
 import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
 import { ArrowRight, Play, Star, ShieldCheck, Zap, Users } from "lucide-react";
+import Image from "next/image";
 import { db } from "@/db";
-import { podcasts, epcInstallers } from "@/db/schema";
-import { desc, avg, count, eq } from "drizzle-orm";
-import { reviews } from "@/db/schema";
+import { podcasts, epcInstallers, reviews, users } from "@/db/schema";
+import { desc, avg, count, eq, sql } from "drizzle-orm";
+import { unstable_cache } from "next/cache";
+
+const getHomepageData = unstable_cache(
+    async () => {
+        try {
+            const latestPodcasts = await db.select().from(podcasts).orderBy(desc(podcasts.createdAt)).limit(3);
+
+            // Get EPCs with real average ratings in a single query
+            const topEpcs = await db.select({
+                id: epcInstallers.id,
+                companyName: epcInstallers.companyName,
+                logoUrl: epcInstallers.logoUrl,
+                about: epcInstallers.about,
+                avgRating: sql<number>`CAST(AVG(${reviews.rating}) AS FLOAT)`,
+                reviewCount: count(reviews.id),
+            })
+            .from(epcInstallers)
+            .innerJoin(users, eq(users.id, epcInstallers.userId))
+            .leftJoin(reviews, eq(epcInstallers.id, reviews.targetId))
+            .where(eq(users.isActive, true))
+            .groupBy(epcInstallers.id)
+            .orderBy(desc(sql`AVG(${reviews.rating})`), desc(epcInstallers.createdAt))
+            .limit(3);
+
+            return { latestPodcasts, topEpcs };
+        } catch (e) {
+            console.error("Homepage data fetch failed:", e);
+            return { latestPodcasts: [], topEpcs: [] };
+        }
+    },
+    ['homepage-data'],
+    { revalidate: 3600, tags: ['homepage'] }
+);
 
 export default async function Homepage() {
     const t = await getTranslations("HomePage");
-
-    // Fetch data
-    let latestPodcasts: any[] = [];
-    let topEpcs: any[] = [];
-
-    try {
-        latestPodcasts = await db.select().from(podcasts).orderBy(desc(podcasts.createdAt)).limit(3);
-
-        // Get EPCs with real average ratings, ordered by rating desc
-        const allEpcs = await db.select().from(epcInstallers).orderBy(desc(epcInstallers.createdAt)).limit(6);
-        const withRatings = await Promise.all(allEpcs.map(async (epc) => {
-            const [result] = await db.select({
-                average: avg(reviews.rating),
-                total: count(reviews.id),
-            }).from(reviews).where(eq(reviews.targetId, epc.id));
-            return {
-                ...epc,
-                avgRating: result?.average ? parseFloat(result.average) : null,
-                reviewCount: result?.total ?? 0,
-            };
-        }));
-        // Sort: top rated first, fall back to latest
-        topEpcs = withRatings
-            .sort((a, b) => (b.avgRating ?? -1) - (a.avgRating ?? -1))
-            .slice(0, 3);
-    } catch (e) {
-        console.error("Homepage data fetch failed:", e);
-    }
+    const { latestPodcasts, topEpcs } = await getHomepageData();
 
     const [featuredPodcast, ...morePodcasts] = latestPodcasts;
 
@@ -47,10 +53,12 @@ export default async function Homepage() {
                 <div className="relative rounded-3xl overflow-hidden bg-[#006d6d] text-white min-h-[560px] flex items-center justify-center text-center px-8 lg:px-20">
                     {/* Background image */}
                     <div className="absolute inset-0 z-0">
-                        <img
+                        <Image
                             src="https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=2072&auto=format&fit=crop"
                             alt="Solar energy farm"
-                            className="w-full h-full object-cover opacity-25"
+                            fill
+                            className="object-cover opacity-25"
+                            priority
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#005353]/80 to-transparent" />
                     </div>
@@ -109,7 +117,7 @@ export default async function Homepage() {
                             <div className="md:col-span-8 bg-white border border-[#bec9c8] rounded-2xl overflow-hidden shadow-sm flex flex-col">
                                 <div className="aspect-video bg-black relative">
                                     {featuredPodcast.thumbnailUrl ? (
-                                        <img src={featuredPodcast.thumbnailUrl} alt={featuredPodcast.title} className="w-full h-full object-cover" />
+                                        <Image src={featuredPodcast.thumbnailUrl} alt={featuredPodcast.title} fill className="object-cover" />
                                     ) : (
                                         <div className="w-full h-full bg-[#006d6d]/20 flex items-center justify-center">
                                             <div className="w-16 h-16 bg-[#005353] text-white rounded-full flex items-center justify-center shadow-xl">
@@ -245,7 +253,7 @@ export default async function Homepage() {
                                     {/* Logo or initials */}
                                     <div className="w-14 h-14 bg-white rounded-xl border border-[#bec9c8] flex items-center justify-center overflow-hidden p-1 shadow-sm">
                                         {epc.logoUrl ? (
-                                            <img src={epc.logoUrl} alt={epc.companyName} className="max-h-full max-w-full object-contain" />
+                                            <Image src={epc.logoUrl} alt={epc.companyName || "EPC Logo"} width={56} height={56} className="object-contain" />
                                         ) : (
                                             <span className="font-black text-[#005353] text-lg">
                                                 {epc.companyName?.slice(0, 2).toUpperCase()}

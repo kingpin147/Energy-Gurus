@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { brands, products, reviews } from "@/db/schema";
+import { brands, products, reviews, users } from "@/db/schema";
 import { Link } from "@/i18n/routing";
 import { ShieldCheck, Star, Search, Zap, ArrowRight, Shield, Globe, Award } from "lucide-react";
 import { redis } from "@/lib/redis";
@@ -35,7 +35,9 @@ export default async function BrandsListingPage({
                 reviewCount: sql<number>`COUNT(${reviews.id})`.as('review_count'),
             })
             .from(brands)
+            .innerJoin(users, eq(users.id, brands.userId))
             .leftJoin(reviews, eq(reviews.targetId, brands.id))
+            .where(eq(users.isActive, true))
             .groupBy(brands.id)
             .orderBy((t) => {
                 if (sort === "top-rated") return desc(t.avgRating);

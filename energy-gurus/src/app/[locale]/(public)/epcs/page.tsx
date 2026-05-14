@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { epcInstallers, reviews } from "@/db/schema";
+import { epcInstallers, reviews, users } from "@/db/schema";
 import { Link } from "@/i18n/routing";
 import { Briefcase, MapPin, Star, ShieldCheck, ArrowRight, Search, Zap, Globe, MessageSquare } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,34 +8,46 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ListSort } from "@/components/shared/list-sort";
 import { desc, asc, eq, sql } from "drizzle-orm";
+import Image from "next/image";
+import { unstable_cache } from "next/cache";
+
+const getInstallers = unstable_cache(
+  async (sort: string) => {
+    return await db
+      .select({
+        id: epcInstallers.id,
+        companyName: epcInstallers.companyName,
+        logoUrl: epcInstallers.logoUrl,
+        about: epcInstallers.about,
+        isVerified: epcInstallers.isVerified,
+        createdAt: epcInstallers.createdAt,
+        avgRating: sql<number>`CAST(AVG(${reviews.rating}) AS FLOAT)`.as('avg_rating'),
+        reviewCount: sql<number>`COUNT(${reviews.id})`.as('review_count'),
+      })
+      .from(epcInstallers)
+      .innerJoin(users, eq(users.id, epcInstallers.userId))
+      .leftJoin(reviews, eq(reviews.targetId, epcInstallers.id))
+      .where(eq(users.isActive, true))
+      .groupBy(epcInstallers.id)
+      .orderBy((t) => {
+        if (sort === "top-rated") return desc(t.avgRating);
+        if (sort === "lowest-rated") return asc(t.avgRating);
+        if (sort === "oldest") return asc(t.createdAt);
+        return desc(t.createdAt);
+      });
+  },
+  ['epc-installers-list'],
+  { revalidate: 3600, tags: ['epcs'] }
+);
 
 export default async function EpcListingPage({
   searchParams,
 }: {
   searchParams: Promise<{ sort?: string }>;
 }) {
-  const { sort } = await searchParams;
+  const { sort = "latest" } = await searchParams;
 
-  const installers = await db
-    .select({
-      id: epcInstallers.id,
-      companyName: epcInstallers.companyName,
-      logoUrl: epcInstallers.logoUrl,
-      about: epcInstallers.about,
-      isVerified: epcInstallers.isVerified,
-      createdAt: epcInstallers.createdAt,
-      avgRating: sql<number>`CAST(AVG(${reviews.rating}) AS FLOAT)`.as('avg_rating'),
-      reviewCount: sql<number>`COUNT(${reviews.id})`.as('review_count'),
-    })
-    .from(epcInstallers)
-    .leftJoin(reviews, eq(reviews.targetId, epcInstallers.id))
-    .groupBy(epcInstallers.id)
-    .orderBy((t) => {
-      if (sort === "top-rated") return desc(t.avgRating);
-      if (sort === "lowest-rated") return asc(t.avgRating);
-      if (sort === "oldest") return asc(t.createdAt);
-      return desc(t.createdAt);
-    });
+  const installers = await getInstallers(sort);
 
   return (
     <div className="min-h-screen bg-background selection:bg-primary/20">
@@ -99,9 +111,11 @@ export default async function EpcListingPage({
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                   
                   {installer.logoUrl ? (
-                    <img 
+                    <Image 
                       src={installer.logoUrl} 
-                      className="max-h-full max-w-full object-contain filter drop-shadow-2xl group-hover:scale-110 transition-transform duration-700 ease-out" 
+                      width={120}
+                      height={120}
+                      className="object-contain filter drop-shadow-2xl group-hover:scale-110 transition-transform duration-700 ease-out" 
                       alt={installer.companyName} 
                     />
                   ) : (

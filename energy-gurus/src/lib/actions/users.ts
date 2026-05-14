@@ -4,8 +4,9 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq, and, ne } from "drizzle-orm";
 import { auth, createClerkClient } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getUserRole } from "@/lib/roles";
+import { redis } from "@/lib/redis";
 
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
@@ -66,4 +67,40 @@ export async function updateUserRole(userId: string, newRole: any) {
     await db.update(users).set({ role: newRole }).where(eq(users.id, userId));
 
     revalidatePath("/dashboard/users");
+}
+
+export async function toggleUserStatus(userId: string) {
+    const currentUserRole = await getUserRole();
+    if (currentUserRole !== 'super-admin' && currentUserRole !== 'admin') {
+        throw new Error("Unauthorized");
+    }
+
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    if (!user) throw new Error("User not found");
+
+    // Protection: Only super-admin can disable other admins
+    if (user.role === 'admin' || user.role === 'super-admin') {
+        if (currentUserRole !== 'super-admin') {
+            throw new Error("Only Super Admins can manage administrative account status");
+        }
+    }
+
+    await db.update(users).set({ isActive: !user.isActive }).where(eq(users.id, userId));
+
+    // Clear Next.js Caches
+    revalidatePath("/");
+    revalidatePath("/[locale]", "layout");
+    revalidatePath("/dashboard/users");
+    revalidatePath("/[locale]/epcs", "layout");
+    revalidatePath("/[locale]/brands", "layout");
+
+    // Clear Redis Brand Cache (wildcard delete for brands list)
+    try {
+        const keys = await redis.keys("brands:all:*");
+        if (keys.length > 0) {
+            await redis.del(...keys);
+        }
+    } catch (e) {
+        console.error("Failed to clear brand cache:", e);
+    }
 }

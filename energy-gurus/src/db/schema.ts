@@ -1,4 +1,8 @@
 import { pgTable, text, timestamp, uuid, jsonb, integer, boolean } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+
+// ... (existing code) ...
+
 
 export const userRoleEnum = ['super-admin', 'admin', 'epc', 'brand'] as const;
 export type UserRole = (typeof userRoleEnum)[number];
@@ -9,6 +13,7 @@ export const users = pgTable('users', {
   email: text('email').notNull().unique(),
   name: text('name'),
   role: text('role').$type<UserRole>().default('epc').notNull(),
+  isActive: boolean('is_active').default(true).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -126,8 +131,12 @@ export const inquiries = pgTable('inquiries', {
   guestEmail: text('guest_email'),
   guestPhone: text('guest_phone'),
   message: text('message').notNull(),
+  subject: text('subject'),
   status: text('status').default('new').notNull(),
+  isRead: boolean('is_read').default(false).notNull(),
+  inquiryType: text('inquiry_type').$type<'client' | 'support'>().default('client').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 export const reviews = pgTable('reviews', {
@@ -175,3 +184,28 @@ export const brandCertifications = pgTable('brand_certifications', {
   expiryDate: timestamp('expiry_date'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
+
+export const usersRelations = relations(users, ({ one }) => ({
+  epcInstaller: one(epcInstallers, {
+    fields: [users.id],
+    references: [epcInstallers.userId],
+  }),
+  brand: one(brands, {
+    fields: [users.id],
+    references: [brands.userId],
+  }),
+}));
+
+export const epcInstallersRelations = relations(epcInstallers, ({ one }) => ({
+  user: one(users, {
+    fields: [epcInstallers.userId],
+    references: [users.id],
+  }),
+}));
+
+export const brandsRelations = relations(brands, ({ one }) => ({
+  user: one(users, {
+    fields: [brands.userId],
+    references: [users.id],
+  }),
+}));

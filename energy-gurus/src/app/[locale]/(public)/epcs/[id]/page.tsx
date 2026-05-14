@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { epcInstallers, epcOffices, epcProjects } from "@/db/schema";
+import { epcInstallers, epcOffices, epcProjects, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Globe, Mail, Star, ShieldCheck, ArrowLeft, Image as ImageIcon, Facebook, Twitter, Instagram, Linkedin, MapPin, Zap, MessageSquare, LayoutGrid, Building2, ExternalLink } from "lucide-react";
@@ -12,20 +12,54 @@ import { ReviewForm } from "@/components/forms/review-form";
 import { ReviewList } from "@/components/reviews/review-list";
 import { getProfileRating } from "@/lib/actions/reviews";
 import { TrackedLink, TrackedInteraction } from "@/components/shared/AnalyticsTracker";
+import { TrackedDialogTrigger } from "@/components/shared/TrackedDialogTrigger";
 import { SocialLinkTracker } from "@/components/brands/SocialLinkTracker";
+import { redis, CACHE_KEYS } from "@/lib/redis";
+import { InferSelectModel } from "drizzle-orm";
+
+type EpcInstaller = InferSelectModel<typeof epcInstallers>;
+type EpcOffice = InferSelectModel<typeof epcOffices>;
+type EpcProject = InferSelectModel<typeof epcProjects>;
+
+interface EpcProfileData {
+  installer: EpcInstaller;
+  offices: EpcOffice[];
+  projects: EpcProject[];
+  rating: number | null;
+  count: number;
+}
 
 export default async function EpcProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   
-  const installer = await db.query.epcInstallers.findFirst({
-    where: eq(epcInstallers.id, id),
-  });
+  const cacheKey = CACHE_KEYS.EPC_DETAILS(id);
+  let profileData: EpcProfileData | null = await redis.get<EpcProfileData>(cacheKey);
 
-  if (!installer) notFound();
+  if (!profileData) {
+    const installer = await db.query.epcInstallers.findFirst({
+      where: eq(epcInstallers.id, id),
+      with: {
+        user: true
+      }
+    });
 
-  const offices = await db.select().from(epcOffices).where(eq(epcOffices.epcId, id));
-  const projects = await db.select().from(epcProjects).where(eq(epcProjects.epcId, id));
-  const { rating, count } = await getProfileRating(id);
+    if (!installer || !installer.user?.isActive) notFound();
+
+    const offices = await db.select().from(epcOffices).where(eq(epcOffices.epcId, id));
+    const projects = await db.select().from(epcProjects).where(eq(epcProjects.epcId, id));
+    const { rating, count } = await getProfileRating(id);
+
+    profileData = { installer, offices, projects, rating, count };
+    await redis.set(cacheKey, profileData, { ex: 3600 });
+  }
+
+  if (!profileData) return notFound();
+
+  const { installer, offices, projects, rating, count } = profileData;
+
+  // Always check if the user is active, even if coming from cache
+  const [userData] = await db.select({ isActive: users.isActive }).from(users).where(eq(users.id, installer.userId));
+  if (!userData?.isActive) notFound();
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/20 pb-20">
@@ -158,7 +192,7 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
                     <div className="aspect-[4/3] relative overflow-hidden group/gallery">
                       {project.images && project.images.length > 0 ? (
                         <div className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide">
-                          {(project.images as string[]).map((img, i) => (
+                          {project.images?.map((img, i) => (
                             <div key={i} className="flex-none w-full h-full snap-start">
                               <img src={img} className="w-full h-full object-cover group-hover/gallery:scale-110 transition-transform duration-1000" alt={`${project.name} ${i + 1}`} />
                             </div>
@@ -320,19 +354,16 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
                     })()}
 
                     <Dialog>
-                      <DialogTrigger asChild>
-                        <TrackedInteraction 
-                          as="button" 
-                          className="w-full h-16 rounded-[1.5rem] font-black text-lg bg-white text-black hover:bg-white/90 gap-3 shadow-lg shadow-white/5 group transition-all flex items-center justify-center"
-                          eventName="epc_contact_click"
-                          eventProperties={{ epcId: installer.id, companyName: installer.companyName }}
-                        >
-                          <Mail className="w-6 h-6 group-hover:scale-110 transition-transform" /> Send InMail
-                        </TrackedInteraction>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[550px] rounded-[3.5rem] p-12 border-none shadow-2xl bg-white/95 backdrop-blur-3xl">
+                      <TrackedDialogTrigger 
+                        className="w-full h-16 rounded-[1.5rem] font-black text-lg bg-white text-black hover:bg-white/90 gap-3 shadow-lg shadow-white/5 group transition-all flex items-center justify-center"
+                        eventName="epc_contact_click"
+                        eventProperties={{ epcId: installer.id, companyName: installer.companyName }}
+                      >
+                        <Mail className="w-6 h-6 group-hover:scale-110 transition-transform" /> Send InMail
+                      </TrackedDialogTrigger>
+                      <DialogContent className="border-none shadow-2xl bg-white/95 backdrop-blur-3xl">
                         <DialogHeader>
-                          <DialogTitle className="text-4xl font-black tracking-tighter mb-6">Direct Inquiry</DialogTitle>
+                          <DialogTitle className="text-3xl sm:text-4xl font-black tracking-tighter mb-4 sm:mb-6">Direct Inquiry</DialogTitle>
                         </DialogHeader>
                         <ContactForm receiverId={installer.userId} receiverName={installer.companyName} />
                       </DialogContent>

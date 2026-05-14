@@ -5,15 +5,15 @@ import { useLocale } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
 import { UserNav } from "@/components/layout/user-nav";
 import { Menu, X, LayoutDashboard } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const navLinks = [
-    { label: "Home",      href: "/" },
-    { label: "Podcast",   href: "/podcast" },
-    { label: "Installers",href: "/epcs" },
-    { label: "Brands",    href: "/brands" },
-    { label: "Live QA",   href: "/live-qa" },
-    { label: "About Us",  href: "/about" },
+    { label: "Home",       href: "/" },
+    { label: "Podcast",    href: "/podcast" },
+    { label: "Installers", href: "/epcs" },
+    { label: "Brands",     href: "/brands" },
+    { label: "Live QA",    href: "/live-qa" },
+    { label: "About Us",   href: "/about" },
 ];
 
 export function Navbar() {
@@ -21,16 +21,7 @@ export function Navbar() {
     const pathname = usePathname();
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
     const { isSignedIn } = useAuth();
-
-    // Detect mobile reliably via JS — avoids Tailwind responsive class issues
-    useEffect(() => {
-        const check = () => setIsMobile(window.innerWidth < 768);
-        check();
-        window.addEventListener("resize", check);
-        return () => window.removeEventListener("resize", check);
-    }, []);
 
     const toggleLocale = (l: string) => router.replace(pathname, { locale: l });
 
@@ -39,83 +30,118 @@ export function Navbar() {
         router.push(isSignedIn ? "/dashboard" as any : "/sign-in" as any);
     };
 
-    const activeClass = "text-[#005353] border-b-2 border-[#7a5900] pb-0.5 font-bold";
-    const inactiveClass = "text-[#3e4948] hover:text-[#005353] transition-colors duration-200";
+    const activeClass = "text-primary border-b-2 border-accent pb-0.5 font-bold";
+    const inactiveClass = "text-muted-foreground hover:text-primary transition-colors duration-200";
 
     return (
-        <header style={{ backgroundColor: "#ffffff", borderBottom: "1px solid #bec9c8", position: "sticky", top: 0, zIndex: 50 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "0 24px", height: "64px", gap: "32px" }}>
+        <header className="bg-white border-b border-[#bec9c8] sticky top-0 z-50">
+            <div className="flex items-center justify-between w-full max-w-[1200px] mx-auto px-6 h-16 gap-4">
 
                 {/* Logo */}
-                <Link href="/" style={{ fontWeight: 700, fontSize: "18px", color: "#005353", whiteSpace: "nowrap", flexShrink: 0, textDecoration: "none" }}>
+                <Link href="/" className="font-bold text-lg text-primary shrink-0 no-underline">
                     EnergyGurus.Online
                 </Link>
 
-                {/* Desktop Nav */}
-                {!isMobile && (
-                    <nav style={{ display: "flex", alignItems: "center", gap: "24px", flex: 1, justifyContent: "center" }}>
-                        {navLinks.map((link) => (
-                            <Link
-                                key={link.href}
-                                href={link.href as any}
-                                className={`text-sm font-semibold whitespace-nowrap ${pathname === link.href ? activeClass : inactiveClass}`}
-                                style={{ textDecoration: "none" }}
-                            >
-                                {link.label}
-                            </Link>
-                        ))}
-                        <button
-                            onClick={goToDashboard}
-                            className={`text-sm font-semibold whitespace-nowrap flex items-center gap-1.5 ${pathname === "/dashboard" ? activeClass : inactiveClass}`}
-                        >
-                            <LayoutDashboard style={{ width: 14, height: 14 }} />
-                            Dashboard
-                        </button>
-                    </nav>
-                )}
-
-                {/* Right: Auth + Mobile Toggle */}
-                <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
-                    {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
-                        process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY !== "pk_test_..." && (
-                                <UserNav />
-                        )}
-
-                    {isMobile && (
-                        <button onClick={() => setIsOpen(!isOpen)} style={{ padding: "8px", color: "#3e4948", background: "none", border: "none", cursor: "pointer" }}>
-                            {isOpen ? <X style={{ width: 24, height: 24 }} /> : <Menu style={{ width: 24, height: 24 }} />}
-                        </button>
-                    )}
-                </div>
-            </div>
-
-            {/* Mobile Drawer */}
-            {isMobile && isOpen && (
-                <div style={{ borderTop: "1px solid #bec9c8", backgroundColor: "#ffffff", padding: "12px 16px", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}>
+                {/* Desktop Nav — hidden on small screens via CSS media query in style tag */}
+                <nav className="desktop-nav items-center gap-6 flex-1 justify-center">
                     {navLinks.map((link) => (
                         <Link
                             key={link.href}
                             href={link.href as any}
-                            className={`flex items-center text-sm font-semibold px-3 py-2.5 rounded-lg ${pathname === link.href ? "text-[#005353] bg-[#006d6d]/10" : "text-[#3e4948] hover:text-[#005353]"}`}
-                            onClick={() => setIsOpen(false)}
-                            style={{ textDecoration: "none", display: "flex" }}
+                            className={`text-sm font-semibold whitespace-nowrap no-underline transition-all ${pathname === link.href ? activeClass : inactiveClass}`}
                         >
                             {link.label}
                         </Link>
                     ))}
                     <button
                         onClick={goToDashboard}
-                        className="w-full flex items-center gap-2 text-sm font-semibold px-3 py-2.5 rounded-lg text-[#3e4948] hover:text-[#005353]"
+                        className={`text-sm font-semibold whitespace-nowrap flex items-center gap-1.5 bg-transparent border-none cursor-pointer transition-all ${pathname.startsWith("/dashboard") ? activeClass : inactiveClass}`}
                     >
-                        <LayoutDashboard style={{ width: 16, height: 16 }} />
+                        <LayoutDashboard className="w-3.5 h-3.5" />
                         Dashboard
                     </button>
-                    <div style={{ display: "flex", gap: "8px", marginTop: "12px", paddingTop: "12px", borderTop: "1px solid #bec9c8" }}>
-                        <button onClick={() => toggleLocale("en")} style={{ flex: 1, padding: "8px", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", border: "none", backgroundColor: locale === "en" ? "#005353" : "#e8f6f6", color: locale === "en" ? "#fff" : "#3e4948" }}>English</button>
-                        <button onClick={() => toggleLocale("ur")} style={{ flex: 1, padding: "8px", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", border: "none", backgroundColor: locale === "ur" ? "#005353" : "#e8f6f6", color: locale === "ur" ? "#fff" : "#3e4948" }}>اردو</button>
+                </nav>
+
+                {/* Right side: User nav + mobile toggle */}
+                <div className="flex items-center gap-2 shrink-0">
+                    {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
+                        process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY !== "pk_test_..." && (
+                            <UserNav />
+                        )}
+                    {/* Mobile hamburger — only shown on small screens */}
+                    <button
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="mobile-menu-btn text-muted-foreground bg-transparent border-none cursor-pointer"
+                        style={{ padding: "8px", alignItems: "center", justifyContent: "center" }}
+                        aria-label="Toggle Menu"
+                    >
+                        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                    </button>
+                </div>
+            </div>
+
+            {/* Mobile Drawer */}
+            {isOpen && (
+                <div className="mobile-drawer border-t border-[#bec9c8] bg-white px-4 py-3 shadow-lg animate-in fade-in slide-in-from-top-2 duration-200">
+                    <nav className="flex flex-col gap-1">
+                        {navLinks.map((link) => (
+                            <Link
+                                key={link.href}
+                                href={link.href as any}
+                                className={`flex items-center text-sm font-semibold px-3 py-2.5 rounded-lg no-underline ${pathname === link.href ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-primary"}`}
+                                onClick={() => setIsOpen(false)}
+                            >
+                                {link.label}
+                            </Link>
+                        ))}
+                        <button
+                            onClick={goToDashboard}
+                            className="w-full flex items-center gap-2 text-sm font-semibold px-3 py-2.5 rounded-lg text-muted-foreground hover:text-primary bg-transparent border-none cursor-pointer text-left"
+                        >
+                            <LayoutDashboard className="w-4 h-4" />
+                            Dashboard
+                        </button>
+                    </nav>
+
+                    <div className="flex gap-2 mt-3 pt-3 border-t border-[#bec9c8]">
+                        <button
+                            onClick={() => toggleLocale("en")}
+                            className={`flex-1 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none transition-colors ${locale === "en" ? "bg-primary text-white" : "bg-[#e8f6f6] text-muted-foreground"}`}
+                        >
+                            English
+                        </button>
+                        <button
+                            onClick={() => toggleLocale("ur")}
+                            className={`flex-1 py-2 rounded-lg text-sm font-semibold cursor-pointer border-none transition-colors ${locale === "ur" ? "bg-primary text-white" : "bg-[#e8f6f6] text-muted-foreground"}`}
+                        >
+                            اردو
+                        </button>
                     </div>
                 </div>
             )}
+
+            <style>{`
+                .desktop-nav {
+                    display: none;
+                }
+                .mobile-menu-btn {
+                    display: flex;
+                }
+                .mobile-drawer {
+                    display: block;
+                }
+                @media (min-width: 768px) {
+                    .desktop-nav {
+                        display: flex;
+                    }
+                    .mobile-menu-btn {
+                        display: none;
+                    }
+                    .mobile-drawer {
+                        display: none;
+                    }
+                }
+            `}</style>
         </header>
     );
 }
