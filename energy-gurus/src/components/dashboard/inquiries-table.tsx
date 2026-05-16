@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { markInquiryAsRead, deleteInquiry } from "@/lib/actions/inquiry";
+import { markInquiryAsRead, deleteInquiry, replyToInquiry } from "@/lib/actions/inquiry";
 import { Mail, Phone, Trash2, Eye, EyeOff, ChevronDown, ChevronUp, Clock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -14,12 +14,13 @@ type Inquiry = {
     message: string;
     status: string;
     isRead: boolean;
+    reply: string | null;
     createdAt: Date;
 };
 
 type Filter = "all" | "unread" | "read";
 
-export function InquiriesTable({ inquiries }: { inquiries: Inquiry[] }) {
+export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: Inquiry[], hideReply?: boolean }) {
     const [filter, setFilter] = useState<Filter>("all");
     const [expanded, setExpanded] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
@@ -150,22 +151,44 @@ export function InquiriesTable({ inquiries }: { inquiries: Inquiry[] }) {
                             {expanded === inq.id && (
                                 <div className="px-4 pb-4 pt-0 border-t border-dashed border-border ml-7">
                                     <p className="text-sm text-foreground leading-relaxed mt-3 whitespace-pre-wrap">{inq.message}</p>
-                                    <div className="flex gap-3 mt-4">
-                                        {inq.guestEmail && (
-                                            <a href={`mailto:${inq.guestEmail}`}>
-                                                <Button size="sm" variant="outline" className="gap-1.5 text-xs">
-                                                    <Mail className="w-3.5 h-3.5" /> Reply via Email
-                                                </Button>
-                                            </a>
-                                        )}
-                                        {inq.guestPhone && (
-                                            <a href={`https://wa.me/${inq.guestPhone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer">
-                                                <Button size="sm" variant="outline" className="gap-1.5 text-xs text-green-600 border-green-200">
-                                                    <Phone className="w-3.5 h-3.5" /> WhatsApp
-                                                </Button>
-                                            </a>
-                                        )}
-                                    </div>
+                                    
+                                    {!hideReply && (
+                                        <>
+                                            {inq.reply ? (
+                                                <div className="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/10">
+                                                    <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Reply</p>
+                                                    <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{inq.reply}</p>
+                                                </div>
+                                            ) : (
+                                                <form
+                                                    action={(formData) => {
+                                                        const text = formData.get("reply") as string;
+                                                        if (!text) return;
+                                                        startTransition(() => replyToInquiry(inq.id, text));
+                                                    }}
+                                                    className="mt-4 space-y-3"
+                                                >
+                                                    <textarea
+                                                        name="reply"
+                                                        placeholder="Type your reply here to maintain the chat in the dashboard..."
+                                                        className="w-full min-h-[100px] p-3 rounded-xl border bg-secondary/5 focus:ring-2 focus:ring-primary outline-none resize-none text-sm transition-all"
+                                                        required
+                                                    />
+                                                    <div className="flex justify-end">
+                                                        <Button size="sm" type="submit" disabled={isPending} className="gap-2">
+                                                            <Mail className="w-3.5 h-3.5" /> Send Reply
+                                                        </Button>
+                                                    </div>
+                                                </form>
+                                            )}
+                                        </>
+                                    )}
+                                    
+                                    {hideReply && (
+                                        <div className="mt-4 p-4 rounded-xl bg-secondary/5 border border-dashed text-center">
+                                            <p className="text-xs text-muted-foreground italic">Public inquiry. Please contact via email or phone provided above.</p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

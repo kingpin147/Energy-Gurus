@@ -6,14 +6,33 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Video, Youtube, Trash2, Calendar, Mic } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { deletePodcast, deleteLiveQA } from "@/lib/actions/content";
-import { desc, asc } from "drizzle-orm";
-import { PodcastForm } from "@/components/forms/podcast-form";
-import { LiveQAForm } from "@/components/forms/live-qa-form";
-import { redis, CACHE_KEYS } from "@/lib/redis";
+import { desc, asc, like } from "drizzle-orm";
 import { getUserRole } from "@/lib/roles";
 import { ListSort } from "@/components/shared/list-sort";
 import { ListSearch } from "@/components/shared/list-search";
-import { like, and, or } from "drizzle-orm";
+import { PodcastForm } from "@/components/forms/podcast-form";
+import { LiveQAForm } from "@/components/forms/live-qa-form";
+import { unstable_cache } from "next/cache";
+
+const getPodcastsData = unstable_cache(
+    async (sortVal: string, q?: string) => {
+        const order = sortVal === "oldest" ? asc(podcasts.createdAt) : desc(podcasts.createdAt);
+        const podcastWhere = q ? like(podcasts.title, `%${q}%`) : undefined;
+        return await db.select().from(podcasts).where(podcastWhere).orderBy(order);
+    },
+    ['podcasts-list-cache'],
+    { revalidate: 3600, tags: ['podcasts'] }
+);
+
+const getLiveQAData = unstable_cache(
+    async (sortVal: string, q?: string) => {
+        const qaOrder = sortVal === "oldest" ? asc(liveQA.createdAt) : desc(liveQA.createdAt);
+        const qaWhere = q ? like(liveQA.topic, `%${q}%`) : undefined;
+        return await db.select().from(liveQA).where(qaWhere).orderBy(qaOrder);
+    },
+    ['live-qa-list-cache'],
+    { revalidate: 3600, tags: ['live-qa'] }
+);
 
 export default async function ContentManagementPage({
     searchParams,
@@ -28,27 +47,8 @@ export default async function ContentManagementPage({
         redirect("/dashboard");
     }
 
-    const order = sortVal === "oldest" ? asc(podcasts.createdAt) : desc(podcasts.createdAt);
-    const qaOrder = sortVal === "oldest" ? asc(liveQA.createdAt) : desc(liveQA.createdAt);
-
-    const podcastWhere = q ? like(podcasts.title, `%${q}%`) : undefined;
-    const qaWhere = q ? like(liveQA.topic, `%${q}%`) : undefined;
-
-    // Podcast Caching (Key includes sort and search)
-    const PODCAST_CACHE_KEY = `${CACHE_KEYS.PODCASTS_LIST}:${sortVal}:${q || ""}`;
-    let allPodcasts: (typeof podcasts.$inferSelect)[] | null = await redis.get(PODCAST_CACHE_KEY);
-    if (!allPodcasts) {
-        allPodcasts = await db.select().from(podcasts).where(podcastWhere).orderBy(order);
-        await redis.set(PODCAST_CACHE_KEY, allPodcasts, { ex: 3600 });
-    }
-
-    // Live QA Caching (Key includes sort and search)
-    const QA_CACHE_KEY = `${CACHE_KEYS.LIVE_QA_LIST}:${sortVal}:${q || ""}`;
-    let allLiveQA: (typeof liveQA.$inferSelect)[] | null = await redis.get(QA_CACHE_KEY);
-    if (!allLiveQA) {
-        allLiveQA = await db.select().from(liveQA).where(qaWhere).orderBy(qaOrder);
-        await redis.set(QA_CACHE_KEY, allLiveQA, { ex: 3600 });
-    }
+    const allPodcasts = await getPodcastsData(sortVal, q);
+    const allLiveQA = await getLiveQAData(sortVal, q);
 
     return (
         <div className="p-4 md:p-8 space-y-8">
@@ -113,10 +113,7 @@ export default async function ContentManagementPage({
                                                     <Youtube className="w-12 h-12 text-red-600" />
                                                 )}
                                                 <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <form action={async () => {
-                                                        "use server";
-                                                        await deletePodcast(podcast.id);
-                                                    }}>
+                                                    <form action={deletePodcast.bind(null, podcast.id)}>
                                                         <Button variant="destructive" size="sm" className="h-8 w-8 p-0 rounded-lg shadow-lg">
                                                             <Trash2 className="w-4 h-4" />
                                                         </Button>
@@ -176,10 +173,7 @@ export default async function ContentManagementPage({
                                                     <Calendar className="w-12 h-12 text-primary" />
                                                 )}
                                                 <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <form action={async () => {
-                                                        "use server";
-                                                        await deleteLiveQA(session.id);
-                                                    }}>
+                                                    <form action={deleteLiveQA.bind(null, session.id)}>
                                                         <Button variant="destructive" size="sm" className="h-8 w-8 p-0 rounded-lg shadow-lg">
                                                             <Trash2 className="w-4 h-4" />
                                                         </Button>

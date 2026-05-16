@@ -3,6 +3,7 @@ import { epcInstallers, epcOffices, epcProjects, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Globe, Mail, Star, ShieldCheck, ArrowLeft, Image as ImageIcon, Facebook, Twitter, Instagram, Linkedin, MapPin, Zap, MessageSquare, LayoutGrid, Building2, ExternalLink } from "lucide-react";
+import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -89,7 +90,7 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
               <div className="absolute inset-0 bg-primary/20 rounded-[3rem] blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               <div className="w-48 h-48 md:w-64 md:h-64 rounded-[3.5rem] border-2 border-white/50 bg-white p-10 flex items-center justify-center overflow-hidden shadow-2xl relative z-10 transition-transform duration-700 group-hover:scale-105">
                 {installer.logoUrl ? (
-                  <img src={installer.logoUrl} className="max-h-full max-w-full object-contain filter drop-shadow-lg" alt={installer.companyName} />
+                  <Image src={installer.logoUrl} fill className="object-contain p-4 filter drop-shadow-lg" alt={installer.companyName} sizes="(max-width: 768px) 192px, 256px" />
                 ) : (
                   <ShieldCheck className="w-24 h-24 text-primary/10" />
                 )}
@@ -193,8 +194,8 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
                       {project.images && project.images.length > 0 ? (
                         <div className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide">
                           {project.images?.map((img, i) => (
-                            <div key={i} className="flex-none w-full h-full snap-start">
-                              <img src={img} className="w-full h-full object-cover group-hover/gallery:scale-110 transition-transform duration-1000" alt={`${project.name} ${i + 1}`} />
+                            <div key={i} className="flex-none w-full h-full snap-start relative">
+                              <Image src={img} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover group-hover/gallery:scale-110 transition-transform duration-1000" alt={`${project.name} ${i + 1}`} />
                             </div>
                           ))}
                         </div>
@@ -353,21 +354,7 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
                       }
                     })()}
 
-                    <Dialog>
-                      <TrackedDialogTrigger 
-                        className="w-full h-16 rounded-[1.5rem] font-black text-lg bg-white text-black hover:bg-white/90 gap-3 shadow-lg shadow-white/5 group transition-all flex items-center justify-center"
-                        eventName="epc_contact_click"
-                        eventProperties={{ epcId: installer.id, companyName: installer.companyName }}
-                      >
-                        <Mail className="w-6 h-6 group-hover:scale-110 transition-transform" /> Send InMail
-                      </TrackedDialogTrigger>
-                      <DialogContent className="border-none shadow-2xl bg-white/95 backdrop-blur-3xl">
-                        <DialogHeader>
-                          <DialogTitle className="text-3xl sm:text-4xl font-black tracking-tighter mb-4 sm:mb-6">Direct Inquiry</DialogTitle>
-                        </DialogHeader>
-                        <ContactForm receiverId={installer.userId} receiverName={installer.companyName} />
-                      </DialogContent>
-                    </Dialog>
+
 
                     {installer.website ? (
                       <TrackedLink 

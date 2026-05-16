@@ -110,13 +110,28 @@ export default async function UserManagementPage({
                                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">Email Address</label>
                                 <input name="email" type="email" placeholder="user@example.com" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none" required />
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">Assign Role</label>
-                                <select name="role" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none">
-                                                    <option value="epc">EPC Installer</option>
-                                                    <option value="brand">Solar Brand</option>
-                                                    <option value="admin">Admin</option>
-                                                </select>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                    <label className="cursor-pointer">
+                                        <input type="radio" name="role" value="epc" className="peer sr-only" defaultChecked />
+                                        <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary hover:bg-secondary transition-colors">
+                                            EPC Installer
+                                        </div>
+                                    </label>
+                                    <label className="cursor-pointer">
+                                        <input type="radio" name="role" value="brand" className="peer sr-only" />
+                                        <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary hover:bg-secondary transition-colors">
+                                            Solar Brand
+                                        </div>
+                                    </label>
+                                    <label className="cursor-pointer">
+                                        <input type="radio" name="role" value="admin" className="peer sr-only" />
+                                        <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary hover:bg-secondary transition-colors">
+                                            Admin
+                                        </div>
+                                    </label>
+                                </div>
                             </div>
                             <Button type="submit" className="w-full rounded-xl font-bold h-12 gap-2 shadow-lg shadow-primary/20">
                                 Send Invite / Assign
@@ -226,19 +241,7 @@ export default async function UserManagementPage({
                                                         </form>
                                                     )}
 
-                                                    {!isSuperAdmin && userRole === 'super-admin' && (user.role === 'admin' || user.role === 'epc' || user.role === 'brand') && (
-                                                        <form action={async () => {
-                                                            "use server";
-                                                            const targetRole = user.role === 'admin' ? 'epc' : 'admin';
-                                                            await updateUserRole(user.id, targetRole);
-                                                        }}>
-                                                            <Button variant="outline" size="sm" className="h-9 px-4 rounded-xl gap-2 font-bold">
-                                                                <UserCog className="w-4 h-4" />
-                                                                {user.role === 'admin' ? "Demote" : "Make Admin"}
-                                                            </Button>
-                                                        </form>
-                                                    )}
-                                                    
+
                                                     {/* Only Super Admin can delete other Admins, but NO ONE can delete Super Admins */}
                                                     {!isSuperAdmin && (userRole === 'super-admin' || (userRole === 'admin' && user.role !== 'admin' && user.role !== 'super-admin')) && (
                                                         <form action={async () => {

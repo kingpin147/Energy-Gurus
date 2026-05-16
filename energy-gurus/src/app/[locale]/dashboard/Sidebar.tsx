@@ -31,20 +31,17 @@ export default function Sidebar({ role }: { role: UserRole }) {
         { href: "/dashboard/users", icon: <Users className="w-4 h-4" />, label: "Manage Users" },
         { href: "/dashboard/moderation", icon: <ShieldCheck className="w-4 h-4" />, label: "Content Moderation" },
         { href: "/dashboard/content", icon: <Video className="w-4 h-4" />, label: "Content (Podcast/QA)" },
-        { href: "/dashboard/brands", icon: <Building2 className="w-4 h-4" />, label: "Manage Brands" },
         { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings" },
     ];
 
     const epcLinks = [
         { href: "/dashboard/epc", icon: <Briefcase className="w-4 h-4" />, label: "My EPC Profile" },
-        { href: "/dashboard/inquiries", icon: <MessageSquare className="w-4 h-4" />, label: "My Inquiries" },
         { href: "/dashboard/support", icon: <HeadphonesIcon className="w-4 h-4" />, label: "Contact Support" },
         { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings" },
     ];
 
     const brandLinks = [
         { href: "/dashboard/brand", icon: <Building2 className="w-4 h-4" />, label: "My Brand Profile" },
-        { href: "/dashboard/inquiries", icon: <MessageSquare className="w-4 h-4" />, label: "My Inquiries" },
         { href: "/dashboard/support", icon: <HeadphonesIcon className="w-4 h-4" />, label: "Contact Support" },
         { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings" },
     ];

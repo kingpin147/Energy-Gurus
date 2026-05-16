@@ -2,13 +2,13 @@
 
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { eq, and, ne } from "drizzle-orm";
-import { auth, createClerkClient } from "@clerk/nextjs/server";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { eq, and, ne, or } from "drizzle-orm";
+import { clerkClient as createClerkClient } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
 import { getUserRole } from "@/lib/roles";
-import { redis } from "@/lib/redis";
+import { redis, CACHE_KEYS } from "@/lib/redis";
+import { brands, epcInstallers, inquiries, reviews } from "@/db/schema";
 
-const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
 export async function deleteUser(userId: string) {
     const currentUserRole = await getUserRole();
@@ -30,11 +30,19 @@ export async function deleteUser(userId: string) {
     // Delete from Clerk first
     if (userToDelete.clerkId) {
         try {
-            await clerkClient.users.deleteUser(userToDelete.clerkId);
+            const client = await createClerkClient();
+            await client.users.deleteUser(userToDelete.clerkId);
         } catch (error: any) {
             console.warn("Could not delete user from Clerk (may not exist):", error.message);
         }
     }
+
+    // Manual cleanup of relations to avoid FK constraint errors 
+    // (Backup in case DB cascade isn't synced yet)
+    await db.delete(inquiries).where(or(eq(inquiries.senderId, userId), eq(inquiries.receiverId, userId)));
+    await db.delete(reviews).where(eq(reviews.authorId, userId));
+    await db.delete(brands).where(eq(brands.userId, userId));
+    await db.delete(epcInstallers).where(eq(epcInstallers.userId, userId));
 
     // Delete from DB
     await db.delete(users).where(eq(users.id, userId));
@@ -59,7 +67,8 @@ export async function updateUserRole(userId: string, newRole: any) {
     }
 
     // Update Clerk Metadata
-    await clerkClient.users.updateUserMetadata(userToUpdate.clerkId, {
+    const client = await createClerkClient();
+    await client.users.updateUserMetadata(userToUpdate.clerkId, {
         publicMetadata: { role: newRole }
     });
 
@@ -87,20 +96,26 @@ export async function toggleUserStatus(userId: string) {
 
     await db.update(users).set({ isActive: !user.isActive }).where(eq(users.id, userId));
 
-    // Clear Next.js Caches
+
     revalidatePath("/");
     revalidatePath("/[locale]", "layout");
     revalidatePath("/dashboard/users");
     revalidatePath("/[locale]/epcs", "layout");
     revalidatePath("/[locale]/brands", "layout");
 
-    // Clear Redis Brand Cache (wildcard delete for brands list)
+    // Clear Redis Caches for specific profiles
     try {
-        const keys = await redis.keys("brands:all:*");
-        if (keys.length > 0) {
-            await redis.del(...keys);
+        const [brand] = await db.select({ id: brands.id }).from(brands).where(eq(brands.userId, userId));
+        const [epc] = await db.select({ id: epcInstallers.id }).from(epcInstallers).where(eq(epcInstallers.userId, userId));
+
+        const keysToDelete: string[] = [];
+        if (brand) keysToDelete.push(CACHE_KEYS.BRAND_DETAILS(brand.id));
+        if (epc) keysToDelete.push(CACHE_KEYS.EPC_DETAILS(epc.id));
+
+        if (keysToDelete.length > 0) {
+            await redis.del(...keysToDelete);
         }
     } catch (e) {
-        console.error("Failed to clear brand cache:", e);
+        console.error("Failed to clear profile caches:", e);
     }
 }

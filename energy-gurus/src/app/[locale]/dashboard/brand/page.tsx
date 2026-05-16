@@ -27,18 +27,14 @@ export default async function BrandDashboard() {
     const [dbUser] = await db.select().from(users).where(eq(users.clerkId, clerkId));
     if (!dbUser) redirect("/dashboard");
 
-    const [myBrand] = await db.select().from(brands).where(eq(brands.userId, dbUser.id));
+    let [myBrand] = await db.select().from(brands).where(eq(brands.userId, dbUser.id));
 
+    // Auto-create Brand profile if it doesn't exist
     if (!myBrand) {
-        return (
-            <div className="p-8 text-center py-20">
-                <Building2 className="w-16 h-16 text-muted-foreground/20 mx-auto mb-4" />
-                <h2 className="text-2xl font-bold">No Brand Profile Found</h2>
-                <p className="text-muted-foreground max-w-md mx-auto mt-2">
-                    Please contact a Super Admin to link your account to a brand profile.
-                </p>
-            </div>
-        );
+        [myBrand] = await db.insert(brands).values({
+            userId: dbUser.id,
+            brandName: dbUser.name || "My Brand",
+        }).returning();
     }
 
     const brandProducts = await db.select({

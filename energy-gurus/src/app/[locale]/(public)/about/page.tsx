@@ -39,7 +39,7 @@ export default function AboutPage() {
                             </p>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="aspect-square bg-slate-100 rounded-2xl flex items-center justify-center p-8 text-center flex-col gap-4">
+                            <div className="aspect-square bg-primary/5 rounded-2xl flex items-center justify-center p-8 text-center flex-col gap-4">
                                 <span className="text-4xl font-bold text-primary">500+</span>
                                 <span className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Audits Done</span>
                             </div>
@@ -51,7 +51,7 @@ export default function AboutPage() {
                                 <span className="text-4xl font-bold text-primary">50+</span>
                                 <span className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Team Experts</span>
                             </div>
-                            <div className="aspect-square bg-slate-100 rounded-2xl flex items-center justify-center p-8 text-center flex-col gap-4">
+                            <div className="aspect-square bg-primary/5 rounded-2xl flex items-center justify-center p-8 text-center flex-col gap-4">
                                 <span className="text-4xl font-bold text-primary">100+</span>
                                 <span className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Podcast Episodes</span>
                             </div>
@@ -61,7 +61,7 @@ export default function AboutPage() {
             </section>
 
             {/* Team/Leadership Section */}
-            <section className="py-24 bg-secondary/20">
+            <section className="py-24 bg-primary/5">
                 <div className="container mx-auto px-4">
                     <h2 className="text-3xl font-bold text-center mb-16">Leadership Team</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
@@ -80,7 +80,7 @@ export default function AboutPage() {
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center opacity-50 grayscale hover:grayscale-0 transition-all">
                         {/* Replace with actual partner logos */}
                         {[1, 2, 3, 4, 5, 6].map(i => (
-                            <div key={i} className="h-12 bg-slate-200 rounded flex items-center justify-center font-bold text-xs">PARTNER LOGO</div>
+                            <div key={i} className="h-12 bg-primary/5 rounded flex items-center justify-center font-bold text-xs">PARTNER LOGO</div>
                         ))}
                     </div>
                 </div>
@@ -92,7 +92,7 @@ export default function AboutPage() {
 function TeamMember({ name, role, bio }: { name: string, role: string, bio: string }) {
     return (
         <Card className="border-none shadow-lg overflow-hidden group">
-            <div className="aspect-[4/5] bg-slate-200" />
+            <div className="aspect-[4/5] bg-primary/5" />
             <CardContent className="p-8">
                 <h4 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">{name}</h4>
                 <p className="text-sm font-medium text-accent uppercase tracking-widest mb-4">{role}</p>

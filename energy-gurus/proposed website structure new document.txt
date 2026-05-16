@@ -78,7 +78,11 @@ Simple homepage with 4 main sections:
 1. Podcast  
 2. EPCs / Installers  
 3. Brands  
-4. Weekly Live QA Session  
+4. Weekly Live QA Session 
+5. About us Page
+6. Contact Us Page 
+
+
 Minimal and professional. 
 Suggested Website Style 
 • Clean white background  

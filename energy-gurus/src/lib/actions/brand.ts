@@ -85,31 +85,3 @@ export async function addProductModel(formData: FormData) {
     revalidatePath("/dashboard/brand");
 }
 
-export async function registerGlobalBrand(formData: FormData) {
-    const { userId: clerkId } = await auth();
-    if (!clerkId) throw new Error("Unauthorized");
-
-    const role = await getUserRole();
-    if (role !== 'super-admin' && role !== 'admin') {
-        throw new Error("Unauthorized");
-    }
-
-    const brandName = formData.get("brandName") as string;
-    const website = formData.get("website") as string;
-    const logoUrl = formData.get("logoUrl") as string;
-
-    const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId));
-    if (!user) throw new Error("User not found in database");
-
-    await db.insert(brands).values({
-        brandName,
-        website,
-        logoUrl,
-        userId: user.id
-    });
-
-    // Invalidate Cache
-    await redis.del(CACHE_KEYS.BRANDS_LIST);
-
-    revalidatePath("/dashboard/brands");
-}

@@ -9,20 +9,11 @@ import { desc, asc, eq, sql } from "drizzle-orm";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { TrackedLink } from "@/components/shared/AnalyticsTracker";
+import Image from "next/image";
+import { unstable_cache } from "next/cache";
 
-
-export default async function BrandsListingPage({
-    searchParams,
-}: {
-    searchParams: Promise<{ sort?: string }>;
-}) {
-    const { sort } = await searchParams;
-    const sortVal = sort || "latest";
-    const BRANDS_LIST_CACHE_KEY = `brands:all:${sortVal}:v8`;
-
-    let brandList: any[] | null = await redis.get(BRANDS_LIST_CACHE_KEY);
-
-    if (!brandList) {
+const getBrandsData = unstable_cache(
+    async (sort: string) => {
         const brandsData = await db
             .select({
                 id: brands.id,
@@ -48,13 +39,22 @@ export default async function BrandsListingPage({
 
         const allProducts = await db.select().from(products);
 
-        brandList = brandsData.map(brand => ({
+        return brandsData.map(brand => ({
             ...brand,
             products: allProducts.filter(p => p.brandId === brand.id).slice(0, 3)
         }));
-
-        await redis.set(BRANDS_LIST_CACHE_KEY, brandList, { ex: 3600 });
-    }
+    },
+    ['brands-list-cache'],
+    { revalidate: 3600, tags: ['brands'] }
+);
+export default async function BrandsListingPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ sort?: string }>;
+}) {
+    const { sort } = await searchParams;
+    const sortVal = sort || "latest";
+    const brandList = await getBrandsData(sortVal);
 
     return (
         <div className="min-h-screen bg-background selection:bg-primary/20">
@@ -121,9 +121,9 @@ export default async function BrandsListingPage({
                                             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10 mb-12">
                                                 <div className="flex flex-col md:flex-row gap-8 flex-1 items-start md:items-center">
                                                     {/* Logo Wrapper */}
-                                                    <div className="w-32 h-32 bg-white p-6 rounded-[2.5rem] border border-border/50 shadow-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-700">
+                                                    <div className="w-32 h-32 bg-white p-6 rounded-[2.5rem] border border-border/50 shadow-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-700 relative overflow-hidden">
                                                         {brand.logoUrl ? (
-                                                            <img src={brand.logoUrl} alt={brand.brandName} className="max-h-full max-w-full object-contain filter drop-shadow-lg" />
+                                                            <Image src={brand.logoUrl} alt={brand.brandName} fill className="object-contain p-4 filter drop-shadow-lg" sizes="128px" />
                                                         ) : (
                                                             <ShieldCheck className="w-12 h-12 text-primary/10" />
                                                         )}
@@ -177,7 +177,7 @@ export default async function BrandsListingPage({
                                                         brand.products.map((product: any) => (
                                                             <div key={product.id} className="group/item relative overflow-hidden rounded-[2rem] aspect-[16/10] bg-white border border-border/50 hover:border-primary/50 shadow-sm hover:shadow-2xl transition-all duration-700">
                                                                 {product.imageUrl ? (
-                                                                    <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover/item:scale-125" />
+                                                                    <Image src={product.imageUrl} alt={product.name} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-1000 group-hover/item:scale-125" />
                                                                 ) : (
                                                                     <div className="w-full h-full flex flex-col items-center justify-center bg-white opacity-20">
                                                                         <Zap className="w-10 h-10 text-primary" />

@@ -126,3 +126,20 @@ export async function updateInquiryStatus(id: string, status: "pending" | "repli
 
     revalidatePath("/dashboard");
 }
+
+export async function replyToInquiry(id: string, replyText: string) {
+    const { userId: clerkId } = await auth();
+    if (!clerkId) throw new Error("Unauthorized");
+
+    await db.update(inquiries)
+        .set({ 
+            reply: replyText,
+            status: "replied",
+            updatedAt: new Date() 
+        })
+        .where(eq(inquiries.id, id));
+
+    revalidatePath("/dashboard/inquiries");
+    revalidatePath("/dashboard/inbox");
+    revalidatePath("/dashboard/support");
+}

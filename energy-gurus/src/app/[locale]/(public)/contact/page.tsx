@@ -1,10 +1,34 @@
+"use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mail, Phone, MapPin, MessageSquare, Clock, ArrowRight, Instagram, Linkedin, Twitter } from "lucide-react";
-import { Link } from "@/i18n/routing";
+import { Mail, Phone, MapPin, MessageSquare, Instagram, Linkedin, Twitter, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { submitPublicContact } from "@/lib/actions/inquiries";
 
 export default function ContactPage() {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [error, setError] = useState("");
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setError("");
+
+        const formData = new FormData(e.currentTarget);
+        const result = await submitPublicContact(formData);
+
+        if (result.success) {
+            setIsSuccess(true);
+        } else {
+            setError(result.error || "An unexpected error occurred.");
+        }
+        
+        setIsSubmitting(false);
+    };
+
     return (
         <div className="flex flex-col min-h-screen">
             {/* Hero Header */}
@@ -58,39 +82,65 @@ export default function ContactPage() {
 
                     {/* Contact Form */}
                     <div className="lg:col-span-2">
-                        <Card className="shadow-2xl border-none">
-                            <CardContent className="p-8 md:p-12">
-                                <h3 className="text-2xl font-bold mb-8">Send us a Message</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">Your Name</label>
-                                        <Input placeholder="John Doe" />
+                        <Card className="shadow-2xl border-none overflow-hidden relative">
+                            {isSuccess ? (
+                                <CardContent className="p-12 md:p-24 flex flex-col items-center justify-center text-center min-h-[500px]">
+                                    <div className="w-20 h-20 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6">
+                                        <CheckCircle2 className="w-10 h-10" />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">Email Address</label>
-                                        <Input type="email" placeholder="john@example.com" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">Subject</label>
-                                        <select className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">
-                                            <option>General Inquiry</option>
-                                            <option>Request an Audit</option>
-                                            <option>O&M Services</option>
-                                            <option>Partnership/Sponsorship</option>
-                                            <option>Media/Press</option>
-                                        </select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">Phone (Optional)</label>
-                                        <Input placeholder="+92 3XX XXXXXXX" />
-                                    </div>
-                                </div>
-                                <div className="space-y-2 mb-8">
-                                    <label className="text-sm font-medium">Message</label>
-                                    <textarea className="w-full min-h-[150px] rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="Tell us how we can help..." />
-                                </div>
-                                <Button className="w-full md:w-auto px-12 font-bold py-6 text-lg" size="lg">Send Message</Button>
-                            </CardContent>
+                                    <h3 className="text-3xl font-bold mb-4">Message Sent!</h3>
+                                    <p className="text-muted-foreground text-lg mb-8 max-w-md">
+                                        Thank you for reaching out to EnergyGurus. Our team will review your inquiry and get back to you shortly.
+                                    </p>
+                                    <Button onClick={() => setIsSuccess(false)} variant="outline" className="font-bold">
+                                        Send Another Message
+                                    </Button>
+                                </CardContent>
+                            ) : (
+                                <CardContent className="p-8 md:p-12">
+                                    <h3 className="text-2xl font-bold mb-8">Send us a Message</h3>
+                                    
+                                    {error && (
+                                        <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 text-sm font-medium">
+                                            {error}
+                                        </div>
+                                    )}
+
+                                    <form onSubmit={handleSubmit}>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium">Your Name *</label>
+                                                <Input name="name" required placeholder="John Doe" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium">Email Address *</label>
+                                                <Input name="email" type="email" required placeholder="john@example.com" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium">Subject</label>
+                                                <select name="subject" className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                                                    <option>General Inquiry</option>
+                                                    <option>Request an Audit</option>
+                                                    <option>O&M Services</option>
+                                                    <option>Partnership/Sponsorship</option>
+                                                    <option>Media/Press</option>
+                                                </select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium">Phone (Optional)</label>
+                                                <Input name="phone" placeholder="+92 3XX XXXXXXX" />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2 mb-8">
+                                            <label className="text-sm font-medium">Message *</label>
+                                            <textarea name="message" required className="w-full min-h-[150px] rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" placeholder="Tell us how we can help..." />
+                                        </div>
+                                        <Button type="submit" disabled={isSubmitting} className="w-full md:w-auto px-12 font-bold py-6 text-lg" size="lg">
+                                            {isSubmitting ? "Sending..." : "Send Message"}
+                                        </Button>
+                                    </form>
+                                </CardContent>
+                            )}
                         </Card>
                     </div>
                 </div>

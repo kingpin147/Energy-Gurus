@@ -207,33 +207,12 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
                           </p>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4">
                           <Button variant="outline" className="h-14 rounded-2xl border-primary/20 text-primary font-black uppercase tracking-widest text-[10px] hover:bg-primary/5 transition-all" asChild>
                             <a href={product.datasheetUrl || "#"} target="_blank">
                               Datasheet
                             </a>
                           </Button>
-                          
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <button
-                                className="h-14 rounded-2xl bg-[#0F172A] text-white font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
-                                onClick={() => {
-                                  if (typeof window !== 'undefined' && (window as any).posthog) {
-                                    (window as any).posthog.capture("brand_inquiry_click", { brandId: brand.id, productId: product.id, productName: product.name })
-                                  }
-                                }}
-                              >
-                                <MessageSquare className="w-4 h-4" /> Inquire
-                              </button>
-                            </DialogTrigger>
-                            <DialogContent className="border-none shadow-2xl bg-white/95 backdrop-blur-3xl">
-                              <DialogHeader>
-                                <DialogTitle className="text-3xl sm:text-4xl font-black tracking-tighter mb-4 sm:mb-6">Product Inquiry</DialogTitle>
-                              </DialogHeader>
-                              <ContactForm receiverId={brand.userId} receiverName={brand.brandName} initialMessage={`I am interested in the ${product.name} model.`} />
-                            </DialogContent>
-                          </Dialog>
                         </div>
                       </div>
                     </div>
@@ -386,24 +365,7 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
                       </div>
                     )}
                     
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <TrackedInteraction 
-                          as="button"
-                          className="w-full h-16 rounded-[1.8rem] font-black bg-white/5 border-white/10 hover:bg-white/10 text-white gap-4 transition-all border inline-flex items-center justify-center"
-                          eventName="brand_contact_click"
-                          eventProperties={{ brandId: brand.id, brandName: brand.brandName }}
-                        >
-                          <Mail className="w-6 h-6" /> Direct InMail
-                        </TrackedInteraction>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[550px] rounded-[3.5rem] p-12 border-none shadow-2xl bg-white/95 backdrop-blur-3xl">
-                        <DialogHeader>
-                          <DialogTitle className="text-4xl font-black tracking-tighter mb-6">Manufacturer Support</DialogTitle>
-                        </DialogHeader>
-                        <ContactForm receiverId={brand.userId} receiverName={brand.brandName} />
-                      </DialogContent>
-                    </Dialog>
+
                   </div>
 
                   {/* Social Network */}
