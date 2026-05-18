@@ -22,6 +22,7 @@ export async function seedDummyData() {
     for (const b of brandData) {
         await db.insert(brands).values({
             userId: systemUser.id,
+            isVerified: true,
             ...b
         });
     }

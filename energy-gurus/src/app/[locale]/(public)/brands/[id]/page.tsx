@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { brands, products, brandCertifications, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import { getBrandCompleteness } from "@/lib/utils/completeness";
 import { Globe, Mail, Star, ShieldCheck, ArrowLeft, Image as ImageIcon, Facebook, Twitter, Instagram, Linkedin, Zap, Shield, Award, MapPin, Building2, Package, CheckCircle2, Info, MessageSquare, ExternalLink } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
@@ -59,8 +60,30 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
   const [userData] = await db.select({ isActive: users.isActive }).from(users).where(eq(users.id, brand.userId));
   if (!userData?.isActive) notFound();
 
+  // Enforce 50% completeness score threshold
+  const { score } = getBrandCompleteness(brand, brandProducts.length);
+  if (score < 50) notFound();
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": brand.brandName,
+    "description": brand.about || `Verified global solar manufacturer: ${brand.brandName}`,
+    "logo": brand.logoUrl || undefined,
+    "url": brand.website || undefined,
+    "aggregateRating": rating && count > 0 ? {
+      "@type": "AggregateRating",
+      "ratingValue": rating.toFixed(1),
+      "reviewCount": count
+    } : undefined
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/20 pb-32">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Background Atmosphere */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 left-0 w-[50%] h-[40%] bg-primary/5 rounded-full blur-[150px]" />

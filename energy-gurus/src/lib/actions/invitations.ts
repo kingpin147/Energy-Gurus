@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { createClerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { getUserRole } from "@/lib/roles";
+import { sendInvitationEmail } from "@/lib/mail";
 
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
@@ -23,6 +24,12 @@ export async function createInvitation(email: string, role: UserRole) {
         target: invitations.email,
         set: { role }
     });
+
+    try {
+        await sendInvitationEmail(email, role);
+    } catch (e) {
+        console.error("Failed to send invitation email:", e);
+    }
 
     revalidatePath("/dashboard/users");
 }
@@ -84,5 +91,32 @@ export async function isUserAllowed(email: string, clerkId?: string, name?: stri
     }
 
     return false;
+}
+
+export async function bulkInvite(invites: { email: string; role: UserRole }[]) {
+    const currentRole = await getUserRole();
+    
+    if (currentRole !== 'super-admin' && currentRole !== 'admin') {
+        throw new Error("Unauthorized");
+    }
+
+    for (const invite of invites) {
+        if (!invite.email || !invite.role) continue;
+        await db.insert(invitations).values({
+            email: invite.email.toLowerCase().trim(),
+            role: invite.role
+        }).onConflictDoUpdate({
+            target: invitations.email,
+            set: { role: invite.role }
+        });
+
+        try {
+            await sendInvitationEmail(invite.email, invite.role);
+        } catch (e) {
+            console.error(`Failed to send bulk invitation email to ${invite.email}:`, e);
+        }
+    }
+
+    revalidatePath("/dashboard/users");
 }
 

@@ -1,33 +1,44 @@
 import { db } from "@/db";
-import { epcInstallers, reviews, users } from "@/db/schema";
-import { Link } from "@/i18n/routing";
-import { Briefcase, MapPin, Star, ShieldCheck, ArrowRight, Search, Zap, Globe, MessageSquare } from "lucide-react";
+import { epcInstallers, reviews, users, epcOffices, epcProjects } from "@/db/schema";
+import { MapPin, Star, ShieldCheck, ArrowRight, Zap, Briefcase, MessageSquare, Globe } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { TrackedLink } from "@/components/shared/AnalyticsTracker";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ListSort } from "@/components/shared/list-sort";
-import { desc, asc, eq, sql } from "drizzle-orm";
+import { ListSearch } from "@/components/shared/list-search";
+import { desc, asc, eq, sql, ilike, and } from "drizzle-orm";
 import Image from "next/image";
 import { unstable_cache } from "next/cache";
+import { getEpcCompleteness } from "@/lib/utils/completeness";
 
 const getInstallers = unstable_cache(
-  async (sort: string) => {
-    return await db
+  async (sort: string, q?: string) => {
+    const rawInstallers = await db
       .select({
         id: epcInstallers.id,
         companyName: epcInstallers.companyName,
+        ceoName: epcInstallers.ceoName,
+        sectors: epcInstallers.sectors,
         logoUrl: epcInstallers.logoUrl,
         about: epcInstallers.about,
+        website: epcInstallers.website,
+        socialLinks: epcInstallers.socialLinks,
         isVerified: epcInstallers.isVerified,
         createdAt: epcInstallers.createdAt,
         avgRating: sql<number>`CAST(AVG(${reviews.rating}) AS FLOAT)`.as('avg_rating'),
         reviewCount: sql<number>`COUNT(${reviews.id})`.as('review_count'),
+        officesCount: sql<number>`(SELECT COUNT(*) FROM ${epcOffices} WHERE ${epcOffices.epcId} = ${epcInstallers.id})`.mapWith(Number),
+        projectsCount: sql<number>`(SELECT COUNT(*) FROM ${epcProjects} WHERE ${epcProjects.epcId} = ${epcInstallers.id})`.mapWith(Number),
       })
       .from(epcInstallers)
       .innerJoin(users, eq(users.id, epcInstallers.userId))
       .leftJoin(reviews, eq(reviews.targetId, epcInstallers.id))
-      .where(eq(users.isActive, true))
+      .where(
+        and(
+          eq(users.isActive, true),
+          q ? ilike(epcInstallers.companyName, `%${q}%`) : undefined
+        )
+      )
       .groupBy(epcInstallers.id)
       .orderBy((t) => {
         if (sort === "top-rated") return desc(t.avgRating);
@@ -35,6 +46,13 @@ const getInstallers = unstable_cache(
         if (sort === "oldest") return asc(t.createdAt);
         return desc(t.createdAt);
       });
+
+    const mapped = rawInstallers.map(inst => {
+      const { score } = getEpcCompleteness(inst, inst.officesCount || 0, inst.projectsCount || 0);
+      return { ...inst, score };
+    });
+
+    return mapped.filter(inst => inst.score >= 50);
   },
   ['epc-installers-list'],
   { revalidate: 3600, tags: ['epcs'] }
@@ -43,11 +61,11 @@ const getInstallers = unstable_cache(
 export default async function EpcListingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sort?: string }>;
+  searchParams: Promise<{ sort?: string; q?: string }>;
 }) {
-  const { sort = "latest" } = await searchParams;
+  const { sort = "latest", q = "" } = await searchParams;
 
-  const installers = await getInstallers(sort);
+  const installers = await getInstallers(sort, q);
 
   return (
     <div className="min-h-screen bg-background selection:bg-primary/20">
@@ -73,13 +91,10 @@ export default async function EpcListingPage({
           
           <div className="w-full max-w-2xl mt-8">
             <div className="flex flex-col sm:flex-row gap-4 w-full">
-              <div className="relative flex-1 group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <Input 
-                  placeholder="Search experts..." 
-                  className="pl-12 h-16 bg-white/50 backdrop-blur-xl border-border/50 rounded-2xl focus:ring-primary/20 focus:border-primary transition-all text-base font-medium shadow-sm" 
-                />
-              </div>
+              <ListSearch 
+                placeholder="Search experts..." 
+                className="pl-12 h-16 bg-white/50 backdrop-blur-xl border-border/50 rounded-2xl focus:ring-primary/20 focus:border-primary transition-all text-base font-medium shadow-sm" 
+              />
               <ListSort 
                 options={[
                   { label: "Latest First", value: "latest" },

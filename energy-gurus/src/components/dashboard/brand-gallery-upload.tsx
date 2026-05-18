@@ -46,7 +46,7 @@ export function BrandGalleryUpload({ initialPhotos }: BrandGalleryUploadProps) {
         ))}
       </div>
       <UploadButton
-        endpoint="brandLogo"
+        endpoint="epcPortfolio"
         onClientUploadComplete={handleUploadComplete}
       />
     </div>

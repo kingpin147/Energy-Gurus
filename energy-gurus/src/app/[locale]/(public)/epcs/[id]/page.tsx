@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { epcInstallers, epcOffices, epcProjects, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import { getEpcCompleteness } from "@/lib/utils/completeness";
 import { Globe, Mail, Star, ShieldCheck, ArrowLeft, Image as ImageIcon, Facebook, Twitter, Instagram, Linkedin, MapPin, Zap, MessageSquare, LayoutGrid, Building2, ExternalLink } from "lucide-react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
@@ -62,8 +63,35 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
   const [userData] = await db.select({ isActive: users.isActive }).from(users).where(eq(users.id, installer.userId));
   if (!userData?.isActive) notFound();
 
+  // Enforce 50% completeness score threshold
+  const { score } = getEpcCompleteness(installer, offices.length, projects.length);
+  if (score < 50) notFound();
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": installer.companyName,
+    "description": installer.about || `Verified EPC solar installer: ${installer.companyName}`,
+    "logo": installer.logoUrl || undefined,
+    "url": installer.website || undefined,
+    "address": offices.length > 0 ? {
+      "@type": "PostalAddress",
+      "addressLocality": offices[0].city,
+      "streetAddress": [offices[0].officeNumber, offices[0].block, offices[0].area].filter(Boolean).join(", ")
+    } : undefined,
+    "aggregateRating": rating && count > 0 ? {
+      "@type": "AggregateRating",
+      "ratingValue": rating.toFixed(1),
+      "reviewCount": count
+    } : undefined
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/20 pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Background Glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 right-0 w-[60%] h-[40%] bg-primary/5 rounded-full blur-[150px]" />

@@ -5,7 +5,8 @@ import { epcInstallers, epcOffices, epcProjects, users } from "@/db/schema";
 import { getUserRole } from "@/lib/roles";
 import { auth } from "@clerk/nextjs/server";
 import { eq, and } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { redirect } from "next/navigation";
 import { redis, CACHE_KEYS } from "@/lib/redis";
 
 export async function updateEpcProfile(data: FormData | Partial<typeof epcInstallers.$inferInsert>) {
@@ -42,6 +43,8 @@ export async function updateEpcProfile(data: FormData | Partial<typeof epcInstal
   // Invalidate Cache
   await redis.del(CACHE_KEYS.EPC_DETAILS(existingEpc.id));
   await redis.del(CACHE_KEYS.EPCS_LIST);
+// Revalidate Next.js tag for EPC list
+revalidateTag('epcs', {});
 
   revalidatePath("/dashboard/epc");
   revalidatePath("/epcs");

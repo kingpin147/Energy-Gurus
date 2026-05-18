@@ -5,7 +5,8 @@ import { brands, products, users } from "@/db/schema";
 import { getUserRole } from "@/lib/roles";
 import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { redirect } from "next/navigation";
 import { redis, CACHE_KEYS } from "@/lib/redis";
 
 export async function updateBrandProfile(data: FormData | Partial<typeof brands.$inferInsert>) {
@@ -49,6 +50,10 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
   if (b) {
     await redis.del(CACHE_KEYS.BRAND_DETAILS(b.id));
     await redis.del(CACHE_KEYS.BRANDS_LIST);
+    // Revalidate Next.js tags for public brand list
+    revalidateTag('brands', {});
+    // Redirect back with success message
+    redirect(`/dashboard/brand?msg=profile_updated`);
   }
 
   revalidatePath("/dashboard/brand");

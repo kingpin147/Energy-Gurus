@@ -9,9 +9,10 @@ import { useDebounce } from "../../hooks/use-debounce";
 interface ListSearchProps {
     placeholder?: string;
     paramName?: string;
+    className?: string;
 }
 
-export function ListSearch({ placeholder = "Search...", paramName = "q" }: ListSearchProps) {
+export function ListSearch({ placeholder = "Search...", paramName = "q", className }: ListSearchProps) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -40,7 +41,7 @@ export function ListSearch({ placeholder = "Search...", paramName = "q" }: ListS
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 placeholder={placeholder} 
-                className="pl-10 h-11 bg-white border-primary/10 rounded-xl focus-visible:ring-primary/20" 
+                className={className || "pl-10 h-11 bg-white border-primary/10 rounded-xl focus-visible:ring-primary/20"} 
             />
         </div>
     );

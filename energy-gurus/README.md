@@ -22,25 +22,55 @@ Energy Gurus is a high-performance, full-stack platform designed to bridge the g
 - **Smart Sorting:** Filter entities by Highest Engagement, Lowest Engagement, or A-Z.
 - **Zero-DB Overhead:** Analytics are fetched via PostHog's HogQL API, ensuring no performance impact on the primary database.
 
-### 👤 Role-Based Access Control (RBAC)
+### 👤 Role-Based Access Control (RBAC) & Automated Verification
 Strictly isolated dashboards for different user types:
 - **Super Admin:** Full system control, user management (promoting/demoting admins), and content moderation.
 - **Admin:** Manage website users and update dynamic content like YouTube podcasts/QA.
-- **EPC (Installer):** Manage company branding, about section, and upload work portfolios.
-- **Brand:** Manage brand profile and product verification codes.
+- **EPC (Installer) & Brand Dashboards:** Manage company branding, offices, projects, warranty info, and upload multi-image portfolios.
+- **Invite-Only Auto-Verification:** Auto-creation and verification (`isVerified: true`) for invited EPCs and Brands upon first-login, ensuring zero manual DB intervention.
+- **Public Visibility Warning Banners:** Integrated top-level warning banner shown dynamically on the EPC/Brand dashboard if their profile completeness is below **50%**, detailing missing checkpoints to achieve public directory visibility.
 
-### 🏢 EPC Directory
-- Public listing of verified EPC companies.
-- Detailed profile pages with portfolio galleries and contact options.
-- Lead generation for installers via inquiry forms.
+### 🏢 Partner Directories & Dynamic Search
+- **Strategic Directories:** Public search indices for verified EPC companies and tier-1 solar manufacturers.
+- **50% Profile Completeness Threshold:** Automatic filtering of incomplete draft profiles. EPCs and Brands are completely hidden from public directories, search pages, and sitemaps unless their profile completeness score is at least **50%**.
+- **Direct Link 404 Enforcers:** Accessing dynamic profiles directly via their URL (e.g. `/epcs/[id]` or `/brands/[id]`) automatically enforces a `404 Not Found` if their score is below `50%`.
+- **Debounced Search Inputs:** Real-time client-side debounced search input component (`ListSearch`) synchronized with URL state parameters.
+- **Type-safe Drizzle Filters:** Fast database filtering utilizing SQL case-insensitive `ilike` and `and` expressions.
+- **Segmented Caching:** Cache tagged results under Next.js `unstable_cache` with search query segments.
+
+### 📈 SEO Optimization & Discoverability
+- **JSON-LD Schema Markup:** Dynamic injections of Google-friendly structured data (`LocalBusiness` on individual EPC profiles and `Organization` on Brand profiles) to display premium review star snippets.
+- **Completeness-Aware Sitemap Generator:** Dynamically excludes incomplete profiles (completeness `< 50%`) from generating in `/sitemap.xml`, maintaining indexation excellence for search engine bots.
 
 ### 🎙️ Podcast & Live QA Integration
 - Dynamic homepage updates fetching latest episodes directly from the database.
 - YouTube embed integration managed via the Admin Dashboard.
 
 ### 🔐 Secure User Management
-- Custom dashboard interface to assign roles without leaving the website.
-- Seamless sync between Clerk metadata and the local Postgres database.
+- **On-Demand User Sync Engine:** Solves registration status latency. As soon as an invited user registers in Clerk, loading the Admin User Management panel (`/dashboard/users`) performs an on-demand active sync, instantly transferring them to "Registered Users" and deleting their pending invitation.
+- **Role Assignment:** Custom dashboard interface to assign roles without leaving the website.
+- **Metadata Sync:** Seamless sync between Clerk metadata and the local Postgres database.
+
+## 📊 PostHog Analytics Engine & HogQL Architecture
+
+EnergyGurus implements a high-performance, decoupled analytics layer utilizing **PostHog Cloud** and Next.js Server Components. Instead of logging clicks and views inside Postgres (which degrades database performance over time), all telemetry data is captured on the client and queried on the server via PostHog's Query API and **HogQL (PostHog's SQL Dialect)**.
+
+### 1. Telemetry Capture (Client-Side)
+Telemetry is initialized inside the `CSPostHogProvider` at the root layout. Interactions are automatically captured using wrapper components:
+* **`TrackedLink` & `TrackedInteraction`**: Log profile redirections, official website visits, and WhatsApp direct actions.
+* **`SocialLinkTracker`**: Captures platform-specific social media link clicks (Facebook, YouTube, LinkedIn, WhatsApp).
+* **Tracked Events**:
+  - `brand_portfolio_view`: Tracked when users open a brand profile page.
+  - `brand_website_click`: Tracked when brand outbound links are followed.
+  - `epc_profile_view`: Tracked when users browse an EPC partner's showcase.
+  - `brand_social_click` / `epc_social_click`: Tracked when users engage with social handles.
+
+### 2. High-Performance Server-Side Aggregation (HogQL)
+Inside [posthog.ts](file:///d:/downloads%206-11-2025/Energy%20Gurus/energy-gurus/src/lib/posthog.ts), server actions run SQL-like HogQL queries through PostHog's Query API:
+* **Trend Analysis**: `getPostHogTrends` retrieves event trends over a 30-day window to plot line charts.
+* **Database Alignment**: `getPostHogTable` retrieves aggregated events (e.g. `SUM(clicks)`, `COUNT(views)`) grouped by partner `id`. It queries the Neon Postgres database to get the active names first, ensuring only active profiles are returned and sorted (by engagement, views, or clicks).
+
+---
 
 ## 🛠️ Getting Started
 

@@ -3,8 +3,8 @@ import { users } from "@/db/schema";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users as UsersIcon, ShieldAlert, Trash2, UserCog, MailPlus, Clock, Power, PowerOff } from "lucide-react";
-import { deleteUser, updateUserRole, toggleUserStatus } from "@/lib/actions/users";
+import { Users as UsersIcon, ShieldAlert, Trash2, MailPlus, Clock, Power, PowerOff } from "lucide-react";
+import { deleteUser, toggleUserStatus } from "@/lib/actions/users";
 import { createInvitation } from "@/lib/actions/invitations";
 import { invitations } from "@/db/schema";
 import { revalidatePath } from "next/cache";
@@ -12,6 +12,8 @@ import { ListSort } from "@/components/shared/list-sort";
 import { ListSearch } from "@/components/shared/list-search";
 import { eq, asc, desc, like, or, and } from "drizzle-orm";
 import { getUserRole } from "@/lib/roles";
+import { BulkInvite } from "@/components/dashboard/bulk-invite";
+import { createClerkClient } from "@clerk/nextjs/server";
 
 export default async function UserManagementPage({
     searchParams,
@@ -30,15 +32,55 @@ export default async function UserManagementPage({
     const searchCondition = q ? or(like(users.name, `%${q}%`), like(users.email, `%${q}%`)) : undefined;
     const where = and(roleCondition, searchCondition);
 
-    const baseUsers = await db.select().from(users).where(where).orderBy(order);
-    const allUsers = [...baseUsers];
     const allInvites = await db.select().from(invitations).orderBy(invitations.createdAt);
 
-    // Only show invitations for emails that have NOT yet registered
-    const registeredEmails = new Set(allUsers.map(u => u.email.toLowerCase()));
-    const pendingInvites = allInvites.filter(
-        inv => !registeredEmails.has(inv.email.toLowerCase())
-    );
+    // Sync pending invitations with Clerk on-demand
+    const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+    let needsRequery = false;
+
+    await Promise.all(allInvites.map(async (invite) => {
+        try {
+            const clerkUsers = await clerkClient.users.getUserList({
+                emailAddress: [invite.email.toLowerCase()]
+            });
+
+            if (clerkUsers.data && clerkUsers.data.length > 0) {
+                const clerkUser = clerkUsers.data[0];
+                await db.insert(users).values({
+                    clerkId: clerkUser.id,
+                    email: invite.email.toLowerCase(),
+                    name: clerkUser.fullName || clerkUser.firstName || invite.email.split("@")[0],
+                    role: invite.role
+                }).onConflictDoNothing();
+
+                await db.delete(invitations).where(eq(invitations.id, invite.id));
+
+                await clerkClient.users.updateUserMetadata(clerkUser.id, {
+                    publicMetadata: { role: invite.role }
+                });
+
+                needsRequery = true;
+            }
+        } catch (err) {
+            console.error("Clerk sync error for:", invite.email, err);
+        }
+    }));
+
+    let baseUsers;
+    let pendingInvites;
+
+    if (needsRequery) {
+        baseUsers = await db.select().from(users).where(where).orderBy(order);
+        const updatedInvites = await db.select().from(invitations).orderBy(invitations.createdAt);
+        const registeredEmails = new Set(baseUsers.map(u => u.email.toLowerCase()));
+        pendingInvites = updatedInvites.filter(inv => !registeredEmails.has(inv.email.toLowerCase()));
+    } else {
+        baseUsers = await db.select().from(users).where(where).orderBy(order);
+        const registeredEmails = new Set(baseUsers.map(u => u.email.toLowerCase()));
+        pendingInvites = allInvites.filter(inv => !registeredEmails.has(inv.email.toLowerCase()));
+    }
+
+    const allUsers = [...baseUsers];
 
     // Force include super admins in display list even if not in DB yet
     const adminWhitelist = ["nomiking0072012@gmail.com", "energygurusonline@gmail.com"];
@@ -92,53 +134,57 @@ export default async function UserManagementPage({
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <Card className="lg:col-span-1 border-none shadow-sm rounded-3xl h-fit">
-                    <CardHeader>
-                        <CardTitle className="text-xl flex items-center gap-2">
-                            <MailPlus className="w-5 h-5 text-primary" />
-                            Invite User
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <form action={async (formData) => {
-                            "use server";
-                            const email = formData.get("email") as string;
-                            const selectedRole = formData.get("role") as "admin" | "epc" | "brand";
-                            await createInvitation(email, selectedRole);
-                        }} className="space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase tracking-widest opacity-60">Email Address</label>
-                                <input name="email" type="email" placeholder="user@example.com" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none" required />
-                            </div>
-                            <div className="space-y-3">
-                                <label className="text-xs font-bold uppercase tracking-widest opacity-60">Assign Role</label>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                    <label className="cursor-pointer">
-                                        <input type="radio" name="role" value="epc" className="peer sr-only" defaultChecked />
-                                        <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary hover:bg-secondary transition-colors">
-                                            EPC Installer
-                                        </div>
-                                    </label>
-                                    <label className="cursor-pointer">
-                                        <input type="radio" name="role" value="brand" className="peer sr-only" />
-                                        <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary hover:bg-secondary transition-colors">
-                                            Solar Brand
-                                        </div>
-                                    </label>
-                                    <label className="cursor-pointer">
-                                        <input type="radio" name="role" value="admin" className="peer sr-only" />
-                                        <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary hover:bg-secondary transition-colors">
-                                            Admin
-                                        </div>
-                                    </label>
+                <div className="lg:col-span-1 space-y-6">
+                    <Card className="border-none shadow-sm rounded-3xl h-fit">
+                        <CardHeader>
+                            <CardTitle className="text-xl flex items-center gap-2">
+                                <MailPlus className="w-5 h-5 text-primary" />
+                                Invite User
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <form action={async (formData) => {
+                                "use server";
+                                const email = formData.get("email") as string;
+                                const selectedRole = formData.get("role") as "admin" | "epc" | "brand";
+                                await createInvitation(email, selectedRole);
+                            }} className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold uppercase tracking-widest opacity-60">Email Address</label>
+                                    <input name="email" type="email" placeholder="user@example.com" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none" required />
                                 </div>
-                            </div>
-                            <Button type="submit" className="w-full rounded-xl font-bold h-12 gap-2 shadow-lg shadow-primary/20">
-                                Send Invite / Assign
-                            </Button>
-                        </form>
-                    </CardContent>
-                </Card>
+                                <div className="space-y-3">
+                                    <label className="text-xs font-bold uppercase tracking-widest opacity-60">Assign Role</label>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                        <label className="cursor-pointer">
+                                            <input type="radio" name="role" value="epc" className="peer sr-only" defaultChecked />
+                                            <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary hover:bg-secondary transition-colors">
+                                                EPC Installer
+                                            </div>
+                                        </label>
+                                        <label className="cursor-pointer">
+                                            <input type="radio" name="role" value="brand" className="peer sr-only" />
+                                            <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary hover:bg-secondary transition-colors">
+                                                Solar Brand
+                                            </div>
+                                        </label>
+                                        <label className="cursor-pointer">
+                                            <input type="radio" name="role" value="admin" className="peer sr-only" />
+                                            <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary hover:bg-secondary transition-colors">
+                                                Admin
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <Button type="submit" className="w-full rounded-xl font-bold h-12 gap-2 shadow-lg shadow-primary/20">
+                                    Send Invite / Assign
+                                </Button>
+                            </form>
+                        </CardContent>
+                    </Card>
+
+                    <BulkInvite />
+                </div>
 
                 <div className="lg:col-span-2 space-y-8">
                     {pendingInvites.length > 0 && (

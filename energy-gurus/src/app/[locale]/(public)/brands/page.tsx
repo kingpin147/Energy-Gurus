@@ -1,34 +1,45 @@
 import { db } from "@/db";
 import { brands, products, reviews, users } from "@/db/schema";
-import { Link } from "@/i18n/routing";
-import { ShieldCheck, Star, Search, Zap, ArrowRight, Shield, Globe, Award } from "lucide-react";
-import { redis } from "@/lib/redis";
+import { ShieldCheck, Star, ArrowRight, Globe, Award, Zap, Shield } from "lucide-react";
 import { SidebarVerification } from "@/components/brands/sidebar-verification";
 import { ListSort } from "@/components/shared/list-sort";
-import { desc, asc, eq, sql } from "drizzle-orm";
-import { Input } from "@/components/ui/input";
+import { ListSearch } from "@/components/shared/list-search";
+import { desc, asc, eq, sql, ilike, and } from "drizzle-orm";
 import { Card, CardContent } from "@/components/ui/card";
 import { TrackedLink } from "@/components/shared/AnalyticsTracker";
 import Image from "next/image";
 import { unstable_cache } from "next/cache";
+import { getBrandCompleteness } from "@/lib/utils/completeness";
 
 const getBrandsData = unstable_cache(
-    async (sort: string) => {
+    async (sort: string, q?: string) => {
         const brandsData = await db
             .select({
                 id: brands.id,
                 brandName: brands.brandName,
+                countryHead: brands.countryHead,
+                customerCareHead: brands.customerCareHead,
                 logoUrl: brands.logoUrl,
                 about: brands.about,
+                headOffice: brands.headOffice,
+                website: brands.website,
+                socialLinks: brands.socialLinks,
+                warrantyUrl: brands.warrantyUrl,
                 isVerified: brands.isVerified,
                 createdAt: brands.createdAt,
                 avgRating: sql<number>`CAST(AVG(${reviews.rating}) AS FLOAT)`.as('avg_rating'),
                 reviewCount: sql<number>`COUNT(${reviews.id})`.as('review_count'),
+                productsCount: sql<number>`(SELECT COUNT(*) FROM ${products} WHERE ${products.brandId} = ${brands.id})`.mapWith(Number),
             })
             .from(brands)
             .innerJoin(users, eq(users.id, brands.userId))
             .leftJoin(reviews, eq(reviews.targetId, brands.id))
-            .where(eq(users.isActive, true))
+            .where(
+                and(
+                    eq(users.isActive, true),
+                    q ? ilike(brands.brandName, `%${q}%`) : undefined
+                )
+            )
             .groupBy(brands.id)
             .orderBy((t) => {
                 if (sort === "top-rated") return desc(t.avgRating);
@@ -39,10 +50,16 @@ const getBrandsData = unstable_cache(
 
         const allProducts = await db.select().from(products);
 
-        return brandsData.map(brand => ({
-            ...brand,
-            products: allProducts.filter(p => p.brandId === brand.id).slice(0, 3)
-        }));
+        const brandsWithScore = brandsData.map(brand => {
+            const { score } = getBrandCompleteness(brand, brand.productsCount || 0);
+            return {
+                ...brand,
+                score,
+                products: allProducts.filter(p => p.brandId === brand.id).slice(0, 3)
+            };
+        });
+
+        return brandsWithScore.filter(brand => brand.score >= 50);
     },
     ['brands-list-cache'],
     { revalidate: 3600, tags: ['brands'] }
@@ -50,11 +67,12 @@ const getBrandsData = unstable_cache(
 export default async function BrandsListingPage({
     searchParams,
 }: {
-    searchParams: Promise<{ sort?: string }>;
+    searchParams: Promise<{ sort?: string; q?: string }>;
 }) {
-    const { sort } = await searchParams;
+    const { sort, q } = await searchParams;
     const sortVal = sort || "latest";
-    const brandList = await getBrandsData(sortVal);
+    const qVal = q || "";
+    const brandList = await getBrandsData(sortVal, qVal);
 
     return (
         <div className="min-h-screen bg-background selection:bg-primary/20">
@@ -91,13 +109,10 @@ export default async function BrandsListingPage({
                                 </span>
                             </div>
                             <div className="flex gap-4 w-full md:w-auto">
-                                <div className="relative flex-1 md:w-72 group">
-                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                    <Input 
-                                        placeholder="Search global brands..." 
-                                        className="pl-12 h-14 bg-white/50 backdrop-blur-xl border-border/50 rounded-2xl focus:ring-primary/20 focus:border-primary transition-all text-base font-medium shadow-sm" 
-                                    />
-                                </div>
+                                <ListSearch 
+                                    placeholder="Search global brands..." 
+                                    className="pl-12 h-14 bg-white/50 backdrop-blur-xl border-border/50 rounded-2xl focus:ring-primary/20 focus:border-primary transition-all text-base font-medium shadow-sm" 
+                                />
                                 <ListSort 
                                     options={[
                                         { label: "Newest Arrivals", value: "latest" },
