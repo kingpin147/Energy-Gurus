@@ -15,6 +15,7 @@ import { DashboardInquiryList } from "@/components/dashboard/inquiry-list";
 import { DashboardReviewList } from "@/components/dashboard/dashboard-review-list";
 import { addProductModel, updateBrandProfile } from "@/lib/actions/brand";
 import { getBrandCompleteness } from "@/lib/utils/completeness";
+import { SocialLinksForm } from "@/components/dashboard/social-links-form";
 
 export default async function BrandDashboard() {
     const { userId: clerkId, sessionClaims } = await auth();
@@ -292,29 +293,7 @@ export default async function BrandDashboard() {
                                 
                                 <div className="pt-6 border-t">
                                     <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-4 block">Social Media Presence</label>
-                                    <form action={async (formData) => {
-                                        "use server";
-                                        const links = [
-                                            { platform: "Facebook", url: formData.get("facebook") as string },
-                                            { platform: "LinkedIn", url: formData.get("linkedin") as string },
-                                            { platform: "Instagram", url: formData.get("instagram") as string },
-                                            { platform: "YouTube", url: formData.get("youtube") as string },
-                                            { platform: "WhatsApp", url: formData.get("whatsapp") as string },
-                                        ].filter(l => l.url);
-                                        await updateBrandProfile({ socialLinks: links });
-                                    }} className="space-y-4">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <input name="facebook" placeholder="Facebook URL" defaultValue={(myBrand.socialLinks as any[])?.find(l => l.platform === "Facebook")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none" />
-                                            <input name="linkedin" placeholder="LinkedIn URL" defaultValue={(myBrand.socialLinks as any[])?.find(l => l.platform === "LinkedIn")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none" />
-                                            <input name="instagram" placeholder="Instagram URL" defaultValue={(myBrand.socialLinks as any[])?.find(l => l.platform === "Instagram")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none" />
-                                            <input name="youtube" placeholder="YouTube URL" defaultValue={(myBrand.socialLinks as any[])?.find(l => l.platform === "YouTube")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none" />
-                                        </div>
-                                        <div>
-                                            <label className="text-[8px] font-black uppercase tracking-[0.2em] opacity-30 mb-2 block">WhatsApp Contact Number</label>
-                                            <input name="whatsapp" placeholder="+92 3XX XXXXXXX" defaultValue={(myBrand.socialLinks as any[])?.find(l => l.platform === "WhatsApp")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none font-bold text-green-600" />
-                                        </div>
-                                        <Button className="w-full bg-secondary text-secondary-foreground rounded-xl font-bold h-11">Update Network Links</Button>
-                                    </form>
+                                    <SocialLinksForm type="brand" initialLinks={(myBrand.socialLinks as any[]) || []} />
                                 </div>
                             </CardContent>
                         </Card>

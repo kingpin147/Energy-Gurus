@@ -15,6 +15,7 @@ import { EpcProfileForm } from "@/components/dashboard/epc-profile-form";
 import { OfficeManagement } from "@/components/dashboard/office-management";
 import { ProjectManagement } from "@/components/dashboard/project-management";
 import { getEpcCompleteness } from "@/lib/utils/completeness";
+import { SocialLinksForm } from "@/components/dashboard/social-links-form";
 
 export default async function EpcDashboard() {
   const { userId: clerkId } = await auth();
@@ -152,39 +153,7 @@ export default async function EpcDashboard() {
 
                 <div className="pt-8 border-t">
                   <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-4">Social Presence</label>
-                  <form action={async (formData) => {
-                    "use server";
-                    const links = [
-                        { platform: "Facebook", url: formData.get("facebook") as string },
-                        { platform: "LinkedIn", url: formData.get("linkedin") as string },
-                        { platform: "Instagram", url: formData.get("instagram") as string },
-                        { platform: "Twitter", url: formData.get("twitter") as string },
-                        { platform: "WhatsApp", url: formData.get("whatsapp") as string },
-                    ].filter(l => l.url);
-                    await updateEpcProfile({ socialLinks: links });
-                  }} className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-bold uppercase tracking-widest opacity-50 w-20 shrink-0">Facebook</span>
-                      <input name="facebook" placeholder="https://facebook.com/yourpage" defaultValue={epc.socialLinks?.find(l => l.platform === "Facebook")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-bold uppercase tracking-widest opacity-50 w-20 shrink-0">LinkedIn</span>
-                      <input name="linkedin" placeholder="https://linkedin.com/company/yourpage" defaultValue={epc.socialLinks?.find(l => l.platform === "LinkedIn")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-bold uppercase tracking-widest opacity-50 w-20 shrink-0">Instagram</span>
-                      <input name="instagram" placeholder="https://instagram.com/yourprofile" defaultValue={epc.socialLinks?.find(l => l.platform === "Instagram")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-bold uppercase tracking-widest opacity-50 w-20 shrink-0">Twitter</span>
-                      <input name="twitter" placeholder="https://twitter.com/yourhandle" defaultValue={epc.socialLinks?.find(l => l.platform === "Twitter")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-bold uppercase tracking-widest opacity-50 w-20 shrink-0">WhatsApp</span>
-                      <input name="whatsapp" placeholder="+92 3XX XXXXXXX" defaultValue={epc.socialLinks?.find(l => l.platform === "WhatsApp")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
-                    </div>
-                    <button className="w-full bg-secondary text-secondary-foreground h-10 rounded-xl font-bold text-sm hover:bg-secondary/80 mt-2">Update Social Links</button>
-                  </form>
+                  <SocialLinksForm type="epc" initialLinks={epc.socialLinks || []} />
                 </div>
 
               </CardContent>

@@ -3,9 +3,10 @@ import { getTranslations } from "next-intl/server";
 import { ArrowRight, Play, Star, ShieldCheck, Zap, Video, Calendar, ArrowUpRight, Phone, Info, Users } from "lucide-react";
 import Image from "next/image";
 import { db } from "@/db";
-import { podcasts, epcInstallers, reviews, users, brands, liveQA } from "@/db/schema";
+import { podcasts, epcInstallers, reviews, users, brands, liveQA, epcOffices, epcProjects, products } from "@/db/schema";
 import { desc, count, eq, sql, asc } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
+import { getEpcCompleteness, getBrandCompleteness } from "@/lib/utils/completeness";
 
 const getHomepageData = unstable_cache(
     async () => {
@@ -26,39 +27,80 @@ const getHomepageData = unstable_cache(
 
             const targetQA = activeQA.length > 0 ? activeQA[0] : upcomingQA[0] || null;
 
-            // Get EPCs with real average ratings in a single query
-            const topEpcs = await db.select({
+            // Get all active EPCs, calculate completeness, filter, and sort
+            const rawEpcs = await db.select({
                 id: epcInstallers.id,
                 companyName: epcInstallers.companyName,
+                ceoName: epcInstallers.ceoName,
+                sectors: epcInstallers.sectors,
                 logoUrl: epcInstallers.logoUrl,
                 about: epcInstallers.about,
+                website: epcInstallers.website,
+                socialLinks: epcInstallers.socialLinks,
+                createdAt: epcInstallers.createdAt,
                 avgRating: sql<number>`CAST(AVG(${reviews.rating}) AS FLOAT)`,
                 reviewCount: count(reviews.id),
+                officesCount: sql<number>`(SELECT COUNT(*) FROM ${epcOffices} WHERE ${epcOffices.epcId} = ${epcInstallers.id})`.mapWith(Number),
+                projectsCount: sql<number>`(SELECT COUNT(*) FROM ${epcProjects} WHERE ${epcProjects.epcId} = ${epcInstallers.id})`.mapWith(Number),
             })
             .from(epcInstallers)
             .innerJoin(users, eq(users.id, epcInstallers.userId))
             .leftJoin(reviews, eq(epcInstallers.id, reviews.targetId))
             .where(eq(users.isActive, true))
-            .groupBy(epcInstallers.id)
-            .orderBy(sql`AVG(${reviews.rating}) DESC NULLS LAST`, asc(epcInstallers.createdAt))
-            .limit(3);
+            .groupBy(epcInstallers.id);
 
-            // Get top brands
-            const topBrands = await db.select({
+            const topEpcs = rawEpcs.map(inst => {
+                const { score } = getEpcCompleteness(inst, inst.officesCount || 0, inst.projectsCount || 0);
+                return { ...inst, score };
+            })
+            .filter(inst => inst.score >= 50)
+            .sort((a, b) => {
+                if (b.avgRating !== a.avgRating) {
+                    if (a.avgRating === null || isNaN(a.avgRating)) return 1;
+                    if (b.avgRating === null || isNaN(b.avgRating)) return -1;
+                    return b.avgRating - a.avgRating;
+                }
+                return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+            })
+            .slice(0, 3);
+
+            // Get all active Brands, calculate completeness, filter, and sort
+            const rawBrands = await db.select({
                 id: brands.id,
                 brandName: brands.brandName,
+                countryHead: brands.countryHead,
+                customerCareHead: brands.customerCareHead,
                 logoUrl: brands.logoUrl,
                 about: brands.about,
+                headOffice: brands.headOffice,
+                website: brands.website,
+                socialLinks: brands.socialLinks,
+                warrantyUrl: brands.warrantyUrl,
+                createdAt: brands.createdAt,
                 avgRating: sql<number>`CAST(AVG(${reviews.rating}) AS FLOAT)`,
                 reviewCount: count(reviews.id),
+                productsCount: sql<number>`(SELECT COUNT(*) FROM ${products} WHERE ${products.brandId} = ${brands.id})`.mapWith(Number),
             })
             .from(brands)
             .innerJoin(users, eq(users.id, brands.userId))
             .leftJoin(reviews, eq(brands.id, reviews.targetId))
             .where(eq(users.isActive, true))
-            .groupBy(brands.id)
-            .orderBy(sql`AVG(${reviews.rating}) DESC NULLS LAST`, asc(brands.createdAt))
-            .limit(3);
+            .groupBy(brands.id);
+
+            const topBrands = rawBrands.map(brand => {
+                const { score } = getBrandCompleteness(brand, brand.productsCount || 0);
+                return { ...brand, score };
+            })
+            .filter(brand => brand.score >= 50)
+            .sort((a, b) => {
+                if (b.avgRating !== a.avgRating) {
+                    if (a.avgRating === null || isNaN(a.avgRating)) return 1;
+                    if (b.avgRating === null || isNaN(b.avgRating)) return -1;
+                    return b.avgRating - a.avgRating;
+                }
+                return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+            })
+            .slice(0, 3);
 
             return { latestPodcasts, topEpcs, topBrands, targetQA };
         } catch (e) {
