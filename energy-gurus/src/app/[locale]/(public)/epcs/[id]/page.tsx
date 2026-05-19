@@ -406,8 +406,9 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
                           <SocialLinkTracker 
                             key={i} 
                             link={link} 
-                            brandId={installer.id} 
-                            brandName={installer.companyName} 
+                            id={installer.id} 
+                            name={installer.companyName} 
+                            type="epc"
                           />
                         ))}
                       </div>

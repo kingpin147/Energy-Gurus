@@ -1,29 +1,42 @@
 'use client'
 
 import posthog from 'posthog-js'
-import { Facebook, Twitter, Instagram, Linkedin, Globe } from "lucide-react"
+import { Facebook, Twitter, Instagram, Linkedin, Globe, Youtube, MessageSquare } from "lucide-react"
 
 export function SocialLinkTracker({ 
   link, 
-  brandId, 
-  brandName 
+  id, 
+  name,
+  type = "brand"
 }: { 
   link: { platform: string; url: string }, 
-  brandId: string, 
-  brandName: string 
+  id: string, 
+  name: string,
+  type?: "brand" | "epc"
 }) {
   const Icon = link.platform === "Facebook" ? Facebook :
                link.platform === "Twitter" ? Twitter :
                link.platform === "Instagram" ? Instagram :
-               link.platform === "LinkedIn" ? Linkedin : Globe;
+               link.platform === "LinkedIn" ? Linkedin :
+               link.platform === "YouTube" ? Youtube :
+               link.platform === "WhatsApp" ? MessageSquare : Globe;
 
   const handleClick = () => {
-    posthog.capture('brand_social_click', {
-      brandId,
-      brandName,
-      platform: link.platform,
-      url: link.url
-    })
+    if (type === "epc") {
+      posthog.capture('epc_social_click', {
+        epcId: id,
+        companyName: name,
+        platform: link.platform,
+        url: link.url
+      })
+    } else {
+      posthog.capture('brand_social_click', {
+        brandId: id,
+        brandName: name,
+        platform: link.platform,
+        url: link.url
+      })
+    }
   }
 
   return (

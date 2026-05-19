@@ -398,8 +398,9 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
                         <SocialLinkTracker 
                           key={i} 
                           link={link} 
-                          brandId={brand.id} 
-                          brandName={brand.brandName} 
+                          id={brand.id} 
+                          name={brand.brandName} 
+                          type="brand"
                         />
                       ))}
                     </div>
