@@ -328,7 +328,7 @@ export default async function Homepage() {
                             <div className="md:col-span-8 bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm group">
                                 <div className="aspect-[16/9] bg-primary/5 relative overflow-hidden">
                                     {featuredPodcast.thumbnailUrl ? (
-                                        <Image src={featuredPodcast.thumbnailUrl} alt={featuredPodcast.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+                                        <Image src={featuredPodcast.thumbnailUrl} alt={featuredPodcast.title} fill sizes="(max-width: 768px) 100vw, 66vw" className="object-cover group-hover:scale-105 transition-transform duration-700" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center bg-primary/5">
                                             <Play className="w-12 h-12 text-slate-300" />

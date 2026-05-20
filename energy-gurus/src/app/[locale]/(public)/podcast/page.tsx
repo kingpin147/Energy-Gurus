@@ -55,6 +55,7 @@ export default async function PodcastListingPage({
                                     src={getThumbnail(episodes[0])} 
                                     alt={episodes[0].title}
                                     fill
+                                    sizes="(max-width: 1024px) 100vw, 60vw"
                                     className="object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
                                     priority
                                 />
@@ -167,6 +168,7 @@ export default async function PodcastListingPage({
                                             src={getThumbnail(episode)} 
                                             alt={episode.title}
                                             fill
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                             className="object-cover group-hover:scale-105 transition-transform duration-500"
                                         />
                                         <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-lg text-[10px] font-bold text-primary shadow-sm uppercase">
