@@ -18,6 +18,7 @@ import { getBrandCompleteness } from "@/lib/utils/completeness";
 import { SocialLinksForm } from "@/components/dashboard/social-links-form";
 import { AddProductDialog } from "@/components/dashboard/AddProductDialog";
 import { BrandRepsForm } from "@/components/dashboard/BrandRepsForm";
+import { BrandLogoUpload } from "@/components/dashboard/BrandLogoUpload";
 
 export default async function BrandDashboard() {
     const { userId: clerkId } = await auth();
@@ -187,6 +188,7 @@ export default async function BrandDashboard() {
                                 <CardTitle>Media & Socials</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-6">
+                                <BrandLogoUpload initialLogo={myBrand.logoUrl} />
                                 <BrandGalleryUpload initialPhotos={myBrand.photos} />
 
                                 <div className="pt-6 border-t">
@@ -258,7 +260,7 @@ export default async function BrandDashboard() {
                         <DashboardReviewList targetId={myBrand.id} targetType="brand" />
                     </div>
                 </TabsContent>
-            </Tabs>
-        </div>
+            </Tabs >
+        </div >
     );
 }

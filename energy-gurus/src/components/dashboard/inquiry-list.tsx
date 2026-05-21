@@ -1,16 +1,29 @@
 import { db } from "@/db";
-import { inquiries, users } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
-import { MessageSquare, Clock, User, CheckCircle2 } from "lucide-react";
+import { inquiries, users, brands, epcInstallers } from "@/db/schema";
+import { eq, desc, and } from "drizzle-orm";
+import { MessageSquare, Clock, User, CheckCircle2, Mail, Phone, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { updateInquiryStatus } from "@/lib/actions/inquiry";
-
-import { Mail, Phone, ExternalLink } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export async function DashboardInquiryList({ receiverId }: { receiverId: string }) {
-    const inquiryList = await db.select()
+    const inquiryList = await db.select({
+        id: inquiries.id,
+        message: inquiries.message,
+        status: inquiries.status,
+        createdAt: inquiries.createdAt,
+        guestName: inquiries.guestName,
+        guestEmail: inquiries.guestEmail,
+        guestPhone: inquiries.guestPhone,
+        authorId: inquiries.senderId,
+        brandLogo: brands.logoUrl,
+        epcLogo: epcInstallers.logoUrl
+    })
         .from(inquiries)
+        .leftJoin(users, eq(inquiries.senderId, users.id))
+        .leftJoin(brands, eq(brands.userId, users.id))
+        .leftJoin(epcInstallers, eq(epcInstallers.userId, users.id))
         .where(eq(inquiries.receiverId, receiverId))
         .orderBy(desc(inquiries.createdAt));
 
@@ -29,20 +42,22 @@ export async function DashboardInquiryList({ receiverId }: { receiverId: string 
                         <CardContent className="p-6">
                             <div className="flex justify-between items-start mb-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center">
-                                        <User className="w-5 h-5 text-primary" />
-                                    </div>
+                                    <Avatar className="w-10 h-10 rounded-full">
+                                        <AvatarImage src={inquiry.brandLogo || inquiry.epcLogo || undefined} />
+                                        <AvatarFallback className="bg-secondary text-primary">
+                                            <User className="w-5 h-5" />
+                                        </AvatarFallback>
+                                    </Avatar>
                                     <div>
-                                        <p className="font-bold text-sm">{(inquiry as any).guestName || "Potential Customer"}</p>
+                                        <p className="font-bold text-sm">{inquiry.guestName || "Potential Customer"}</p>
                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                             <Clock className="w-3 h-3" />
                                             <span>{new Date(inquiry.createdAt).toLocaleString()}</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded ${
-                                    inquiry.status === 'pending' ? 'bg-accent/20 text-accent' : 'bg-green-100 text-green-600'
-                                }`}>
+                                <div className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded ${inquiry.status === 'pending' ? 'bg-accent/20 text-accent' : 'bg-green-100 text-green-600'
+                                    }`}>
                                     {inquiry.status}
                                 </div>
                             </div>

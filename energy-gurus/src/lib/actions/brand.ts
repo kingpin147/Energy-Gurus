@@ -9,6 +9,8 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { redis, CACHE_KEYS } from "@/lib/redis";
 
+import { clerkClient as createClerkClient } from "@clerk/nextjs/server";
+
 export async function updateBrandProfile(data: FormData | Partial<typeof brands.$inferInsert>) {
   const { userId: clerkId } = await auth();
   if (!clerkId) throw new Error("Unauthorized");
@@ -48,8 +50,12 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
   } : data;
 
   let targetUserId = user.id;
+  let targetClerkId = clerkId;
+
   if (!isFormData && data.userId && (role === "admin" || role === "super-admin")) {
     targetUserId = data.userId;
+    const [targetUser] = await db.select().from(users).where(eq(users.id, targetUserId));
+    if (targetUser) targetClerkId = targetUser.clerkId;
   }
 
   const result = await db.update(brands)
@@ -59,6 +65,24 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
     })
     .where(eq(brands.userId, targetUserId))
     .returning();
+
+  // Handle Clerk Avatar Sync if logoUrl is updated
+  const newLogoUrl = (updateData as any).logoUrl;
+  if (newLogoUrl !== undefined) {
+    try {
+      const client = await createClerkClient();
+      // Update public metadata so frontend can use it if needed, 
+      // and attempt to sync basic profile info if possible.
+      // Note: imageUrl is often read-only in Clerk's updateUser.
+      await client.users.updateUserMetadata(targetClerkId, {
+        publicMetadata: {
+          brandLogo: newLogoUrl || ""
+        }
+      });
+    } catch (e) {
+      console.error("Failed to sync logo with Clerk metadata:", e);
+    }
+  }
 
   // Invalidate Cache
   if (result.length > 0) {

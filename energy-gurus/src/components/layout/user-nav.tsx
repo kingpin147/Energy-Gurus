@@ -48,7 +48,7 @@ export function UserNav() {
           style={{ height: "40px", minWidth: "40px" }}
         >
           <Avatar className="h-8 w-8 shrink-0">
-            <AvatarImage src={user.imageUrl} alt={user.fullName ?? ""} />
+            <AvatarImage src={(user.publicMetadata?.brandLogo as string) || user.imageUrl} alt={user.fullName ?? ""} />
             <AvatarFallback className="bg-[#006d6d] text-white">
               {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
             </AvatarFallback>

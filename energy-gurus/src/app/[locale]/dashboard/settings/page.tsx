@@ -2,9 +2,10 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Globe, User, Save, Loader2 } from "lucide-react";
+import { Globe, User, Save, Loader2, ImageIcon } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const roleLabels: Record<string, string> = {
     "super-admin": "System Administrator",
@@ -22,23 +23,38 @@ export default function SettingsPage() {
     const [saved, setSaved] = useState(false);
 
     // Populate once user loads
-    if (isLoaded && user && firstName === "" && lastName === "") {
-        setFirstName(user.firstName || "");
-        setLastName(user.lastName || "");
-    }
+    useEffect(() => {
+        if (isLoaded && user && firstName === "" && lastName === "") {
+            setFirstName(user.firstName || "");
+            setLastName(user.lastName || "");
+        }
+    }, [isLoaded, user]);
 
     const role = (user?.publicMetadata?.role as string) || "user";
     const roleLabel = roleLabels[role] || "Member";
 
     const handleSaveName = async () => {
         if (!user) return;
+
+        const trimmedFirstName = firstName.trim();
+        const trimmedLastName = lastName.trim();
+
+        if (trimmedFirstName === "" || trimmedLastName === "") {
+            alert("Names cannot be empty or contain only spaces.");
+            return;
+        }
+
         setSaving(true);
         try {
-            await user.update({ firstName, lastName });
+            await user.update({
+                firstName: trimmedFirstName,
+                lastName: trimmedLastName
+            });
             setSaved(true);
             setTimeout(() => setSaved(false), 3000);
-        } catch (e) {
+        } catch (e: any) {
             console.error("Failed to update name:", e);
+            alert(e.errors?.[0]?.longMessage || "Failed to update name. Please check your inputs.");
         } finally {
             setSaving(false);
         }
@@ -66,9 +82,12 @@ export default function SettingsPage() {
                     <CardContent className="p-8 space-y-8">
                         {/* Avatar + identity */}
                         <div className="flex items-center gap-6">
-                            <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center text-white text-2xl font-bold border-4 border-white shadow-xl shrink-0">
-                                {user?.firstName?.charAt(0) || user?.emailAddresses[0]?.emailAddress?.charAt(0)?.toUpperCase() || "?"}
-                            </div>
+                            <Avatar className="w-20 h-20 rounded-2xl border-4 border-white shadow-xl shrink-0">
+                                <AvatarImage src={(user?.publicMetadata?.brandLogo as string) || user?.imageUrl} />
+                                <AvatarFallback className="bg-primary text-white text-2xl font-bold">
+                                    {user?.firstName?.charAt(0) || user?.emailAddresses[0]?.emailAddress?.charAt(0)?.toUpperCase() || "?"}
+                                </AvatarFallback>
+                            </Avatar>
                             <div>
                                 <h3 className="text-xl font-bold">{user?.fullName || "Energy Guru"}</h3>
                                 <p className="text-muted-foreground text-sm">{user?.emailAddresses[0]?.emailAddress}</p>

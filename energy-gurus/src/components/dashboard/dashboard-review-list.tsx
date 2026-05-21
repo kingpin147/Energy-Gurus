@@ -1,10 +1,11 @@
 import { db } from "@/db";
-import { reviews, users } from "@/db/schema";
+import { reviews, users, brands, epcInstallers } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { Star, User, MessageCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { replyToReview } from "@/lib/actions/reviews";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export async function DashboardReviewList({ targetId, targetType }: { targetId: string, targetType: string }) {
     const allReviews = await db.select({
@@ -14,11 +15,15 @@ export async function DashboardReviewList({ targetId, targetType }: { targetId: 
         reply: reviews.reply,
         createdAt: reviews.createdAt,
         userName: users.name,
+        brandLogo: brands.logoUrl,
+        epcLogo: epcInstallers.logoUrl
     })
-    .from(reviews)
-    .leftJoin(users, eq(reviews.authorId, users.id))
-    .where(eq(reviews.targetId, targetId))
-    .orderBy(desc(reviews.createdAt));
+        .from(reviews)
+        .leftJoin(users, eq(reviews.authorId, users.id))
+        .leftJoin(brands, eq(brands.userId, users.id))
+        .leftJoin(epcInstallers, eq(epcInstallers.userId, users.id))
+        .where(eq(reviews.targetId, targetId))
+        .orderBy(desc(reviews.createdAt));
 
     if (allReviews.length === 0) {
         return (
@@ -36,9 +41,12 @@ export async function DashboardReviewList({ targetId, targetType }: { targetId: 
                     <CardContent className="p-8">
                         <div className="flex justify-between items-start mb-6">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-secondary rounded-2xl flex items-center justify-center">
-                                    <User className="w-6 h-6 text-primary" />
-                                </div>
+                                <Avatar className="w-12 h-12 rounded-2xl">
+                                    <AvatarImage src={review.brandLogo || review.epcLogo || undefined} />
+                                    <AvatarFallback className="bg-secondary text-primary">
+                                        <User className="w-6 h-6" />
+                                    </AvatarFallback>
+                                </Avatar>
                                 <div>
                                     <p className="font-bold">{review.userName || "Verified User"}</p>
                                     <p className="text-xs text-muted-foreground">{new Date(review.createdAt).toLocaleDateString()}</p>
@@ -52,7 +60,7 @@ export async function DashboardReviewList({ targetId, targetType }: { targetId: 
                         <p className="text-muted-foreground leading-relaxed italic mb-6">
                             "{review.comment}"
                         </p>
-                        
+
                         {review.reply ? (
                             <div className="p-6 bg-primary/5 rounded-2xl border-l-4 border-primary space-y-2">
                                 <p className="text-[10px] font-black uppercase tracking-widest text-primary opacity-60">Your Reply</p>
@@ -65,11 +73,11 @@ export async function DashboardReviewList({ targetId, targetType }: { targetId: 
                                 <input type="hidden" name="targetId" value={targetId} />
                                 <label className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 block">Reply to this review</label>
                                 <div className="flex gap-2">
-                                    <textarea 
-                                        name="reply" 
-                                        placeholder="Type your response..." 
+                                    <textarea
+                                        name="reply"
+                                        placeholder="Type your response..."
                                         className="flex-1 border rounded-xl p-3 text-sm bg-secondary/5 focus:ring-2 focus:ring-primary outline-none"
-                                        required 
+                                        required
                                     />
                                     <Button type="submit" className="self-end rounded-xl font-bold h-12">
                                         <MessageCircle className="w-4 h-4 mr-2" /> Reply
