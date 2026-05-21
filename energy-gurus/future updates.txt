@@ -1,0 +1,180 @@
+Dashboard Codebase Audit — Full Report
+Scope: Read-only audit of all 17 dashboard files (pages, layout, sidebar).
+Goal: Identify missing features, inconsistencies, and verify avatar/logo synchronization.
+
+Files Audited (17 total)
+#	File	Lines	Role Guard	Data Source
+1	
+page.tsx
+169	✅ Role-based stats	DB (live)
+2	
+brand/page.tsx
+267	✅ brand/admin	DB (live)
+3	
+epc/page.tsx
+198	✅ epc/admin	DB (live)
+4	
+users/page.tsx
+317	✅ admin only	DB + Clerk
+5	
+analytics/page.tsx
+233	❌ No guard	PostHog
+6	
+inbox/page.tsx
+105	✅ admin only	DB
+7	
+content/page.tsx
+217	✅ admin only	DB (cached)
+8	
+moderation/page.tsx
+104	✅ admin only	DB
+9	
+monitoring/page.tsx
+114	❌ No guard	Static/demo
+10	
+reports/page.tsx
+174	❌ No guard	Static + API
+11	
+inquiries/page.tsx
+51	✅ auth check	DB
+12	
+seed/page.tsx
+29	❌ No guard	Server action
+13	
+support/page.tsx
+71	✅ auth check	DB
+14	
+settings/page.tsx
+155	✅ via Clerk client	Clerk
+15	
+layout.tsx
+104	✅ SecurityGuard	—
+16	
+Sidebar.tsx
+85	✅ role-based links	—
+17	
+podcasts/page.tsx
+117	✅ admin only	DB
+✅ What's Working Well
+Authentication & Authorization
+Brand, EPC, Users, Inbox, Content, Moderation, Podcasts all have proper role guards
+Layout uses SecurityGuard and InvitationCheck components
+Sidebar correctly renders role-specific navigation links
+Admin whitelist in 
+users/page.tsx
+ ensures super-admin visibility
+Avatar/Logo Synchronization
+Settings page correctly shows publicMetadata.brandLogo fallback → user.imageUrl
+UserNav in layout sidebar renders synchronized avatar
+Previously fixed in 
+DashboardReviewList
+, 
+InquiryList
+, 
+DashboardInquiryList
+Profile Completeness
+Brand dashboard: Full completeness scoring via 
+getBrandCompleteness()
+EPC dashboard: Full completeness scoring via 
+getEpcCompleteness()
+ with visibility warning at <50%
+Data Fetching Patterns
+Content page uses unstable_cache with tags for efficient caching
+Analytics uses PostHog integration with real-time trends
+User Management includes Clerk sync for pending invitations
+⚠️ Findings — Potential Issues
+1. Missing Role Guards (Security)
+CAUTION
+
+These pages have no authentication or role check — any logged-in user can access them.
+
+Page	Issue
+analytics/page.tsx
+No auth/role check. Should be admin-only.
+monitoring/page.tsx
+No auth/role check. Exposes telemetry data.
+reports/page.tsx
+No auth/role check. Has CSV download links for users, inquiries, reviews.
+seed/page.tsx
+No auth/role check. Allows anyone to trigger database seeding.
+2. Duplicate Content Pages
+WARNING
+
+podcasts/page.tsx
+ and 
+content/page.tsx
+ serve the same purpose (managing podcasts + live QA sessions).
+
+content/page.tsx
+ is the polished version with PodcastForm, LiveQAForm, thumbnails, search, caching
+podcasts/page.tsx
+ is the legacy version with basic inline forms, no thumbnails, no search
+Impact: Two routes exist for the same functionality. The old page uses raw <form action={addPodcast}> while the new one uses dedicated form components.
+3. Sidebar Navigation Gaps
+IMPORTANT
+
+Several dashboard pages exist but are not linked in the sidebar for any role.
+
+Page	In Admin Sidebar?	In EPC Sidebar?	In Brand Sidebar?
+/dashboard/monitoring	❌	❌	❌
+/dashboard/reports	❌	❌	❌
+/dashboard/inquiries	❌	❌	❌
+/dashboard/seed	❌	❌	❌
+/dashboard/podcasts	❌	❌	❌
+inquiries/page.tsx
+ is a standalone partner-facing inbox, but EPC/Brand users already access inquiries via their profile tabs. This standalone page may be redundant or could be exposed as a top-level sidebar link.
+monitoring and reports are partially static/demo pages — they exist but have no connecting entry point.
+4. Static / Hardcoded Data
+Page	Hardcoded Data
+monitoring/page.tsx
+All gauge values, inverter health, alerts are statically hardcoded (not from DB/API)
+reports/page.tsx
+"Historical Audit PDF Archives" and "Recent Form Submissions" are hardcoded with fake names/emails
+page.tsx
+ (main)	EPC stats: Avg. Rating: "4.8" and Profile Views: "1.2k" are hardcoded strings
+page.tsx
+ (main)	Brand stats: Verifications: "450" and Support Tickets: "3" are hardcoded
+page.tsx
+ (main)	Engagement chart uses static array [40, 60, 45, 70, 85, 100, 90, 75, 50, 30]
+5. Console Debug Logs in Production Code
+File	Line	Log Statement
+inbox/page.tsx
+27-28	console.log("[Inbox Debug]...") — debug logging left in production code
+6. Locale Selector Non-Functional
+settings/page.tsx
+ line 144: The locale <select> dropdown is purely visual with no onChange handler or routing logic. Selecting "Urdu (Pakistan)" does nothing.
+7. Quick Actions Not Linked
+page.tsx
+ (main dashboard): "Reply to Inquiries", "Update Portfolio", "Add New Product", "Generate QR Codes", "Help & Support" buttons are plain <button> elements with no onClick or href — they are non-functional placeholders.
+8. Minor UI Inconsistences
+Area	Detail
+EPC visibility warning	Uses raw markdown syntax **50%** in JSX text — renders as literal **50%** instead of bold
+reports/page.tsx
+"Download PDF" buttons link nowhere (no href on <Button>)
+users/page.tsx
+Role change functionality is imported (
+updateUserRole
+) but never used in the UI
+📊 Summary Matrix
+Category	Status	Count
+Pages with proper role guards	✅	13/17
+Pages missing role guards	❌	4 (analytics, monitoring, reports, seed)
+Pages with live DB data	✅	11
+Pages with hardcoded/static data	⚠️	3 (monitoring, reports, main overview partially)
+Duplicate/legacy pages	⚠️	1 (podcasts vs content)
+Orphan pages (not in sidebar)	⚠️	5 (monitoring, reports, inquiries, seed, podcasts)
+Non-functional UI elements	⚠️	3 (quick actions, locale selector, report downloads)
+🔑 Priority Recommendations
+🔴 Critical: Add role guards to analytics, monitoring, reports, and especially seed pages
+🟡 Important: Remove or redirect 
+podcasts/page.tsx
+ — it's superseded by 
+content/page.tsx
+🟡 Important: Remove console.log debug statements from 
+inbox/page.tsx
+🟢 Nice-to-have: Wire up Quick Action buttons on main dashboard or remove them
+🟢 Nice-to-have: Replace hardcoded stats on main dashboard with real DB queries
+🟢 Nice-to-have: Add sidebar links for monitoring/reports if they're intended for admin use
+
+Migrate from uploadthing to Cloudflare R2 for file uploads 
+
