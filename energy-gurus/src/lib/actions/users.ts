@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq, and, ne, or } from "drizzle-orm";
 import { clerkClient as createClerkClient } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getUserRole } from "@/lib/roles";
 import { redis, CACHE_KEYS } from "@/lib/redis";
 import { brands, epcInstallers, inquiries, reviews } from "@/db/schema";
@@ -44,10 +44,31 @@ export async function deleteUser(userId: string) {
     await db.delete(brands).where(eq(brands.userId, userId));
     await db.delete(epcInstallers).where(eq(epcInstallers.userId, userId));
 
+    // Clear Redis Caches for specific profiles before deleting from DB
+    try {
+        const [brand] = await db.select({ id: brands.id }).from(brands).where(eq(brands.userId, userId));
+        const [epc] = await db.select({ id: epcInstallers.id }).from(epcInstallers).where(eq(epcInstallers.userId, userId));
+
+        const keysToDelete: string[] = [CACHE_KEYS.BRANDS_LIST, CACHE_KEYS.EPCS_LIST];
+        if (brand) keysToDelete.push(CACHE_KEYS.BRAND_DETAILS(brand.id));
+        if (epc) keysToDelete.push(CACHE_KEYS.EPC_DETAILS(epc.id));
+
+        await redis.del(...keysToDelete);
+    } catch (e) {
+        console.error("Failed to clear profile caches during deletion:", e);
+    }
+
     // Delete from DB
     await db.delete(users).where(eq(users.id, userId));
 
+    revalidatePath("/");
+    revalidatePath("/[locale]", "layout");
     revalidatePath("/dashboard/users");
+    revalidatePath("/[locale]/epcs", "layout");
+    revalidatePath("/[locale]/brands", "layout");
+    revalidateTag("homepage", {});
+    revalidateTag("brands", {});
+    revalidateTag("epcs", {});
 }
 
 export async function updateUserRole(userId: string, newRole: any) {
@@ -102,6 +123,9 @@ export async function toggleUserStatus(userId: string) {
     revalidatePath("/dashboard/users");
     revalidatePath("/[locale]/epcs", "layout");
     revalidatePath("/[locale]/brands", "layout");
+    revalidateTag("homepage", {});
+    revalidateTag("brands", {});
+    revalidateTag("epcs", {});
 
     // Clear Redis Caches for specific profiles
     try {

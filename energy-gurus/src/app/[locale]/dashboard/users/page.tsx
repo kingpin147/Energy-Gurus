@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users as UsersIcon, ShieldAlert, Trash2, MailPlus, Clock, Power, PowerOff } from "lucide-react";
-import { deleteUser, toggleUserStatus } from "@/lib/actions/users";
+import { deleteUser, toggleUserStatus, updateUserRole } from "@/lib/actions/users";
 import { createInvitation } from "@/lib/actions/invitations";
 import { invitations } from "@/db/schema";
 import { revalidatePath } from "next/cache";
@@ -113,7 +113,7 @@ export default async function UserManagementPage({
                 <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
                     <ListSearch placeholder="Search name or email..." />
                     <div className="flex gap-3">
-                        <ListSort 
+                        <ListSort
                             label="Filter by Role"
                             defaultValue="all"
                             options={[
@@ -121,13 +121,13 @@ export default async function UserManagementPage({
                                 { label: "Admin", value: "admin" },
                                 { label: "EPC Installer", value: "epc" },
                                 { label: "Solar Brand", value: "brand" },
-                            ]} 
+                            ]}
                         />
-                        <ListSort 
+                        <ListSort
                             options={[
                                 { label: "Latest", value: "latest" },
                                 { label: "Oldest", value: "oldest" },
-                            ]} 
+                            ]}
                         />
                     </div>
                 </div>
@@ -198,37 +198,37 @@ export default async function UserManagementPage({
                             <CardContent className="p-0">
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-left min-w-[600px]">
-                                    <thead>
-                                        <tr className="bg-secondary/5 border-b">
-                                            <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Email</th>
-                                            <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Pre-assigned Role</th>
-                                            <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60 text-right">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {pendingInvites.map((invite) => (
-                                            <tr key={invite.id} className="border-b">
-                                                <td className="p-6 font-medium">{invite.email}</td>
-                                                <td className="p-6">
-                                                    <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-secondary text-muted-foreground border">
-                                                        {invite.role}
-                                                    </span>
-                                                </td>
-                                                <td className="p-6 text-right">
-                                                    <form action={async () => {
-                                                        "use server";
-                                                        await db.delete(invitations).where(eq(invitations.id, invite.id));
-                                                        revalidatePath("/dashboard/users");
-                                                    }}>
-                                                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-500 rounded-lg">
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </Button>
-                                                    </form>
-                                                </td>
+                                        <thead>
+                                            <tr className="bg-secondary/5 border-b">
+                                                <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Email</th>
+                                                <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Pre-assigned Role</th>
+                                                <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60 text-right">Action</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            {pendingInvites.map((invite) => (
+                                                <tr key={invite.id} className="border-b">
+                                                    <td className="p-6 font-medium">{invite.email}</td>
+                                                    <td className="p-6">
+                                                        <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-secondary text-muted-foreground border">
+                                                            {invite.role}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-6 text-right">
+                                                        <form action={async () => {
+                                                            "use server";
+                                                            await db.delete(invitations).where(eq(invitations.id, invite.id));
+                                                            revalidatePath("/dashboard/users");
+                                                        }}>
+                                                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-500 rounded-lg">
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </Button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </CardContent>
                         </Card>
@@ -241,74 +241,73 @@ export default async function UserManagementPage({
                                 Registered Users
                             </CardTitle>
                         </CardHeader>
-                <CardContent className="p-0">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse min-w-[800px]">
-                            <thead>
-                                <tr className="bg-secondary/5 border-b">
-                                    <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Name</th>
-                                    <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Email</th>
-                                    <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Role</th>
-                                    <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {allUsers.map((user) => {
-                                    const whitelist = ["nomiking0072012@gmail.com", "energygurusonline@gmail.com"];
-                                    const isSuperAdmin = whitelist.includes(user.email.toLowerCase()) || user.role === 'super-admin';
-                                    const displayRole = isSuperAdmin ? "super-admin" : user.role;
-                                    
-                                    return (
-                                        <tr key={user.id} className="border-b hover:bg-secondary/5 transition-colors">
-                                            <td className="p-6 font-bold whitespace-nowrap">{user.name || "N/A"}</td>
-                                            <td className="p-6 text-muted-foreground whitespace-nowrap">{user.email}</td>
-                                            <td className="p-6">
-                                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border whitespace-nowrap ${
-                                                    displayRole === 'super-admin' ? 'bg-red-100 text-red-600 border-red-200' :
-                                                    displayRole === 'admin' ? 'bg-blue-100 text-blue-600 border-blue-200' :
-                                                    displayRole === 'epc' ? 'bg-green-100 text-green-600 border-green-200' :
-                                                    'bg-secondary text-muted-foreground border-secondary-foreground/10'
-                                                }`}>
-                                                    {displayRole.replace('-', ' ')}
-                                                </span>
-                                            </td>
-                                            <td className="p-6">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    {!isSuperAdmin && (user.role === 'epc' || user.role === 'brand') && (
-                                                        <form action={toggleUserStatus.bind(null, user.id)}>
-                                                            <Button 
-                                                                variant={user.isActive ? "outline" : "default"} 
-                                                                size="sm" 
-                                                                className={`h-9 px-4 rounded-xl gap-2 font-bold ${user.isActive ? "text-green-600 border-green-200 hover:bg-green-50" : "bg-red-600 hover:bg-red-700 text-white"}`}
-                                                            >
-                                                                {user.isActive ? <Power className="w-4 h-4" /> : <PowerOff className="w-4 h-4" />}
-                                                                {user.isActive ? "Active" : "Inactive"}
-                                                            </Button>
-                                                        </form>
-                                                    )}
-
-
-                                                    {/* Only Super Admin can delete other Admins, but NO ONE can delete Super Admins */}
-                                                    {!isSuperAdmin && (userRole === 'super-admin' || (userRole === 'admin' && user.role !== 'admin' && user.role !== 'super-admin')) && (
-                                                        <form action={async () => {
-                                                            "use server";
-                                                            await deleteUser(user.id);
-                                                        }}>
-                                                            <Button variant="ghost" size="sm" className="h-9 w-9 p-0 rounded-xl text-red-500 hover:text-red-600 hover:bg-red-50">
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </Button>
-                                                        </form>
-                                                    )}
-                                                </div>
-                                            </td>
+                        <CardContent className="p-0">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse min-w-[800px]">
+                                    <thead>
+                                        <tr className="bg-secondary/5 border-b">
+                                            <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Name</th>
+                                            <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Email</th>
+                                            <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Role</th>
+                                            <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60 text-right">Actions</th>
                                         </tr>
-                                    );
-                                })}
+                                    </thead>
+                                    <tbody>
+                                        {allUsers.map((user) => {
+                                            const whitelist = ["nomiking0072012@gmail.com", "energygurusonline@gmail.com"];
+                                            const isSuperAdmin = whitelist.includes(user.email.toLowerCase()) || user.role === 'super-admin';
+                                            const displayRole = isSuperAdmin ? "super-admin" : user.role;
 
-                            </tbody>
-                        </table>
-                    </div>
-                </CardContent>
+                                            return (
+                                                <tr key={user.id} className="border-b hover:bg-secondary/5 transition-colors">
+                                                    <td className="p-6 font-bold whitespace-nowrap">{user.name || "N/A"}</td>
+                                                    <td className="p-6 text-muted-foreground whitespace-nowrap">{user.email}</td>
+                                                    <td className="p-6">
+                                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border whitespace-nowrap ${displayRole === 'super-admin' ? 'bg-red-100 text-red-600 border-red-200' :
+                                                            displayRole === 'admin' ? 'bg-blue-100 text-blue-600 border-blue-200' :
+                                                                displayRole === 'epc' ? 'bg-green-100 text-green-600 border-green-200' :
+                                                                    'bg-secondary text-muted-foreground border-secondary-foreground/10'
+                                                            }`}>
+                                                            {displayRole.replace('-', ' ')}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-6">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            {!isSuperAdmin && (user.role === 'epc' || user.role === 'brand') && (
+                                                                <form action={toggleUserStatus.bind(null, user.id)}>
+                                                                    <Button
+                                                                        variant={user.isActive ? "outline" : "default"}
+                                                                        size="sm"
+                                                                        className={`h-9 px-4 rounded-xl gap-2 font-bold ${user.isActive ? "text-green-600 border-green-200 hover:bg-green-50" : "bg-red-600 hover:bg-red-700 text-white"}`}
+                                                                    >
+                                                                        {user.isActive ? <Power className="w-4 h-4" /> : <PowerOff className="w-4 h-4" />}
+                                                                        {user.isActive ? "Active" : "Inactive"}
+                                                                    </Button>
+                                                                </form>
+                                                            )}
+
+
+                                                            {/* Only Super Admin can delete other Admins, but NO ONE can delete Super Admins */}
+                                                            {!isSuperAdmin && (userRole === 'super-admin' || (userRole === 'admin' && user.role !== 'admin' && user.role !== 'super-admin')) && (
+                                                                <form action={async () => {
+                                                                    "use server";
+                                                                    await deleteUser(user.id);
+                                                                }}>
+                                                                    <Button variant="ghost" size="sm" className="h-9 w-9 p-0 rounded-xl text-red-500 hover:text-red-600 hover:bg-red-50">
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                    </Button>
+                                                                </form>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </CardContent>
                     </Card>
                 </div>
             </div>

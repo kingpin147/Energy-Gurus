@@ -1,70 +1,87 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Handshake, Newspaper, ArrowRight, ShieldCheck, Mail, Globe, MapPin } from "lucide-react";
+import { Users, Handshake, Newspaper, ArrowRight, ShieldCheck, Mail, Globe, MapPin, Zap, Award, Target, TrendingUp } from "lucide-react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 
 export default function AboutPage() {
     return (
-        <div className="flex flex-col min-h-screen">
-            {/* Hero Section */}
-            <section className="bg-primary text-primary-foreground py-20 lg:py-32">
-                <div className="container mx-auto px-4 text-center max-w-4xl">
-                    <h1 className="text-4xl md:text-6xl font-bold mb-6">Independent Energy Insights for Pakistan</h1>
-                    <p className="text-xl opacity-90 leading-relaxed mb-8">
-                        EnergyGurus is a professional platform dedicated to delivering data-driven analysis, expert commentary, and engineering excellence across Pakistan's energy sector.
+        <div className="flex flex-col min-h-screen bg-white font-sans selection:bg-primary/20">
+            {/* ─── HERO SECTION ─── */}
+            <section className="relative w-full py-24 lg:py-48 flex items-center justify-center overflow-hidden border-b border-slate-100">
+                {/* Premium Abstract Network Asset */}
+                <div className="absolute inset-0 z-0">
+                    <Image
+                        src="/hero_solar_banner.png"
+                        alt="Network Background"
+                        fill
+                        priority
+                        className="object-cover opacity-20 md:opacity-40 transition-opacity duration-1000 scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-white/40 to-white"></div>
+                </div>
+
+                <div className="container mx-auto px-6 text-center max-w-5xl relative z-10 animate-reveal">
+                    <div className="inline-flex items-center gap-3 bg-primary/10 text-primary px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-primary/20 mb-10 animate-soft-float">
+                        <Award className="w-4 h-4" /> Engineering Excellence
+                    </div>
+                    <h1 className="text-4xl md:text-7xl font-black mb-8 text-slate-900 tracking-tighter leading-[1] uppercase md:px-0 px-4">
+                        Independent Energy <span className="text-primary">Insights</span> for Pakistan
+                    </h1>
+                    <p className="text-lg md:text-2xl text-slate-600 font-medium leading-relaxed mb-12 opacity-90 max-w-3xl mx-auto">
+                        EnergyGurus is a professional platform dedicated to delivering data-driven analysis, expert commentary, and engineering standards across Pakistan&apos;s energy sector.
                     </p>
-                    <div className="flex justify-center gap-4">
-                        <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-sm">
-                            <ShieldCheck className="w-4 h-4 text-accent" /> Professional Integrity
+                    <div className="flex flex-wrap justify-center gap-5">
+                        <div className="glass px-6 py-3 rounded-2xl flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.1em] text-slate-900 shadow-lg border border-white/60">
+                            <ShieldCheck className="w-5 h-5 text-primary" /> Professional Integrity
                         </div>
-                        <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-sm">
-                            <Globe className="w-4 h-4 text-accent" /> Locally Optimized
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Mission Section */}
-            <section className="py-24 bg-background">
-                <div className="container mx-auto px-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                        <div className="space-y-6">
-                            <h2 className="text-3xl font-bold">Our Mission</h2>
-                            <p className="text-lg text-muted-foreground leading-relaxed">
-                                We believe that an informed energy transition is the key to Pakistan's economic stability. By bridging the gap between complex engineering data and policy-level decision making, we empower stakeholders at every level—from homeowners to regulators—to make smarter energy choices.
-                            </p>
-                            <p className="text-lg text-muted-foreground leading-relaxed">
-                                Whether through our weekly podcast, physical energy audits, or real-time monitoring platforms, our goal remains consistent: **clarity, action, and impact.**
-                            </p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="aspect-square bg-primary/5 rounded-2xl flex items-center justify-center p-8 text-center flex-col gap-4">
-                                <span className="text-4xl font-bold text-primary">500+</span>
-                                <span className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Audits Done</span>
-                            </div>
-                            <div className="aspect-square bg-primary/10 rounded-2xl flex items-center justify-center p-8 text-center flex-col gap-4">
-                                <span className="text-4xl font-bold text-primary">20MW+</span>
-                                <span className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Monitored</span>
-                            </div>
-                            <div className="aspect-square bg-accent/10 rounded-2xl flex items-center justify-center p-8 text-center flex-col gap-4">
-                                <span className="text-4xl font-bold text-primary">50+</span>
-                                <span className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Team Experts</span>
-                            </div>
-                            <div className="aspect-square bg-primary/5 rounded-2xl flex items-center justify-center p-8 text-center flex-col gap-4">
-                                <span className="text-4xl font-bold text-primary">100+</span>
-                                <span className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Podcast Episodes</span>
-                            </div>
+                        <div className="glass px-6 py-3 rounded-2xl flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.1em] text-slate-900 shadow-lg border border-white/60">
+                            <Globe className="w-5 h-5 text-primary" /> Locally Optimized
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Team/Leadership Section */}
-            <section className="py-24 bg-primary/5">
-                <div className="container mx-auto px-4">
-                    <h2 className="text-3xl font-bold text-center mb-16">Leadership Team</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+            {/* ─── MISSION SECTION ─── */}
+            <section className="py-24 md:py-40 bg-white relative">
+                <div className="container mx-auto px-6 max-w-7xl">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 lg:gap-32 items-center">
+                        <div className="space-y-10 animate-reveal">
+                            <div className="space-y-4">
+                                <span className="text-primary font-black uppercase tracking-[0.3em] text-[10px]">Technical Vision</span>
+                                <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter uppercase">Our Mission</h2>
+                            </div>
+                            <div className="space-y-6">
+                                <p className="text-xl text-slate-500 font-medium leading-relaxed opacity-90">
+                                    We believe that an informed energy transition is the key to Pakistan&apos;s economic stability. By bridging the gap between complex engineering data and policy-level decision making, we empower stakeholders at every level to make smarter energy choices.
+                                </p>
+                                <p className="text-xl text-slate-500 font-medium leading-relaxed opacity-90">
+                                    Whether through our technical podcasts, physical energy audits, or real-time monitoring platforms, our goal remains consistent: <span className="text-slate-900 font-black tracking-tight uppercase underline decoration-primary decoration-4 underline-offset-8">Clarity, Action, and Impact.</span>
+                                </p>
+                            </div>
+                            <Button className="bg-slate-900 text-white h-16 px-12 rounded-[2rem] font-black text-[11px] uppercase tracking-[0.2em] shadow-xl hover:scale-105 transition-all border-none">
+                                Review Standards <ArrowRight className="ml-3 w-5 h-5" />
+                            </Button>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6 md:gap-10">
+                            <StatCard value="500+" label="Audits Verified" icon={<ShieldCheck className="w-6 h-6" />} color="primary" />
+                            <StatCard value="20MW+" label="Load Monitored" icon={<Zap className="w-6 h-6" />} color="accent" />
+                            <StatCard value="50+" label="Board Experts" icon={<Users className="w-6 h-6" />} color="accent" />
+                            <StatCard value="100+" label="Deep Dives" icon={<TrendingUp className="w-6 h-6" />} color="primary" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ─── LEADERSHIP SECTION ─── */}
+            <section className="py-24 md:py-40 bg-slate-50/50 border-y border-slate-100">
+                <div className="container mx-auto px-6 max-w-7xl">
+                    <div className="text-center space-y-4 mb-20 md:mb-32">
+                        <span className="text-primary font-black uppercase tracking-[0.3em] text-[10px]">The Engineering Board</span>
+                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter uppercase">Leadership Team</h2>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-16">
                         <TeamMember name="Engr. M. Nouman" role="Technical Director" bio="Expert in distributed generation and grid integration with over 15 years of industrial experience." />
                         <TeamMember name="Dr. Ayesha Malik" role="Policy Lead" bio="Ph.D. in Energy Economics, advising regulators on net-metering and tariff structures." />
                         <TeamMember name="Sarmad Khan" role="Operations Manager" bio="Specialist in O&M logistics and field engineering for large-scale industrial portfolios." />
@@ -72,15 +89,19 @@ export default function AboutPage() {
                 </div>
             </section>
 
-            {/* Partners & Sponsors Section */}
-            <section className="py-24 bg-background">
-                <div className="container mx-auto px-4 text-center">
-                    <h2 className="text-3xl font-bold mb-4">Our Partners & Sponsors</h2>
-                    <p className="text-muted-foreground mb-16">Collaborating with global leaders in energy technology and policy.</p>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center opacity-50 grayscale hover:grayscale-0 transition-all">
-                        {/* Replace with actual partner logos */}
+            {/* ─── PARTNERS SECTION ─── */}
+            <section className="py-24 md:py-40 bg-white">
+                <div className="container mx-auto px-6 max-w-7xl text-center">
+                    <div className="space-y-4 mb-20 md:mb-32">
+                        <span className="text-slate-400 font-black uppercase tracking-[0.3em] text-[10px]">Global Synergy</span>
+                        <h2 className="text-4xl font-black text-slate-900 tracking-tighter uppercase">Partners & Sponsors</h2>
+                        <p className="text-slate-500 font-medium text-lg lg:max-w-xl mx-auto">Collaborating with global leaders in energy technology and policy to ensure technical excellence.</p>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 md:gap-12 items-center opacity-40 grayscale group hover:opacity-100 transition-all duration-700">
                         {[1, 2, 3, 4, 5, 6].map(i => (
-                            <div key={i} className="h-12 bg-primary/5 rounded flex items-center justify-center font-bold text-xs">PARTNER LOGO</div>
+                            <div key={i} className="glass h-20 px-6 rounded-[2rem] border border-white/60 flex items-center justify-center font-black text-[10px] uppercase tracking-widest text-slate-400 hover:text-primary hover:border-primary/30 hover:scale-110 transition-all duration-300 shadow-sm cursor-default">
+                                Node {i}
+                            </div>
                         ))}
                     </div>
                 </div>
@@ -89,14 +110,31 @@ export default function AboutPage() {
     );
 }
 
+function StatCard({ value, label, icon, color }: { value: string, label: string, icon: any, color: 'primary' | 'accent' }) {
+    return (
+        <div className="glass aspect-square flex flex-col items-center justify-center p-8 text-center gap-6 rounded-[2.5rem] border border-white/60 shadow-xl group hover:-translate-y-2 transition-all duration-500">
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-2 shadow-sm border ${color === 'primary' ? 'bg-primary/10 border-primary/20 text-primary' : 'bg-amber-500/10 border-amber-500/20 text-amber-500'}`}>
+                {icon}
+            </div>
+            <div className="space-y-1">
+                <span className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter leading-none">{value}</span>
+                <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">{label}</span>
+            </div>
+        </div>
+    );
+}
+
 function TeamMember({ name, role, bio }: { name: string, role: string, bio: string }) {
     return (
-        <Card className="border-none shadow-lg overflow-hidden group">
-            <div className="aspect-[4/5] bg-primary/5" />
-            <CardContent className="p-8">
-                <h4 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">{name}</h4>
-                <p className="text-sm font-medium text-accent uppercase tracking-widest mb-4">{role}</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">{bio}</p>
+        <Card className="glass border border-white/60 shadow-2xl overflow-hidden group rounded-[3.5rem] hover:-translate-y-3 transition-all duration-500">
+            <div className="aspect-[4/5] bg-slate-100 flex items-center justify-center relative overflow-hidden">
+                <Image src="/logo.png" alt="EnergyGurus" width={120} height={120} className="opacity-10 group-hover:scale-125 transition-transform duration-1000 grayscale" />
+                <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent opacity-60"></div>
+            </div>
+            <CardContent className="p-10 md:p-14 relative bg-white/40 backdrop-blur-3xl">
+                <h4 className="text-2xl font-black mb-2 text-slate-900 tracking-tight group-hover:text-primary transition-colors">{name}</h4>
+                <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-8">{role}</p>
+                <p className="text-base text-slate-500 font-medium leading-relaxed opacity-80">{bio}</p>
             </CardContent>
         </Card>
     );

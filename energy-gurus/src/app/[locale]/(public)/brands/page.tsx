@@ -37,6 +37,7 @@ const getBrandsData = unstable_cache(
             .where(
                 and(
                     eq(users.isActive, true),
+                    eq(users.role, 'brand'),
                     q ? ilike(brands.brandName, `%${q}%`) : undefined
                 )
             )
@@ -109,28 +110,28 @@ export default async function BrandsListingPage({
                                 </span>
                             </div>
                             <div className="flex gap-4 w-full md:w-auto">
-                                <ListSearch 
-                                    placeholder="Search global brands..." 
-                                    className="pl-12 h-14 bg-white/50 backdrop-blur-xl border-border/50 rounded-2xl focus:ring-primary/20 focus:border-primary transition-all text-base font-medium shadow-sm" 
+                                <ListSearch
+                                    placeholder="Search global brands..."
+                                    className="pl-12 h-14 bg-white/50 backdrop-blur-xl border-border/50 rounded-2xl focus:ring-primary/20 focus:border-primary transition-all text-base font-medium shadow-sm"
                                 />
-                                <ListSort 
+                                <ListSort
                                     options={[
                                         { label: "Newest Arrivals", value: "latest" },
                                         { label: "Elite Rating", value: "top-rated" },
-                                    ]} 
+                                    ]}
                                 />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 gap-10">
                             {brandList?.map((brand, index) => (
-                                <article 
-                                    key={brand.id} 
+                                <article
+                                    key={brand.id}
                                     className="group relative animate-in fade-in slide-in-from-bottom-8 duration-700"
                                     style={{ animationDelay: `${index * 150}ms` }}
                                 >
                                     <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 rounded-[3rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                                    
+
                                     <Card className="border-border/50 bg-white/70 backdrop-blur-xl hover:bg-white/90 transition-all duration-500 overflow-hidden rounded-[3rem] relative z-10 premium-shadow border group-hover:border-primary/30 group-hover:-translate-y-2">
                                         <div className="p-8 md:p-12">
                                             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10 mb-12">
@@ -165,8 +166,8 @@ export default async function BrandsListingPage({
                                                     </div>
                                                 </div>
 
-                                                <TrackedLink 
-                                                    href={`/brands/${brand.id}` as any} 
+                                                <TrackedLink
+                                                    href={`/brands/${brand.id}` as any}
                                                     className="inline-flex items-center gap-3 px-8 py-4 bg-foreground text-background rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-primary transition-all duration-500 group/btn shadow-xl active:scale-95"
                                                     eventName="brand_portfolio_view"
                                                     eventProperties={{

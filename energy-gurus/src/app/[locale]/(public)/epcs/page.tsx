@@ -36,6 +36,7 @@ const getInstallers = unstable_cache(
       .where(
         and(
           eq(users.isActive, true),
+          eq(users.role, 'epc'),
           q ? ilike(epcInstallers.companyName, `%${q}%`) : undefined
         )
       )
@@ -88,19 +89,19 @@ export default async function EpcListingPage({
           <p className="text-lg md:text-2xl text-muted-foreground font-medium leading-relaxed opacity-80">
             Connect with top-tier solar energy experts. Our directory features verified EPC companies with proven track records in high-efficiency installations.
           </p>
-          
+
           <div className="w-full max-w-2xl mt-8">
             <div className="flex flex-col sm:flex-row gap-4 w-full">
-              <ListSearch 
-                placeholder="Search experts..." 
-                className="pl-12 h-16 bg-white/50 backdrop-blur-xl border-border/50 rounded-2xl focus:ring-primary/20 focus:border-primary transition-all text-base font-medium shadow-sm" 
+              <ListSearch
+                placeholder="Search experts..."
+                className="pl-12 h-16 bg-white/50 backdrop-blur-xl border-border/50 rounded-2xl focus:ring-primary/20 focus:border-primary transition-all text-base font-medium shadow-sm"
               />
-              <ListSort 
+              <ListSort
                 options={[
                   { label: "Latest First", value: "latest" },
                   { label: "Top Rated", value: "top-rated" },
                   { label: "Portfolio Size", value: "portfolio" },
-                ]} 
+                ]}
               />
             </div>
           </div>
@@ -109,8 +110,8 @@ export default async function EpcListingPage({
         {/* Listing Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
           {installers.map((installer) => (
-            <TrackedLink 
-              key={installer.id} 
+            <TrackedLink
+              key={installer.id}
               href={`/epcs/${installer.id}` as any}
               className="group relative"
               eventName="epc_profile_view"
@@ -120,23 +121,23 @@ export default async function EpcListingPage({
               }}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
+
               <Card className="h-full border-border/50 bg-white/70 backdrop-blur-xl hover:bg-white/90 transition-all duration-500 overflow-hidden rounded-[2.5rem] relative z-10 premium-shadow border group-hover:border-primary/30 group-hover:-translate-y-2">
                 <div className="aspect-[16/10] bg-secondary/10 relative flex items-center justify-center p-12 overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                  
+
                   {installer.logoUrl ? (
-                    <Image 
-                      src={installer.logoUrl} 
+                    <Image
+                      src={installer.logoUrl}
                       width={120}
                       height={120}
-                      className="object-contain filter drop-shadow-2xl group-hover:scale-110 transition-transform duration-700 ease-out" 
-                      alt={installer.companyName} 
+                      className="object-contain filter drop-shadow-2xl group-hover:scale-110 transition-transform duration-700 ease-out"
+                      alt={installer.companyName}
                     />
                   ) : (
                     <Briefcase className="w-20 h-20 text-primary/10 group-hover:scale-110 transition-transform duration-700" />
                   )}
-                  
+
                   {installer.isVerified && (
                     <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-md text-primary text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full flex items-center gap-2 shadow-xl border border-primary/10">
                       <ShieldCheck className="w-3.5 h-3.5" /> Verified
@@ -155,7 +156,7 @@ export default async function EpcListingPage({
                         <span className="text-xs font-black">{installer.avgRating ? installer.avgRating.toFixed(1) : "N/A"}</span>
                       </div>
                     </div>
-                    
+
                     <p className="text-muted-foreground text-sm font-medium line-clamp-2 leading-relaxed opacity-80">
                       {installer.about || "N/A"}
                     </p>
@@ -181,7 +182,7 @@ export default async function EpcListingPage({
                       <MapPin className="w-4 h-4" /> Nationwide
                     </div>
                     <div className="flex items-center gap-2 text-foreground font-black text-xs uppercase tracking-widest">
-                      Explorer Profile 
+                      Explorer Profile
                       <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-2 transition-transform duration-300 text-primary" />
                     </div>
                   </div>

@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { getEpcCompleteness } from "@/lib/utils/completeness";
 import { Globe, Mail, Star, ShieldCheck, ArrowLeft, Image as ImageIcon, Facebook, Twitter, Instagram, Linkedin, MapPin, Zap, MessageSquare, LayoutGrid, Building2, ExternalLink } from "lucide-react";
+import { ProjectGallery } from "@/components/shared/ProjectGallery";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,7 @@ interface EpcProfileData {
 
 export default async function EpcProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  
+
   const cacheKey = CACHE_KEYS.EPC_DETAILS(id);
   let profileData: EpcProfileData | null = await redis.get<EpcProfileData>(cacheKey);
 
@@ -111,7 +112,7 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
       <section className="container mx-auto px-6 mb-16 relative z-10">
         <div className="relative rounded-[3.5rem] overflow-hidden border border-border/50 premium-shadow bg-white/40 backdrop-blur-3xl">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-          
+
           <div className="p-8 md:p-16 flex flex-col items-center text-center gap-12 relative z-10">
             {/* Logo Area */}
             <div className="relative group">
@@ -140,11 +141,11 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
                     </span>
                   ))}
                 </div>
-                
+
                 <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.85] text-foreground">
                   {installer.companyName}
                 </h1>
-                
+
                 {installer.ceoName ? (
                   <p className="text-xl text-muted-foreground font-medium flex items-center justify-center gap-3 italic">
                     <span className="w-8 h-[1px] bg-primary/30" />
@@ -173,7 +174,7 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
                     Ratings: N/A
                   </div>
                 )}
-                
+
                 <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
                   <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
                     <Globe className="w-5 h-5" />
@@ -190,7 +191,7 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
           {/* LEFT COLUMN: Main Content */}
           <div className="lg:col-span-8 space-y-24">
-            
+
             {/* About Section */}
             <section className="space-y-10">
               <div className="flex items-center gap-4">
@@ -219,29 +220,12 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
                 {projects.map((project) => (
                   <div key={project.id} className="group relative rounded-[3rem] overflow-hidden bg-white border border-border/50 premium-shadow transition-all duration-500 hover:-translate-y-2">
                     <div className="aspect-[4/3] relative overflow-hidden group/gallery">
-                      {project.images && project.images.length > 0 ? (
-                        <div className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide">
-                          {project.images?.map((img, i) => (
-                            <div key={i} className="flex-none w-full h-full snap-start relative">
-                              <Image src={img} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover group-hover/gallery:scale-110 transition-transform duration-1000" alt={`${project.name} ${i + 1}`} />
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="w-full h-full bg-secondary/10 flex items-center justify-center">
-                          <ImageIcon className="w-16 h-16 opacity-5" />
-                        </div>
-                      )}
-                      
-                      {project.images && (project.images as string[]).length > 1 && (
-                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-                          {(project.images as string[]).map((_, i) => (
-                            <div key={i} className="w-1.5 h-1.5 rounded-full bg-white/50" />
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-primary shadow-xl border border-primary/10">
+                      <ProjectGallery
+                        images={(project.images as string[]) || []}
+                        videos={(project.videos as string[]) || []}
+                        name={project.name || "Project"}
+                      />
+                      <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-primary shadow-xl border border-primary/10 z-30">
                         {project.segmentType || "Residential"}
                       </div>
                     </div>
@@ -253,7 +237,7 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
                           <MapPin className="w-4 h-4 text-primary" /> {project.city || "N/A"}
                         </p>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-8 py-8 border-y border-border/50">
                         <div className="space-y-2">
                           <p className="text-[10px] font-black uppercase tracking-widest opacity-40 leading-none">System Size</p>
@@ -285,7 +269,7 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
                     </div>
                   </div>
                 ))}
-                
+
                 {projects.length === 0 && (
                   <div className="col-span-full py-24 text-center bg-white/40 backdrop-blur-xl rounded-[3.5rem] border-4 border-dashed border-border/50">
                     <LayoutGrid className="w-16 h-16 text-primary/10 mx-auto mb-6" />
@@ -358,7 +342,7 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
                       Discuss high-performance solar solutions directly with the {installer.companyName} technical team.
                     </p>
                   </div>
-                  
+
                   <div className="space-y-4">
                     {(() => {
                       const socialLinks = installer.socialLinks as { platform: string; url: string }[] | null;
@@ -375,18 +359,38 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
                             eventName="epc_whatsapp_click"
                             eventProperties={{ epcId: installer.id, companyName: installer.companyName }}
                           >
-                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
                             WhatsApp Direct
                           </TrackedInteraction>
                         );
                       }
                     })()}
 
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button className="w-full h-16 rounded-[1.5rem] font-black text-lg bg-primary hover:bg-primary/90 text-white gap-3 shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]">
+                          <Mail className="w-6 h-6" /> Send Inquiry (InMail)
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-xl rounded-[2.5rem] border-none p-0 overflow-hidden">
+                        <div className="bg-primary p-8 text-white">
+                          <DialogHeader>
+                            <DialogTitle className="text-2xl font-black">Direct Message</DialogTitle>
+                            <p className="text-white/60 text-sm font-medium">Send a secure inquiry to {installer.companyName}</p>
+                          </DialogHeader>
+                        </div>
+                        <div className="p-8">
+                          <ContactForm
+                            receiverId={installer.userId}
+                            receiverName={installer.companyName}
+                          />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
 
-
-                    {installer.website ? (
-                      <TrackedLink 
-                        href={installer.website} 
+                    {installer.website && (
+                      <TrackedLink
+                        href={installer.website}
                         target="_blank"
                         className="w-full h-16 rounded-[1.5rem] font-black bg-white/5 border border-white/10 hover:bg-white/10 text-white gap-3 transition-all inline-flex items-center justify-center"
                         eventName="epc_website_click"
@@ -394,48 +398,43 @@ export default async function EpcProfilePage({ params }: { params: Promise<{ id:
                       >
                         <Globe className="w-6 h-6" /> Visit Portfolio <ExternalLink className="w-3 h-3 opacity-30" />
                       </TrackedLink>
-                    ) : (
-                      <div className="py-4 text-center text-white/20 text-[10px] font-black uppercase tracking-widest border border-dashed border-white/10 rounded-[1.5rem]">
-                        Digital Portal: N/A
-                      </div>
-                    )}
-
-                    {installer.socialLinks && (installer.socialLinks as any[]).length > 0 && (
-                      <div className="flex justify-center gap-4 pt-6 border-t border-white/5">
-                        {(installer.socialLinks as { platform: string; url: string }[]).map((link, i) => (
-                          <SocialLinkTracker 
-                            key={i} 
-                            link={link} 
-                            id={installer.id} 
-                            name={installer.companyName} 
-                            type="epc"
-                          />
-                        ))}
-                      </div>
                     )}
                   </div>
 
-                  <div className="pt-10 border-t border-white/5 space-y-6">
-                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30">Integrity Report</h4>
-                    <div className="space-y-5">
-                      <div className="flex justify-between items-center">
-                        <span className="opacity-40 font-bold uppercase tracking-widest text-[10px]">Onboarding</span>
-                        <span className="font-black text-primary text-sm">{new Date(installer.createdAt).getFullYear() || "N/A"}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="opacity-40 font-bold uppercase tracking-widest text-[10px]">Verification</span>
-                        <ShieldCheck className="w-5 h-5 text-green-500" />
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="opacity-40 font-bold uppercase tracking-widest text-[10px]">Service Area</span>
-                        <span className="font-black text-white/80 text-[10px] uppercase tracking-widest">Nationwide</span>
-                      </div>
+                  {installer.socialLinks && (installer.socialLinks as any[]).length > 0 && (
+                    <div className="flex justify-center gap-4 pt-6 border-t border-white/5">
+                      {(installer.socialLinks as { platform: string; url: string }[]).map((link, i) => (
+                        <SocialLinkTracker
+                          key={i}
+                          link={link}
+                          id={installer.id}
+                          name={installer.companyName}
+                          type="epc"
+                        />
+                      ))}
                     </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
 
-              {/* Secondary Widget */}
+              <div className="pt-10 border-t border-white/5 space-y-6">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30">Integrity Report</h4>
+                <div className="space-y-5">
+                  <div className="flex justify-between items-center">
+                    <span className="opacity-40 font-bold uppercase tracking-widest text-[10px]">Onboarding</span>
+                    <span className="font-black text-primary text-sm">{new Date(installer.createdAt).getFullYear() || "N/A"}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="opacity-40 font-bold uppercase tracking-widest text-[10px]">Verification</span>
+                    <ShieldCheck className="w-5 h-5 text-green-500" />
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="opacity-40 font-bold uppercase tracking-widest text-[10px]">Service Area</span>
+                    <span className="font-black text-white/80 text-[10px] uppercase tracking-widest">Nationwide</span>
+                  </div>
+                </div>
+              </div>
+
               <div className="p-10 rounded-[3.5rem] bg-accent/5 border border-accent/10 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full group-hover:scale-125 transition-transform duration-700" />
                 <h4 className="text-xs font-black uppercase tracking-widest text-accent-foreground mb-4">Support Ecosystem</h4>

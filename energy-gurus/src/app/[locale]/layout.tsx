@@ -3,7 +3,7 @@ import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import type { Metadata } from "next";
-import { Inter, Noto_Sans_Arabic } from "next/font/google";
+import { Inter, Noto_Sans_Arabic, Outfit } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { CSPostHogProvider } from '@/components/providers/PostHogProvider';
 import "../globals.css";
@@ -18,6 +18,12 @@ const inter = Inter({
 const notoArabic = Noto_Sans_Arabic({
   variable: "--font-noto-arabic",
   subsets: ["arabic"],
+});
+
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 export async function generateMetadata({
@@ -67,7 +73,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} className="scroll-smooth" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${notoArabic.variable} font-sans antialiased`}
+        className={`${inter.variable} ${outfit.variable} ${notoArabic.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
         {isClerkConfigured ? (

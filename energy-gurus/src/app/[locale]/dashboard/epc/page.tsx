@@ -1,4 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
+import { getUserRole } from "@/lib/roles";
 import { db } from "@/db";
 import { epcInstallers, users, epcOffices, epcProjects } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -20,6 +21,11 @@ import { SocialLinksForm } from "@/components/dashboard/social-links-form";
 export default async function EpcDashboard() {
   const { userId: clerkId } = await auth();
   if (!clerkId) redirect("/sign-in");
+
+  const role = await getUserRole();
+  if (role !== 'epc' && role !== 'super-admin' && role !== 'admin') {
+    redirect("/dashboard");
+  }
 
   const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId));
   if (!user) redirect("/dashboard");
@@ -55,11 +61,11 @@ export default async function EpcDashboard() {
       )}
       <div className="flex items-center gap-4">
         <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center">
-            <Briefcase className="w-6 h-6 text-white" />
+          <Briefcase className="w-6 h-6 text-white" />
         </div>
         <div>
-            <h1 className="text-3xl font-bold tracking-tight">EPC Dashboard</h1>
-            <p className="text-muted-foreground">Manage your company profile, portfolio, and customer inquiries.</p>
+          <h1 className="text-3xl font-bold tracking-tight">EPC Dashboard</h1>
+          <p className="text-muted-foreground">Manage your company profile, portfolio, and customer inquiries.</p>
         </div>
       </div>
 
@@ -68,26 +74,24 @@ export default async function EpcDashboard() {
         <div className="space-y-2 flex-1">
           <div className="flex justify-between items-center text-sm">
             <span className="font-black uppercase tracking-widest text-[11px] opacity-60">Profile Completeness</span>
-            <span className={`font-black px-3 py-1 rounded-xl text-xs border ${
-              score === 100 ? "bg-green-100 text-green-600 border-green-200" :
+            <span className={`font-black px-3 py-1 rounded-xl text-xs border ${score === 100 ? "bg-green-100 text-green-600 border-green-200" :
               score >= 70 ? "bg-blue-100 text-blue-600 border-blue-200" :
-              "bg-orange-100 text-orange-600 border-orange-200"
-            }`}>
+                "bg-orange-100 text-orange-600 border-orange-200"
+              }`}>
               {score}% Complete
             </span>
           </div>
           <div className="w-full h-3 bg-secondary/30 rounded-full overflow-hidden">
-            <div 
-              className={`h-full rounded-full transition-all duration-500 ${
-                score === 100 ? "bg-green-500" :
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${score === 100 ? "bg-green-500" :
                 score >= 70 ? "bg-blue-500" :
-                "bg-orange-500"
-              }`} 
-              style={{ width: `${score}%` }} 
+                  "bg-orange-500"
+                }`}
+              style={{ width: `${score}%` }}
             />
           </div>
         </div>
-        
+
         {missing.length > 0 ? (
           <div className="text-xs md:text-right max-w-sm">
             <span className="font-bold text-muted-foreground block mb-1">Missing Checkpoints to hit 100%:</span>
@@ -145,9 +149,9 @@ export default async function EpcDashboard() {
                 <CardTitle>Branding & Media</CardTitle>
               </CardHeader>
               <CardContent className="space-y-8">
-                <PortfolioUpload 
-                  initialLogoUrl={epc.logoUrl} 
-                  initialPortfolio={epc.portfolio} 
+                <PortfolioUpload
+                  initialLogoUrl={epc.logoUrl}
+                  initialPortfolio={epc.portfolio}
                 />
 
 
@@ -162,11 +166,11 @@ export default async function EpcDashboard() {
         </TabsContent>
 
         <TabsContent value="offices">
-            <OfficeManagement epcId={epc.id} initialOffices={offices} />
+          <OfficeManagement epcId={epc.id} initialOffices={offices} />
         </TabsContent>
 
         <TabsContent value="projects">
-            <ProjectManagement epcId={epc.id} initialProjects={projects} />
+          <ProjectManagement epcId={epc.id} initialProjects={projects} />
         </TabsContent>
 
         <TabsContent value="inquiries">
@@ -178,11 +182,11 @@ export default async function EpcDashboard() {
         <TabsContent value="reviews">
           <div className="max-w-3xl space-y-8">
             <div className="flex items-center gap-4 p-6 bg-yellow-500/5 rounded-3xl border border-yellow-500/10">
-                <Star className="w-10 h-10 text-yellow-500" />
-                <div>
-                    <h3 className="text-xl font-bold">Ratings & Feedback</h3>
-                    <p className="text-muted-foreground text-sm">Monitor what customers are saying about your installations.</p>
-                </div>
+              <Star className="w-10 h-10 text-yellow-500" />
+              <div>
+                <h3 className="text-xl font-bold">Ratings & Feedback</h3>
+                <p className="text-muted-foreground text-sm">Monitor what customers are saying about your installations.</p>
+              </div>
             </div>
             <DashboardReviewList targetId={epc.id} targetType="epc" />
           </div>

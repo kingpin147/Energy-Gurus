@@ -9,7 +9,10 @@ const f = createUploadthing({
 });
 
 export const ourFileRouter = {
-  epcPortfolio: f({ image: { maxFileSize: "4MB", maxFileCount: 10 } })
+  epcPortfolio: f({
+    image: { maxFileSize: "4MB", maxFileCount: 10 },
+    video: { maxFileSize: "16MB", maxFileCount: 2 }
+  })
     .middleware(async ({ req }) => {
       try {
         const user = await auth();
@@ -38,6 +41,23 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       return { uploadedBy: metadata.userId };
+    }),
+  brandDatasheet: f({
+    pdf: { maxFileSize: "8MB", maxFileCount: 1 },
+    image: { maxFileSize: "4MB", maxFileCount: 1 }
+  })
+    .middleware(async ({ req }) => {
+      try {
+        const user = await auth();
+        if (!user.userId) throw new Error("Unauthorized");
+        return { userId: user.userId };
+      } catch (error) {
+        console.error("UploadThing Datasheet Auth Error:", error);
+        throw error;
+      }
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      return { uploadedBy: metadata.userId, url: file.url };
     }),
 } satisfies FileRouter;
 

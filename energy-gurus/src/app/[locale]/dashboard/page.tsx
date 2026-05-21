@@ -18,24 +18,30 @@ export default async function Dashboard() {
     if (role === 'epc') {
         title = "EPC Overview";
         subtitle = "Track your company's performance and customer engagement.";
-        const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId!));
-        const inquiryStats = await db.select({ 
-            total: sql<number>`count(*)`,
-            newLeads: sql<number>`count(*) filter (where status = 'new')`
-        }).from(inquiries).where(eq(inquiries.receiverId, user.id));
-        
-        stats = [
-            { title: "Total Inquiries", value: inquiryStats[0].total.toString(), unit: "Customer leads", icon: <MessageSquare className="w-4 h-4 text-primary" /> },
-            { title: "New Leads", value: inquiryStats[0].newLeads.toString(), unit: "Action required", icon: <Activity className="w-4 h-4 text-orange-500" /> },
-            { title: "Avg. Rating", value: "4.8", unit: "Out of 5", icon: <Sun className="w-4 h-4 text-yellow-500" /> },
-            { title: "Profile Views", value: "1.2k", unit: "This month", icon: <Users className="w-4 h-4 text-blue-500" /> },
-        ];
+        const [user] = clerkId ? await db.select().from(users).where(eq(users.clerkId, clerkId)) : [];
+        if (!user) {
+            stats = [
+                { title: "Welcome", value: "—", unit: "Setting up your profile…", icon: <Activity className="w-4 h-4 text-primary" /> },
+            ];
+        } else {
+            const inquiryStats = await db.select({
+                total: sql<number>`count(*)`,
+                newLeads: sql<number>`count(*) filter (where status = 'new')`
+            }).from(inquiries).where(eq(inquiries.receiverId, user.id));
+
+            stats = [
+                { title: "Total Inquiries", value: inquiryStats[0].total.toString(), unit: "Customer leads", icon: <MessageSquare className="w-4 h-4 text-primary" /> },
+                { title: "New Leads", value: inquiryStats[0].newLeads.toString(), unit: "Action required", icon: <Activity className="w-4 h-4 text-orange-500" /> },
+                { title: "Avg. Rating", value: "4.8", unit: "Out of 5", icon: <Sun className="w-4 h-4 text-yellow-500" /> },
+                { title: "Profile Views", value: "1.2k", unit: "This month", icon: <Users className="w-4 h-4 text-blue-500" /> },
+            ];
+        }
     } else if (role === 'brand') {
         title = "Brand Center";
         subtitle = "Manage your product ecosystem and brand reputation.";
         const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId!));
         const [brand] = await db.select().from(brands).where(eq(brands.userId, user.id));
-        const productCount = brand ? await db.select({ count: sql<number>`count(*)` }).from(products).where(eq(products.brandId, brand.id)) : [{count: 0}];
+        const productCount = brand ? await db.select({ count: sql<number>`count(*)` }).from(products).where(eq(products.brandId, brand.id)) : [{ count: 0 }];
         const inquiryCount = await db.select({ count: sql<number>`count(*)` }).from(inquiries).where(eq(inquiries.receiverId, user.id));
 
         stats = [
@@ -123,16 +129,16 @@ export default async function Dashboard() {
                     </CardHeader>
                     <CardContent className="p-8 pt-0 space-y-4">
                         {role === 'epc' && (
-                             <>
+                            <>
                                 <button className="w-full h-12 bg-white/10 hover:bg-white/20 rounded-xl text-left px-4 text-sm font-bold transition-colors">Reply to Inquiries</button>
                                 <button className="w-full h-12 bg-white/10 hover:bg-white/20 rounded-xl text-left px-4 text-sm font-bold transition-colors">Update Portfolio</button>
-                             </>
+                            </>
                         )}
                         {role === 'brand' && (
-                             <>
+                            <>
                                 <button className="w-full h-12 bg-white/10 hover:bg-white/20 rounded-xl text-left px-4 text-sm font-bold transition-colors">Add New Product</button>
                                 <button className="w-full h-12 bg-white/10 hover:bg-white/20 rounded-xl text-left px-4 text-sm font-bold transition-colors">Generate QR Codes</button>
-                             </>
+                            </>
                         )}
 
                         <button className="w-full h-12 bg-white text-primary rounded-xl text-center text-sm font-bold shadow-lg mt-4">Help & Support</button>

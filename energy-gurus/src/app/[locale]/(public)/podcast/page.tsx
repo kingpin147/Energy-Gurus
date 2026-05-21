@@ -1,4 +1,4 @@
-import { Mic, Play, Youtube, Filter, Search, Share2, Link as LinkIcon, Headphones, Calendar, Clock } from "lucide-react";
+import { Mic, Play, Youtube, Filter, Search, Share2, Link as LinkIcon, Headphones, Calendar, Clock, ArrowRight, User } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,7 +27,7 @@ export default async function PodcastListingPage({
 }) {
     const { sort } = await searchParams;
     const sortOrder = sort === "oldest" ? "asc" : "desc";
-    
+
     const episodes = await getPodcasts(sortOrder);
 
     const getYouTubeId = (url: string) => {
@@ -41,180 +41,179 @@ export default async function PodcastListingPage({
     };
 
     return (
-        <div className="bg-white min-h-screen">
-            {/* Main Content Container */}
-            <div className="container mx-auto px-4 py-12 max-w-7xl">
-                
-                {/* Hero / Latest Episode Section */}
-                {episodes.length > 0 && (
-                    <div className="grid lg:grid-cols-12 gap-12 items-center mb-24">
-                        {/* Video Thumbnail Side */}
-                        <div className="lg:col-span-7 relative group">
-                            <div className="aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl bg-black relative">
-                                <Image 
-                                    src={getThumbnail(episodes[0])} 
-                                    alt={episodes[0].title}
-                                    fill
-                                    sizes="(max-width: 1024px) 100vw, 60vw"
-                                    className="object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
-                                    priority
-                                />
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-20 h-20 bg-accent text-accent-foreground rounded-full flex items-center justify-center shadow-2xl transform group-hover:scale-110 transition-transform duration-300">
-                                        <Play className="w-8 h-8 fill-current ml-1" />
+        <div className="bg-white min-h-screen font-sans selection:bg-primary/20">
+            {/* ─── CINEMATIC HERO ─── */}
+            <section className="relative w-full py-12 md:py-24 overflow-hidden border-b border-slate-100">
+                <div className="absolute inset-0 bg-primary/5 -z-10"></div>
+                <div className="container mx-auto px-6 max-w-7xl animate-reveal">
+                    {episodes.length > 0 && (
+                        <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+                            {/* Video Thumbnail Side */}
+                            <div className="lg:col-span-7 relative group">
+                                <div className="aspect-[16/9] rounded-[2.5rem] overflow-hidden shadow-2xl bg-black relative border border-white/20">
+                                    <Image
+                                        src={getThumbnail(episodes[0])}
+                                        alt={episodes[0].title}
+                                        fill
+                                        sizes="(max-width: 1024px) 100vw, 60vw"
+                                        className="object-cover opacity-70 group-hover:scale-105 transition-transform duration-1000"
+                                        priority
+                                    />
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors">
+                                        <a href={episodes[0].youtubeUrl} target="_blank" className="w-20 h-20 md:w-24 md:h-24 bg-white/95 backdrop-blur rounded-full flex items-center justify-center shadow-2xl transform group-hover:scale-110 transition-all duration-500 hover:rotate-12">
+                                            <Play className="w-8 h-8 md:w-10 md:h-10 fill-primary text-primary ml-1.5" />
+                                        </a>
+                                    </div>
+                                    <div className="absolute bottom-10 left-10 hidden md:flex items-center gap-3">
+                                        <div className="glass px-4 py-2 rounded-xl text-[10px] font-black text-slate-900 uppercase tracking-[0.2em] shadow-lg">
+                                            Latest Insight
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Content Side */}
-                        <div className="lg:col-span-5">
-                            <div className="inline-flex items-center gap-2 bg-accent/20 text-accent-foreground px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-6">
-                                <span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-                                LATEST EPISODE
-                            </div>
-                            
-                            <h1 className="text-4xl md:text-5xl font-bold text-primary leading-tight mb-6">
-                                Episode {episodes.length}: {episodes[0].title}
-                            </h1>
-
-                            <div className="flex items-center gap-4 mb-8">
-                                <Avatar className="w-12 h-12 border-2 border-primary/10">
-                                    <AvatarFallback className="bg-primary text-white">
-                                        {episodes[0].guestName?.charAt(0) || "G"}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <p className="font-bold text-primary">{episodes[0].guestName}</p>
-                                    <p className="text-sm text-muted-foreground">{episodes[0].guestDesignation}</p>
+                            {/* Content Side */}
+                            <div className="lg:col-span-5 space-y-8">
+                                <div className="inline-flex items-center gap-3 bg-primary/10 text-primary px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-primary/20 animate-soft-float">
+                                    <Mic className="w-4 h-4" /> Energy Discourse
                                 </div>
-                            </div>
 
-                            <p className="text-lg text-muted-foreground mb-10 line-clamp-4 leading-relaxed">
-                                {episodes[0].description}
-                            </p>
+                                <h1 className="text-4xl md:text-6xl font-black text-slate-900 leading-[1] tracking-tighter">
+                                    EP {episodes.length}: {episodes[0].title}
+                                </h1>
 
-                            <div className="flex flex-wrap gap-4 mb-8">
-                                <Button size="lg" className="rounded-xl px-8 h-14 font-bold bg-primary hover:bg-primary/90 gap-2" asChild>
-                                    <a href={episodes[0].youtubeUrl} target="_blank">
-                                        <Play className="w-5 h-5 fill-current" /> Watch Now
-                                    </a>
-                                </Button>
-                                <Button variant="outline" size="lg" className="rounded-xl px-8 h-14 font-bold border-primary/20 hover:bg-primary/5 gap-2" asChild>
-                                    <a href={episodes[0].youtubeUrl} target="_blank">
-                                        <Headphones className="w-5 h-5" /> Listen on YouTube
-                                    </a>
-                                </Button>
-                            </div>
+                                <div className="flex items-center gap-5 p-4 glass rounded-2xl border border-white/40 shadow-sm max-w-fit">
+                                    <Avatar className="w-14 h-14 border-2 border-primary/20 shadow-sm">
+                                        <AvatarFallback className="bg-primary text-white font-black">
+                                            {episodes[0].guestName?.charAt(0) || "G"}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="font-black text-slate-900 uppercase tracking-tight">{episodes[0].guestName}</p>
+                                        <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.1em]">{episodes[0].guestDesignation}</p>
+                                    </div>
+                                </div>
 
-                            <div className="flex items-center gap-4 text-muted-foreground">
-                                <span className="text-sm font-medium">Share this episode:</span>
-                                <div className="flex gap-2">
-                                    <button className="p-2 hover:text-primary transition-colors"><Share2 className="w-4 h-4" /></button>
-                                    <button className="p-2 hover:text-primary transition-colors"><LinkIcon className="w-4 h-4" /></button>
+                                <p className="text-lg text-slate-500 font-medium leading-relaxed opacity-90 line-clamp-3">
+                                    {episodes[0].description}
+                                </p>
+
+                                <div className="flex flex-col sm:flex-row gap-5">
+                                    <Link href={episodes[0].youtubeUrl} target="_blank" className="bg-primary text-white px-10 py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3">
+                                        <Youtube className="w-5 h-5" /> Watch Episode
+                                    </Link>
+                                    <Link href={episodes[0].youtubeUrl} target="_blank" className="glass text-slate-900 px-10 py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-lg hover:bg-white/60 transition-all flex items-center justify-center gap-3">
+                                        <Share2 className="w-4 h-4" /> Share Discussion
+                                    </Link>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
+            </section>
 
-                {/* All Episodes Header */}
-                <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12 border-t pt-16">
-                    <div>
-                        <h2 className="text-3xl font-bold text-primary">All Episodes</h2>
-                        <p className="text-muted-foreground">Explore our full library of energy insights.</p>
+            {/* ─── EPISODES GRID ─── */}
+            <div className="container mx-auto px-6 py-20 lg:py-32 max-w-7xl">
+
+                {/* Header Controls */}
+                <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-16 lg:mb-24">
+                    <div className="space-y-2">
+                        <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter uppercase">Episode Archive</h2>
+                        <p className="text-slate-500 font-medium text-lg">Deep-dive technical discussions with solar industry leaders.</p>
                     </div>
-                    <div className="flex gap-3 w-full md:w-auto">
-                        <div className="relative flex-1 md:w-80">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input placeholder="Search topics, guests..." className="pl-10 h-11 bg-white border-primary/10 rounded-xl" />
+                    <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                        <div className="relative group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary transition-colors" />
+                            <Input placeholder="Search topics..." className="pl-12 h-14 bg-slate-50 border-slate-200 rounded-2xl focus:bg-white focus:ring-primary/20 transition-all min-w-[280px]" />
                         </div>
-                        <ListSort 
+                        <ListSort
                             options={[
-                                { label: "Latest", value: "latest" },
-                                { label: "Oldest", value: "oldest" },
-                            ]} 
+                                { label: "Latest First", value: "latest" },
+                                { label: "Oldest First", value: "oldest" },
+                            ]}
                         />
                     </div>
                 </div>
 
-                {/* Episodes Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-14">
                     {episodes.map((episode, index) => {
-                        // Insert CTA card at position 5 (index 4)
-                        const showCTA = index === 4;
-                        
+                        const showCTA = index === 2; // Show CTA after 3 episodes
+
                         return (
                             <div key={episode.id} className="contents">
-                                {showCTA && (
-                                    <Card key="cta-card" className="bg-primary text-primary-foreground overflow-hidden rounded-3xl border-none flex flex-col justify-center p-10 relative">
-                                        <div className="relative z-10">
-                                            <h3 className="text-3xl font-bold mb-6">Join the Conversation Live</h3>
-                                            <p className="text-primary-foreground/80 mb-8 leading-relaxed">
-                                                Every Thursday we host a live QA with industry leaders. Get your questions answered directly.
-                                            </p>
-                                            <Button variant="accent" className="w-full h-14 rounded-xl font-bold text-lg gap-2">
-                                                <Calendar className="w-5 h-5" /> Register for Next Live
-                                            </Button>
-                                        </div>
-                                        <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-3xl" />
-                                        <div className="absolute top-10 -left-10 w-20 h-20 bg-white/5 rounded-full blur-2xl" />
-                                    </Card>
-                                )}
-                                
-                                <Card key={episode.id} className="group border-none shadow-none hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 rounded-2xl overflow-hidden bg-white">
+                                <Card className="group glass border border-white/40 rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 flex flex-col">
                                     <div className="aspect-[16/10] relative overflow-hidden">
-                                        <Image 
-                                            src={getThumbnail(episode)} 
+                                        <Image
+                                            src={getThumbnail(episode)}
                                             alt={episode.title}
                                             fill
                                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                            className="object-cover group-hover:scale-105 transition-transform duration-1000"
                                         />
-                                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-lg text-[10px] font-bold text-primary shadow-sm uppercase">
+                                        <div className="absolute top-6 left-6 glass px-3 py-1.5 rounded-xl text-[9px] font-black text-slate-900 shadow-sm uppercase tracking-widest border border-white/50">
                                             EP {episodes.length - index}
                                         </div>
                                     </div>
-                                    <CardContent className="p-6">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <div className="w-2 h-2 bg-accent rounded-full" />
-                                            <span className="text-[10px] font-bold text-accent-foreground uppercase tracking-widest">
-                                                {episode.guestDesignation || "Energy Guru Insight"}
+                                    <div className="p-8 flex-1 flex flex-col">
+                                        <div className="flex items-center gap-3 mb-5">
+                                            <div className="w-2 h-2 bg-primary rounded-full shadow-[0_0_10px_rgba(0,109,109,0.5)]" />
+                                            <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">
+                                                {episode.guestDesignation || "Energy Insight"}
                                             </span>
                                         </div>
-                                        <h3 className="text-xl font-bold text-primary mb-4 line-clamp-2 group-hover:text-accent transition-colors">
+                                        <h3 className="text-2xl font-black text-slate-900 mb-6 leading-tight group-hover:text-primary transition-colors tracking-tight line-clamp-2">
                                             {episode.title}
                                         </h3>
-                                        <p className="text-sm text-muted-foreground line-clamp-2 mb-6 leading-relaxed">
+                                        <p className="text-sm text-slate-500 font-medium line-clamp-3 mb-10 leading-relaxed opacity-80 flex-1">
                                             {episode.description}
                                         </p>
-                                        <div className="flex items-center justify-between pt-6 border-t border-primary/5">
-                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                <Clock className="w-3 h-3" />
+                                        <div className="flex items-center justify-between pt-8 border-t border-slate-100">
+                                            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                                <Calendar className="w-4 h-4" />
                                                 <span>{new Date(episode.createdAt).toLocaleDateString()}</span>
                                             </div>
-                                            <Link 
-                                                href={`/podcast/${episode.id}`}
-                                                className="text-xs font-bold text-primary hover:text-accent flex items-center gap-1 transition-colors"
+                                            <Link
+                                                href={episode.youtubeUrl}
+                                                target="_blank"
+                                                className="text-[10px] font-black text-primary hover:text-slate-900 flex items-center gap-2 transition-all uppercase tracking-widest group/link"
                                             >
-                                                Details <span className="text-lg">→</span>
+                                                Start <ArrowRight className="w-4 h-4 group-hover/link:translate-x-2 transition-transform" />
                                             </Link>
                                         </div>
-                                    </CardContent>
+                                    </div>
                                 </Card>
+
+                                {showCTA && (
+                                    <Card className="bg-slate-900 rounded-[3rem] overflow-hidden border-none flex flex-col justify-center p-12 relative shadow-2xl group lg:aspect-square">
+                                        <div className="absolute inset-0 bg-primary/5 pointer-events-none group-hover:bg-primary/10 transition-colors"></div>
+                                        <div className="relative z-10 space-y-6">
+                                            <div className="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center border border-white/10 group-hover:rotate-12 transition-transform">
+                                                <User className="w-7 h-7 text-primary" />
+                                            </div>
+                                            <h3 className="text-3xl font-black text-white leading-tight tracking-tight uppercase">Join the Discourse Live</h3>
+                                            <p className="text-slate-400 font-medium leading-relaxed opacity-80">
+                                                Every session includes a live engineering board Q&A. Register to participate directly.
+                                            </p>
+                                            <Button className="w-full h-16 rounded-[1.5rem] font-black text-[11px] uppercase tracking-[0.2em] bg-primary text-white hover:scale-105 shadow-xl shadow-primary/20 transition-all border-none">
+                                                <Calendar className="w-5 h-5 mr-3" /> Register for Next Session
+                                            </Button>
+                                        </div>
+                                        <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-primary/5 rounded-full blur-[100px]" />
+                                    </Card>
+                                )}
                             </div>
                         );
                     })}
                 </div>
 
                 {/* Pagination */}
-                <div className="mt-20 flex justify-center items-center gap-2">
-                    <Button variant="outline" size="icon" className="rounded-xl border-primary/10">{"<"}</Button>
-                    <Button variant="primary" size="icon" className="rounded-xl">1</Button>
-                    <Button variant="ghost" size="icon" className="rounded-xl">2</Button>
-                    <Button variant="ghost" size="icon" className="rounded-xl">3</Button>
-                    <span className="mx-2 text-muted-foreground">...</span>
-                    <Button variant="outline" size="icon" className="rounded-xl border-primary/10">{">"}</Button>
+                <div className="mt-32 flex justify-center items-center gap-4">
+                    <button className="w-14 h-14 rounded-2xl border border-slate-200 flex items-center justify-center text-slate-400 hover:border-primary hover:text-primary transition-all font-black">&lt;</button>
+                    <button className="w-14 h-14 rounded-2xl bg-primary text-white flex items-center justify-center font-black shadow-lg shadow-primary/20">1</button>
+                    <button className="w-14 h-14 rounded-2xl border border-slate-200 flex items-center justify-center text-slate-900 hover:border-primary hover:text-primary transition-all font-black">2</button>
+                    <button className="w-14 h-14 rounded-2xl border border-slate-200 flex items-center justify-center text-slate-900 hover:border-primary hover:text-primary transition-all font-black">3</button>
+                    <span className="mx-4 text-slate-300 font-black">...</span>
+                    <button className="w-14 h-14 rounded-2xl border border-slate-200 flex items-center justify-center text-slate-400 hover:border-primary hover:text-primary transition-all font-black">&gt;</button>
                 </div>
             </div>
         </div>

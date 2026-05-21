@@ -22,6 +22,19 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
   }
 
   const isFormData = data instanceof FormData;
+
+  let repsData = [];
+  if (isFormData) {
+    try {
+      const repsRaw = data.get("reps") as string;
+      if (repsRaw) {
+        repsData = JSON.parse(repsRaw);
+      }
+    } catch (e) {
+      console.error("Failed to parse reps JSON", e);
+    }
+  }
+
   const updateData = isFormData ? {
     brandName: data.get("brandName") as string,
     countryHead: data.get("countryHead") as string,
@@ -31,6 +44,7 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
     website: data.get("website") as string,
     warrantyUrl: data.get("warrantyUrl") as string,
     qrUrl: data.get("qrUrl") as string,
+    reps: repsData,
   } : data;
 
   let targetUserId = user.id;
@@ -38,55 +52,63 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
     targetUserId = data.userId;
   }
 
-  await db.update(brands)
-    .set({ 
-      ...updateData, 
-      updatedAt: new Date() 
+  const result = await db.update(brands)
+    .set({
+      ...updateData,
+      updatedAt: new Date()
     })
-    .where(eq(brands.userId, targetUserId));
+    .where(eq(brands.userId, targetUserId))
+    .returning();
 
   // Invalidate Cache
-  const [b] = await db.select().from(brands).where(eq(brands.userId, targetUserId));
-  if (b) {
+  if (result.length > 0) {
+    const b = result[0];
     await redis.del(CACHE_KEYS.BRAND_DETAILS(b.id));
     await redis.del(CACHE_KEYS.BRANDS_LIST);
-    // Revalidate Next.js tags for public brand list
-    revalidateTag('brands', {});
-    // Redirect back with success message
-    redirect(`/dashboard/brand?msg=profile_updated`);
-  }
 
-  revalidatePath("/dashboard/brand");
+    // Revalidate BEFORE redirect
+    revalidateTag('brands', {});
+    revalidatePath("/dashboard/brand", "page");
+    revalidatePath("/[locale]/dashboard/brand", "page");
+    revalidatePath("/", "layout");
+
+    // Redirect back with success message
+    redirect(`/dashboard/brand?msg=profile_updated&t=${Date.now()}`);
+  } else {
+    console.error("No brand found to update for user:", targetUserId);
+  }
 }
 
 export async function addProductModel(formData: FormData) {
-    const { userId: clerkId } = await auth();
-    if (!clerkId) throw new Error("Unauthorized");
+  const { userId: clerkId } = await auth();
+  if (!clerkId) throw new Error("Unauthorized");
 
-    const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId));
-    if (!user) throw new Error("User not found");
+  const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId));
+  if (!user) throw new Error("User not found");
 
-    const [brand] = await db.select().from(brands).where(eq(brands.userId, user.id));
-    if (!brand) throw new Error("Brand not found");
+  const [brand] = await db.select().from(brands).where(eq(brands.userId, user.id));
+  if (!brand) throw new Error("Brand not found");
 
-    const name = formData.get("name") as string;
-    const category = formData.get("category") as string;
-    const description = formData.get("description") as string;
-    const serialNumber = formData.get("serialNumber") as string;
-    const datasheetUrl = formData.get("datasheetUrl") as string;
+  const name = formData.get("name") as string;
+  const category = formData.get("category") as string;
+  const description = formData.get("description") as string;
+  const serialNumber = formData.get("serialNumber") as string;
+  const datasheetUrl = formData.get("datasheetUrl") as string;
 
-    await db.insert(products).values({
-        brandId: brand.id,
-        name,
-        category,
-        description,
-        serialNumber,
-        datasheetUrl
-    });
+  await db.insert(products).values({
+    brandId: brand.id,
+    name,
+    category,
+    description,
+    serialNumber,
+    datasheetUrl
+  });
 
-    // Invalidate Cache
-    await redis.del(CACHE_KEYS.BRAND_DETAILS(brand.id));
+  // Invalidate Cache
+  await redis.del(CACHE_KEYS.BRAND_DETAILS(brand.id));
 
-    revalidatePath("/dashboard/brand");
+  revalidatePath("/dashboard/brand", "page");
+  revalidatePath("/[locale]/dashboard/brand", "page");
+  revalidatePath("/", "layout");
 }
 

@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { brands, products, productSerials, users } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
+import { getUserRole } from "@/lib/roles";
 import { redirect } from "next/navigation";
 import { eq, count } from "drizzle-orm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,19 +10,20 @@ import { Building2, Package, Hash, Plus, Globe, ShieldCheck, AlertTriangle } fro
 import { bulkImportSerials } from "@/lib/actions/serials";
 import { BrandGalleryUpload } from "@/components/dashboard/brand-gallery-upload";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { MessageSquare, Star } from "lucide-react";
 import { DashboardInquiryList } from "@/components/dashboard/inquiry-list";
 import { DashboardReviewList } from "@/components/dashboard/dashboard-review-list";
-import { addProductModel, updateBrandProfile } from "@/lib/actions/brand";
+import { updateBrandProfile } from "@/lib/actions/brand";
 import { getBrandCompleteness } from "@/lib/utils/completeness";
 import { SocialLinksForm } from "@/components/dashboard/social-links-form";
+import { AddProductDialog } from "@/components/dashboard/AddProductDialog";
+import { BrandRepsForm } from "@/components/dashboard/BrandRepsForm";
 
 export default async function BrandDashboard() {
-    const { userId: clerkId, sessionClaims } = await auth();
+    const { userId: clerkId } = await auth();
     if (!clerkId) redirect("/sign-in");
 
-    const role = (sessionClaims?.metadata as { role?: string })?.role || "user";
+    const role = await getUserRole();
     if (role !== 'brand') {
         redirect("/dashboard");
     }
@@ -44,10 +46,10 @@ export default async function BrandDashboard() {
         product: products,
         serialCount: count(productSerials.id)
     })
-    .from(products)
-    .leftJoin(productSerials, eq(productSerials.productId, products.id))
-    .where(eq(products.brandId, myBrand.id))
-    .groupBy(products.id);
+        .from(products)
+        .leftJoin(productSerials, eq(productSerials.productId, products.id))
+        .where(eq(products.brandId, myBrand.id))
+        .groupBy(products.id);
 
     const { score, missing } = getBrandCompleteness(myBrand, brandProducts.length);
 
@@ -79,26 +81,24 @@ export default async function BrandDashboard() {
                 <div className="space-y-2 flex-1">
                     <div className="flex justify-between items-center text-sm">
                         <span className="font-black uppercase tracking-widest text-[11px] opacity-60">Profile Completeness</span>
-                        <span className={`font-black px-3 py-1 rounded-xl text-xs border ${
-                            score === 100 ? "bg-green-100 text-green-600 border-green-200" :
+                        <span className={`font-black px-3 py-1 rounded-xl text-xs border ${score === 100 ? "bg-green-100 text-green-600 border-green-200" :
                             score >= 70 ? "bg-blue-100 text-blue-600 border-blue-200" :
-                            "bg-orange-100 text-orange-600 border-orange-200"
-                        }`}>
+                                "bg-orange-100 text-orange-600 border-orange-200"
+                            }`}>
                             {score}% Complete
                         </span>
                     </div>
                     <div className="w-full h-3 bg-secondary/30 rounded-full overflow-hidden">
-                        <div 
-                            className={`h-full rounded-full transition-all duration-500 ${
-                                score === 100 ? "bg-green-500" :
+                        <div
+                            className={`h-full rounded-full transition-all duration-500 ${score === 100 ? "bg-green-500" :
                                 score >= 70 ? "bg-blue-500" :
-                                "bg-orange-500"
-                            }`} 
-                            style={{ width: `${score}%` }} 
+                                    "bg-orange-500"
+                                }`}
+                            style={{ width: `${score}%` }}
                         />
                     </div>
                 </div>
-                
+
                 {missing.length > 0 ? (
                     <div className="text-xs md:text-right max-w-sm">
                         <span className="font-bold text-muted-foreground block mb-1">Missing Checkpoints to hit 100%:</span>
@@ -114,8 +114,11 @@ export default async function BrandDashboard() {
                 )}
             </div>
 
-            <Tabs defaultValue="products" className="w-full">
+            <Tabs defaultValue="profile" className="w-full">
                 <TabsList className="grid w-full grid-cols-4 h-14 p-1 bg-secondary/20 rounded-xl mb-8">
+                    <TabsTrigger value="profile" className="rounded-lg font-bold gap-2">
+                        <Building2 className="w-4 h-4" /> Profile
+                    </TabsTrigger>
                     <TabsTrigger value="products" className="rounded-lg font-bold gap-2">
                         <Package className="w-4 h-4" /> Products
                     </TabsTrigger>
@@ -125,59 +128,82 @@ export default async function BrandDashboard() {
                     <TabsTrigger value="reviews" className="rounded-lg font-bold gap-2">
                         <Star className="w-4 h-4" /> Reviews
                     </TabsTrigger>
-                    <TabsTrigger value="profile" className="rounded-lg font-bold gap-2">
-                        <Building2 className="w-4 h-4" /> Profile
-                    </TabsTrigger>
                 </TabsList>
+
+                <TabsContent value="profile" className="space-y-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <Card className="border-none shadow-sm rounded-3xl">
+                            <CardHeader>
+                                <CardTitle>Brand Information</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <form action={updateBrandProfile} className="space-y-4">
+                                    <div>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Brand Name</label>
+                                        <input name="brandName" defaultValue={myBrand.brandName} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" required />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Head Office Address</label>
+                                        <input name="headOffice" defaultValue={myBrand.headOffice || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" placeholder="123 Energy St, Solar City" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Country Head Name</label>
+                                            <input name="countryHead" defaultValue={myBrand.countryHead || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Customer Care Lead</label>
+                                            <input name="customerCareHead" defaultValue={myBrand.customerCareHead || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Customer Care Number</label>
+                                            <input name="customerCare" defaultValue={myBrand.customerCare || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Official Website</label>
+                                            <input name="website" defaultValue={myBrand.website || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
+                                        </div>
+                                    </div>
+                                    <BrandRepsForm initialReps={(myBrand.reps as any[]) || []} />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Warranty Registry URL</label>
+                                            <input name="warrantyUrl" defaultValue={myBrand.warrantyUrl || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" placeholder="https://..." />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">QR Verification URL</label>
+                                            <input name="qrUrl" defaultValue={myBrand.qrUrl || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" placeholder="https://..." />
+                                        </div>
+                                    </div>
+                                    <Button type="submit" className="w-full h-12 rounded-xl font-bold mt-2">Update Profile</Button>
+                                </form>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="border-none shadow-sm rounded-3xl">
+                            <CardHeader>
+                                <CardTitle>Media & Socials</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <BrandGalleryUpload initialPhotos={myBrand.photos} />
+
+                                <div className="pt-6 border-t">
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-4 block">Social Media Presence</label>
+                                    <SocialLinksForm type="brand" initialLinks={(myBrand.socialLinks as any[]) || []} />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </TabsContent>
 
                 <TabsContent value="products" className="space-y-8">
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-bold flex items-center gap-2">
                             <Package className="w-5 h-5 text-primary" /> Product Ecosystem
                         </h2>
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button className="rounded-xl font-bold gap-2">
-                                    <Plus className="w-4 h-4" /> Add Model
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[500px] rounded-[2.5rem] p-8">
-                                <DialogHeader>
-                                    <DialogTitle className="text-2xl font-bold mb-4">Add Product Model</DialogTitle>
-                                </DialogHeader>
-                                <form action={addProductModel} className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Model Name</label>
-                                            <input name="name" placeholder="e.g. Hi-MO 6" className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" required />
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Category</label>
-                                            <select name="category" className="w-full border rounded-xl p-3 bg-secondary/5 outline-none">
-                                                <option>Solar Panels</option>
-                                                <option>Inverters</option>
-                                                <option>Batteries</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Description</label>
-                                        <textarea name="description" placeholder="Technical highlights..." className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" rows={3} />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Serial/Model Prefix</label>
-                                            <input name="serialNumber" placeholder="LR5-72HPH" className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Datasheet URL</label>
-                                            <input name="datasheetUrl" placeholder="https://..." className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
-                                        </div>
-                                    </div>
-                                    <Button type="submit" className="w-full h-12 rounded-xl font-bold mt-4">Save Product Model</Button>
-                                </form>
-                            </DialogContent>
-                        </Dialog>
+                        <AddProductDialog />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -204,10 +230,10 @@ export default async function BrandDashboard() {
                                             const raw = formData.get("serials") as string;
                                             await bulkImportSerials(product.id, raw);
                                         }} className="space-y-3">
-                                            <textarea 
-                                                name="serials" 
+                                            <textarea
+                                                name="serials"
                                                 rows={3}
-                                                placeholder="Paste serial numbers...&#10;SN-882-991&#10;SN-882-992" 
+                                                placeholder="Paste serial numbers...&#10;SN-882-991&#10;SN-882-992"
                                                 className="w-full border rounded-2xl p-4 text-sm bg-secondary/5 focus:ring-2 focus:ring-primary outline-none font-mono"
                                             />
                                             <Button type="submit" variant="secondary" className="w-full rounded-xl font-bold h-11">
@@ -230,73 +256,6 @@ export default async function BrandDashboard() {
                 <TabsContent value="reviews">
                     <div className="max-w-3xl">
                         <DashboardReviewList targetId={myBrand.id} targetType="brand" />
-                    </div>
-                </TabsContent>
-
-                <TabsContent value="profile" className="space-y-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <Card className="border-none shadow-sm rounded-3xl">
-                            <CardHeader>
-                                <CardTitle>Brand Information</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <form action={updateBrandProfile} className="space-y-4">
-                                    <div>
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Brand Name</label>
-                                        <input name="brandName" defaultValue={myBrand.brandName} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" required />
-                                    </div>
-                                    <div>
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Head Office Address</label>
-                                        <input name="headOffice" defaultValue={myBrand.headOffice || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" placeholder="123 Energy St, Solar City" />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Country Head Name</label>
-                                            <input name="countryHead" defaultValue={myBrand.countryHead || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Customer Care Head</label>
-                                            <input name="customerCareHead" defaultValue={myBrand.customerCareHead || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Customer Care Number</label>
-                                            <input name="customerCare" defaultValue={myBrand.customerCare || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Official Website</label>
-                                            <input name="website" defaultValue={myBrand.website || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Warranty Registry URL</label>
-                                            <input name="warrantyUrl" defaultValue={myBrand.warrantyUrl || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" placeholder="https://..." />
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">QR Verification URL</label>
-                                            <input name="qrUrl" defaultValue={myBrand.qrUrl || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" placeholder="https://..." />
-                                        </div>
-                                    </div>
-                                    <Button type="submit" className="w-full h-12 rounded-xl font-bold mt-2">Update Profile</Button>
-                                </form>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="border-none shadow-sm rounded-3xl">
-                            <CardHeader>
-                                <CardTitle>Media & Socials</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <BrandGalleryUpload initialPhotos={myBrand.photos} />
-                                
-                                <div className="pt-6 border-t">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-4 block">Social Media Presence</label>
-                                    <SocialLinksForm type="brand" initialLinks={(myBrand.socialLinks as any[]) || []} />
-                                </div>
-                            </CardContent>
-                        </Card>
                     </div>
                 </TabsContent>
             </Tabs>
