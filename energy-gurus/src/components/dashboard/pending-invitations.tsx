@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, Trash2, Send, Loader2 } from "lucide-react";
-import { revalidatePath } from "next/cache"; // Wait, cannot use in client component.
+
 import { deleteInvitation, resendInvitation } from "@/lib/actions/invitations"; // I'll need to create these
 import { toast } from "sonner";
 import { UserRole } from "@/db/schema";
