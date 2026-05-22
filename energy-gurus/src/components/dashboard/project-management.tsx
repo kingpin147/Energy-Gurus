@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { addEpcProject, updateEpcProject, deleteEpcProject } from "@/lib/actions/epc";
-import { Plus, Trash2, Zap, Loader2, Image as ImageIcon, Video as VideoIcon, LayoutGrid, Edit2, X } from "lucide-react";
+import { Plus, Trash2, Zap, Loader2, Image as ImageIcon, Video as VideoIcon, LayoutGrid, Edit2, X, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { UploadButton } from "@/lib/uploadthing";
+import { useR2Upload } from "@/lib/hooks/use-r2-upload";
+import { toast } from "sonner";
 
 interface Project {
     id: string;
@@ -34,6 +35,9 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
     const [uploadedImages, setUploadedImages] = useState<string[]>([]);
     const [uploadedVideos, setUploadedVideos] = useState<string[]>([]);
 
+    const { uploadFile, isUploading } = useR2Upload();
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const openAddForm = () => {
         setEditingProject(null);
         setUploadedImages([]);
@@ -46,6 +50,28 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
         setUploadedImages(project.images || []);
         setUploadedVideos(project.videos || []);
         setIsFormOpen(true);
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        try {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const folder = file.type.startsWith("video") ? "project-videos" : "project-images";
+                const { publicUrl } = await uploadFile(file, folder);
+
+                if (file.type.startsWith("video")) {
+                    setUploadedVideos(prev => [...prev, publicUrl]);
+                } else {
+                    setUploadedImages(prev => [...prev, publicUrl]);
+                }
+            }
+            toast.success(`${files.length} file(s) uploaded`);
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     const handleSave = async (formData: FormData) => {
@@ -173,28 +199,41 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
                                 <label className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-4 block">Project Media</label>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="space-y-6">
-                                        <div className="border-2 border-dashed border-primary/20 rounded-[2rem] p-8 text-center bg-white/50">
-                                            <ImageIcon className="w-8 h-8 text-primary/30 mx-auto mb-3" />
-                                            <UploadButton
-                                                endpoint="epcPortfolio"
-                                                onClientUploadComplete={(res) => {
-                                                    if (res) {
-                                                        const imgs = res.filter((r: any) => r.type.startsWith('image')).map((r: any) => r.url);
-                                                        const vids = res.filter((r: any) => r.type.startsWith('video')).map((r: any) => r.url);
-                                                        setUploadedImages((prev: string[]) => [...prev, ...imgs]);
-                                                        setUploadedVideos((prev: string[]) => [...prev, ...vids]);
-                                                    }
-                                                }}
-                                                className="ut-button:bg-primary ut-button:rounded-xl"
-                                            />
-                                            <p className="text-[10px] font-bold text-muted-foreground mt-4 uppercase tracking-widest">Images (Max 10) & Videos (Max 2)</p>
+                                        <div className="border-2 border-dashed border-primary/20 rounded-[2rem] p-8 text-center bg-white/50 relative overflow-hidden">
+                                            {isUploading ? (
+                                                <div className="flex flex-col items-center gap-4 py-4">
+                                                    <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                                                    <p className="text-xs font-bold uppercase tracking-widest text-primary">Uploading Content...</p>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <ImageIcon className="w-8 h-8 text-primary/30 mx-auto mb-3" />
+                                                    <input
+                                                        type="file"
+                                                        ref={fileInputRef}
+                                                        className="hidden"
+                                                        accept="image/*,video/*"
+                                                        multiple
+                                                        onChange={handleFileChange}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => fileInputRef.current?.click()}
+                                                        className="bg-primary text-white font-bold rounded-xl px-6 h-12 text-sm flex items-center justify-center gap-2 mx-auto hover:scale-[1.02] transition-all shadow-lg shadow-primary/20"
+                                                    >
+                                                        <Upload className="w-4 h-4" />
+                                                        Select Photos & Videos
+                                                    </button>
+                                                    <p className="text-[10px] font-bold text-muted-foreground mt-4 uppercase tracking-widest">Images (Max 10) & Videos (Max 2)</p>
+                                                </>
+                                            )}
                                         </div>
 
                                         <div className="space-y-4">
                                             <h5 className="text-[10px] font-black uppercase tracking-widest opacity-30">Gallery Preview</h5>
                                             <div className="grid grid-cols-4 gap-3">
                                                 {uploadedImages.map((img, i) => (
-                                                    <div key={i} className="aspect-square rounded-xl overflow-hidden border group relative">
+                                                    <div key={i} className="aspect-square rounded-xl overflow-hidden border group relative bg-white shadow-sm">
                                                         <img src={img} className="w-full h-full object-cover" />
                                                         <button
                                                             type="button"
@@ -206,7 +245,7 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
                                                     </div>
                                                 ))}
                                                 {uploadedVideos.map((vid, i) => (
-                                                    <div key={i} className="aspect-square rounded-xl overflow-hidden border group relative bg-secondary/10 flex items-center justify-center">
+                                                    <div key={i} className="aspect-square rounded-xl overflow-hidden border group relative bg-secondary/10 flex items-center justify-center shadow-sm">
                                                         <VideoIcon className="w-6 h-6 text-primary/40" />
                                                         <button
                                                             type="button"
@@ -241,7 +280,7 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
                                 </div>
                             </div>
 
-                            <Button type="submit" disabled={isLoading} className="w-full h-14 rounded-2xl font-bold text-lg shadow-lg shadow-primary/20">
+                            <Button type="submit" disabled={isLoading || isUploading} className="w-full h-14 rounded-2xl font-bold text-lg shadow-lg shadow-primary/20">
                                 {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : editingProject ? "Update Showcase Project" : "Publish Showcase Project"}
                             </Button>
                         </form>

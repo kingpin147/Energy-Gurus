@@ -85,7 +85,6 @@ export const brands = pgTable('brands', {
   headOffice: text('head_office'),
   website: text('website'),
   warrantyUrl: text('warranty_url'),
-  qrUrl: text('qr_url'),
   socialLinks: jsonb('social_links').$type<{ platform: string; url: string }[]>().default([]),
   isVerified: boolean('is_verified').default(false),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -103,7 +102,6 @@ export const products = pgTable('products', {
   description: text('description'),
   datasheetUrl: text('datasheet_url'),
   serialNumber: text('serial_number'),
-  qrCode: text('qr_code'),
   warrantyLink: text('warranty_link'),
   imageUrl: text('image_url'),
   series: text('series'), // e.g. "Hi-MO 6", "N-Type"
@@ -206,6 +204,24 @@ export const liveQaQuestions = pgTable('live_qa_questions', {
 }, (table) => ({
   sessionIdIdx: index('live_qa_questions_session_id_idx').on(table.sessionId),
 }));
+
+export const monitoringStats = pgTable('monitoring_stats', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  totalPowerFlow: text('total_power_flow').notNull(), // kW as string for precision or just use numeric
+  gridExport: text('grid_export').notNull(),
+  selfConsumption: integer('self_consumption').notNull(), // percentage
+  inverterHealth: jsonb('inverter_health').$type<{
+    status: 'optimal' | 'warning' | 'error';
+    temp: number;
+    efficiency: number;
+  }[]>().default([]).notNull(),
+  alerts: jsonb('alerts').$type<{
+    type: 'critical' | 'warning' | 'info';
+    message: string;
+    timestamp: string;
+  }[]>().default([]).notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
 
 export const brandCertifications = pgTable('brand_certifications', {
   id: uuid('id').defaultRandom().primaryKey(),

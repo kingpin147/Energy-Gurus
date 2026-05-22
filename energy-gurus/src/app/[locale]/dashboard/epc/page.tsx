@@ -5,7 +5,6 @@ import { epcInstallers, users, epcOffices, epcProjects } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { updateEpcProfile } from "@/lib/actions/epc";
-import { UploadButton } from "@/lib/uploadthing";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardInquiryList } from "@/components/dashboard/inquiry-list";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

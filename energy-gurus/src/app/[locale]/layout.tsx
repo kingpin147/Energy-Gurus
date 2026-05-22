@@ -6,9 +6,8 @@ import type { Metadata } from "next";
 import { Inter, Noto_Sans_Arabic, Outfit } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { CSPostHogProvider } from '@/components/providers/PostHogProvider';
+import { Toaster } from 'sonner';
 import "../globals.css";
-
-import "@uploadthing/react/styles.css";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -66,6 +65,7 @@ export default async function RootLayout({
     <CSPostHogProvider>
       <NextIntlClientProvider messages={messages}>
         {children}
+        <Toaster position="top-right" expand={true} richColors />
       </NextIntlClientProvider>
     </CSPostHogProvider>
   );

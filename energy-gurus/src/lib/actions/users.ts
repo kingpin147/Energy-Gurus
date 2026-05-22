@@ -7,7 +7,8 @@ import { clerkClient as createClerkClient } from "@clerk/nextjs/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getUserRole } from "@/lib/roles";
 import { redis, CACHE_KEYS } from "@/lib/redis";
-import { brands, epcInstallers, inquiries, reviews } from "@/db/schema";
+import { brands, epcInstallers, inquiries, reviews, epcProjects, products } from "@/db/schema";
+import { deleteFile, extractKeyFromUrl } from "@/lib/r2";
 
 
 export async function deleteUser(userId: string) {
@@ -37,6 +38,46 @@ export async function deleteUser(userId: string) {
         }
     }
 
+    // 1. Gather all file URLs to delete from R2
+    const fileUrlsToDelete: string[] = [];
+
+    // EPC Files
+    const [epc] = await db.select().from(epcInstallers).where(eq(epcInstallers.userId, userId));
+    if (epc) {
+        if (epc.logoUrl) fileUrlsToDelete.push(epc.logoUrl);
+        if (epc.portfolio) fileUrlsToDelete.push(...epc.portfolio);
+
+        const projects = await db.select().from(epcProjects).where(eq(epcProjects.epcId, epc.id));
+        for (const p of projects) {
+            if (p.images) fileUrlsToDelete.push(...p.images);
+            if (p.videos) fileUrlsToDelete.push(...p.videos);
+        }
+    }
+
+    // Brand Files
+    const [brand] = await db.select().from(brands).where(eq(brands.userId, userId));
+    if (brand) {
+        if (brand.logoUrl) fileUrlsToDelete.push(brand.logoUrl);
+        if (brand.photos) fileUrlsToDelete.push(...brand.photos);
+
+        const brandProducts = await db.select().from(products).where(eq(products.brandId, brand.id));
+        for (const prod of brandProducts) {
+            if (prod.datasheetUrl) fileUrlsToDelete.push(prod.datasheetUrl);
+            if (prod.imageUrl) fileUrlsToDelete.push(prod.imageUrl);
+        }
+    }
+
+    // 2. Perform R2 Deletion
+    for (const url of fileUrlsToDelete) {
+        if (!url) continue;
+        try {
+            const key = extractKeyFromUrl(url);
+            await deleteFile(key);
+        } catch (error) {
+            console.error(`Failed to delete R2 file: ${url}`, error);
+        }
+    }
+
     // Manual cleanup of relations to avoid FK constraint errors 
     // (Backup in case DB cascade isn't synced yet)
     await db.delete(inquiries).where(or(eq(inquiries.senderId, userId), eq(inquiries.receiverId, userId)));
@@ -46,9 +87,6 @@ export async function deleteUser(userId: string) {
 
     // Clear Redis Caches for specific profiles before deleting from DB
     try {
-        const [brand] = await db.select({ id: brands.id }).from(brands).where(eq(brands.userId, userId));
-        const [epc] = await db.select({ id: epcInstallers.id }).from(epcInstallers).where(eq(epcInstallers.userId, userId));
-
         const keysToDelete: string[] = [CACHE_KEYS.BRANDS_LIST, CACHE_KEYS.EPCS_LIST];
         if (brand) keysToDelete.push(CACHE_KEYS.BRAND_DETAILS(brand.id));
         if (epc) keysToDelete.push(CACHE_KEYS.EPC_DETAILS(epc.id));

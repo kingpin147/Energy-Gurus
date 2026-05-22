@@ -2,10 +2,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Globe, User, Save, Loader2, ImageIcon } from "lucide-react";
+import { Globe, User, Save, Loader2 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { usePathname, useRouter } from "@/i18n/routing";
+import { useLocale } from "next-intl";
 
 const roleLabels: Record<string, string> = {
     "super-admin": "System Administrator",
@@ -17,6 +19,10 @@ const roleLabels: Record<string, string> = {
 
 export default function SettingsPage() {
     const { user, isLoaded } = useUser();
+    const router = useRouter();
+    const pathname = usePathname();
+    const locale = useLocale();
+
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [saving, setSaving] = useState(false);
@@ -58,6 +64,10 @@ export default function SettingsPage() {
         } finally {
             setSaving(false);
         }
+    };
+
+    const handleLocaleChange = (newLocale: string) => {
+        router.replace(pathname, { locale: newLocale as any });
     };
 
     return (
@@ -141,9 +151,13 @@ export default function SettingsPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <select className="w-full bg-white border rounded-xl p-3 font-medium outline-none focus:ring-2 focus:ring-primary">
-                                <option>English (United States)</option>
-                                <option>Urdu (Pakistan)</option>
+                            <select
+                                value={locale}
+                                onChange={(e) => handleLocaleChange(e.target.value)}
+                                className="w-full bg-white border rounded-xl p-3 font-medium outline-none focus:ring-2 focus:ring-primary appearance-none cursor-pointer"
+                            >
+                                <option value="en">English (United States)</option>
+                                <option value="ur">Urdu (Pakistan)</option>
                             </select>
                         </CardContent>
                     </Card>

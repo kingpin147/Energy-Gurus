@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { db } from "@/db";
 import { users, inquiries } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
@@ -20,7 +21,7 @@ export default async function AdminInboxPage() {
 
     // Fetch all inquiries and filter in memory to avoid query issues
     const allInquiries = await db.select().from(inquiries).orderBy(desc(inquiries.createdAt));
-    
+
     const partnerInquiries = allInquiries.filter(i => i.inquiryType === "support");
     const publicInquiries = allInquiries.filter(i => i.inquiryType === "public");
 
@@ -43,12 +44,19 @@ export default async function AdminInboxPage() {
                         Manage support requests and public inquiries
                     </p>
                 </div>
-                {(partnerUnreadCount + publicUnreadCount) > 0 && (
-                    <div className="w-fit flex items-center gap-2 bg-red-100 text-red-700 px-4 py-2 rounded-xl text-sm font-bold">
-                        <Mail className="w-4 h-4" />
-                        {(partnerUnreadCount + publicUnreadCount)} unread request{(partnerUnreadCount + publicUnreadCount) !== 1 ? "s" : ""}
-                    </div>
-                )}
+                <div className="flex items-center gap-3">
+                    <a href="/api/reports?type=inquiries" download>
+                        <Button variant="outline" size="sm" className="h-10 rounded-xl gap-2 font-bold whitespace-nowrap">
+                            <MessageSquare className="w-4 h-4" /> Export CSV
+                        </Button>
+                    </a>
+                    {(partnerUnreadCount + publicUnreadCount) > 0 && (
+                        <div className="w-fit flex items-center gap-2 bg-red-100 text-red-700 px-4 py-2 rounded-xl text-sm font-bold shadow-sm">
+                            <Mail className="w-4 h-4" />
+                            {(partnerUnreadCount + publicUnreadCount)} unread request{(partnerUnreadCount + publicUnreadCount) !== 1 ? "s" : ""}
+                        </div>
+                    )}
+                </div>
             </div>
 
             <Tabs defaultValue="partner" className="w-full">

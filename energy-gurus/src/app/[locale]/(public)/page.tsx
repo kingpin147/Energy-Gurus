@@ -106,7 +106,7 @@ const getHomepageData = unstable_cache(
             return { latestPodcasts: [], topEpcs: [], topBrands: [], targetQA: null };
         }
     },
-    ['homepage-data-v2'],
+    ['homepage-data-v3'],
     { revalidate: 3600, tags: ['homepage'] }
 );
 

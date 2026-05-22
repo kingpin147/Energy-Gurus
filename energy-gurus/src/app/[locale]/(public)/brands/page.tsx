@@ -62,7 +62,7 @@ const getBrandsData = unstable_cache(
 
         return brandsWithScore.filter(brand => brand.score >= 50);
     },
-    ['brands-list-cache'],
+    ['brands-list-cache-v2'],
     { revalidate: 3600, tags: ['brands'] }
 );
 export default async function BrandsListingPage({

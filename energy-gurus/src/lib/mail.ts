@@ -1,8 +1,7 @@
-export async function sendInvitationEmail(toEmail: string, role: string) {
+export async function sendInvitationEmail(toEmail: string, role: string): Promise<boolean> {
   const apiKey = process.env.BREVO_API_KEY;
   if (!apiKey) {
-    console.warn("BREVO_API_KEY is not defined. Skipping invitation email sending.");
-    return false;
+    throw new Error("BREVO_API_KEY is not configured. Cannot send invitation emails.");
   }
 
   const roleLabels: Record<string, string> = {
@@ -12,7 +11,11 @@ export async function sendInvitationEmail(toEmail: string, role: string) {
   };
 
   const roleLabel = roleLabels[role] || role;
-  const signUpUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/sign-up?email=${encodeURIComponent(toEmail)}`;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (!appUrl) {
+    console.warn("NEXT_PUBLIC_APP_URL is not set — email links will use localhost fallback.");
+  }
+  const signUpUrl = `${appUrl || "http://localhost:3000"}/sign-up?email=${encodeURIComponent(toEmail)}`;
 
   try {
     const response = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -25,7 +28,7 @@ export async function sendInvitationEmail(toEmail: string, role: string) {
       body: JSON.stringify({
         sender: {
           name: "Energy Gurus",
-          email: "info@energygurus.com" // Brevo account authorized sender
+          email: "energygurusonline@gmail.com"
         },
         to: [
           {
@@ -155,14 +158,19 @@ export async function sendInvitationEmail(toEmail: string, role: string) {
     });
 
     if (response.ok) {
+      const result = await response.json();
+      console.log(`✅ Invitation email sent to ${toEmail} (messageId: ${result.messageId})`);
       return true;
     } else {
       const errorText = await response.text();
-      console.error("Brevo API error payload:", errorText);
-      return false;
+      console.error(`❌ Brevo API error [${response.status}] for ${toEmail}:`, errorText);
+      throw new Error(`Email delivery failed: Brevo returned ${response.status}`);
     }
   } catch (error) {
-    console.error("Brevo POST execution failed:", error);
-    return false;
+    if (error instanceof Error && error.message.startsWith("Email delivery failed")) {
+      throw error;
+    }
+    console.error("❌ Brevo POST execution failed:", error);
+    throw new Error("Failed to connect to email service. Please try again.");
   }
 }

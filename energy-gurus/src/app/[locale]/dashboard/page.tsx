@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { users, inquiries, epcInstallers, brands, products } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
+import { Link } from "@/i18n/routing";
 
 export default async function Dashboard() {
     const role = await getUserRole();
@@ -130,18 +131,24 @@ export default async function Dashboard() {
                     <CardContent className="p-8 pt-0 space-y-4">
                         {role === 'epc' && (
                             <>
-                                <button className="w-full h-12 bg-white/10 hover:bg-white/20 rounded-xl text-left px-4 text-sm font-bold transition-colors">Reply to Inquiries</button>
-                                <button className="w-full h-12 bg-white/10 hover:bg-white/20 rounded-xl text-left px-4 text-sm font-bold transition-colors">Update Portfolio</button>
+                                <Link href="/dashboard/epc" className="w-full h-12 bg-white/10 hover:bg-white/20 rounded-xl text-left px-4 flex items-center text-sm font-bold transition-colors">Update Profile & Portfolio</Link>
+                                <Link href="/dashboard/support" className="w-full h-12 bg-white/10 hover:bg-white/20 rounded-xl text-left px-4 flex items-center text-sm font-bold transition-colors">Contact Expert Support</Link>
                             </>
                         )}
                         {role === 'brand' && (
                             <>
-                                <button className="w-full h-12 bg-white/10 hover:bg-white/20 rounded-xl text-left px-4 text-sm font-bold transition-colors">Add New Product</button>
-                                <button className="w-full h-12 bg-white/10 hover:bg-white/20 rounded-xl text-left px-4 text-sm font-bold transition-colors">Generate QR Codes</button>
+                                <Link href="/dashboard/brand" className="w-full h-12 bg-white/10 hover:bg-white/20 rounded-xl text-left px-4 flex items-center text-sm font-bold transition-colors">Manage Product Catalog</Link>
+                                <Link href="/dashboard/support" className="w-full h-12 bg-white/10 hover:bg-white/20 rounded-xl text-left px-4 flex items-center text-sm font-bold transition-colors">Head Office Support</Link>
+                            </>
+                        )}
+                        {(role === 'admin' || role === 'super-admin') && (
+                            <>
+                                <Link href="/dashboard/users" className="w-full h-12 bg-white/10 hover:bg-white/20 rounded-xl text-left px-4 flex items-center text-sm font-bold transition-colors">Manage System Users</Link>
+                                <Link href="/dashboard/inbox" className="w-full h-12 bg-white/10 hover:bg-white/20 rounded-xl text-left px-4 flex items-center text-sm font-bold transition-colors">Platform Lead Inbox</Link>
                             </>
                         )}
 
-                        <button className="w-full h-12 bg-white text-primary rounded-xl text-center text-sm font-bold shadow-lg mt-4">Help & Support</button>
+                        <Link href="/dashboard/settings" className="w-full h-12 bg-white text-primary rounded-xl flex items-center justify-center text-sm font-bold shadow-lg mt-4">Account Settings</Link>
                     </CardContent>
                 </Card>
             </div>

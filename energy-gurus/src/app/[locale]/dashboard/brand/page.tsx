@@ -168,14 +168,10 @@ export default async function BrandDashboard() {
                                         </div>
                                     </div>
                                     <BrandRepsForm initialReps={(myBrand.reps as any[]) || []} />
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 gap-4">
                                         <div>
                                             <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Warranty Registry URL</label>
                                             <input name="warrantyUrl" defaultValue={myBrand.warrantyUrl || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" placeholder="https://..." />
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">QR Verification URL</label>
-                                            <input name="qrUrl" defaultValue={myBrand.qrUrl || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" placeholder="https://..." />
                                         </div>
                                     </div>
                                     <Button type="submit" className="w-full h-12 rounded-xl font-bold mt-2">Update Profile</Button>

@@ -26,10 +26,9 @@ export default function Sidebar({ role }: { role: UserRole }) {
 
     const adminLinks = [
         { href: "/dashboard", icon: <LayoutDashboard className="w-4 h-4" />, label: "Overview" },
+        { href: "/dashboard/monitoring", icon: <Activity className="w-4 h-4" />, label: "Live Telemetry" },
         { href: "/dashboard/inbox", icon: <Inbox className="w-4 h-4" />, label: "Support Inbox" },
-        { href: "/dashboard/analytics", icon: <Activity className="w-4 h-4" />, label: "Analytics" },
         { href: "/dashboard/users", icon: <Users className="w-4 h-4" />, label: "Manage Users" },
-        { href: "/dashboard/moderation", icon: <ShieldCheck className="w-4 h-4" />, label: "Content Moderation" },
         { href: "/dashboard/content", icon: <Video className="w-4 h-4" />, label: "Content (Podcast/QA)" },
         { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings" },
     ];
@@ -46,10 +45,10 @@ export default function Sidebar({ role }: { role: UserRole }) {
         { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings" },
     ];
 
-    const links = role === 'super-admin' || role === 'admin' 
-        ? adminLinks 
-        : role === 'brand' 
-            ? brandLinks 
+    const links = role === 'super-admin' || role === 'admin'
+        ? adminLinks
+        : role === 'brand'
+            ? brandLinks
             : epcLinks;
 
 

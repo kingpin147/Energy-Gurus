@@ -1,8 +1,18 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Zap, TrendingUp, AlertCircle, Clock, CheckCircle2 } from "lucide-react";
+import { Activity, Zap, TrendingUp, AlertCircle, Clock, CheckCircle2, ShieldCheck, ShieldAlert, ShieldIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { db } from "@/db";
+import { monitoringStats } from "@/db/schema";
+import { desc } from "drizzle-orm";
+import { formatDistanceToNow } from "date-fns";
 
-export default function MonitoringDashboardPage() {
+export default async function MonitoringDashboardPage() {
+    const [latestStats] = await db.select().from(monitoringStats).orderBy(desc(monitoringStats.updatedAt)).limit(1);
+
+    if (!latestStats) {
+        return <div className="p-8 text-center text-muted-foreground italic">No monitoring data available.</div>;
+    }
+
     return (
         <div className="p-6 space-y-8">
             <div className="flex justify-between items-center">
@@ -12,15 +22,20 @@ export default function MonitoringDashboardPage() {
                 </div>
                 <div className="flex gap-2">
                     <Button variant="secondary" size="sm">Site: DHA Phase 6</Button>
+                    <a href="/api/reports?type=monitoring" download>
+                        <Button variant="outline" size="sm" className="gap-2">
+                            <TrendingUp className="w-4 h-4" /> Export CSV
+                        </Button>
+                    </a>
                     <Button variant="accent" size="sm">Live View</Button>
                 </div>
             </div>
 
             {/* Grid of Gauges/Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <GaugeCard title="Total Power Flow" value="12.8" unit="kW" trend="+2.4% vs last hour" color="text-yellow-500" />
-                <GaugeCard title="Grid Export" value="8.4" unit="kW" trend="Net Metering Active" color="text-green-500" />
-                <GaugeCard title="Self-Consumption" value="94%" unit="Ratio" trend="Optimal" color="text-primary" />
+                <GaugeCard title="Total Power Flow" value={latestStats.totalPowerFlow} unit="kW" trend="+2.4% vs last hour" color="text-yellow-500" />
+                <GaugeCard title="Grid Export" value={latestStats.gridExport} unit="kW" trend="Net Metering Active" color="text-green-500" />
+                <GaugeCard title="Self-Consumption" value={`${latestStats.selfConsumption}%`} unit="Ratio" trend="Optimal" color="text-primary" />
             </div>
 
             {/* Chart Section */}
@@ -46,9 +61,17 @@ export default function MonitoringDashboardPage() {
                         <CardTitle>Inverter Health</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <HealthItem label="Inverter A (Main)" status="Online" temp="42°C" efficiency="97.8%" />
-                        <HealthItem label="Inverter B (Backyard)" status="Online" temp="38°C" efficiency="98.2%" />
-                        <HealthItem label="Battery BMS" status="Online" temp="26°C" voltage="52.4V" />
+                        {latestStats.inverterHealth.map((inv: any, i: number) => (
+                            <HealthItem
+                                key={i}
+                                label={`Inverter ${String.fromCharCode(65 + i)}`}
+                                status={inv.status === 'optimal' ? 'Online' : 'Check'}
+                                temp={`${inv.temp}°C`}
+                                efficiency={`${inv.efficiency}%`}
+                                color={inv.status === 'optimal' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}
+                            />
+                        ))}
+                        <HealthItem label="Battery BMS" status="Online" temp="26°C" voltage="52.4V" color="bg-green-100 text-green-700" />
                     </CardContent>
                 </Card>
 
@@ -58,9 +81,18 @@ export default function MonitoringDashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            <AlertItem icon={<CheckCircle2 className="text-green-500" />} message="Grid sync successful" time="2 mins ago" />
-                            <AlertItem icon={<Clock className="text-yellow-500" />} message="Scheduled maintenance in 4 days" time="1 hour ago" />
-                            <AlertItem icon={<AlertCircle className="text-red-500" />} message="Low cloud coverage detected - Yield reduced" time="3 hours ago" />
+                            {latestStats.alerts.map((alert: any, i: number) => (
+                                <AlertItem
+                                    key={i}
+                                    icon={
+                                        alert.type === 'critical' ? <AlertCircle className="text-red-500" /> :
+                                            alert.type === 'warning' ? <ShieldAlert className="text-yellow-500" /> :
+                                                <ShieldCheck className="text-blue-500" />
+                                    }
+                                    message={alert.message}
+                                    time={formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}
+                                />
+                            ))}
                         </div>
                     </CardContent>
                 </Card>
@@ -86,14 +118,14 @@ function GaugeCard({ title, value, unit, trend, color }: { title: string, value:
     );
 }
 
-function HealthItem({ label, status, temp, efficiency, voltage }: { label: string, status: string, temp: string, efficiency?: string, voltage?: string }) {
+function HealthItem({ label, status, temp, efficiency, voltage, color }: { label: string, status: string, temp: string, efficiency?: string, voltage?: string, color: string }) {
     return (
         <div className="flex items-center justify-between p-3 bg-secondary/10 rounded-lg">
             <div>
                 <p className="font-bold text-sm text-foreground">{label}</p>
                 <p className="text-xs text-muted-foreground">{efficiency || voltage} • {temp}</p>
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 bg-green-100 text-green-700 rounded-full">
+            <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full ${color}`}>
                 {status}
             </span>
         </div>

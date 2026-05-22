@@ -3,7 +3,7 @@ import { users } from "@/db/schema";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users as UsersIcon, ShieldAlert, Trash2, MailPlus, Clock, Power, PowerOff } from "lucide-react";
+import { Users as UsersIcon, ShieldAlert, Trash2, Power, PowerOff } from "lucide-react";
 import { deleteUser, toggleUserStatus, updateUserRole } from "@/lib/actions/users";
 import { createInvitation } from "@/lib/actions/invitations";
 import { invitations } from "@/db/schema";
@@ -13,6 +13,8 @@ import { ListSearch } from "@/components/shared/list-search";
 import { eq, asc, desc, like, or, and } from "drizzle-orm";
 import { getUserRole } from "@/lib/roles";
 import { BulkInvite } from "@/components/dashboard/bulk-invite";
+import { SingleInvite } from "@/components/dashboard/single-invite";
+import { PendingInvitations } from "@/components/dashboard/pending-invitations";
 import { createClerkClient } from "@clerk/nextjs/server";
 
 export default async function UserManagementPage({
@@ -110,7 +112,12 @@ export default async function UserManagementPage({
                         <p className="text-muted-foreground">Manage platform access, roles, and administrative permissions.</p>
                     </div>
                 </div>
-                <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+                <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto items-center">
+                    <a href="/api/reports?type=users" download>
+                        <Button variant="outline" className="h-11 rounded-xl gap-2 font-bold whitespace-nowrap">
+                            <UsersIcon className="w-4 h-4" /> Export CSV
+                        </Button>
+                    </a>
                     <ListSearch placeholder="Search name or email..." />
                     <div className="flex gap-3">
                         <ListSort
@@ -135,104 +142,12 @@ export default async function UserManagementPage({
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-1 space-y-6">
-                    <Card className="border-none shadow-sm rounded-3xl h-fit">
-                        <CardHeader>
-                            <CardTitle className="text-xl flex items-center gap-2">
-                                <MailPlus className="w-5 h-5 text-primary" />
-                                Invite User
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <form action={async (formData) => {
-                                "use server";
-                                const email = formData.get("email") as string;
-                                const selectedRole = formData.get("role") as "admin" | "epc" | "brand";
-                                await createInvitation(email, selectedRole);
-                            }} className="space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-widest opacity-60">Email Address</label>
-                                    <input name="email" type="email" placeholder="user@example.com" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none" required />
-                                </div>
-                                <div className="space-y-3">
-                                    <label className="text-xs font-bold uppercase tracking-widest opacity-60">Assign Role</label>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                        <label className="cursor-pointer">
-                                            <input type="radio" name="role" value="epc" className="peer sr-only" defaultChecked />
-                                            <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary hover:bg-secondary transition-colors">
-                                                EPC Installer
-                                            </div>
-                                        </label>
-                                        <label className="cursor-pointer">
-                                            <input type="radio" name="role" value="brand" className="peer sr-only" />
-                                            <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary hover:bg-secondary transition-colors">
-                                                Solar Brand
-                                            </div>
-                                        </label>
-                                        <label className="cursor-pointer">
-                                            <input type="radio" name="role" value="admin" className="peer sr-only" />
-                                            <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary hover:bg-secondary transition-colors">
-                                                Admin
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-                                <Button type="submit" className="w-full rounded-xl font-bold h-12 gap-2 shadow-lg shadow-primary/20">
-                                    Send Invite / Assign
-                                </Button>
-                            </form>
-                        </CardContent>
-                    </Card>
-
+                    <SingleInvite />
                     <BulkInvite />
                 </div>
 
                 <div className="lg:col-span-2 space-y-8">
-                    {pendingInvites.length > 0 && (
-                        <Card className="border-none shadow-sm rounded-3xl overflow-hidden">
-                            <CardHeader className="bg-orange-500/10 p-6">
-                                <CardTitle className="text-xl flex items-center gap-2 text-orange-600">
-                                    <Clock className="w-5 h-5" />
-                                    Pending Invitations
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-0">
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left min-w-[600px]">
-                                        <thead>
-                                            <tr className="bg-secondary/5 border-b">
-                                                <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Email</th>
-                                                <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Pre-assigned Role</th>
-                                                <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60 text-right">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {pendingInvites.map((invite) => (
-                                                <tr key={invite.id} className="border-b">
-                                                    <td className="p-6 font-medium">{invite.email}</td>
-                                                    <td className="p-6">
-                                                        <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-secondary text-muted-foreground border">
-                                                            {invite.role}
-                                                        </span>
-                                                    </td>
-                                                    <td className="p-6 text-right">
-                                                        <form action={async () => {
-                                                            "use server";
-                                                            await db.delete(invitations).where(eq(invitations.id, invite.id));
-                                                            revalidatePath("/dashboard/users");
-                                                        }}>
-                                                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-500 rounded-lg">
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </Button>
-                                                        </form>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
+                    <PendingInvitations initialInvites={pendingInvites as any} />
 
                     <Card className="border-none shadow-sm rounded-3xl overflow-hidden">
                         <CardHeader className="bg-secondary/10 p-6">

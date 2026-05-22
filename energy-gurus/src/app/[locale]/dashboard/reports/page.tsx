@@ -32,7 +32,7 @@ export default function ReportsPage() {
                                 <p className="text-xs text-muted-foreground">Full roster of all registered admin, EPC, and brand accounts with login states.</p>
                             </div>
                             <Button asChild variant="outline" className="w-full gap-2 rounded-xl font-bold h-11 border-blue-200 text-blue-600 hover:bg-blue-50">
-                                <a href="/api/export/users" download>
+                                <a href="/api/reports?type=users" download>
                                     <Download className="w-4 h-4" /> Download Users CSV
                                 </a>
                             </Button>
@@ -52,7 +52,7 @@ export default function ReportsPage() {
                                 <p className="text-xs text-muted-foreground">Historical records of guest leads, corporate questions, and dialog histories.</p>
                             </div>
                             <Button asChild variant="outline" className="w-full gap-2 rounded-xl font-bold h-11 border-green-200 text-green-600 hover:bg-green-50">
-                                <a href="/api/export/inquiries" download>
+                                <a href="/api/reports?type=inquiries" download>
                                     <Download className="w-4 h-4" /> Download Inquiries CSV
                                 </a>
                             </Button>
@@ -72,8 +72,28 @@ export default function ReportsPage() {
                                 <p className="text-xs text-muted-foreground">Complete feed of rating scores, author emails, comments, and replies.</p>
                             </div>
                             <Button asChild variant="outline" className="w-full gap-2 rounded-xl font-bold h-11 border-orange-200 text-orange-600 hover:bg-orange-50">
-                                <a href="/api/export/reviews" download>
+                                <a href="/api/reports?type=reviews" download>
                                     <Download className="w-4 h-4" /> Download Reviews CSV
+                                </a>
+                            </Button>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="hover:shadow-md transition-shadow border-none shadow-sm rounded-3xl overflow-hidden bg-white/50 backdrop-blur-xl">
+                        <CardContent className="pt-6 space-y-4">
+                            <div className="flex justify-between items-start">
+                                <div className="p-3 bg-purple-100 text-purple-600 rounded-2xl">
+                                    <TrendingUp className="w-6 h-6" />
+                                </div>
+                                <span className="text-[10px] font-black uppercase tracking-widest bg-purple-100/50 text-purple-600 border border-purple-200 px-2 py-1 rounded-full">CSV Matrix</span>
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-lg mb-1">Telemetry & Monitoring</h3>
+                                <p className="text-xs text-muted-foreground">Historical power flow, grid export, and self-consumption metrics from all assets.</p>
+                            </div>
+                            <Button asChild variant="outline" className="w-full gap-2 rounded-xl font-bold h-11 border-purple-200 text-purple-600 hover:bg-purple-50">
+                                <a href="/api/reports?type=monitoring" download>
+                                    <Download className="w-4 h-4" /> Download Monitoring CSV
                                 </a>
                             </Button>
                         </CardContent>
@@ -163,7 +183,7 @@ function LeadRow({ name, email, service, date, status }: { name: string, email: 
             <td className="px-6 py-4">{date}</td>
             <td className="px-6 py-4">
                 <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${status === 'New' ? 'bg-blue-100 text-blue-700' :
-                        status === 'Contacted' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                    status === 'Contacted' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
                     }`}>
                     {status}
                 </span>

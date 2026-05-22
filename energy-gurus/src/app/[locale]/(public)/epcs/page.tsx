@@ -55,7 +55,7 @@ const getInstallers = unstable_cache(
 
     return mapped.filter(inst => inst.score >= 50);
   },
-  ['epc-installers-list'],
+  ['epc-installers-list-v2'],
   { revalidate: 3600, tags: ['epcs'] }
 );
 

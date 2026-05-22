@@ -1,10 +1,11 @@
 "use client";
 
-import { UploadButton } from "@/lib/uploadthing";
 import { updateBrandProfile } from "@/lib/actions/brand";
-import { Trash2, ImageIcon, CheckCircle2 } from "lucide-react";
-import { useState } from "react";
+import { Trash2, ImageIcon, CheckCircle2, Upload } from "lucide-react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useR2Upload } from "@/lib/hooks/use-r2-upload";
+import { toast } from "sonner";
 
 interface BrandLogoUploadProps {
     initialLogo?: string | null;
@@ -13,19 +14,28 @@ interface BrandLogoUploadProps {
 export function BrandLogoUpload({ initialLogo }: BrandLogoUploadProps) {
     const router = useRouter();
     const [logo, setLogo] = useState(initialLogo || "");
-    const [isUploading, setIsUploading] = useState(false);
+    const { uploadFile, isUploading } = useR2Upload();
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleUploadComplete = async (res: any) => {
-        const newUrl = res[0].url;
-        setLogo(newUrl);
-        setIsUploading(false);
-        await updateBrandProfile({ logoUrl: newUrl });
-        router.refresh();
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+            const { publicUrl } = await uploadFile(file, "brand-logos");
+            setLogo(publicUrl);
+            await updateBrandProfile({ logoUrl: publicUrl });
+            toast.success("Logo uploaded successfully");
+            router.refresh();
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     const handleDeleteLogo = async () => {
         setLogo("");
         await updateBrandProfile({ logoUrl: "" });
+        toast.success("Logo removed");
         router.refresh();
     };
 
@@ -73,19 +83,21 @@ export function BrandLogoUpload({ initialLogo }: BrandLogoUploadProps) {
                 </div>
 
                 <div className="w-full max-w-[200px]">
-                    <UploadButton
-                        endpoint="brandLogo"
-                        onUploadBegin={() => setIsUploading(true)}
-                        onClientUploadComplete={handleUploadComplete}
-                        onUploadError={(error: Error) => {
-                            alert(`ERROR! ${error.message}`);
-                            setIsUploading(false);
-                        }}
-                        appearance={{
-                            button: "w-full bg-primary text-white font-bold rounded-xl px-4 h-10 text-[10px] uppercase tracking-[0.1em] hover:scale-[1.02] shadow-lg shadow-primary/20 transition-all",
-                            allowedContent: "text-[9px] opacity-40 font-bold uppercase mt-2"
-                        }}
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleFileChange}
                     />
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        className="w-full bg-primary text-white font-bold rounded-xl px-4 h-11 text-[10px] uppercase tracking-[0.1em] hover:scale-[1.02] shadow-lg shadow-primary/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                        <Upload className="w-4 h-4" />
+                        {isUploading ? "Uploading..." : "Upload Brand Logo"}
+                    </button>
                 </div>
             </div>
         </div>
