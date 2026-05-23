@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { users, brands, epcInstallers, epcOffices, epcProjects, products, brandCertifications, podcasts, liveQA } from "@/db/schema";
+import { users, brands, epcInstallers, epcOffices, epcProjects, products, brandCertifications } from "@/db/schema";
 import { like, inArray } from "drizzle-orm";
 import { seedDummyData } from "@/lib/seed";
 import { redis } from "@/lib/redis";
-import { revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 const DUMMY_EMAIL_SUFFIX = "@energygurus.demo";
 
@@ -28,14 +28,15 @@ export async function POST() {
         await seedDummyData();
 
         // Bust Redis caches
-        await redis.del("epcs:all", "brands:all");
-        // Bust Next.js unstable_cache
-        revalidateTag("epcs");
-        revalidateTag("brands");
-        revalidateTag("homepage");
+        try { await redis.del("epcs:all", "brands:all"); } catch {}
+
+        // Bust Next.js page cache
+        revalidatePath("/", "layout");
+        revalidatePath("/epcs");
+        revalidatePath("/brands");
 
         return NextResponse.json({
-            message: "✅ Seeded 4 EPCs, 4 Brands, offices, projects, products, certifications, podcasts & live QA sessions."
+            message: "✅ Seeded 4 EPCs, 4 Brands, offices, projects, products, certifications, podcasts & live QA. Refresh the page to see data."
         });
     } catch (error: any) {
         console.error("Seed error:", error);
@@ -46,7 +47,6 @@ export async function POST() {
 // DELETE — clear dummy data only
 export async function DELETE() {
     try {
-        // Find all dummy users
         const dummyUsers = await db
             .select({ id: users.id })
             .from(users)
@@ -58,23 +58,18 @@ export async function DELETE() {
 
         const dummyUserIds = dummyUsers.map(u => u.id);
 
-        // Find EPC profiles for these users
         const dummyEpcs = await db
             .select({ id: epcInstallers.id })
             .from(epcInstallers)
             .where(inArray(epcInstallers.userId, dummyUserIds));
-
         const dummyEpcIds = dummyEpcs.map(e => e.id);
 
-        // Find Brand profiles for these users
         const dummyBrands = await db
             .select({ id: brands.id })
             .from(brands)
             .where(inArray(brands.userId, dummyUserIds));
-
         const dummyBrandIds = dummyBrands.map(b => b.id);
 
-        // Delete in dependency order
         if (dummyEpcIds.length > 0) {
             await db.delete(epcProjects).where(inArray(epcProjects.epcId, dummyEpcIds));
             await db.delete(epcOffices).where(inArray(epcOffices.epcId, dummyEpcIds));
@@ -87,15 +82,12 @@ export async function DELETE() {
             await db.delete(brands).where(inArray(brands.id, dummyBrandIds));
         }
 
-        // Delete dummy users
         await db.delete(users).where(inArray(users.id, dummyUserIds));
 
-        // Bust Redis caches
-        await redis.del("epcs:all", "brands:all");
-        // Bust Next.js unstable_cache
-        revalidateTag("epcs");
-        revalidateTag("brands");
-        revalidateTag("homepage");
+        try { await redis.del("epcs:all", "brands:all"); } catch {}
+        revalidatePath("/", "layout");
+        revalidatePath("/epcs");
+        revalidatePath("/brands");
 
         return NextResponse.json({
             message: `✅ Cleared ${dummyUserIds.length} dummy users and all associated data.`

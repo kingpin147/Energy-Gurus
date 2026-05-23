@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'v5.airtableusercontent.com' },
       { protocol: 'https', hostname: 'energygurus.online' },
       { protocol: 'https', hostname: 'pub-e5b765a7c8b54f2da6a2b30d08d60039.r2.dev' },
+      { protocol: 'https', hostname: 'picsum.photos' },
     ],
   },
 };
