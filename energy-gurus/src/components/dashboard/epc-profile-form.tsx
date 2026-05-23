@@ -178,5 +178,3 @@ export function EpcProfileForm({ epcId, defaultCompanyName, defaultCeoName, defa
     );
 }
 
-
-// This is a significant layout redesign — going from a centered hero layout to a clean two-column sidebar + content layout inspired by the PropertyGuru reference. Let me redesign the public EPC profile page while keeping all existing content and functionality.

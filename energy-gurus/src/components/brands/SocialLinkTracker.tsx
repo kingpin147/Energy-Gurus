@@ -7,12 +7,14 @@ export function SocialLinkTracker({
   link, 
   id, 
   name,
-  type = "brand"
+  type = "brand",
+  variant = "dark"
 }: { 
   link: { platform: string; url: string }, 
   id: string, 
   name: string,
-  type?: "brand" | "epc"
+  type?: "brand" | "epc",
+  variant?: "dark" | "light"
 }) {
   const Icon = link.platform === "Facebook" ? Facebook :
                link.platform === "Twitter" ? Twitter :
@@ -39,15 +41,22 @@ export function SocialLinkTracker({
     }
   }
 
+  const lightClass = "w-9 h-9 bg-secondary rounded-xl flex items-center justify-center hover:bg-primary hover:text-white transition-all border border-border/50 group"
+  const darkClass  = "w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center hover:bg-primary hover:text-white transition-all border border-white/5 group"
+  const lightIcon  = "w-4 h-4 text-foreground group-hover:text-white group-hover:scale-110 transition-transform"
+  const darkIcon   = "w-7 h-7 text-white group-hover:scale-110 transition-transform"
+
   return (
     <a 
       href={link.url} 
       target="_blank" 
       rel="noopener noreferrer"
+      title={link.platform}
+      aria-label={`${name} on ${link.platform}`}
       onClick={handleClick}
-      className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center hover:bg-primary hover:text-white transition-all border border-white/5 group"
+      className={variant === "light" ? lightClass : darkClass}
     >
-      <Icon className="w-7 h-7 text-white group-hover:scale-110 transition-transform" />
+      <Icon className={variant === "light" ? lightIcon : darkIcon} />
     </a>
   )
 }

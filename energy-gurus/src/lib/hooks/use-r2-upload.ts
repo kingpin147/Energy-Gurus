@@ -10,31 +10,24 @@ export function useR2Upload() {
         setProgress(0);
 
         try {
-            // 1. Get presigned URL
+            // Upload via server-side proxy — avoids CORS issues with direct R2 PUT
             const res = await fetch("/api/r2/sign", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    filename: file.name,
-                    contentType: file.type,
-                    folder
-                }),
-            });
-
-            if (!res.ok) throw new Error("Failed to get upload URL");
-            const { uploadUrl, publicUrl, key } = await res.json();
-
-            // 2. Upload to R2
-            const uploadRes = await fetch(uploadUrl, {
-                method: "PUT",
-                body: file,
                 headers: {
                     "Content-Type": file.type,
+                    "x-file-type": file.type,
+                    "x-folder": folder,
+                    "x-filename": file.name,
                 },
+                body: file,
             });
 
-            if (!uploadRes.ok) throw new Error("Upload failed");
+            if (!res.ok) {
+                const msg = await res.text();
+                throw new Error(msg || "Upload failed");
+            }
 
+            const { publicUrl, key } = await res.json();
             return { publicUrl, key };
         } catch (error: any) {
             toast.error(error.message || "Upload failed");

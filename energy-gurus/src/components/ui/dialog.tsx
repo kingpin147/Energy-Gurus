@@ -61,7 +61,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed left-[50%] top-[30%] z-50 grid w-[95vw] sm:max-w-lg max-h-[90dvh] overflow-hidden translate-x-[-50%] translate-y-[-50%] gap-4 rounded-3xl border bg-background p-0 shadow-2xl duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 flex flex-col",
+          "fixed left-[50%] top-[50%] z-50 grid w-[95vw] sm:max-w-lg max-h-[85dvh] overflow-hidden translate-x-[-50%] translate-y-[-50%] gap-4 rounded-2xl border bg-background p-0 shadow-2xl duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 flex flex-col",
           className
         )}
         {...props}
@@ -69,15 +69,15 @@ function DialogContent({
         <DialogPrimitive.Description className="sr-only">
           Please fill out the form below to send an inquiry.
         </DialogPrimitive.Description>
-        <div className="overflow-y-auto p-6 sm:p-12 pb-16 sm:pb-24 max-h-full">
+        <div className="overflow-y-auto p-6 max-h-full">
           {children}
         </div>
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="absolute right-4 top-4 sm:right-8 sm:top-8 rounded-full bg-secondary/80 p-2 text-foreground/70 opacity-70 transition-all hover:bg-secondary hover:opacity-100 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary disabled:pointer-events-none z-50"
+            className="absolute right-4 top-4 rounded-full bg-secondary/80 p-2 text-foreground/70 opacity-70 transition-all hover:bg-secondary hover:opacity-100 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary disabled:pointer-events-none z-50"
           >
-            <XIcon className="w-5 h-5" />
+            <XIcon className="w-4 h-4" />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}

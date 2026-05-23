@@ -27,7 +27,7 @@ export function SocialLinksForm({ type, initialLinks }: SocialLinksFormProps) {
                     { platform: "YouTube", url: formData.get("youtube") as string },
                     { platform: "Twitter", url: formData.get("twitter") as string },
                     { platform: "WhatsApp", url: formData.get("whatsapp") as string },
-                ].filter(l => l.url);
+                ].filter(l => l.url && l.url.trim() !== "");
                 await updateEpcProfile({ socialLinks: links });
             } else {
                 const links = [
@@ -36,7 +36,7 @@ export function SocialLinksForm({ type, initialLinks }: SocialLinksFormProps) {
                     { platform: "Instagram", url: formData.get("instagram") as string },
                     { platform: "YouTube", url: formData.get("youtube") as string },
                     { platform: "WhatsApp", url: formData.get("whatsapp") as string },
-                ].filter(l => l.url);
+                ].filter(l => l.url && l.url.trim() !== "");
                 await updateBrandProfile({ socialLinks: links });
             }
             setStatus("success");
