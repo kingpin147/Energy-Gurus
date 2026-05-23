@@ -107,20 +107,20 @@ export default async function EpcDashboard() {
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 h-14 p-1 bg-secondary/20 rounded-xl mb-8">
-          <TabsTrigger value="profile" className="rounded-lg font-bold gap-2">
+        <TabsList className="flex flex-wrap w-full h-auto p-1 bg-secondary/20 rounded-xl mb-8 gap-1">
+          <TabsTrigger value="profile" className="rounded-lg font-bold gap-2 flex-1 min-w-[120px] h-12">
             <Settings className="w-4 h-4" /> Profile
           </TabsTrigger>
-          <TabsTrigger value="offices" className="rounded-lg font-bold gap-2">
+          <TabsTrigger value="offices" className="rounded-lg font-bold gap-2 flex-1 min-w-[120px] h-12">
             <MapPin className="w-4 h-4" /> Offices
           </TabsTrigger>
-          <TabsTrigger value="projects" className="rounded-lg font-bold gap-2">
+          <TabsTrigger value="projects" className="rounded-lg font-bold gap-2 flex-1 min-w-[120px] h-12">
             <LayoutGrid className="w-4 h-4" /> Showcase
           </TabsTrigger>
-          <TabsTrigger value="inquiries" className="rounded-lg font-bold gap-2">
+          <TabsTrigger value="inquiries" className="rounded-lg font-bold gap-2 flex-1 min-w-[120px] h-12">
             <MessageSquare className="w-4 h-4" /> Inquiries
           </TabsTrigger>
-          <TabsTrigger value="reviews" className="rounded-lg font-bold gap-2">
+          <TabsTrigger value="reviews" className="rounded-lg font-bold gap-2 flex-1 min-w-[120px] h-12">
             <Star className="w-4 h-4" /> Reviews
           </TabsTrigger>
         </TabsList>
@@ -137,6 +137,7 @@ export default async function EpcDashboard() {
                   defaultCompanyName={epc.companyName}
                   defaultCeoName={epc.ceoName || ""}
                   defaultSectors={epc.sectors || []}
+                  defaultCertifications={(epc as any).certifications || []}
                   defaultAbout={epc.about || ""}
                   defaultWebsite={epc.website || ""}
                 />

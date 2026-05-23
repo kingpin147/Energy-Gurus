@@ -27,6 +27,7 @@ export const epcInstallers = pgTable('epc_installers', {
   companyName: text('company_name').notNull(),
   ceoName: text('ceo_name'),
   sectors: jsonb('sectors').$type<string[]>().default([]),
+  certifications: jsonb('certifications').$type<string[]>().default([]),
   logoUrl: text('logo_url'),
   about: text('about'),
   portfolio: jsonb('portfolio').$type<string[]>().default([]),
@@ -57,7 +58,7 @@ export const epcProjects = pgTable('epc_projects', {
   epcId: uuid('epc_id').references(() => epcInstallers.id, { onDelete: 'cascade' }).notNull(),
   name: text('name').notNull(),
   city: text('city'),
-  segmentType: text('segment_type'), // Residential, Commercial, etc.
+  segmentType: jsonb('segment_type').$type<string[]>().default([]), // Residential, Commercial, etc. (Multi-select)
   systemSize: text('system_size'), // e.g. "10kW"
   systemType: text('system_type'), // Hybrid, Grid Tied, etc.
   inverterModel: text('inverter_model'),

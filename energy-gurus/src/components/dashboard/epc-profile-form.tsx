@@ -9,20 +9,33 @@ interface EpcProfileFormProps {
     defaultCompanyName: string;
     defaultCeoName?: string;
     defaultSectors?: string[];
+    defaultCertifications?: string[];
     defaultAbout: string;
     defaultWebsite: string;
 }
 
-export function EpcProfileForm({ epcId, defaultCompanyName, defaultCeoName, defaultSectors = [], defaultAbout, defaultWebsite }: EpcProfileFormProps) {
+export function EpcProfileForm({ epcId, defaultCompanyName, defaultCeoName, defaultSectors = [], defaultCertifications = [], defaultAbout, defaultWebsite }: EpcProfileFormProps) {
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
     const [errorMsg, setErrorMsg] = useState("");
     const [selectedSectors, setSelectedSectors] = useState<string[]>(defaultSectors);
+    const [selectedCertifications, setSelectedCertifications] = useState<string[]>(defaultCertifications);
 
     const sectors = ["Residential", "Commercial", "Industrial", "Agriculture"];
+    const certificationsList = [
+        "GoodWe", "Huawei", "Growatt", "Solis", "Sungrow", 
+        "Dyness", "Paylontech", "EY Power", "Hystorix", 
+        "Longi", "JINKO", "TRINA", "Canadian", "JA"
+    ];
 
     const toggleSector = (sector: string) => {
         setSelectedSectors(prev => 
             prev.includes(sector) ? prev.filter(s => s !== sector) : [...prev, sector]
+        );
+    };
+
+    const toggleCertification = (cert: string) => {
+        setSelectedCertifications(prev => 
+            prev.includes(cert) ? prev.filter(c => c !== cert) : [...prev, cert]
         );
     };
 
@@ -31,6 +44,7 @@ export function EpcProfileForm({ epcId, defaultCompanyName, defaultCeoName, defa
         setErrorMsg("");
         try {
             formData.set("sectors", JSON.stringify(selectedSectors));
+            formData.set("certifications", JSON.stringify(selectedCertifications));
             await updateEpcProfile(formData);
             setStatus("success");
             setTimeout(() => setStatus("idle"), 4000);
@@ -86,6 +100,33 @@ export function EpcProfileForm({ epcId, defaultCompanyName, defaultCeoName, defa
             </div>
 
             <div>
+                <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Certifications</label>
+                <div className="flex flex-wrap gap-3 bg-secondary/5 border rounded-2xl p-4">
+                    {certificationsList.map(cert => {
+                        const isChecked = selectedCertifications.includes(cert);
+                        return (
+                            <label
+                                key={cert}
+                                className={`flex items-center gap-3 p-3 rounded-xl border text-sm font-medium cursor-pointer transition-all ${
+                                    isChecked
+                                    ? "bg-primary/5 border-primary text-primary"
+                                    : "bg-background hover:bg-secondary/5 border-border text-muted-foreground"
+                                }`}
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={() => toggleCertification(cert)}
+                                    className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary"
+                                />
+                                <span>{cert}</span>
+                            </label>
+                        );
+                    })}
+                </div>
+            </div>
+
+            <div>
                 <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">About Company</label>
                 <textarea
                     name="about"
@@ -136,3 +177,6 @@ export function EpcProfileForm({ epcId, defaultCompanyName, defaultCeoName, defa
         </form>
     );
 }
+
+
+// This is a significant layout redesign — going from a centered hero layout to a clean two-column sidebar + content layout inspired by the PropertyGuru reference. Let me redesign the public EPC profile page while keeping all existing content and functionality.

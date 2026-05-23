@@ -24,6 +24,7 @@ export async function updateEpcProfile(data: FormData | Partial<typeof epcInstal
     companyName: data.get("companyName") as string,
     ceoName: data.get("ceoName") as string,
     sectors: data.get("sectors") ? JSON.parse(data.get("sectors") as string) : [],
+    certifications: data.get("certifications") ? JSON.parse(data.get("certifications") as string) : [],
     about: data.get("about") as string,
     website: data.get("website") as string,
   } : data;

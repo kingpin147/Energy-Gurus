@@ -19,6 +19,7 @@ const getInstallers = unstable_cache(
         companyName: epcInstallers.companyName,
         ceoName: epcInstallers.ceoName,
         sectors: epcInstallers.sectors,
+        certifications: epcInstallers.certifications,
         logoUrl: epcInstallers.logoUrl,
         about: epcInstallers.about,
         website: epcInstallers.website,

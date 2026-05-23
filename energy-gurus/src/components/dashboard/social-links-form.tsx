@@ -24,6 +24,7 @@ export function SocialLinksForm({ type, initialLinks }: SocialLinksFormProps) {
                     { platform: "Facebook", url: formData.get("facebook") as string },
                     { platform: "LinkedIn", url: formData.get("linkedin") as string },
                     { platform: "Instagram", url: formData.get("instagram") as string },
+                    { platform: "YouTube", url: formData.get("youtube") as string },
                     { platform: "Twitter", url: formData.get("twitter") as string },
                     { platform: "WhatsApp", url: formData.get("whatsapp") as string },
                 ].filter(l => l.url);
@@ -61,6 +62,10 @@ export function SocialLinksForm({ type, initialLinks }: SocialLinksFormProps) {
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold uppercase tracking-widest opacity-50 w-20 shrink-0">Instagram</span>
                   <input name="instagram" placeholder="https://instagram.com/yourprofile" defaultValue={initialLinks?.find(l => l.platform === "Instagram")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold uppercase tracking-widest opacity-50 w-20 shrink-0">YouTube</span>
+                  <input name="youtube" placeholder="https://youtube.com/yourchannel" defaultValue={initialLinks?.find(l => l.platform === "YouTube")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold uppercase tracking-widest opacity-50 w-20 shrink-0">Twitter</span>

@@ -3,7 +3,6 @@
 import { Link, usePathname } from "@/i18n/routing";
 import {
     LayoutDashboard,
-    Activity,
     FileText,
     Settings,
     ArrowLeft,
@@ -26,7 +25,6 @@ export default function Sidebar({ role }: { role: UserRole }) {
 
     const adminLinks = [
         { href: "/dashboard", icon: <LayoutDashboard className="w-4 h-4" />, label: "Overview" },
-        { href: "/dashboard/monitoring", icon: <Activity className="w-4 h-4" />, label: "Live Telemetry" },
         { href: "/dashboard/inbox", icon: <Inbox className="w-4 h-4" />, label: "Support Inbox" },
         { href: "/dashboard/users", icon: <Users className="w-4 h-4" />, label: "Manage Users" },
         { href: "/dashboard/content", icon: <Video className="w-4 h-4" />, label: "Content (Podcast/QA)" },

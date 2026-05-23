@@ -16,10 +16,6 @@ export default async function MonitoringDashboardPage() {
     return (
         <div className="p-6 space-y-8">
             <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Live Telemetry</h1>
-                    <p className="text-muted-foreground">High-resolution performance data from your energy assets.</p>
-                </div>
                 <div className="flex gap-2">
                     <Button variant="secondary" size="sm">Site: DHA Phase 6</Button>
                     <a href="/api/reports?type=monitoring" download>

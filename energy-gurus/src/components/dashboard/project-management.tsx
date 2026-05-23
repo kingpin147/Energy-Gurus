@@ -12,7 +12,7 @@ interface Project {
     id: string;
     name: string;
     city: string | null;
-    segmentType: string | null;
+    segmentType: any;
     systemSize: string | null;
     systemType: string | null;
     inverterModel: string | null;
@@ -34,6 +34,7 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
     const [isLoading, setIsLoading] = useState(false);
     const [uploadedImages, setUploadedImages] = useState<string[]>([]);
     const [uploadedVideos, setUploadedVideos] = useState<string[]>([]);
+    const [selectedSegments, setSelectedSegments] = useState<string[]>([]);
 
     const { uploadFile, isUploading } = useR2Upload();
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -42,6 +43,7 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
         setEditingProject(null);
         setUploadedImages([]);
         setUploadedVideos([]);
+        setSelectedSegments([]);
         setIsFormOpen(true);
     };
 
@@ -49,6 +51,17 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
         setEditingProject(project);
         setUploadedImages(project.images || []);
         setUploadedVideos(project.videos || []);
+        
+        let defaultSegments: string[] = [];
+        if (project.segmentType) {
+            try {
+                const parsed = typeof project.segmentType === 'string' ? JSON.parse(project.segmentType) : project.segmentType;
+                defaultSegments = Array.isArray(parsed) ? parsed : [parsed];
+            } catch {
+                defaultSegments = Array.isArray(project.segmentType) ? project.segmentType : [project.segmentType as string];
+            }
+        }
+        setSelectedSegments(defaultSegments);
         setIsFormOpen(true);
     };
 
@@ -80,7 +93,7 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
             const projectData = {
                 name: formData.get("name") as string,
                 city: formData.get("city") as string,
-                segmentType: formData.get("segmentType") as string,
+                segmentType: selectedSegments,
                 systemSize: formData.get("systemSize") as string,
                 systemType: formData.get("systemType") as string,
                 inverterModel: formData.get("inverterModel") as string,
@@ -151,18 +164,39 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
                                         <input name="name" defaultValue={editingProject?.name || ""} placeholder="e.g. 10kW Residential Installation" className="w-full border rounded-2xl p-4 bg-background outline-none" required />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div>
+                                        <div className="col-span-2 sm:col-span-1">
                                             <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">City</label>
                                             <input name="city" defaultValue={editingProject?.city || ""} placeholder="Islamabad" className="w-full border rounded-2xl p-4 bg-background outline-none" />
                                         </div>
-                                        <div>
-                                            <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">Segment</label>
-                                            <select name="segmentType" defaultValue={editingProject?.segmentType || "Residential"} className="w-full border rounded-2xl p-4 bg-background outline-none">
-                                                <option>Residential</option>
-                                                <option>Commercial</option>
-                                                <option>Industrial</option>
-                                                <option>Agriculture</option>
-                                            </select>
+                                        <div className="col-span-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">Segment (Tick Options)</label>
+                                            <div className="grid grid-cols-2 gap-2 bg-background border rounded-2xl p-3">
+                                                {["Residential", "Commercial", "Industrial", "Agriculture"].map(seg => {
+                                                    const isChecked = selectedSegments.includes(seg);
+                                                    return (
+                                                        <label
+                                                            key={seg}
+                                                            className={`flex items-center gap-2.5 p-2 rounded-xl text-xs font-bold cursor-pointer transition-all border ${
+                                                                isChecked
+                                                                ? "bg-primary/5 border-primary/20 text-primary"
+                                                                : "bg-transparent border-transparent text-muted-foreground hover:bg-secondary/5"
+                                                            }`}
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={isChecked}
+                                                                onChange={() => {
+                                                                    setSelectedSegments(prev =>
+                                                                        prev.includes(seg) ? prev.filter(s => s !== seg) : [...prev, seg]
+                                                                    );
+                                                                }}
+                                                                className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary"
+                                                            />
+                                                            <span>{seg}</span>
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -299,10 +333,23 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
                                     <ImageIcon className="w-10 h-10 opacity-10" />
                                 </div>
                             )}
-                            <div className="absolute top-4 left-4 flex gap-2">
-                                <span className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-primary shadow-sm border border-primary/10">
-                                    {project.segmentType}
-                                </span>
+                            <div className="absolute top-4 left-4 flex flex-wrap gap-2 max-w-[80%]">
+                                {(() => {
+                                    let segments: string[] = [];
+                                    if (project.segmentType) {
+                                        try {
+                                            const parsed = typeof project.segmentType === 'string' ? JSON.parse(project.segmentType) : project.segmentType;
+                                            segments = Array.isArray(parsed) ? parsed : [parsed];
+                                        } catch {
+                                            segments = Array.isArray(project.segmentType) ? project.segmentType : [project.segmentType];
+                                        }
+                                    }
+                                    return segments.map(seg => (
+                                        <span key={seg} className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-primary shadow-sm border border-primary/10">
+                                            {seg}
+                                        </span>
+                                    ));
+                                })()}
                                 {project.videos && project.videos.length > 0 && (
                                     <span className="bg-accent/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-sm">
                                         <VideoIcon className="w-3 h-3 inline mr-1" /> HD Video

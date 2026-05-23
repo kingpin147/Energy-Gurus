@@ -52,7 +52,7 @@ export function ReviewForm({ targetId, targetType }: { targetId: string, targetT
 
             {/* Star rating */}
             <div className="space-y-4">
-                <label className="text-xs font-bold uppercase tracking-widest opacity-60">Your Rating</label>
+                <label className="text-xs font-bold uppercase tracking-widest opacity-60">Rate Workmanship</label>
                 <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                         <button
@@ -77,7 +77,7 @@ export function ReviewForm({ targetId, targetType }: { targetId: string, targetT
 
             {/* Comment */}
             <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest opacity-60">Your Experience</label>
+                <label className="text-xs font-bold uppercase tracking-widest opacity-60">Share Feedback & Comments</label>
                 <textarea
                     name="comment"
                     placeholder="Tell others about the quality of service, installation, or products..."
