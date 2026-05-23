@@ -10,6 +10,7 @@ import { TrackedLink } from "@/components/shared/AnalyticsTracker";
 import Image from "next/image";
 import { unstable_cache } from "next/cache";
 import { getBrandCompleteness } from "@/lib/utils/completeness";
+import { AdBanner } from "@/components/shared/AdBanner";
 
 const getBrandsData = unstable_cache(
     async (sort: string, q?: string) => {
@@ -219,6 +220,13 @@ export default async function BrandsListingPage({
                             ))}
                         </div>
 
+                        {/* Mid-listing ad */}
+                        {(brandList?.length ?? 0) >= 2 && (
+                          <div className="mt-2">
+                            <AdBanner variant="horizontal" slot={3} />
+                          </div>
+                        )}
+
                         {(brandList?.length || 0) === 0 && (
                             <div className="text-center py-32 bg-white/40 backdrop-blur-xl rounded-[4rem] border-4 border-dashed border-border/50">
                                 <Shield className="w-24 h-24 text-primary/10 mx-auto mb-8 animate-float" />
@@ -230,6 +238,9 @@ export default async function BrandsListingPage({
 
                     {/* Sidebar */}
                     <aside className="w-full xl:w-96 flex-shrink-0 xl:sticky xl:top-12 space-y-8">
+                        {/* Sidebar Ad */}
+                        <AdBanner variant="sidebar" slot={2} />
+
                         {/* Verification Portal */}
                         <section className="bg-white/50 backdrop-blur-2xl p-10 rounded-[3.5rem] border border-border/50 premium-shadow relative overflow-hidden group text-center">
                             <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />

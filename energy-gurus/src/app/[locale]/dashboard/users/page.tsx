@@ -3,11 +3,9 @@ import { users } from "@/db/schema";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users as UsersIcon, ShieldAlert, Trash2, Power, PowerOff } from "lucide-react";
-import { deleteUser, toggleUserStatus, updateUserRole } from "@/lib/actions/users";
-import { createInvitation } from "@/lib/actions/invitations";
+import { Users as UsersIcon, ShieldAlert, Power, PowerOff } from "lucide-react";
+import { toggleUserStatus } from "@/lib/actions/users";
 import { invitations } from "@/db/schema";
-import { revalidatePath } from "next/cache";
 import { ListSort } from "@/components/shared/list-sort";
 import { ListSearch } from "@/components/shared/list-search";
 import { eq, asc, desc, like, or, and } from "drizzle-orm";
@@ -15,6 +13,7 @@ import { getUserRole } from "@/lib/roles";
 import { BulkInvite } from "@/components/dashboard/bulk-invite";
 import { SingleInvite } from "@/components/dashboard/single-invite";
 import { PendingInvitations } from "@/components/dashboard/pending-invitations";
+import { DeleteUserButton } from "@/components/dashboard/delete-user-button";
 import { createClerkClient } from "@clerk/nextjs/server";
 
 export default async function UserManagementPage({
@@ -204,14 +203,11 @@ export default async function UserManagementPage({
 
                                                             {/* Only Super Admin can delete other Admins, but NO ONE can delete Super Admins */}
                                                             {!isSuperAdmin && (userRole === 'super-admin' || (userRole === 'admin' && user.role !== 'admin' && user.role !== 'super-admin')) && (
-                                                                <form action={async () => {
-                                                                    "use server";
-                                                                    await deleteUser(user.id);
-                                                                }}>
-                                                                    <Button variant="ghost" size="sm" className="h-9 w-9 p-0 rounded-xl text-red-500 hover:text-red-600 hover:bg-red-50">
-                                                                        <Trash2 className="w-4 h-4" />
-                                                                    </Button>
-                                                                </form>
+                                                                <DeleteUserButton
+                                                                    userId={user.id}
+                                                                    userName={user.name || ""}
+                                                                    userEmail={user.email}
+                                                                />
                                                             )}
                                                         </div>
                                                     </td>
