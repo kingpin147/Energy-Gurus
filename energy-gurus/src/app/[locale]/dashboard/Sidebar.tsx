@@ -14,7 +14,8 @@ import {
     MessageSquare,
     ShieldCheck,
     Inbox,
-    HeadphonesIcon
+    HeadphonesIcon,
+    MousePointerClick
 } from "lucide-react";
 import { UserRole } from "@/db/schema";
 
@@ -25,6 +26,7 @@ export default function Sidebar({ role }: { role: UserRole }) {
 
     const adminLinks = [
         { href: "/dashboard", icon: <LayoutDashboard className="w-4 h-4" />, label: "Overview" },
+        { href: "/dashboard/analytics", icon: <MousePointerClick className="w-4 h-4" />, label: "Engagement Hub" },
         { href: "/dashboard/inbox", icon: <Inbox className="w-4 h-4" />, label: "Support Inbox" },
         { href: "/dashboard/users", icon: <Users className="w-4 h-4" />, label: "Manage Users" },
         { href: "/dashboard/content", icon: <Video className="w-4 h-4" />, label: "Content (Podcast/QA)" },

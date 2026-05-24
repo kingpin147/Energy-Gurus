@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ContactForm } from "@/components/forms/contact-form";
 import { TrackedInteraction, TrackedLink } from "@/components/shared/AnalyticsTracker";
+import { TrackedDialogTrigger } from "@/components/shared/TrackedDialogTrigger";
 import { Globe, ExternalLink } from "lucide-react";
 
 interface EpcContactButtonsProps {
@@ -35,11 +36,13 @@ export function EpcContactButtons({ epcId, companyName, userId, website, whatsap
             )}
 
             <Dialog>
-                <DialogTrigger asChild>
-                    <Button className="w-full h-12 rounded-xl font-bold text-sm bg-primary hover:bg-primary/90 text-white gap-2.5 shadow-md shadow-primary/20 transition-all hover:scale-[1.01]">
-                        <Mail className="w-4 h-4" /> Direct Message
-                    </Button>
-                </DialogTrigger>
+                <TrackedDialogTrigger
+                    className="w-full h-12 rounded-xl font-bold text-sm bg-primary hover:bg-primary/90 text-white gap-2.5 shadow-md shadow-primary/20 transition-all hover:scale-[1.01] inline-flex items-center justify-center"
+                    eventName="epc_contact_click"
+                    eventProperties={{ epcId, companyName }}
+                >
+                    <Mail className="w-4 h-4" /> Direct Message
+                </TrackedDialogTrigger>
                 <DialogContent className="sm:max-w-lg rounded-2xl border border-border/60 p-0 overflow-hidden bg-white shadow-2xl">
                     {/* Header */}
                     <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-border/50">
