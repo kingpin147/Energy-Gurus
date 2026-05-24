@@ -135,49 +135,52 @@ export default async function BrandsListingPage({
 
                                     <Card className="border-border/50 bg-white/70 backdrop-blur-xl hover:bg-white/90 transition-all duration-500 overflow-hidden rounded-[3rem] relative z-10 premium-shadow border group-hover:border-primary/30 group-hover:-translate-y-2">
                                         <div className="p-8 md:p-12">
-                                            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10 mb-12">
-                                                <div className="flex flex-col md:flex-row gap-8 flex-1 items-start md:items-center">
-                                                    {/* Logo Wrapper */}
-                                                    <div className="w-32 h-32 bg-white p-6 rounded-[2.5rem] border border-border/50 shadow-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-700 relative overflow-hidden">
-                                                        {brand.logoUrl ? (
-                                                            <Image src={brand.logoUrl} alt={brand.brandName} fill className="object-contain p-4 filter drop-shadow-lg" sizes="128px" />
-                                                        ) : (
-                                                            <ShieldCheck className="w-12 h-12 text-primary/10" />
-                                                        )}
-                                                    </div>
-
-                                                    <div className="space-y-4 flex-1">
-                                                        <div className="flex items-center gap-4 flex-wrap">
-                                                            <h2 className="text-4xl font-black text-foreground tracking-tighter">
-                                                                {brand.brandName}
-                                                            </h2>
-                                                            {brand.isVerified && (
-                                                                <div className="flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-black uppercase tracking-widest border border-primary/20">
-                                                                    <ShieldCheck className="w-3.5 h-3.5" /> Verified
-                                                                </div>
-                                                            )}
-                                                            <div className="flex items-center gap-2 px-4 py-1.5 bg-accent/10 text-accent-foreground rounded-full text-[10px] font-black uppercase tracking-widest border border-accent/20">
-                                                                <Star className="w-3.5 h-3.5 fill-current text-yellow-500" />
-                                                                {brand.avgRating ? brand.avgRating.toFixed(1) : "N/A"}
-                                                            </div>
-                                                        </div>
-                                                        <p className="text-lg text-muted-foreground leading-relaxed font-medium opacity-80 max-w-2xl">
-                                                            {brand.about || "N/A"}
-                                                        </p>
-                                                    </div>
+                                            <div className="flex flex-col sm:flex-row gap-6 items-start mb-12">
+                                                {/* Logo Wrapper */}
+                                                <div className="w-28 h-28 md:w-32 md:h-32 bg-white p-5 rounded-[2.5rem] border border-border/50 shadow-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-700 relative overflow-hidden">
+                                                    {brand.logoUrl ? (
+                                                        <Image src={brand.logoUrl} alt={brand.brandName} fill className="object-contain p-4 filter drop-shadow-lg" sizes="128px" />
+                                                    ) : (
+                                                        <ShieldCheck className="w-12 h-12 text-primary/10" />
+                                                    )}
                                                 </div>
 
-                                                <TrackedLink
-                                                    href={`/brands/${brand.id}` as any}
-                                                    className="inline-flex items-center gap-3 px-8 py-4 bg-foreground text-background rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-primary transition-all duration-500 group/btn shadow-xl active:scale-95"
-                                                    eventName="brand_portfolio_view"
-                                                    eventProperties={{
-                                                        brandId: brand.id,
-                                                        brandName: brand.brandName
-                                                    }}
-                                                >
-                                                    Access Portfolio <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-2 transition-transform duration-300" />
-                                                </TrackedLink>
+                                                {/* Info: name + badges + description + button stacked vertically */}
+                                                <div className="flex flex-col gap-4 flex-1 min-w-0">
+                                                    <div className="flex items-center gap-3 flex-wrap">
+                                                        <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tighter">
+                                                            {brand.brandName}
+                                                        </h2>
+                                                        {brand.isVerified && (
+                                                            <div className="flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-black uppercase tracking-widest border border-primary/20">
+                                                                <ShieldCheck className="w-3.5 h-3.5" /> Verified
+                                                            </div>
+                                                        )}
+                                                        <div className="flex items-center gap-2 px-4 py-1.5 bg-accent/10 text-accent-foreground rounded-full text-[10px] font-black uppercase tracking-widest border border-accent/20">
+                                                            <Star className="w-3.5 h-3.5 fill-current text-yellow-500" />
+                                                            {brand.avgRating ? brand.avgRating.toFixed(1) : "N/A"}
+                                                        </div>
+                                                    </div>
+
+                                                    <p className="text-base md:text-lg text-muted-foreground leading-relaxed font-medium opacity-80">
+                                                        {brand.about || "N/A"}
+                                                    </p>
+
+                                                    {/* Button sits below description so description can breathe */}
+                                                    <div className="pt-2">
+                                                        <TrackedLink
+                                                            href={`/brands/${brand.id}` as any}
+                                                            className="inline-flex items-center gap-3 px-8 py-4 bg-foreground text-background rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-primary transition-all duration-500 group/btn shadow-xl active:scale-95 whitespace-nowrap"
+                                                            eventName="brand_portfolio_view"
+                                                            eventProperties={{
+                                                                brandId: brand.id,
+                                                                brandName: brand.brandName
+                                                            }}
+                                                        >
+                                                            Access Portfolio <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-2 transition-transform duration-300" />
+                                                        </TrackedLink>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             {/* Product Showcase */}
