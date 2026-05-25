@@ -46,7 +46,7 @@ export async function highlightQuestion(questionId: string, sessionId: string) {
         .where(eq(liveQaQuestions.id, questionId));
 
     revalidatePath("/[locale]/live-qa", "page");
-    revalidatePath("/dashboard/content/live-qa/[id]/questions", "page");
+    revalidatePath("/[locale]/dashboard/content/live-qa/[id]/questions", "page");
 }
 
 export async function markQuestionAnswered(questionId: string) {
@@ -55,7 +55,7 @@ export async function markQuestionAnswered(questionId: string) {
         .set({ isAnswered: true })
         .where(eq(liveQaQuestions.id, questionId));
 
-    revalidatePath("/dashboard/content/live-qa/[id]/questions", "page");
+    revalidatePath("/[locale]/dashboard/content/live-qa/[id]/questions", "page");
 }
 
 export async function deleteQuestion(questionId: string) {
@@ -63,5 +63,5 @@ export async function deleteQuestion(questionId: string) {
     await db.delete(liveQaQuestions)
         .where(eq(liveQaQuestions.id, questionId));
 
-    revalidatePath("/dashboard/content/live-qa/[id]/questions", "page");
+    revalidatePath("/[locale]/dashboard/content/live-qa/[id]/questions", "page");
 }

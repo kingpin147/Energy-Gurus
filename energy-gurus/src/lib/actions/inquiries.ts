@@ -47,10 +47,10 @@ export async function updateInquiryStatus(id: string, status: string, notes?: st
         .set({ status, adminNotes: notes, updatedAt: new Date() } as any)
         .where(eq(inquiries.id, id));
     
-    revalidatePath("/dashboard/inquiries");
+    revalidatePath("/[locale]/dashboard/inquiries", "layout");
 }
 
 export async function deleteInquiry(id: string) {
     await db.delete(inquiries).where(eq(inquiries.id, id));
-    revalidatePath("/dashboard/inquiries");
+    revalidatePath("/[locale]/dashboard/inquiries", "layout");
 }

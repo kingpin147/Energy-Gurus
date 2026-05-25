@@ -38,7 +38,7 @@ export async function addPodcast(formData: FormData) {
 
         revalidateTag('podcasts', {});
         revalidateTag('homepage', {});
-        revalidatePath("/dashboard/content", "page");
+        revalidatePath("/[locale]/dashboard/content", "page");
         revalidatePath("/podcast", "page");
     } catch (error) {
         console.error("Failed to add podcast:", error);
@@ -53,7 +53,7 @@ export async function deletePodcast(id: string) {
         await db.delete(podcasts).where(eq(podcasts.id, id));
         revalidateTag('podcasts', {});
         revalidateTag('homepage', {});
-        revalidatePath("/dashboard/content", "page");
+        revalidatePath("/[locale]/dashboard/content", "page");
         revalidatePath("/podcast", "page");
     } catch (error) {
         console.error("Failed to delete podcast:", error);
@@ -101,7 +101,7 @@ export async function addLiveQA(formData: FormData) {
 
         revalidateTag('live-qa', {});
         revalidateTag('homepage', {});
-        revalidatePath("/dashboard/content", "page");
+        revalidatePath("/[locale]/dashboard/content", "page");
         revalidatePath("/live-qa", "page");
     } catch (error) {
         console.error("Failed to add Live QA:", error);
@@ -116,7 +116,7 @@ export async function deleteLiveQA(id: string) {
         await db.delete(liveQA).where(eq(liveQA.id, id));
         revalidateTag('live-qa', {});
         revalidateTag('homepage', {});
-        revalidatePath("/dashboard/content", "page");
+        revalidatePath("/[locale]/dashboard/content", "page");
         revalidatePath("/live-qa", "page");
     } catch (error) {
         console.error("Failed to delete Live QA:", error);

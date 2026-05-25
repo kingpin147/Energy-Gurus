@@ -36,7 +36,7 @@ export async function sendInquiry(formData: FormData) {
         isRead: false,
     });
 
-    revalidatePath("/dashboard/inquiries");
+    revalidatePath("/[locale]/dashboard/inquiries", "layout");
 }
 
 export async function sendSupportMessage(formData: FormData) {
@@ -75,7 +75,7 @@ export async function sendSupportMessage(formData: FormData) {
         isRead: false,
     });
 
-    revalidatePath("/dashboard/support");
+    revalidatePath("/[locale]/dashboard/support", "layout");
 }
 
 export async function getMyInquiries(userId: string, filter: "all" | "read" | "unread" = "all") {
@@ -102,8 +102,8 @@ export async function markInquiryAsRead(id: string) {
         .set({ isRead: true, updatedAt: new Date() })
         .where(eq(inquiries.id, id));
 
-    revalidatePath("/dashboard/inquiries");
-    revalidatePath("/dashboard/inbox");
+    revalidatePath("/[locale]/dashboard/inquiries", "layout");
+    revalidatePath("/[locale]/dashboard/inbox", "layout");
 }
 
 export async function deleteInquiry(id: string) {
@@ -112,8 +112,8 @@ export async function deleteInquiry(id: string) {
 
     await db.delete(inquiries).where(eq(inquiries.id, id));
 
-    revalidatePath("/dashboard/inquiries");
-    revalidatePath("/dashboard/inbox");
+    revalidatePath("/[locale]/dashboard/inquiries", "layout");
+    revalidatePath("/[locale]/dashboard/inbox", "layout");
 }
 
 export async function updateInquiryStatus(id: string, status: "pending" | "replied" | "closed") {
@@ -124,7 +124,7 @@ export async function updateInquiryStatus(id: string, status: "pending" | "repli
         .set({ status, updatedAt: new Date() })
         .where(eq(inquiries.id, id));
 
-    revalidatePath("/dashboard");
+    revalidatePath("/[locale]/dashboard", "layout");
 }
 
 export async function replyToInquiry(id: string, replyText: string) {
@@ -139,7 +139,7 @@ export async function replyToInquiry(id: string, replyText: string) {
         })
         .where(eq(inquiries.id, id));
 
-    revalidatePath("/dashboard/inquiries");
-    revalidatePath("/dashboard/inbox");
-    revalidatePath("/dashboard/support");
+    revalidatePath("/[locale]/dashboard/inquiries", "layout");
+    revalidatePath("/[locale]/dashboard/inbox", "layout");
+    revalidatePath("/[locale]/dashboard/support", "layout");
 }

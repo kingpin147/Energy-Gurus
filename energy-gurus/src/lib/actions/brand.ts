@@ -93,7 +93,7 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
     // Revalidate BEFORE redirect
     revalidateTag('brands', {});
     revalidateTag('homepage', {});
-    revalidatePath("/dashboard/brand", "page");
+    revalidatePath("/[locale]/dashboard/brand", "page");
     revalidatePath("/[locale]/dashboard/brand", "page");
     revalidatePath("/", "layout");
 
@@ -134,7 +134,7 @@ export async function addProductModel(formData: FormData) {
 
   revalidateTag('brands', {});
   revalidateTag('homepage', {});
-  revalidatePath("/dashboard/brand", "page");
+  revalidatePath("/[locale]/dashboard/brand", "page");
   revalidatePath("/[locale]/dashboard/brand", "page");
   revalidatePath("/", "layout");
 }
@@ -180,6 +180,6 @@ export async function deleteProductModel(productId: string) {
   await redis.del(CACHE_KEYS.BRAND_DETAILS(product.brandId));
   revalidateTag('brands', {});
   revalidateTag('homepage', {});
-  revalidatePath("/dashboard/brand");
+  revalidatePath("/[locale]/dashboard/brand", "layout");
 }
 

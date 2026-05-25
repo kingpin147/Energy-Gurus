@@ -50,8 +50,8 @@ export async function updateEpcProfile(data: FormData | Partial<typeof epcInstal
   revalidateTag('epcs', {});
   revalidateTag('homepage', {});
 
-  revalidatePath("/dashboard/epc");
-  revalidatePath("/epcs");
+  revalidatePath("/[locale]/dashboard/epc", "layout");
+  revalidatePath("/[locale]/(public)/epcs", "layout");
 }
 
 // Office Actions
@@ -63,8 +63,8 @@ export async function addEpcOffice(epcId: string, data: Omit<typeof epcOffices.$
   await redis.del(CACHE_KEYS.EPC_DETAILS(epcId));
   revalidateTag('epcs', {});
   revalidateTag('homepage', {});
-  revalidatePath("/dashboard/epc");
-  revalidatePath("/epcs", "page");
+  revalidatePath("/[locale]/dashboard/epc", "layout");
+  revalidatePath("/[locale]/(public)/epcs", "page", "layout");
 }
 
 export async function updateEpcOffice(officeId: string, data: Partial<typeof epcOffices.$inferInsert>) {
@@ -75,7 +75,7 @@ export async function updateEpcOffice(officeId: string, data: Partial<typeof epc
     revalidateTag('epcs', {});
     revalidateTag('homepage', {});
   }
-  revalidatePath("/dashboard/epc");
+  revalidatePath("/[locale]/dashboard/epc", "layout");
 }
 
 export async function deleteEpcOffice(officeId: string) {
@@ -86,7 +86,7 @@ export async function deleteEpcOffice(officeId: string) {
     revalidateTag('epcs', {});
     revalidateTag('homepage', {});
   }
-  revalidatePath("/dashboard/epc");
+  revalidatePath("/[locale]/dashboard/epc", "layout");
 }
 
 // Project Actions
@@ -98,8 +98,8 @@ export async function addEpcProject(epcId: string, data: Omit<typeof epcProjects
   await redis.del(CACHE_KEYS.EPC_DETAILS(epcId));
   revalidateTag('epcs', {});
   revalidateTag('homepage', {});
-  revalidatePath("/dashboard/epc");
-  revalidatePath("/epcs", "page");
+  revalidatePath("/[locale]/dashboard/epc", "layout");
+  revalidatePath("/[locale]/(public)/epcs", "page", "layout");
 }
 
 export async function updateEpcProject(projectId: string, data: Partial<typeof epcProjects.$inferInsert>) {
@@ -110,7 +110,7 @@ export async function updateEpcProject(projectId: string, data: Partial<typeof e
     revalidateTag('epcs', {});
     revalidateTag('homepage', {});
   }
-  revalidatePath("/dashboard/epc");
+  revalidatePath("/[locale]/dashboard/epc", "layout");
 }
 
 export async function deleteEpcProject(projectId: string) {
@@ -141,5 +141,5 @@ export async function deleteEpcProject(projectId: string) {
     revalidateTag('epcs', {});
     revalidateTag('homepage', {});
   }
-  revalidatePath("/dashboard/epc");
+  revalidatePath("/[locale]/dashboard/epc", "layout");
 }

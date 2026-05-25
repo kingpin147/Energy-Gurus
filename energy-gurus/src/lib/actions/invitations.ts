@@ -33,7 +33,7 @@ export async function createInvitation(email: string, role: UserRole) {
         console.error("Failed to send invitation email:", e?.message || e);
     }
 
-    revalidatePath("/dashboard/users");
+    revalidatePath("/[locale]/dashboard/users", "layout");
     return { emailSent };
 }
 
@@ -125,7 +125,7 @@ export async function bulkInvite(invites: { email: string; role: UserRole }[]) {
         }
     }
 
-    revalidatePath("/dashboard/users");
+    revalidatePath("/[locale]/dashboard/users", "layout");
     return { emailsSent, emailsFailed, total: invites.length };
 }
 
@@ -136,7 +136,7 @@ export async function deleteInvitation(id: string) {
     }
 
     await db.delete(invitations).where(eq(invitations.id, id));
-    revalidatePath("/dashboard/users");
+    revalidatePath("/[locale]/dashboard/users", "layout");
 }
 
 export async function resendInvitation(email: string, role: UserRole) {

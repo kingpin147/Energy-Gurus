@@ -36,7 +36,7 @@ export async function submitReview(formData: FormData) {
         comment,
     });
 
-    revalidatePath(`/(public)/${targetType}s/${targetId}`, "page");
+    revalidatePath(`/[locale]/(public)/${targetType}s/[id]`, "page");
     revalidateTag(targetType === 'epc' ? 'epcs' : 'brands', {});
     revalidateTag('homepage', {});
 }
@@ -67,6 +67,6 @@ export async function replyToReview(formData: FormData) {
         .set({ reply })
         .where(eq(reviews.id, reviewId));
 
-    revalidatePath(`/dashboard/${targetType}`);
-    revalidatePath(`/(public)/${targetType}s/${targetId}`);
+    revalidatePath(`/[locale]/dashboard/[targetType]`, "page");
+    revalidatePath(`/[locale]/(public)/${targetType}s/[id]`, "page");
 }

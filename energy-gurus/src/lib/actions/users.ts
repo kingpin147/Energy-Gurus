@@ -101,7 +101,7 @@ export async function deleteUser(userId: string) {
 
     revalidatePath("/");
     revalidatePath("/[locale]", "layout");
-    revalidatePath("/dashboard/users");
+    revalidatePath("/[locale]/dashboard/users", "layout");
     revalidatePath("/[locale]/epcs", "layout");
     revalidatePath("/[locale]/brands", "layout");
     revalidateTag("homepage", {});
@@ -134,7 +134,7 @@ export async function updateUserRole(userId: string, newRole: any) {
     // Update DB
     await db.update(users).set({ role: newRole }).where(eq(users.id, userId));
 
-    revalidatePath("/dashboard/users");
+    revalidatePath("/[locale]/dashboard/users", "layout");
 }
 
 export async function toggleUserStatus(userId: string) {
@@ -158,7 +158,7 @@ export async function toggleUserStatus(userId: string) {
 
     revalidatePath("/");
     revalidatePath("/[locale]", "layout");
-    revalidatePath("/dashboard/users");
+    revalidatePath("/[locale]/dashboard/users", "layout");
     revalidatePath("/[locale]/epcs", "layout");
     revalidatePath("/[locale]/brands", "layout");
     revalidateTag("homepage", {});

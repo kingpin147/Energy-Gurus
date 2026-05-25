@@ -29,7 +29,7 @@ export async function bulkImportSerials(productId: string, rawSerials: string) {
         }
     }
 
-    revalidatePath("/dashboard/brand");
+    revalidatePath("/[locale]/dashboard/brand", "layout");
 }
 
 export async function verifySerialNumber(serialNumber: string) {
