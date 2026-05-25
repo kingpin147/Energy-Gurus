@@ -91,6 +91,7 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
 
     // Revalidate BEFORE redirect
     revalidateTag('brands', {});
+    revalidateTag('homepage', {});
     revalidatePath("/dashboard/brand", "page");
     revalidatePath("/[locale]/dashboard/brand", "page");
     revalidatePath("/", "layout");
@@ -130,6 +131,8 @@ export async function addProductModel(formData: FormData) {
   // Invalidate Cache
   await redis.del(CACHE_KEYS.BRAND_DETAILS(brand.id));
 
+  revalidateTag('brands', {});
+  revalidateTag('homepage', {});
   revalidatePath("/dashboard/brand", "page");
   revalidatePath("/[locale]/dashboard/brand", "page");
   revalidatePath("/", "layout");

@@ -3,7 +3,7 @@
 import { db } from "@/db";
 import { podcasts, liveQA } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import { getUserRole } from "@/lib/roles";
 
@@ -16,7 +16,7 @@ async function checkAdmin() {
 
 export async function addPodcast(formData: FormData) {
     await checkAdmin();
-    
+
     const title = formData.get("title")?.toString();
     const description = formData.get("description")?.toString();
     const youtubeUrl = formData.get("youtubeUrl")?.toString();
@@ -36,8 +36,8 @@ export async function addPodcast(formData: FormData) {
             guestName,
         });
 
-        updateTag('podcasts');
-        updateTag('homepage');
+        revalidateTag('podcasts', {});
+        revalidateTag('homepage', {});
         revalidatePath("/dashboard/content", "page");
         revalidatePath("/podcast", "page");
     } catch (error) {
@@ -51,8 +51,8 @@ export async function deletePodcast(id: string) {
     await checkAdmin();
     try {
         await db.delete(podcasts).where(eq(podcasts.id, id));
-        updateTag('podcasts');
-        updateTag('homepage');
+        revalidateTag('podcasts', {});
+        revalidateTag('homepage', {});
         revalidatePath("/dashboard/content", "page");
         revalidatePath("/podcast", "page");
     } catch (error) {
@@ -63,7 +63,7 @@ export async function deletePodcast(id: string) {
 
 export async function addLiveQA(formData: FormData) {
     await checkAdmin();
-    
+
     const topic = formData.get("topic")?.toString();
     const description = formData.get("description")?.toString();
     const youtubeUrl = formData.get("youtubeUrl")?.toString();
@@ -72,7 +72,7 @@ export async function addLiveQA(formData: FormData) {
     const expertTitle = formData.get("expertTitle")?.toString();
     const expertPhotoUrl = formData.get("expertPhotoUrl")?.toString();
     const status = (formData.get("status")?.toString() as 'upcoming' | 'live' | 'archived') || 'upcoming';
-    
+
     const dateVal = formData.get("sessionDate")?.toString();
     let sessionDate: Date | null = null;
     if (dateVal) {
@@ -81,7 +81,7 @@ export async function addLiveQA(formData: FormData) {
             sessionDate = d;
         }
     }
-    
+
     if (!topic || !youtubeUrl) {
         throw new Error("Topic and YouTube URL are required.");
     }
@@ -99,8 +99,8 @@ export async function addLiveQA(formData: FormData) {
             sessionDate
         });
 
-        updateTag('live-qa');
-        updateTag('homepage');
+        revalidateTag('live-qa', {});
+        revalidateTag('homepage', {});
         revalidatePath("/dashboard/content", "page");
         revalidatePath("/live-qa", "page");
     } catch (error) {
@@ -114,8 +114,8 @@ export async function deleteLiveQA(id: string) {
     await checkAdmin();
     try {
         await db.delete(liveQA).where(eq(liveQA.id, id));
-        updateTag('live-qa');
-        updateTag('homepage');
+        revalidateTag('live-qa', {});
+        revalidateTag('homepage', {});
         revalidatePath("/dashboard/content", "page");
         revalidatePath("/live-qa", "page");
     } catch (error) {

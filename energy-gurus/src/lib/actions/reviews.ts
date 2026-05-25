@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { reviews, users } from "@/db/schema";
 import { eq, avg, count } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function submitReview(formData: FormData) {
     const { userId: clerkId } = await auth();
@@ -37,6 +37,8 @@ export async function submitReview(formData: FormData) {
     });
 
     revalidatePath(`/(public)/${targetType}s/${targetId}`, "page");
+    revalidateTag(targetType === 'epc' ? 'epcs' : 'brands', {});
+    revalidateTag('homepage', {});
 }
 
 export async function getProfileRating(targetId: string) {
@@ -44,8 +46,8 @@ export async function getProfileRating(targetId: string) {
         average: avg(reviews.rating),
         total: count(reviews.id),
     })
-    .from(reviews)
-    .where(eq(reviews.targetId, targetId));
+        .from(reviews)
+        .where(eq(reviews.targetId, targetId));
 
     return {
         rating: result[0].average ? parseFloat(result[0].average) : null,

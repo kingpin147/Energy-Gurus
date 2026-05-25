@@ -25,8 +25,6 @@ export default async function AdminInboxPage() {
     const partnerInquiries = allInquiries.filter(i => i.inquiryType === "support");
     const publicInquiries = allInquiries.filter(i => i.inquiryType === "public");
 
-    console.log(`[Inbox Debug] Total: ${allInquiries.length}, Partner: ${partnerInquiries.length}, Public: ${publicInquiries.length}`);
-    console.log(`[Inbox Debug] Inquiry Types: ${[...new Set(allInquiries.map(i => i.inquiryType))].join(", ")}`);
 
     const partnerUnreadCount = partnerInquiries.filter(i => !i.isRead).length;
     const publicUnreadCount = publicInquiries.filter(i => !i.isRead).length;
