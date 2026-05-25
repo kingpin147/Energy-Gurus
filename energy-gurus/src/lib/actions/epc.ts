@@ -64,7 +64,7 @@ export async function addEpcOffice(epcId: string, data: Omit<typeof epcOffices.$
   revalidateTag('epcs', {});
   revalidateTag('homepage', {});
   revalidatePath("/[locale]/dashboard/epc", "layout");
-  revalidatePath("/[locale]/(public)/epcs", "page", "layout");
+  revalidatePath("/[locale]/(public)/epcs", "page");
 }
 
 export async function updateEpcOffice(officeId: string, data: Partial<typeof epcOffices.$inferInsert>) {
@@ -99,7 +99,7 @@ export async function addEpcProject(epcId: string, data: Omit<typeof epcProjects
   revalidateTag('epcs', {});
   revalidateTag('homepage', {});
   revalidatePath("/[locale]/dashboard/epc", "layout");
-  revalidatePath("/[locale]/(public)/epcs", "page", "layout");
+  revalidatePath("/[locale]/(public)/epcs", "page");
 }
 
 export async function updateEpcProject(projectId: string, data: Partial<typeof epcProjects.$inferInsert>) {
