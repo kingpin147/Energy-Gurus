@@ -64,7 +64,10 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
       where: eq(brands.id, id),
     });
 
-    if (!brand) notFound();
+    if (!brand) {
+      console.log(`[Brand Profile] 404: Brand not found for id ${id}`);
+      notFound();
+    }
 
     const brandProducts = await db.select().from(products).where(eq(products.brandId, id));
     const certifications = await db.select().from(brandCertifications).where(eq(brandCertifications.brandId, id));
@@ -74,17 +77,26 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
     await redis.set(cacheKey, profileData, { ex: 3600 });
   }
 
-  if (!profileData) return notFound();
+  if (!profileData) {
+    console.log(`[Brand Profile] 404: Profile data could not be built for id ${id}`);
+    return notFound();
+  }
 
   const { brand, brandProducts, certifications, rating, count } = profileData;
 
   // Always check if the user is active, even if coming from cache
   const [userData] = await db.select({ isActive: users.isActive }).from(users).where(eq(users.id, brand.userId));
-  if (!userData?.isActive) notFound();
+  if (!userData?.isActive) {
+    console.log(`[Brand Profile] 404: User is not active for brand id ${id}`);
+    notFound();
+  }
 
   // Enforce 50% completeness score threshold
   const { score } = getBrandCompleteness(brand, brandProducts.length);
-  if (score < 50) notFound();
+  if (score < 50) {
+    console.log(`[Brand Profile] 404: Completeness score is ${score} (below 50) for brand id ${id}`);
+    notFound();
+  }
 
   const jsonLd = {
     "@context": "https://schema.org",
