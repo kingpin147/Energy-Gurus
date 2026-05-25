@@ -4,8 +4,8 @@ import { cache } from "react";
 export const getCurrentUser = cache(async () => {
   try {
     return await currentUser();
-  } catch (error) {
-    console.error("Clerk currentUser() failed:", error);
+  } catch (error: any) {
+    console.warn("Clerk currentUser() failed:", error?.message || "Unknown error");
     return null;
   }
 });
