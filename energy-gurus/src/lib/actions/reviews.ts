@@ -38,8 +38,6 @@ export async function submitReview(formData: FormData) {
         });
 
         revalidatePath("/", "layout");
-        revalidateTag(targetType === 'epc' ? 'epcs' : 'brands', "default");
-        revalidateTag('homepage', "default");
     } catch (error) {
         console.error("[submitReview Error]:", error);
         throw error;
