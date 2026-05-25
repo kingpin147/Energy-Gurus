@@ -1,11 +1,11 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { 
-    DropdownMenu, 
-    DropdownMenuContent, 
-    DropdownMenuItem, 
-    DropdownMenuTrigger 
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, Filter } from "lucide-react";
@@ -19,20 +19,32 @@ interface ListSortProps {
     options: SortOption[];
     defaultValue?: string;
     label?: string;
+    paramName?: string;
 }
 
-export function ListSort({ options, defaultValue = "latest", label = "Sort By" }: ListSortProps) {
+export function ListSort({
+    options,
+    defaultValue,
+    label = "Sort By",
+    paramName = "sort"
+}: ListSortProps) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    
-    const currentSort = searchParams.get("sort") || defaultValue;
-    const currentLabel = options.find(opt => opt.value === currentSort)?.label || options[0].label;
+
+    // If no defaultValue provided, use the first option's value
+    const effectiveDefault = defaultValue ?? options[0].value;
+    const currentVal = searchParams.get(paramName) || effectiveDefault;
+    const currentLabel = options.find(opt => opt.value === currentVal)?.label || options[0].label;
 
     const handleSort = (value: string) => {
-        if (value === currentSort) return;
+        if (value === currentVal) return;
         const params = new URLSearchParams(searchParams.toString());
-        params.set("sort", value);
+        if (value === "") {
+            params.delete(paramName);
+        } else {
+            params.set(paramName, value);
+        }
         router.push(`${pathname}?${params.toString()}`, { scroll: false });
     };
 
@@ -52,14 +64,13 @@ export function ListSort({ options, defaultValue = "latest", label = "Sort By" }
                     {label}
                 </div>
                 {options.map((option) => (
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                         key={option.value}
                         onClick={() => handleSort(option.value)}
-                        className={`rounded-lg cursor-pointer font-medium text-sm py-2.5 px-3 mb-0.5 last:mb-0 transition-colors ${
-                            currentSort === option.value 
-                                ? "bg-primary/10 text-primary font-bold" 
-                                : "hover:bg-primary/5"
-                        }`}
+                        className={`rounded-lg cursor-pointer font-medium text-sm py-2.5 px-3 mb-0.5 last:mb-0 transition-colors ${currentVal === option.value
+                            ? "bg-primary/10 text-primary font-bold"
+                            : "hover:bg-primary/5"
+                            }`}
                     >
                         {option.label}
                     </DropdownMenuItem>

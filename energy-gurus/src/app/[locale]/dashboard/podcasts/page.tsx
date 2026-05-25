@@ -9,16 +9,16 @@ import { desc, asc } from "drizzle-orm";
 export default async function PodcastsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sort?: string }>;
+  searchParams: Promise<{ podcastSort?: string; qaSort?: string }>;
 }) {
-  const { sort } = await searchParams;
+  const { podcastSort, qaSort } = await searchParams;
   const role = await getUserRole();
   if (role !== "super-admin" && role !== "admin") {
     redirect("/dashboard");
   }
 
-  const order = sort === "oldest" ? asc(podcasts.createdAt) : desc(podcasts.createdAt);
-  const qaOrder = sort === "oldest" ? asc(liveQA.createdAt) : desc(liveQA.createdAt);
+  const order = podcastSort === "oldest" ? asc(podcasts.createdAt) : desc(podcasts.createdAt);
+  const qaOrder = qaSort === "oldest" ? asc(liveQA.createdAt) : desc(liveQA.createdAt);
 
   const existingPodcasts = await db.query.podcasts.findMany({
     orderBy: [order],
@@ -53,11 +53,13 @@ export default async function PodcastsPage({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">Recent Podcasts</h2>
-              <ListSort 
+              <ListSort
+                paramName="podcastSort"
+                defaultValue="latest"
                 options={[
                   { label: "Latest", value: "latest" },
                   { label: "Oldest", value: "oldest" },
-                ]} 
+                ]}
               />
             </div>
             {existingPodcasts.map((p) => (
@@ -92,11 +94,13 @@ export default async function PodcastsPage({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">Recent QA Sessions</h2>
-              <ListSort 
+              <ListSort
+                paramName="qaSort"
+                defaultValue="latest"
                 options={[
                   { label: "Latest", value: "latest" },
                   { label: "Oldest", value: "oldest" },
-                ]} 
+                ]}
               />
             </div>
             {existingQA.map((q) => (

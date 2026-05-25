@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useOptimistic } from "react";
 import { markInquiryAsRead, deleteInquiry, replyToInquiry } from "@/lib/actions/inquiry";
 import { Mail, Phone, Trash2, Eye, EyeOff, ChevronDown, ChevronUp, Clock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,19 +25,38 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
     const [expanded, setExpanded] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
 
-    const filtered = inquiries.filter(i =>
+    const [optimisticInquiries, setOptimisticInquiries] = useOptimistic(
+        inquiries,
+        (current, { action, id }: { action: "markRead" | "delete", id: string }) => {
+            if (action === "markRead") {
+                return current.map(i => i.id === id ? { ...i, isRead: true } : i);
+            }
+            if (action === "delete") {
+                return current.filter(i => i.id !== id);
+            }
+            return current;
+        }
+    );
+
+    const filtered = optimisticInquiries.filter(i =>
         filter === "all" ? true : filter === "read" ? i.isRead : !i.isRead
     );
 
-    const unreadCount = inquiries.filter(i => !i.isRead).length;
+    const unreadCount = optimisticInquiries.filter(i => !i.isRead).length;
 
     function handleMarkRead(id: string) {
-        startTransition(() => markInquiryAsRead(id));
+        startTransition(async () => {
+            setOptimisticInquiries({ action: "markRead", id });
+            await markInquiryAsRead(id);
+        });
     }
 
     function handleDelete(id: string) {
         if (!confirm("Delete this inquiry? This cannot be undone.")) return;
-        startTransition(() => deleteInquiry(id));
+        startTransition(async () => {
+            setOptimisticInquiries({ action: "delete", id });
+            await deleteInquiry(id);
+        });
     }
 
     return (
@@ -61,8 +80,8 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
                         }}
                     >
                         {f === "all" ? `All (${inquiries.length})` :
-                         f === "unread" ? `Unread (${unreadCount})` :
-                         `Read (${inquiries.length - unreadCount})`}
+                            f === "unread" ? `Unread (${unreadCount})` :
+                                `Read (${inquiries.length - unreadCount})`}
                     </button>
                 ))}
             </div>
@@ -151,7 +170,7 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
                             {expanded === inq.id && (
                                 <div className="px-4 pb-4 pt-0 border-t border-dashed border-border ml-7">
                                     <p className="text-sm text-foreground leading-relaxed mt-3 whitespace-pre-wrap">{inq.message}</p>
-                                    
+
                                     {!hideReply && (
                                         <>
                                             {inq.reply ? (
@@ -183,7 +202,7 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
                                             )}
                                         </>
                                     )}
-                                    
+
                                     {hideReply && (
                                         <div className="mt-4 p-4 rounded-xl bg-secondary/5 border border-dashed text-center">
                                             <p className="text-xs text-muted-foreground italic">Public inquiry. Please contact via email or phone provided above.</p>

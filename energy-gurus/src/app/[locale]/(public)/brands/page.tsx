@@ -14,6 +14,13 @@ import { AdBanner } from "@/components/shared/AdBanner";
 
 const getBrandsData = unstable_cache(
     async (sort: string, q?: string) => {
+        let conditions = [
+            eq(users.isActive, true),
+            eq(users.role, 'brand'),
+        ];
+
+        if (q) conditions.push(ilike(brands.brandName, `%${q}%`));
+
         const brandsData = await db
             .select({
                 id: brands.id,
@@ -28,24 +35,18 @@ const getBrandsData = unstable_cache(
                 warrantyUrl: brands.warrantyUrl,
                 isVerified: brands.isVerified,
                 createdAt: brands.createdAt,
-                avgRating: sql<number>`CAST(AVG(${reviews.rating}) AS FLOAT)`.as('avg_rating'),
-                reviewCount: sql<number>`COUNT(${reviews.id})`.as('review_count'),
+                avgRating: sql<number>`COALESCE(CAST(AVG(${reviews.rating}) AS FLOAT), 0)`.as('avg_rating'),
+                reviewCount: sql<number>`COUNT(DISTINCT ${reviews.id})`.as('review_count'),
                 productsCount: sql<number>`(SELECT COUNT(*) FROM ${products} WHERE ${products.brandId} = ${brands.id})`.mapWith(Number),
             })
             .from(brands)
             .innerJoin(users, eq(users.id, brands.userId))
             .leftJoin(reviews, eq(reviews.targetId, brands.id))
-            .where(
-                and(
-                    eq(users.isActive, true),
-                    eq(users.role, 'brand'),
-                    q ? ilike(brands.brandName, `%${q}%`) : undefined
-                )
-            )
+            .where(and(...conditions))
             .groupBy(brands.id)
             .orderBy((t) => {
-                if (sort === "top-rated") return desc(t.avgRating);
-                if (sort === "lowest-rated") return asc(t.avgRating);
+                if (sort === "top-rated") return [desc(t.avgRating), desc(t.reviewCount)];
+                if (sort === "lowest-rated") return [asc(t.avgRating), asc(t.reviewCount)];
                 if (sort === "oldest") return asc(t.createdAt);
                 return desc(t.createdAt);
             });
@@ -61,20 +62,19 @@ const getBrandsData = unstable_cache(
             };
         });
 
-        return brandsWithScore.filter(brand => brand.score >= 50);
+        return brandsWithScore.filter(brand => brand.score >= 40);
     },
-    ['brands-list-cache-v2'],
+    ['brands-list-cache-v3'],
     { revalidate: 3600, tags: ['brands'] }
 );
+
 export default async function BrandsListingPage({
     searchParams,
 }: {
     searchParams: Promise<{ sort?: string; q?: string }>;
 }) {
-    const { sort, q } = await searchParams;
-    const sortVal = sort || "latest";
-    const qVal = q || "";
-    const brandList = await getBrandsData(sortVal, qVal);
+    const { sort = "top-rated", q = "" } = await searchParams;
+    const brandList = await getBrandsData(sort, q);
 
     return (
         <div className="min-h-screen bg-background selection:bg-primary/20">
@@ -110,15 +110,18 @@ export default async function BrandsListingPage({
                                     {brandList?.length || 0} Global Manufacturers Available
                                 </span>
                             </div>
-                            <div className="flex gap-4 w-full md:w-auto">
+                            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
                                 <ListSearch
-                                    placeholder="Search global brands..."
+                                    placeholder="Search by brand name..."
                                     className="pl-12 h-14 bg-white/50 backdrop-blur-xl border-border/50 rounded-2xl focus:ring-primary/20 focus:border-primary transition-all text-base font-medium shadow-sm"
                                 />
                                 <ListSort
+                                    defaultValue="top-rated"
                                     options={[
                                         { label: "Newest Arrivals", value: "latest" },
                                         { label: "Elite Rating", value: "top-rated" },
+                                        { label: "Lowest Rating", value: "lowest-rated" },
+                                        { label: "Oldest First", value: "oldest" },
                                     ]}
                                 />
                             </div>
@@ -225,9 +228,9 @@ export default async function BrandsListingPage({
 
                         {/* Mid-listing ad */}
                         {(brandList?.length ?? 0) >= 2 && (
-                          <div className="mt-2">
-                            <AdBanner variant="horizontal" slot={3} />
-                          </div>
+                            <div className="mt-2">
+                                <AdBanner variant="horizontal" slot={3} />
+                            </div>
                         )}
 
                         {(brandList?.length || 0) === 0 && (

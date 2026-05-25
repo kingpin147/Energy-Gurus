@@ -15,11 +15,31 @@ export async function POST(req: Request) {
 
         const contentType = req.headers.get("content-type") || "";
 
+        const ALLOWED_FOLDERS = [
+            "epc-logos", "epc-projects", "epc-portfolios",
+            "brand-logos", "brand-gallery",
+            "product-images", "product-datasheets",
+            "podcast-thumbnails", "uploads"
+        ];
+
         // ── Multipart / binary upload (new proxy path) ──────────────────────
         if (!contentType.includes("application/json")) {
             const fileType = req.headers.get("x-file-type") || "application/octet-stream";
-            const folder   = req.headers.get("x-folder")    || "uploads";
-            const filename = req.headers.get("x-filename")  || "file";
+            const folder = req.headers.get("x-folder") || "uploads";
+            const filename = req.headers.get("x-filename") || "file";
+
+            if (!ALLOWED_FOLDERS.includes(folder)) {
+                return new NextResponse("Invalid upload destination", { status: 400 });
+            }
+
+            // Basic type validation
+            const isImage = fileType.startsWith("image/");
+            const isVideo = fileType.startsWith("video/");
+            const isPDF = fileType === "application/pdf";
+
+            if (!isImage && !isVideo && !isPDF) {
+                return new NextResponse("Unsupported file type", { status: 400 });
+            }
 
             const ext = filename.split(".").pop() ?? "bin";
             const key = `${folder}/${uuidv4()}.${ext}`;

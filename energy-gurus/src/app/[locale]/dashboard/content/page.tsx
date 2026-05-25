@@ -37,18 +37,19 @@ const getLiveQAData = unstable_cache(
 export default async function ContentManagementPage({
     searchParams,
 }: {
-    searchParams: Promise<{ sort?: string; q?: string }>;
+    searchParams: Promise<{ podcastSort?: string; qaSort?: string; q?: string }>;
 }) {
-    const { sort, q } = await searchParams;
-    const sortVal = sort || "latest";
+    const { podcastSort, qaSort, q } = await searchParams;
+    const podcastSortVal = podcastSort || "latest";
+    const qaSortVal = qaSort || "latest";
     const role = await getUserRole();
 
     if (role !== 'super-admin' && role !== 'admin') {
         redirect("/dashboard");
     }
 
-    const allPodcasts = await getPodcastsData(sortVal, q);
-    const allLiveQA = await getLiveQAData(sortVal, q);
+    const allPodcasts = await getPodcastsData(podcastSortVal, q);
+    const allLiveQA = await getLiveQAData(qaSortVal, q);
 
     return (
         <div className="p-4 md:p-8 space-y-8">
@@ -64,14 +65,14 @@ export default async function ContentManagementPage({
 
             <Tabs defaultValue="podcasts" className="w-full">
                 <TabsList className="flex flex-wrap w-fit bg-secondary/20 p-1.5 rounded-2xl mb-12 border border-secondary/30">
-                    <TabsTrigger 
-                        value="podcasts" 
+                    <TabsTrigger
+                        value="podcasts"
                         className="px-6 md:px-10 py-3 rounded-xl font-bold gap-3 transition-all text-muted-foreground hover:bg-primary/5 hover:text-primary data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20"
                     >
                         <Mic className="w-4 h-4" /> Podcasts
                     </TabsTrigger>
-                    <TabsTrigger 
-                        value="liveqa" 
+                    <TabsTrigger
+                        value="liveqa"
                         className="px-6 md:px-10 py-3 rounded-xl font-bold gap-3 transition-all text-muted-foreground hover:bg-primary/5 hover:text-primary data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20"
                     >
                         <Video className="w-4 h-4" /> Live QA
@@ -94,11 +95,13 @@ export default async function ContentManagementPage({
                                 <h3 className="text-xl font-bold">Existing Episodes</h3>
                                 <div className="flex gap-2 w-full sm:w-auto">
                                     <ListSearch placeholder="Search title..." />
-                                    <ListSort 
+                                    <ListSort
+                                        paramName="podcastSort"
+                                        defaultValue="latest"
                                         options={[
                                             { label: "Latest", value: "latest" },
                                             { label: "Oldest", value: "oldest" },
-                                        ]} 
+                                        ]}
                                     />
                                 </div>
                             </div>
@@ -154,11 +157,13 @@ export default async function ContentManagementPage({
                                 <h3 className="text-xl font-bold">Live Archives</h3>
                                 <div className="flex gap-2 w-full sm:w-auto">
                                     <ListSearch placeholder="Search topic..." />
-                                    <ListSort 
+                                    <ListSort
+                                        paramName="qaSort"
+                                        defaultValue="latest"
                                         options={[
                                             { label: "Latest", value: "latest" },
                                             { label: "Oldest", value: "oldest" },
-                                        ]} 
+                                        ]}
                                     />
                                 </div>
                             </div>
@@ -180,11 +185,10 @@ export default async function ContentManagementPage({
                                                     </form>
                                                 </div>
                                                 <div className="absolute bottom-4 left-4">
-                                                    <span className={`text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest shadow-lg ${
-                                                        session.status === 'live' ? 'bg-red-500 text-white animate-pulse' : 
-                                                        session.status === 'upcoming' ? 'bg-blue-500 text-white' : 
-                                                        'bg-gray-500 text-white'
-                                                    }`}>
+                                                    <span className={`text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest shadow-lg ${session.status === 'live' ? 'bg-red-500 text-white animate-pulse' :
+                                                        session.status === 'upcoming' ? 'bg-blue-500 text-white' :
+                                                            'bg-gray-500 text-white'
+                                                        }`}>
                                                         {session.status}
                                                     </span>
                                                 </div>

@@ -31,6 +31,31 @@ export default async function AdminInboxPage() {
 
     return (
         <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
+            {/* Analytics Overview */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                <div className="bg-white p-6 rounded-[2rem] border border-border/60 shadow-sm">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60 mb-1">Total Volume</p>
+                    <div className="flex items-end gap-2">
+                        <span className="text-3xl font-black">{allInquiries.length}</span>
+                        <span className="text-xs font-bold text-muted-foreground mb-1">Received</span>
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-[2rem] border border-border/60 shadow-sm border-l-4 border-l-primary">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-primary opacity-80 mb-1">Active Support</p>
+                    <div className="flex items-end gap-2">
+                        <span className="text-3xl font-black text-primary">{partnerInquiries.length}</span>
+                        <span className="text-xs font-bold text-muted-foreground mb-1">Partner Tickets</span>
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-[2rem] border border-border/60 shadow-sm">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60 mb-1">Public Pulse</p>
+                    <div className="flex items-end gap-2">
+                        <span className="text-3xl font-black">{publicInquiries.length}</span>
+                        <span className="text-xs font-bold text-muted-foreground mb-1">Web Leads</span>
+                    </div>
+                </div>
+            </div>
+
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>

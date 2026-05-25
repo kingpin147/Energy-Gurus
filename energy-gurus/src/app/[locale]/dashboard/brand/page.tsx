@@ -19,6 +19,7 @@ import { SocialLinksForm } from "@/components/dashboard/social-links-form";
 import { AddProductDialog } from "@/components/dashboard/AddProductDialog";
 import { BrandRepsForm } from "@/components/dashboard/BrandRepsForm";
 import { BrandLogoUpload } from "@/components/dashboard/BrandLogoUpload";
+import { DeleteProductButton } from "@/components/dashboard/DeleteProductButton";
 
 export default async function BrandDashboard() {
     const { userId: clerkId } = await auth();
@@ -216,8 +217,11 @@ export default async function BrandDashboard() {
                                             </div>
                                             <p className="text-sm text-muted-foreground">{product.description || "No model description"}</p>
                                         </div>
-                                        <div className="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                                            <Hash className="w-3 h-3" /> {serialCount} Serials Active
+                                        <div className="flex items-start gap-2">
+                                            <div className="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                                                <Hash className="w-3 h-3" /> {serialCount} Serials Active
+                                            </div>
+                                            <DeleteProductButton productId={product.id} productName={product.name} />
                                         </div>
                                     </div>
 

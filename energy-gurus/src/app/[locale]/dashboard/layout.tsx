@@ -8,6 +8,8 @@ import { InvitationCheck } from "@/components/dashboard/invitation-check";
 import { SecurityGuard } from "@/components/auth/security-guard";
 import { MobileDashboardNav } from "@/components/dashboard/mobile-nav";
 
+import { CommandPalette } from "@/components/dashboard/command-palette";
+
 export default async function DashboardLayout({
     children,
     params
@@ -22,6 +24,7 @@ export default async function DashboardLayout({
 
     return (
         <div className="dashboard-layout">
+            <CommandPalette role={role} />
             {/* Mobile Nav — only visible below 1024px */}
             <div className="mobile-nav-wrapper">
                 <MobileDashboardNav role={role} />

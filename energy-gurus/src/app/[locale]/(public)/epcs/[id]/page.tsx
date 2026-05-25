@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { epcInstallers, epcOffices, epcProjects, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
 import { getEpcCompleteness } from "@/lib/utils/completeness";
 import {
   Globe,
@@ -39,6 +40,29 @@ interface EpcProfileData {
   projects: EpcProject[];
   rating: number | null;
   count: number;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const installer = await db.query.epcInstallers.findFirst({
+    where: eq(epcInstallers.id, id),
+  });
+
+  if (!installer) return {};
+
+  return {
+    title: `${installer.companyName} | Verified Solar EPC | Energy Gurus`,
+    description: installer.about?.slice(0, 160) || `Learn more about ${installer.companyName}, a verified solar EPC installer on Energy Gurus.`,
+    openGraph: {
+      title: `${installer.companyName} | Energy Gurus`,
+      description: installer.about?.slice(0, 160),
+      images: installer.logoUrl ? [installer.logoUrl] : [],
+    }
+  };
 }
 
 export default async function EpcProfilePage({
@@ -114,24 +138,24 @@ export default async function EpcProfilePage({
     address:
       offices.length > 0
         ? {
-            "@type": "PostalAddress",
-            addressLocality: offices[0].city,
-            streetAddress: [
-              offices[0].officeNumber,
-              offices[0].block,
-              offices[0].area,
-            ]
-              .filter(Boolean)
-              .join(", "),
-          }
+          "@type": "PostalAddress",
+          addressLocality: offices[0].city,
+          streetAddress: [
+            offices[0].officeNumber,
+            offices[0].block,
+            offices[0].area,
+          ]
+            .filter(Boolean)
+            .join(", "),
+        }
         : undefined,
     aggregateRating:
       rating && count > 0
         ? {
-            "@type": "AggregateRating",
-            ratingValue: rating.toFixed(1),
-            reviewCount: count,
-          }
+          "@type": "AggregateRating",
+          ratingValue: rating.toFixed(1),
+          reviewCount: count,
+        }
         : undefined,
   };
 
@@ -288,7 +312,7 @@ export default async function EpcProfilePage({
                 {/* Certifications */}
                 {(installer as any).certifications &&
                   ((installer as any).certifications as string[]).length >
-                    0 && (
+                  0 && (
                     <div className="mb-5">
                       <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-2">
                         Certifications
@@ -396,11 +420,10 @@ export default async function EpcProfilePage({
                     Verification
                   </div>
                   <span
-                    className={`font-black text-xs px-2 py-0.5 rounded-full ${
-                      installer.isVerified
+                    className={`font-black text-xs px-2 py-0.5 rounded-full ${installer.isVerified
                         ? "bg-green-100 text-green-700"
                         : "bg-secondary text-muted-foreground"
-                    }`}
+                      }`}
                   >
                     {installer.isVerified ? "Verified" : "Pending"}
                   </span>

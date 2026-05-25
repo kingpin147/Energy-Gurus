@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { redis, CACHE_KEYS } from "@/lib/redis";
+import { deleteFile, extractKeyFromUrl } from "@/lib/r2";
 
 import { clerkClient as createClerkClient } from "@clerk/nextjs/server";
 
@@ -136,5 +137,49 @@ export async function addProductModel(formData: FormData) {
   revalidatePath("/dashboard/brand", "page");
   revalidatePath("/[locale]/dashboard/brand", "page");
   revalidatePath("/", "layout");
+}
+
+export async function deleteProductModel(productId: string) {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) throw new Error("Unauthorized");
+
+  const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId));
+  if (!user) throw new Error("User not found");
+
+  const [product] = await db.select().from(products).where(eq(products.id, productId));
+  if (!product) throw new Error("Product not found");
+
+  // Verify ownership
+  const [brand] = await db.select().from(brands).where(eq(brands.id, product.brandId));
+  if (!brand || brand.userId !== user.id) {
+    const role = await getUserRole();
+    if (role !== "admin" && role !== "super-admin") {
+      throw new Error("Insufficient permissions");
+    }
+  }
+
+  // 1. Gather files to delete
+  const filesToDelete: string[] = [];
+  if (product.imageUrl) filesToDelete.push(product.imageUrl);
+  if (product.datasheetUrl) filesToDelete.push(product.datasheetUrl);
+
+  // 2. Cleanup R2
+  for (const url of filesToDelete) {
+    try {
+      const key = extractKeyFromUrl(url);
+      await deleteFile(key);
+    } catch (e) {
+      console.error(`Failed to delete R2 asset for product ${productId}:`, url, e);
+    }
+  }
+
+  // 3. Delete from DB
+  await db.delete(products).where(eq(products.id, productId));
+
+  // 4. Invalidate Cache
+  await redis.del(CACHE_KEYS.BRAND_DETAILS(product.brandId));
+  revalidateTag('brands', {});
+  revalidateTag('homepage', {});
+  revalidatePath("/dashboard/brand");
 }
 

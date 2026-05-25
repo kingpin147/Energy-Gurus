@@ -11,7 +11,21 @@ import { getEpcCompleteness } from "@/lib/utils/completeness";
 import { AdBanner } from "@/components/shared/AdBanner";
 
 const getInstallers = unstable_cache(
-  async (sort: string, q?: string) => {
+  async (sort: string, q?: string, city?: string, sector?: string) => {
+    let conditions = [
+      eq(users.isActive, true),
+      eq(users.role, 'epc'),
+    ];
+
+    if (q) conditions.push(ilike(epcInstallers.companyName, `%${q}%`));
+    if (sector) conditions.push(sql`${epcInstallers.sectors} ? ${sector}`);
+
+    // City filter requires joining with offices
+    let cityCondition = sql`true`;
+    if (city) {
+      cityCondition = eq(epcOffices.city, city);
+    }
+
     const rawInstallers = await db
       .select({
         id: epcInstallers.id,
@@ -25,25 +39,20 @@ const getInstallers = unstable_cache(
         socialLinks: epcInstallers.socialLinks,
         isVerified: epcInstallers.isVerified,
         createdAt: epcInstallers.createdAt,
-        avgRating: sql<number>`CAST(AVG(${reviews.rating}) AS FLOAT)`.as('avg_rating'),
-        reviewCount: sql<number>`COUNT(${reviews.id})`.as('review_count'),
+        avgRating: sql<number>`COALESCE(CAST(AVG(${reviews.rating}) AS FLOAT), 0)`.as('avg_rating'),
+        reviewCount: sql<number>`COUNT(DISTINCT ${reviews.id})`.as('review_count'),
         officesCount: sql<number>`(SELECT COUNT(*) FROM ${epcOffices} WHERE ${epcOffices.epcId} = ${epcInstallers.id})`.mapWith(Number),
         projectsCount: sql<number>`(SELECT COUNT(*) FROM ${epcProjects} WHERE ${epcProjects.epcId} = ${epcInstallers.id})`.mapWith(Number),
       })
       .from(epcInstallers)
       .innerJoin(users, eq(users.id, epcInstallers.userId))
       .leftJoin(reviews, eq(reviews.targetId, epcInstallers.id))
-      .where(
-        and(
-          eq(users.isActive, true),
-          eq(users.role, 'epc'),
-          q ? ilike(epcInstallers.companyName, `%${q}%`) : undefined
-        )
-      )
+      .leftJoin(epcOffices, eq(epcOffices.epcId, epcInstallers.id))
+      .where(and(...conditions, cityCondition))
       .groupBy(epcInstallers.id)
       .orderBy((t) => {
-        if (sort === "top-rated") return desc(t.avgRating);
-        if (sort === "lowest-rated") return asc(t.avgRating);
+        if (sort === "top-rated") return [desc(t.avgRating), desc(t.reviewCount)];
+        if (sort === "lowest-rated") return [asc(t.avgRating), asc(t.reviewCount)];
         if (sort === "oldest") return asc(t.createdAt);
         return desc(t.createdAt);
       });
@@ -53,20 +62,29 @@ const getInstallers = unstable_cache(
       return { ...inst, score };
     });
 
-    return mapped.filter(inst => inst.score >= 50);
+    return mapped.filter(inst => inst.score >= 40); // Lowered slightly to show more results as requested
   },
-  ['epc-installers-list-v2'],
+  ['epc-installers-list-v3'],
   { revalidate: 3600, tags: ['epcs'] }
 );
+
+import { ListFilters } from "@/components/shared/list-filters";
+
+const PAKISTAN_CITIES = [
+  "Lahore", "Karachi", "Islamabad", "Rawalpindi",
+  "Faisalabad", "Multan", "Peshawar", "Quetta", "Gujranwala", "Sialkot"
+];
+
+const EPC_SECTORS = ["Residential", "Commercial", "Industrial", "Agriculture"];
 
 export default async function EpcListingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sort?: string; q?: string }>;
+  searchParams: Promise<{ sort?: string; q?: string; city?: string; sector?: string }>;
 }) {
-  const { sort = "latest", q = "" } = await searchParams;
+  const { sort = "top-rated", q = "", city = "", sector = "" } = await searchParams;
 
-  const installers = await getInstallers(sort, q);
+  const installers = await getInstallers(sort, q, city, sector);
 
   return (
     <div className="min-h-screen bg-background selection:bg-primary/20">
@@ -90,19 +108,27 @@ export default async function EpcListingPage({
             Connect with top-tier solar energy experts. Our directory features verified EPC companies with proven track records in high-efficiency installations.
           </p>
 
-          <div className="w-full max-w-2xl mt-8">
-            <div className="flex flex-col sm:flex-row gap-4 w-full">
+          <div className="w-full max-w-4xl mt-8 flex flex-col gap-6">
+            <div className="flex flex-col md:flex-row gap-4 w-full">
               <ListSearch
-                placeholder="Search experts..."
+                placeholder="Search by company name..."
                 className="pl-12 h-16 bg-white/50 backdrop-blur-xl border-border/50 rounded-2xl focus:ring-primary/20 focus:border-primary transition-all text-base font-medium shadow-sm"
               />
-              <ListSort
-                options={[
-                  { label: "Latest First", value: "latest" },
-                  { label: "Top Rated", value: "top-rated" },
-                  { label: "Portfolio Size", value: "portfolio" },
-                ]}
-              />
+              <div className="flex gap-4">
+                <ListSort
+                  defaultValue="top-rated"
+                  options={[
+                    { label: "Newest First", value: "latest" },
+                    { label: "Top Rated", value: "top-rated" },
+                    { label: "Lowest Rated", value: "lowest-rated" },
+                    { label: "Oldest First", value: "oldest" },
+                  ]}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-center border-t border-border/30 pt-6">
+              <ListFilters cities={PAKISTAN_CITIES} sectors={EPC_SECTORS} />
             </div>
           </div>
         </div>

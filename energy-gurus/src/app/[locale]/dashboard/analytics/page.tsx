@@ -10,9 +10,9 @@ export const dynamic = "force-dynamic";
 export default async function AnalyticsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sort?: string }>;
+  searchParams: Promise<{ epcSort?: string; brandSort?: string }>;
 }) {
-  const { sort } = await searchParams;
+  const { epcSort, brandSort } = await searchParams;
 
   // Fetch trends for overview cards
   const brandViews = await getPostHogTrends('brand_portfolio_view');
@@ -21,8 +21,8 @@ export default async function AnalyticsPage({
   const contactClicks = await getPostHogTrends('brand_contact_click');
 
   // Fetch detailed tables with sort
-  const brandTable = await getPostHogTable('brand', sort);
-  const epcTable = await getPostHogTable('epc', sort);
+  const brandTable = await getPostHogTable('brand', brandSort || 'engagement');
+  const epcTable = await getPostHogTable('epc', epcSort || 'engagement');
 
   const stats = [
     {
@@ -77,15 +77,6 @@ export default async function AnalyticsPage({
               <Building2 className="w-4 h-4" /> Brand Rankings
             </TabsTrigger>
           </TabsList>
-
-          <ListSort 
-            defaultValue="engagement"
-            options={[
-              { label: "Highest Engagement", value: "engagement" },
-              { label: "Lowest Engagement", value: "engagement-low" },
-              { label: "A - Z (Name)", value: "name" },
-            ]}
-          />
         </div>
 
         <TabsContent value="overview" className="space-y-8 focus-visible:outline-none">
@@ -109,14 +100,25 @@ export default async function AnalyticsPage({
           {/* Brand Engagement Table */}
           <Card className="border-border/50 shadow-xl rounded-[2.5rem] overflow-hidden bg-white">
             <CardHeader className="p-8 border-b border-border/50">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-2xl flex items-center justify-center">
-                  <Building2 className="w-5 h-5 text-primary" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary/10 rounded-2xl flex items-center justify-center">
+                    <Building2 className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl font-black tracking-tight">Brand Performance Matrix</CardTitle>
+                    <p className="text-sm text-muted-foreground font-medium">Top brands ranked by total user engagement</p>
+                  </div>
                 </div>
-                <div>
-                  <CardTitle className="text-2xl font-black tracking-tight">Brand Performance Matrix</CardTitle>
-                  <p className="text-sm text-muted-foreground font-medium">Top brands ranked by total user engagement</p>
-                </div>
+                <ListSort
+                  paramName="brandSort"
+                  defaultValue="engagement"
+                  options={[
+                    { label: "Elite Engagement", value: "engagement" },
+                    { label: "Emerging", value: "engagement-low" },
+                    { label: "Alpha (A-Z)", value: "name" },
+                  ]}
+                />
               </div>
             </CardHeader>
             <CardContent className="p-0">
@@ -170,14 +172,25 @@ export default async function AnalyticsPage({
           {/* EPC Engagement Table */}
           <Card className="border-border/50 shadow-xl rounded-[2.5rem] overflow-hidden bg-white">
             <CardHeader className="p-8 border-b border-border/50">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-accent/10 rounded-2xl flex items-center justify-center">
-                  <Briefcase className="w-5 h-5 text-accent-foreground" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-accent/10 rounded-2xl flex items-center justify-center">
+                    <Briefcase className="w-5 h-5 text-accent-foreground" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl font-black tracking-tight">EPC Installer Ranking</CardTitle>
+                    <p className="text-sm text-muted-foreground font-medium">Top performing installers based on profile interactions</p>
+                  </div>
                 </div>
-                <div>
-                  <CardTitle className="text-2xl font-black tracking-tight">EPC Installer Ranking</CardTitle>
-                  <p className="text-sm text-muted-foreground font-medium">Top performing installers based on profile interactions</p>
-                </div>
+                <ListSort
+                  paramName="epcSort"
+                  defaultValue="engagement"
+                  options={[
+                    { label: "High Impact", value: "engagement" },
+                    { label: "Growing", value: "engagement-low" },
+                    { label: "Alpha (A-Z)", value: "name" },
+                  ]}
+                />
               </div>
             </CardHeader>
             <CardContent className="p-0">
@@ -226,7 +239,7 @@ export default async function AnalyticsPage({
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
-    </div>
+      </Tabs >
+    </div >
   );
 }

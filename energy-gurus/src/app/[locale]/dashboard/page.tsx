@@ -3,7 +3,7 @@ import { Activity, BarChart3, Battery, Sun, AlertTriangle, Users, MessageSquare,
 import { getUserRole } from "@/lib/roles";
 import { db } from "@/db";
 import { users, inquiries, epcInstallers, brands, products } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, and } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { Link } from "@/i18n/routing";
 
@@ -71,6 +71,42 @@ export default async function Dashboard() {
         ];
     }
 
+    // Fetch 7-day Trend Data
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+
+    let trendFilter = sql`true`;
+    if (role === 'epc' || role === 'brand') {
+        const [u] = await db.select().from(users).where(eq(users.clerkId, clerkId!));
+        if (u) trendFilter = eq(inquiries.receiverId, u.id);
+    }
+
+    const trendsRaw = await db.select({
+        date: sql<string>`TO_CHAR(${inquiries.createdAt}, 'YYYY-MM-DD')`,
+        count: sql<number>`count(*)`
+    })
+        .from(inquiries)
+        .where(and(sql`${inquiries.createdAt} >= ${sevenDaysAgo}`, trendFilter))
+        .groupBy(sql`TO_CHAR(${inquiries.createdAt}, 'YYYY-MM-DD')`)
+        .orderBy(sql`TO_CHAR(${inquiries.createdAt}, 'YYYY-MM-DD')`);
+
+    // Fill in missing days for the chart
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const match = trendsRaw.find(t => t.date === dateStr);
+        days.push({
+            label: d.toLocaleDateString('en-US', { weekday: 'short' }),
+            value: match ? Number(match.count) : 0,
+            date: dateStr
+        });
+    }
+
+    const maxValue = Math.max(...days.map(d => d.value), 10);
+
     return (
         <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
@@ -80,7 +116,7 @@ export default async function Dashboard() {
                 </div>
                 <div className="w-fit bg-green-500/10 text-green-600 px-4 py-2 rounded-2xl text-sm font-bold flex items-center gap-2 border border-green-500/20">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                    LIVE DATA ACTIVE
+                    LIVE ANALYTICS
                 </div>
             </div>
 
@@ -99,27 +135,32 @@ export default async function Dashboard() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6 md:p-8 pt-4">
-                        <div className="h-[250px] md:h-[350px] w-full bg-secondary/5 rounded-2xl flex items-end p-4 md:p-6 gap-1.5 md:gap-3 border">
-                            {[40, 60, 45, 70, 85, 100, 90, 75, 50, 30].map((h, i) => (
+                        <div className="h-[250px] md:h-[350px] w-full bg-secondary/5 rounded-3xl flex items-end p-6 md:p-8 gap-3 md:gap-6 border border-border/50 relative overflow-hidden group">
+                            {/* Background Grid Lines */}
+                            <div className="absolute inset-0 flex flex-col justify-between p-6 md:p-8 pointer-events-none opacity-20">
+                                {[1, 2, 3, 4].map(line => <div key={line} className="w-full h-px bg-muted-foreground/20 border-t border-dashed" />)}
+                            </div>
+
+                            {days.map((d, i) => (
                                 <div
                                     key={i}
-                                    className="flex-1 bg-primary/20 rounded-t-lg transition-all hover:bg-primary relative group cursor-pointer"
-                                    style={{ height: `${h}%` }}
+                                    className="flex-1 flex flex-col items-center gap-3 h-full justify-end group/bar z-10"
                                 >
-                                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                        Value: {h}%
+                                    <div
+                                        className="w-full max-w-[40px] bg-gradient-to-t from-primary/80 to-primary rounded-t-xl transition-all duration-500 ease-out hover:brightness-110 relative"
+                                        style={{ height: `${(d.value / maxValue) * 100}%`, minHeight: d.value > 0 ? '4px' : '0px' }}
+                                    >
+                                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white text-[11px] font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover/bar:opacity-100 transition-all transform scale-90 group-hover/bar:scale-100 z-20 shadow-xl border border-white/10 whitespace-nowrap">
+                                            {d.value} {d.value === 1 ? 'Inquiry' : 'Inquiries'}
+                                        </div>
+                                        {/* Glow Effect */}
+                                        <div className="absolute inset-0 bg-primary/20 blur-md -z-10 opacity-0 group-hover/bar:opacity-100 transition-opacity" />
                                     </div>
+                                    <span className="text-[10px] md:text-xs font-bold text-muted-foreground uppercase tracking-tighter opacity-70 group-hover/bar:opacity-100 group-hover/bar:text-primary transition-all">
+                                        {d.label}
+                                    </span>
                                 </div>
                             ))}
-                        </div>
-                        <div className="flex justify-between mt-6 text-xs font-bold text-muted-foreground uppercase tracking-widest px-2">
-                            <span>Mon</span>
-                            <span>Tue</span>
-                            <span>Wed</span>
-                            <span>Thu</span>
-                            <span>Fri</span>
-                            <span>Sat</span>
-                            <span>Sun</span>
                         </div>
                     </CardContent>
                 </Card>

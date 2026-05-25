@@ -121,7 +121,8 @@ export default async function UserManagementPage({
                     <div className="flex gap-3">
                         <ListSort
                             label="Filter by Role"
-                            defaultValue="all"
+                            paramName="role"
+                            defaultValue=""
                             options={[
                                 { label: "All Roles", value: "" },
                                 { label: "Admin", value: "admin" },
@@ -130,6 +131,8 @@ export default async function UserManagementPage({
                             ]}
                         />
                         <ListSort
+                            paramName="sort"
+                            defaultValue="latest"
                             options={[
                                 { label: "Latest", value: "latest" },
                                 { label: "Oldest", value: "oldest" },

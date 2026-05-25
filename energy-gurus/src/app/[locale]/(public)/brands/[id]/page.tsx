@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { brands, products, brandCertifications, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
 import { getBrandCompleteness } from "@/lib/utils/completeness";
 import { Star, ShieldCheck, ArrowLeft, Zap, Shield, Award, Package, CheckCircle2, Info, HeadphonesIcon, Building2 } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -27,6 +28,29 @@ interface BrandProfileData {
   certifications: Certification[];
   rating: number | null;
   count: number;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const brand = await db.query.brands.findFirst({
+    where: eq(brands.id, id),
+  });
+
+  if (!brand) return {};
+
+  return {
+    title: `${brand.brandName} | Solar Manufacturer | Energy Gurus`,
+    description: brand.about?.slice(0, 160) || `Verified solar manufacturer ${brand.brandName} profile on Energy Gurus.`,
+    openGraph: {
+      title: `${brand.brandName} | Energy Gurus`,
+      description: brand.about?.slice(0, 160),
+      images: brand.logoUrl ? [brand.logoUrl] : [],
+    }
+  };
 }
 
 export default async function BrandProfilePage({ params }: { params: Promise<{ id: string }> }) {

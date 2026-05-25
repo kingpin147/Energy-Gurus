@@ -8,6 +8,7 @@ import { eq, and } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { redis, CACHE_KEYS } from "@/lib/redis";
+import { deleteFile, extractKeyFromUrl } from "@/lib/r2";
 
 export async function updateEpcProfile(data: FormData | Partial<typeof epcInstallers.$inferInsert>) {
   const { userId: clerkId } = await auth();
@@ -114,8 +115,28 @@ export async function updateEpcProject(projectId: string, data: Partial<typeof e
 
 export async function deleteEpcProject(projectId: string) {
   const [project] = await db.select().from(epcProjects).where(eq(epcProjects.id, projectId));
-  await db.delete(epcProjects).where(eq(epcProjects.id, projectId));
+
   if (project) {
+    // 1. Gather files to delete
+    const filesToDelete: string[] = [];
+    if (project.images) filesToDelete.push(...project.images);
+    if (project.videos) filesToDelete.push(...project.videos);
+
+    // 2. Cleanup R2
+    for (const url of filesToDelete) {
+      if (!url) continue;
+      try {
+        const key = extractKeyFromUrl(url);
+        await deleteFile(key);
+      } catch (e) {
+        console.error(`Failed to delete R2 asset for project ${projectId}:`, url, e);
+      }
+    }
+
+    // 3. Delete from DB
+    await db.delete(epcProjects).where(eq(epcProjects.id, projectId));
+
+    // 4. Invalidate Cache
     await redis.del(CACHE_KEYS.EPC_DETAILS(project.epcId));
     revalidateTag('epcs', {});
     revalidateTag('homepage', {});
