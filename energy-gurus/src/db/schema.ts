@@ -160,6 +160,7 @@ export const inquiries = pgTable('inquiries', {
   receiverIdIdx: index('inquiries_receiver_id_idx').on(table.receiverId),
   senderIdIdx: index('inquiries_sender_id_idx').on(table.senderId),
   createdAtIdx: index('inquiries_created_at_idx').on(table.createdAt),
+  receiverReadIdx: index('inquiries_receiver_read_idx').on(table.receiverId, table.isRead),
 }));
 
 export const reviews = pgTable('reviews', {
@@ -204,6 +205,7 @@ export const liveQaQuestions = pgTable('live_qa_questions', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => ({
   sessionIdIdx: index('live_qa_questions_session_id_idx').on(table.sessionId),
+  sessionAnsweredIdx: index('live_qa_questions_session_answered_idx').on(table.sessionId, table.isAnswered),
 }));
 
 export const monitoringStats = pgTable('monitoring_stats', {

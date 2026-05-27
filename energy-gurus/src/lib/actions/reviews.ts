@@ -5,6 +5,7 @@ import { reviews, users } from "@/db/schema";
 import { eq, avg, count } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { redis, CACHE_KEYS } from "@/lib/redis";
 
 export async function submitReview(formData: FormData) {
     try {
@@ -36,6 +37,17 @@ export async function submitReview(formData: FormData) {
             rating,
             comment,
         });
+
+        // Invalidate Redis cache for specific profiles and list cache keys
+        try {
+            if (targetType === "brand") {
+                await redis.del(CACHE_KEYS.BRAND_DETAILS(targetId), CACHE_KEYS.BRANDS_LIST);
+            } else if (targetType === "epc") {
+                await redis.del(CACHE_KEYS.EPC_DETAILS(targetId), CACHE_KEYS.EPCS_LIST);
+            }
+        } catch (error) {
+            console.error("Failed to delete Redis cache in submitReview:", error);
+        }
 
         revalidatePath("/", "layout");
     } catch (error) {
@@ -69,6 +81,17 @@ export async function replyToReview(formData: FormData) {
     await db.update(reviews)
         .set({ reply })
         .where(eq(reviews.id, reviewId));
+
+    // Invalidate Redis cache for specific profiles
+    try {
+        if (targetType === "brand" && targetId) {
+            await redis.del(CACHE_KEYS.BRAND_DETAILS(targetId));
+        } else if (targetType === "epc" && targetId) {
+            await redis.del(CACHE_KEYS.EPC_DETAILS(targetId));
+        }
+    } catch (error) {
+        console.error("Failed to delete Redis cache in replyToReview:", error);
+    }
 
     revalidatePath("/", "layout");
 }

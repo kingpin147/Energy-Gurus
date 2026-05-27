@@ -99,14 +99,7 @@ export async function deleteUser(userId: string) {
     // Delete from DB
     await db.delete(users).where(eq(users.id, userId));
 
-    revalidatePath("/");
-    revalidatePath("/[locale]", "layout");
-    revalidatePath("/[locale]/dashboard/users", "layout");
-    revalidatePath("/[locale]/epcs", "layout");
-    revalidatePath("/[locale]/brands", "layout");
-    revalidateTag("homepage", {});
-    revalidateTag("brands", {});
-    revalidateTag("epcs", {});
+    revalidatePath("/", "layout");
 }
 
 export async function updateUserRole(userId: string, newRole: any) {
@@ -134,7 +127,7 @@ export async function updateUserRole(userId: string, newRole: any) {
     // Update DB
     await db.update(users).set({ role: newRole }).where(eq(users.id, userId));
 
-    revalidatePath("/[locale]/dashboard/users", "layout");
+    revalidatePath("/", "layout");
 }
 
 export async function toggleUserStatus(userId: string) {
@@ -156,14 +149,7 @@ export async function toggleUserStatus(userId: string) {
     await db.update(users).set({ isActive: !user.isActive }).where(eq(users.id, userId));
 
 
-    revalidatePath("/");
-    revalidatePath("/[locale]", "layout");
-    revalidatePath("/[locale]/dashboard/users", "layout");
-    revalidatePath("/[locale]/epcs", "layout");
-    revalidatePath("/[locale]/brands", "layout");
-    revalidateTag("homepage", {});
-    revalidateTag("brands", {});
-    revalidateTag("epcs", {});
+    revalidatePath("/", "layout");
 
     // Clear Redis Caches for specific profiles
     try {

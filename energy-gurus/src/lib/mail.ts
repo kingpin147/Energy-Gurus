@@ -1,3 +1,16 @@
+const RETRYABLE_STATUS_CODES = [429, 502, 503, 504];
+const RETRY_DELAY_MS = 1000;
+
+async function fetchWithRetry(url: string, options: RequestInit): Promise<Response> {
+  const response = await fetch(url, options);
+  if (!response.ok && RETRYABLE_STATUS_CODES.includes(response.status)) {
+    console.warn(`Brevo API returned ${response.status}, retrying in ${RETRY_DELAY_MS}ms...`);
+    await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+    return fetch(url, options);
+  }
+  return response;
+}
+
 export async function sendInvitationEmail(toEmail: string, role: string): Promise<boolean> {
   const apiKey = process.env.BREVO_API_KEY;
   if (!apiKey) {
@@ -18,7 +31,7 @@ export async function sendInvitationEmail(toEmail: string, role: string): Promis
   const signUpUrl = `${appUrl || "http://localhost:3000"}/sign-up?email=${encodeURIComponent(toEmail)}`;
 
   try {
-    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    const response = await fetchWithRetry("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
         "accept": "application/json",
@@ -60,7 +73,7 @@ export async function sendInvitationEmail(toEmail: string, role: string): Promis
                 border: 1px solid #f1f5f9;
               }
               .header {
-                background: linear-gradient(135deg, #10b981, #059669);
+                background: linear-gradient(135deg, #006d6d, #005353);
                 padding: 50px 30px;
                 text-align: center;
                 color: #ffffff;
@@ -87,8 +100,8 @@ export async function sendInvitationEmail(toEmail: string, role: string): Promis
               }
               .badge {
                 display: inline-block;
-                background: #ecfdf5;
-                color: #047857;
+                background: #e6f5f5;
+                color: #006d6d;
                 padding: 6px 16px;
                 border-radius: 9999px;
                 font-size: 11px;
@@ -96,7 +109,7 @@ export async function sendInvitationEmail(toEmail: string, role: string): Promis
                 text-transform: uppercase;
                 letter-spacing: 1.2px;
                 margin-bottom: 25px;
-                border: 1px solid #d1fae5;
+                border: 1px solid #b8e8e8;
               }
               .btn-container {
                 text-align: center;
@@ -104,14 +117,14 @@ export async function sendInvitationEmail(toEmail: string, role: string): Promis
               }
               .btn {
                 display: inline-block;
-                background: #10b981;
+                background: #006d6d;
                 color: #ffffff !important;
                 text-decoration: none;
                 padding: 18px 40px;
                 border-radius: 16px;
                 font-weight: 800;
                 font-size: 16px;
-                box-shadow: 0 10px 20px rgba(16, 185, 129, 0.15);
+                box-shadow: 0 10px 20px rgba(0, 109, 109, 0.15);
                 transition: transform 0.2s ease;
               }
               .footer {
@@ -143,7 +156,7 @@ export async function sendInvitationEmail(toEmail: string, role: string): Promis
                 
                 <p style="margin-top: 30px; font-size: 13px; color: #64748b;">
                   If the button doesn't work, copy and paste this link in your browser:<br>
-                  <a href="${signUpUrl}" style="color: #10b981; word-break: break-all;">${signUpUrl}</a>
+                  <a href="${signUpUrl}" style="color: #006d6d; word-break: break-all;">${signUpUrl}</a>
                 </p>
               </div>
               <div class="footer">

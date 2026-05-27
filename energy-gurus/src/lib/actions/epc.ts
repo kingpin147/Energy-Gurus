@@ -46,12 +46,7 @@ export async function updateEpcProfile(data: FormData | Partial<typeof epcInstal
   await redis.del(CACHE_KEYS.EPC_DETAILS(existingEpc.id));
   await redis.del(CACHE_KEYS.EPCS_LIST);
 
-  // Revalidate Next.js tag for EPC list & homepage
-  revalidateTag('epcs', {});
-  revalidateTag('homepage', {});
-
-  revalidatePath("/[locale]/dashboard/epc", "layout");
-  revalidatePath("/[locale]/(public)/epcs", "layout");
+  revalidatePath("/", "layout");
 }
 
 // Office Actions
@@ -61,10 +56,7 @@ export async function addEpcOffice(epcId: string, data: Omit<typeof epcOffices.$
     epcId,
   });
   await redis.del(CACHE_KEYS.EPC_DETAILS(epcId));
-  revalidateTag('epcs', {});
-  revalidateTag('homepage', {});
-  revalidatePath("/[locale]/dashboard/epc", "layout");
-  revalidatePath("/[locale]/(public)/epcs", "page");
+  revalidatePath("/", "layout");
 }
 
 export async function updateEpcOffice(officeId: string, data: Partial<typeof epcOffices.$inferInsert>) {
@@ -72,10 +64,8 @@ export async function updateEpcOffice(officeId: string, data: Partial<typeof epc
   await db.update(epcOffices).set(data).where(eq(epcOffices.id, officeId));
   if (office) {
     await redis.del(CACHE_KEYS.EPC_DETAILS(office.epcId));
-    revalidateTag('epcs', {});
-    revalidateTag('homepage', {});
   }
-  revalidatePath("/[locale]/dashboard/epc", "layout");
+  revalidatePath("/", "layout");
 }
 
 export async function deleteEpcOffice(officeId: string) {
@@ -83,10 +73,8 @@ export async function deleteEpcOffice(officeId: string) {
   await db.delete(epcOffices).where(eq(epcOffices.id, officeId));
   if (office) {
     await redis.del(CACHE_KEYS.EPC_DETAILS(office.epcId));
-    revalidateTag('epcs', {});
-    revalidateTag('homepage', {});
   }
-  revalidatePath("/[locale]/dashboard/epc", "layout");
+  revalidatePath("/", "layout");
 }
 
 // Project Actions
@@ -96,10 +84,7 @@ export async function addEpcProject(epcId: string, data: Omit<typeof epcProjects
     epcId,
   });
   await redis.del(CACHE_KEYS.EPC_DETAILS(epcId));
-  revalidateTag('epcs', {});
-  revalidateTag('homepage', {});
-  revalidatePath("/[locale]/dashboard/epc", "layout");
-  revalidatePath("/[locale]/(public)/epcs", "page");
+  revalidatePath("/", "layout");
 }
 
 export async function updateEpcProject(projectId: string, data: Partial<typeof epcProjects.$inferInsert>) {
@@ -107,10 +92,8 @@ export async function updateEpcProject(projectId: string, data: Partial<typeof e
   await db.update(epcProjects).set({ ...data, updatedAt: new Date() }).where(eq(epcProjects.id, projectId));
   if (project) {
     await redis.del(CACHE_KEYS.EPC_DETAILS(project.epcId));
-    revalidateTag('epcs', {});
-    revalidateTag('homepage', {});
   }
-  revalidatePath("/[locale]/dashboard/epc", "layout");
+  revalidatePath("/", "layout");
 }
 
 export async function deleteEpcProject(projectId: string) {
@@ -138,8 +121,6 @@ export async function deleteEpcProject(projectId: string) {
 
     // 4. Invalidate Cache
     await redis.del(CACHE_KEYS.EPC_DETAILS(project.epcId));
-    revalidateTag('epcs', {});
-    revalidateTag('homepage', {});
   }
-  revalidatePath("/[locale]/dashboard/epc", "layout");
+  revalidatePath("/", "layout");
 }

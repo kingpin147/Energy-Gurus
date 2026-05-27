@@ -16,10 +16,12 @@ export async function POST(req: Request) {
         const contentType = req.headers.get("content-type") || "";
 
         const ALLOWED_FOLDERS = [
-            "epc-logos", "epc-projects", "epc-portfolios",
+            "epc-logos", "epc-projects", "epc-portfolios", "epc-portfolio",
             "brand-logos", "brand-gallery",
             "product-images", "product-datasheets",
-            "podcast-thumbnails", "uploads"
+            "podcast-thumbnails", "uploads",
+            "project-images", "project-videos",
+            "live-qa-thumbnails", "expert-photos"
         ];
 
         // ── Multipart / binary upload (new proxy path) ──────────────────────
