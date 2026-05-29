@@ -12,6 +12,7 @@ import { ListSort } from "@/components/shared/list-sort";
 import { ListSearch } from "@/components/shared/list-search";
 import { PodcastForm } from "@/components/forms/podcast-form";
 import { LiveQAForm } from "@/components/forms/live-qa-form";
+import { DeleteContentButton } from "@/components/dashboard/delete-content-button";
 import { unstable_cache } from "next/cache";
 
 const getPodcastsData = unstable_cache(
@@ -116,11 +117,11 @@ export default async function ContentManagementPage({
                                                     <Youtube className="w-12 h-12 text-red-600" />
                                                 )}
                                                 <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <form action={deletePodcast.bind(null, podcast.id)}>
-                                                        <Button variant="destructive" size="sm" className="h-8 w-8 p-0 rounded-lg shadow-lg">
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </Button>
-                                                    </form>
+                                                    <DeleteContentButton
+                                                        id={podcast.id}
+                                                        action={deletePodcast}
+                                                        confirmMessage={`Are you sure you want to delete the podcast "${podcast.title}"?`}
+                                                    />
                                                 </div>
                                             </div>
                                             <div className="p-6">
@@ -178,11 +179,11 @@ export default async function ContentManagementPage({
                                                     <Calendar className="w-12 h-12 text-primary" />
                                                 )}
                                                 <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <form action={deleteLiveQA.bind(null, session.id)}>
-                                                        <Button variant="destructive" size="sm" className="h-8 w-8 p-0 rounded-lg shadow-lg">
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </Button>
-                                                    </form>
+                                                    <DeleteContentButton
+                                                        id={session.id}
+                                                        action={deleteLiveQA}
+                                                        confirmMessage={`Are you sure you want to delete the session "${session.topic}"?`}
+                                                    />
                                                 </div>
                                                 <div className="absolute bottom-4 left-4">
                                                     <span className={`text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest shadow-lg ${session.status === 'live' ? 'bg-red-500 text-white animate-pulse' :

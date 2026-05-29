@@ -37,7 +37,7 @@ export default async function PodcastsPage({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-card border rounded-lg p-6">
             <h2 className="text-lg font-semibold mb-4">Add New Podcast</h2>
-            <form action={addPodcast} className="space-y-4">
+            <form action={async (formData) => { "use server"; await addPodcast(formData); }} className="space-y-4">
               <input name="title" placeholder="Episode Title" className="w-full border rounded p-2" required />
               <textarea name="description" placeholder="Description" className="w-full border rounded p-2" />
               <input name="youtubeUrl" placeholder="YouTube URL" className="w-full border rounded p-2" required />
@@ -82,7 +82,7 @@ export default async function PodcastsPage({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-card border rounded-lg p-6">
             <h2 className="text-lg font-semibold mb-4">Add New QA Session</h2>
-            <form action={addLiveQA} className="space-y-4">
+            <form action={async (formData) => { "use server"; await addLiveQA(formData); }} className="space-y-4">
               <input name="topic" placeholder="Session Topic" className="w-full border rounded p-2" required />
               <input name="youtubeUrl" placeholder="YouTube URL" className="w-full border rounded p-2" required />
               <input name="expertName" placeholder="Expert Name" className="w-full border rounded p-2" />

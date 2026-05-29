@@ -19,8 +19,8 @@ type Inquiry = {
     guestPhone: string | null;
     subject: string | null;
     message: string;
-    inquiryType: "client" | "support";
-    status: "new" | "read" | "replied" | "closed";
+    inquiryType: "client" | "support" | "public";
+    status: string;
     isRead: boolean;
     reply: string | null;
     createdAt: Date;
