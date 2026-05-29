@@ -42,12 +42,22 @@ export async function generateMetadata({
 
   if (!brand) return {};
 
+  const title = `${brand.brandName} | Solar Manufacturer | Energy Gurus`;
+  const description = brand.about?.slice(0, 160) || `Explore ${brand.brandName}'s high-efficiency solar products and technical specifications on Energy Gurus.`;
+
   return {
-    title: `${brand.brandName} | Solar Manufacturer | Energy Gurus`,
-    description: brand.about?.slice(0, 160) || `Verified solar manufacturer ${brand.brandName} profile on Energy Gurus.`,
+    title,
+    description,
     openGraph: {
-      title: `${brand.brandName} | Energy Gurus`,
-      description: brand.about?.slice(0, 160),
+      title,
+      description,
+      type: "website",
+      images: brand.logoUrl ? [{ url: brand.logoUrl, width: 800, height: 800, alt: brand.brandName }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
       images: brand.logoUrl ? [brand.logoUrl] : [],
     }
   };

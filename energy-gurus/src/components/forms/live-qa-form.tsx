@@ -11,6 +11,7 @@ export function LiveQAForm() {
     const [thumbnailUrl, setThumbnailUrl] = useState("");
     const [expertPhotoUrl, setExpertPhotoUrl] = useState("");
     const [fileName, setFileName] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { uploadFile, isUploading } = useR2Upload();
     const [localIsExpertUploading, setLocalIsExpertUploading] = useState(false);
@@ -29,6 +30,7 @@ export function LiveQAForm() {
             toast.success("Thumbnail uploaded");
         } catch (error) {
             console.error(error);
+            toast.error("Thumbnail upload failed");
         }
     };
 
@@ -43,24 +45,49 @@ export function LiveQAForm() {
             toast.success("Expert photo uploaded");
         } catch (error) {
             console.error(error);
+            toast.error("Expert photo upload failed");
         } finally {
             setLocalIsExpertUploading(false);
         }
     };
 
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            const formData = new FormData(e.currentTarget);
+            const result = await addLiveQA(formData);
+
+            if (result.success) {
+                toast.success(result.message || "Live QA session scheduled");
+                if (e.currentTarget) e.currentTarget.reset();
+                setThumbnailUrl("");
+                setExpertPhotoUrl("");
+                setFileName("");
+            } else {
+                toast.error(result.message || "Failed to schedule session");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("An unexpected error occurred");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     return (
-        <form action={addLiveQA} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">Topic</label>
-                <input name="topic" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none" required />
+                <input name="topic" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none transition-all" required />
             </div>
             <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">Description</label>
-                <textarea name="description" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none h-24" />
+                <textarea name="description" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none h-24 transition-all" />
             </div>
             <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">YouTube URL</label>
-                <input name="youtubeUrl" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none" required />
+                <input name="youtubeUrl" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none transition-all" required />
             </div>
             <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">Thumbnail Image (Required)</label>
@@ -77,7 +104,7 @@ export function LiveQAForm() {
                             <button
                                 type="button"
                                 onClick={() => thumbnailInputRef.current?.click()}
-                                disabled={isUploading}
+                                disabled={isUploading || isSubmitting}
                                 className="w-full bg-[#003e3e] hover:bg-[#002a2a] text-white font-bold rounded-xl h-12 flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-lg shadow-[#003e3e]/20"
                             >
                                 {isUploading && !localIsExpertUploading ? (
@@ -89,7 +116,7 @@ export function LiveQAForm() {
                             </button>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-xl">
+                        <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-xl animate-in fade-in slide-in-from-top-1">
                             <div className="w-16 aspect-video rounded-lg border bg-white overflow-hidden shrink-0">
                                 <img src={thumbnailUrl} className="w-full h-full object-cover" alt="" />
                             </div>
@@ -114,11 +141,11 @@ export function LiveQAForm() {
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-widest opacity-60">Expert Name</label>
-                    <input name="expertName" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none" />
+                    <input name="expertName" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none transition-all" />
                 </div>
                 <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-widest opacity-60">Expert Title</label>
-                    <input name="expertTitle" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none" placeholder="e.g. Solar Engineer" />
+                    <input name="expertTitle" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none transition-all" placeholder="e.g. Solar Engineer" />
                 </div>
             </div>
             <div className="space-y-2">
@@ -136,7 +163,7 @@ export function LiveQAForm() {
                             <button
                                 type="button"
                                 onClick={() => expertPhotoInputRef.current?.click()}
-                                disabled={isUploading}
+                                disabled={isUploading || isSubmitting}
                                 className="w-full bg-secondary/10 hover:bg-secondary/20 text-primary font-bold rounded-xl h-10 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                             >
                                 {localIsExpertUploading ? (
@@ -148,7 +175,7 @@ export function LiveQAForm() {
                             </button>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-3 p-2 bg-secondary/5 border rounded-xl">
+                        <div className="flex items-center gap-3 p-2 bg-secondary/5 border rounded-xl animate-in fade-in slide-in-from-top-1">
                             <div className="w-10 h-10 rounded-full border bg-white overflow-hidden shrink-0">
                                 <img src={expertPhotoUrl} className="w-full h-full object-cover" alt="" />
                             </div>
@@ -164,7 +191,7 @@ export function LiveQAForm() {
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-widest opacity-60">Status</label>
-                    <select name="status" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none appearance-none">
+                    <select name="status" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none appearance-none transition-all">
                         <option value="upcoming">Upcoming</option>
                         <option value="live">Live Now</option>
                         <option value="archived">Archived</option>
@@ -172,15 +199,15 @@ export function LiveQAForm() {
                 </div>
                 <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-widest opacity-60">Session Date/Time</label>
-                    <input name="sessionDate" type="datetime-local" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none" />
+                    <input name="sessionDate" type="datetime-local" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none transition-all" />
                 </div>
             </div>
             <Button
                 type="submit"
-                disabled={isUploading || !thumbnailUrl}
-                className="w-full rounded-xl font-bold h-12 gap-2"
+                disabled={isUploading || isSubmitting || !thumbnailUrl}
+                className="w-full rounded-xl font-bold h-12 gap-2 transition-all"
             >
-                {isUploading ? "Processing..." : <><Plus className="w-4 h-4" /> Add Session</>}
+                {isSubmitting ? "Processing..." : <><Plus className="w-4 h-4" /> Add Session</>}
             </Button>
         </form>
     );

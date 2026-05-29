@@ -54,12 +54,22 @@ export async function generateMetadata({
 
   if (!installer) return {};
 
+  const title = `${installer.companyName} | Verified Solar EPC | Energy Gurus`;
+  const description = installer.about?.slice(0, 160) || `Learn more about ${installer.companyName}, a verified solar EPC installer providing high-quality energy solutions in Pakistan.`;
+
   return {
-    title: `${installer.companyName} | Verified Solar EPC | Energy Gurus`,
-    description: installer.about?.slice(0, 160) || `Learn more about ${installer.companyName}, a verified solar EPC installer on Energy Gurus.`,
+    title,
+    description,
     openGraph: {
-      title: `${installer.companyName} | Energy Gurus`,
-      description: installer.about?.slice(0, 160),
+      title,
+      description,
+      type: "website",
+      images: installer.logoUrl ? [{ url: installer.logoUrl, width: 800, height: 800, alt: installer.companyName }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
       images: installer.logoUrl ? [installer.logoUrl] : [],
     }
   };
@@ -421,8 +431,8 @@ export default async function EpcProfilePage({
                   </div>
                   <span
                     className={`font-black text-xs px-2 py-0.5 rounded-full ${installer.isVerified
-                        ? "bg-green-100 text-green-700"
-                        : "bg-secondary text-muted-foreground"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-secondary text-muted-foreground"
                       }`}
                   >
                     {installer.isVerified ? "Verified" : "Pending"}

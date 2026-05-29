@@ -6,6 +6,7 @@ import { Menu, X, Mic, ArrowLeft } from "lucide-react";
 import Sidebar from "@/app/[locale]/dashboard/Sidebar";
 import { UserNav } from "@/components/layout/user-nav";
 import { UserRole } from "@/db/schema";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export function MobileDashboardNav({ role }: { role: UserRole }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -20,12 +21,15 @@ export function MobileDashboardNav({ role }: { role: UserRole }) {
                     </div>
                     <span className="text-lg font-bold text-primary">EnergyGurus</span>
                 </Link>
-                <button
-                    onClick={() => setIsOpen(true)}
-                    className="p-2 text-muted-foreground bg-transparent border-none cursor-pointer"
-                >
-                    <Menu className="h-6 w-6" />
-                </button>
+                <div className="flex items-center gap-2">
+                    <NotificationBell />
+                    <button
+                        onClick={() => setIsOpen(true)}
+                        className="p-2 text-muted-foreground bg-transparent border-none cursor-pointer"
+                    >
+                        <Menu className="h-6 w-6" />
+                    </button>
+                </div>
             </header>
 
             {/* Mobile Sidebar Overlay */}

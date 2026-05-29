@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 
 export function NewsletterForm({ variant = "default" }: { variant?: "default" | "minimal" }) {
     const [email, setEmail] = useState("");
@@ -17,6 +18,7 @@ export function NewsletterForm({ variant = "default" }: { variant?: "default" | 
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1000));
         setStatus("success");
+        toast.success("Successfully joined our newsletter!");
         setEmail("");
 
         // Reset success state after 5 seconds

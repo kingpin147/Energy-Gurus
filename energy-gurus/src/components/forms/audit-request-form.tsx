@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/input";
 import { CardContent } from "@/components/ui/card";
 import { CheckCircle2 } from "lucide-react";
 
+import { sendSupportMessage } from "@/lib/actions/inquiry";
+import { toast } from "sonner";
+
 export function AuditRequestForm() {
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
     const [formData, setFormData] = useState({
@@ -19,11 +22,29 @@ export function AuditRequestForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setStatus("loading");
-        
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        setStatus("success");
+
+        try {
+            const fData = new FormData();
+            fData.append("guestName", formData.name);
+            fData.append("guestPhone", formData.phone);
+            fData.append("guestEmail", formData.email);
+            fData.append("subject", "New Audit Request");
+            fData.append("message", `Audit Request Details:\nGoal: ${formData.goal}\nAddress: ${formData.address}`);
+
+            const result = await sendSupportMessage(fData);
+
+            if (result.success) {
+                setStatus("success");
+                toast.success("Audit request submitted successfully!");
+            } else {
+                setStatus("error");
+                toast.error(result.message || "Failed to submit request");
+            }
+        } catch (error) {
+            console.error(error);
+            setStatus("error");
+            toast.error("An unexpected error occurred");
+        }
     };
 
     if (status === "success") {
@@ -34,8 +55,8 @@ export function AuditRequestForm() {
                 </div>
                 <h3 className="text-2xl font-bold">Request Received!</h3>
                 <p className="text-muted-foreground">
-                    Thank you, <span className="text-foreground font-semibold">{formData.name}</span>. 
-                    Our certified auditors will review your details for <span className="italic">{formData.address}</span> 
+                    Thank you, <span className="text-foreground font-semibold">{formData.name}</span>.
+                    Our certified auditors will review your details for <span className="italic">{formData.address}</span>
                     and contact you at <span className="text-foreground font-semibold">{formData.phone}</span> within 24 hours.
                 </p>
                 <Button variant="outline" onClick={() => setStatus("idle")} className="mt-4">
@@ -51,52 +72,52 @@ export function AuditRequestForm() {
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <label className="text-sm font-medium">Full Name</label>
-                        <Input 
-                            placeholder="John Doe" 
-                            required 
+                        <Input
+                            placeholder="John Doe"
+                            required
                             value={formData.name}
-                            onChange={e => setFormData({...formData, name: e.target.value})}
+                            onChange={e => setFormData({ ...formData, name: e.target.value })}
                             disabled={status === "loading"}
                         />
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-medium">Phone Number</label>
-                        <Input 
-                            placeholder="+92 3XX XXXXXXX" 
-                            required 
+                        <Input
+                            placeholder="+92 3XX XXXXXXX"
+                            required
                             value={formData.phone}
-                            onChange={e => setFormData({...formData, phone: e.target.value})}
+                            onChange={e => setFormData({ ...formData, phone: e.target.value })}
                             disabled={status === "loading"}
                         />
                     </div>
                 </div>
                 <div className="space-y-2">
                     <label className="text-sm font-medium">Email Address</label>
-                    <Input 
-                        type="email" 
-                        placeholder="john@example.com" 
-                        required 
+                    <Input
+                        type="email"
+                        placeholder="john@example.com"
+                        required
                         value={formData.email}
-                        onChange={e => setFormData({...formData, email: e.target.value})}
+                        onChange={e => setFormData({ ...formData, email: e.target.value })}
                         disabled={status === "loading"}
                     />
                 </div>
                 <div className="space-y-2">
                     <label className="text-sm font-medium">Site Address</label>
-                    <Input 
-                        placeholder="Plot #, Street, City" 
-                        required 
+                    <Input
+                        placeholder="Plot #, Street, City"
+                        required
                         value={formData.address}
-                        onChange={e => setFormData({...formData, address: e.target.value})}
+                        onChange={e => setFormData({ ...formData, address: e.target.value })}
                         disabled={status === "loading"}
                     />
                 </div>
                 <div className="space-y-2">
                     <label className="text-sm font-medium">Energy Goal</label>
-                    <select 
+                    <select
                         className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
                         value={formData.goal}
-                        onChange={e => setFormData({...formData, goal: e.target.value})}
+                        onChange={e => setFormData({ ...formData, goal: e.target.value })}
                         disabled={status === "loading"}
                     >
                         <option>Reduce Monthly Bills</option>
@@ -105,9 +126,9 @@ export function AuditRequestForm() {
                         <option>Commercial Efficiency</option>
                     </select>
                 </div>
-                <Button 
-                    className="w-full font-bold transition-all hover:scale-[1.02] active:scale-[0.98]" 
-                    size="lg" 
+                <Button
+                    className="w-full font-bold transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    size="lg"
                     type="submit"
                     disabled={status === "loading"}
                 >

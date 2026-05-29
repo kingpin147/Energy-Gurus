@@ -1,9 +1,9 @@
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { users, brands, epcInstallers } from "@/db/schema";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users as UsersIcon, ShieldAlert, Power, PowerOff } from "lucide-react";
+import { Users as UsersIcon, ShieldAlert, Power, PowerOff, User as UserIcon } from "lucide-react";
 import { toggleUserStatus } from "@/lib/actions/users";
 import { invitations } from "@/db/schema";
 import { ListSort } from "@/components/shared/list-sort";
@@ -15,6 +15,8 @@ import { SingleInvite } from "@/components/dashboard/single-invite";
 import { PendingInvitations } from "@/components/dashboard/pending-invitations";
 import { DeleteUserButton } from "@/components/dashboard/delete-user-button";
 import { createClerkClient } from "@clerk/nextjs/server";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 export default async function UserManagementPage({
     searchParams,
@@ -70,13 +72,30 @@ export default async function UserManagementPage({
     let baseUsers;
     let pendingInvites;
 
+    const query = db.select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        clerkId: users.clerkId,
+        isActive: users.isActive,
+        createdAt: users.createdAt,
+        brandLogo: brands.logoUrl,
+        epcLogo: epcInstallers.logoUrl
+    })
+        .from(users)
+        .leftJoin(brands, eq(brands.userId, users.id))
+        .leftJoin(epcInstallers, eq(epcInstallers.userId, users.id))
+        .where(where)
+        .orderBy(order);
+
     if (needsRequery) {
-        baseUsers = await db.select().from(users).where(where).orderBy(order);
+        baseUsers = await query;
         const updatedInvites = await db.select().from(invitations).orderBy(invitations.createdAt);
         const registeredEmails = new Set(baseUsers.map(u => u.email.toLowerCase()));
         pendingInvites = updatedInvites.filter(inv => !registeredEmails.has(inv.email.toLowerCase()));
     } else {
-        baseUsers = await db.select().from(users).where(where).orderBy(order);
+        baseUsers = await query;
         const registeredEmails = new Set(baseUsers.map(u => u.email.toLowerCase()));
         pendingInvites = allInvites.filter(inv => !registeredEmails.has(inv.email.toLowerCase()));
     }
@@ -93,9 +112,11 @@ export default async function UserManagementPage({
                 name: "Super Admin (System)",
                 role: "super-admin" as const,
                 clerkId: "system",
+                isActive: true,
                 createdAt: new Date(),
-                updatedAt: new Date()
-            } as typeof users.$inferSelect);
+                brandLogo: null,
+                epcLogo: null
+            } as any);
         }
     });
 
@@ -103,12 +124,12 @@ export default async function UserManagementPage({
         <div className="p-8 space-y-8">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center">
+                    <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
                         <UsersIcon className="w-6 h-6 text-white" />
                     </div>
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
-                        <p className="text-muted-foreground">Manage platform access, roles, and administrative permissions.</p>
+                        <p className="text-muted-foreground text-sm">Manage platform access, roles, and administrative permissions.</p>
                     </div>
                 </div>
                 <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto items-center">
@@ -151,8 +172,8 @@ export default async function UserManagementPage({
                 <div className="lg:col-span-2 space-y-8">
                     <PendingInvitations initialInvites={pendingInvites as any} />
 
-                    <Card className="border-none shadow-sm rounded-3xl overflow-hidden">
-                        <CardHeader className="bg-secondary/10 p-6">
+                    <Card className="border-none shadow-xl shadow-secondary/5 rounded-3xl overflow-hidden">
+                        <CardHeader className="bg-secondary/10 p-6 border-b">
                             <CardTitle className="text-xl flex items-center gap-2">
                                 <ShieldAlert className="w-5 h-5 text-primary" />
                                 Registered Users
@@ -163,10 +184,10 @@ export default async function UserManagementPage({
                                 <table className="w-full text-left border-collapse min-w-[800px]">
                                     <thead>
                                         <tr className="bg-secondary/5 border-b">
-                                            <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Name</th>
-                                            <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Email</th>
-                                            <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Role</th>
-                                            <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60 text-right">Actions</th>
+                                            <th className="p-6 text-[10px] font-black uppercase tracking-widest opacity-40">User</th>
+                                            <th className="p-6 text-[10px] font-black uppercase tracking-widest opacity-40">Email</th>
+                                            <th className="p-6 text-[10px] font-black uppercase tracking-widest opacity-40">Role</th>
+                                            <th className="p-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -174,19 +195,34 @@ export default async function UserManagementPage({
                                             const whitelist = ["nomiking0072012@gmail.com", "energygurusonline@gmail.com"];
                                             const isSuperAdmin = whitelist.includes(user.email.toLowerCase()) || user.role === 'super-admin';
                                             const displayRole = isSuperAdmin ? "super-admin" : user.role;
+                                            const userLogo = user.brandLogo || user.epcLogo;
 
                                             return (
-                                                <tr key={user.id} className="border-b hover:bg-secondary/5 transition-colors">
-                                                    <td className="p-6 font-bold whitespace-nowrap">{user.name || "N/A"}</td>
-                                                    <td className="p-6 text-muted-foreground whitespace-nowrap">{user.email}</td>
+                                                <tr key={user.id} className="border-b hover:bg-secondary/5 transition-colors group">
                                                     <td className="p-6">
-                                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border whitespace-nowrap ${displayRole === 'super-admin' ? 'bg-red-100 text-red-600 border-red-200' :
-                                                            displayRole === 'admin' ? 'bg-blue-100 text-blue-600 border-blue-200' :
-                                                                displayRole === 'epc' ? 'bg-green-100 text-green-600 border-green-200' :
-                                                                    'bg-secondary text-muted-foreground border-secondary-foreground/10'
-                                                            }`}>
+                                                        <div className="flex items-center gap-4">
+                                                            <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
+                                                                <AvatarImage src={userLogo || undefined} />
+                                                                <AvatarFallback className="bg-primary/10 text-primary">
+                                                                    <UserIcon className="w-5 h-5" />
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                            <span className="font-bold whitespace-nowrap text-foreground group-hover:text-primary transition-colors">{user.name || "N/A"}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-6 text-muted-foreground text-sm whitespace-nowrap">{user.email}</td>
+                                                    <td className="p-6">
+                                                        <Badge
+                                                            variant="outline"
+                                                            logoUrl={userLogo}
+                                                            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${displayRole === 'super-admin' ? 'bg-red-50 text-red-600 border-red-100' :
+                                                                displayRole === 'admin' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                                                                    displayRole === 'epc' ? 'bg-green-50 text-green-600 border-green-100' :
+                                                                        'bg-secondary/50 text-muted-foreground border-transparent'
+                                                                }`}
+                                                        >
                                                             {displayRole.replace('-', ' ')}
-                                                        </span>
+                                                        </Badge>
                                                     </td>
                                                     <td className="p-6">
                                                         <div className="flex items-center justify-end gap-2">
@@ -195,7 +231,7 @@ export default async function UserManagementPage({
                                                                     <Button
                                                                         variant={user.isActive ? "outline" : "default"}
                                                                         size="sm"
-                                                                        className={`h-9 px-4 rounded-xl gap-2 font-bold ${user.isActive ? "text-green-600 border-green-200 hover:bg-green-50" : "bg-red-600 hover:bg-red-700 text-white"}`}
+                                                                        className={`h-9 px-4 rounded-xl gap-2 font-bold ${user.isActive ? "text-green-600 border-green-200 hover:bg-green-100" : "bg-red-600 hover:bg-red-700 text-white"}`}
                                                                     >
                                                                         {user.isActive ? <Power className="w-4 h-4" /> : <PowerOff className="w-4 h-4" />}
                                                                         {user.isActive ? "Active" : "Inactive"}
@@ -204,7 +240,6 @@ export default async function UserManagementPage({
                                                             )}
 
 
-                                                            {/* Only Super Admin can delete other Admins, but NO ONE can delete Super Admins */}
                                                             {!isSuperAdmin && (userRole === 'super-admin' || (userRole === 'admin' && user.role !== 'admin' && user.role !== 'super-admin')) && (
                                                                 <DeleteUserButton
                                                                     userId={user.id}

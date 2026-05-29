@@ -9,6 +9,7 @@ import { SecurityGuard } from "@/components/auth/security-guard";
 import { MobileDashboardNav } from "@/components/dashboard/mobile-nav";
 
 import { CommandPalette } from "@/components/dashboard/command-palette";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export default async function DashboardLayout({
     children,
@@ -53,7 +54,10 @@ export default async function DashboardLayout({
                     </Link>
                     <div className="flex flex-col gap-3">
                         <span className="text-xs font-medium uppercase text-muted-foreground px-1">Account</span>
-                        <UserNav />
+                        <div className="flex items-center gap-3 px-1">
+                            <NotificationBell />
+                            <UserNav />
+                        </div>
                     </div>
                 </div>
             </aside>

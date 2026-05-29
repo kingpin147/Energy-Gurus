@@ -1,9 +1,16 @@
 "use client";
 
 import { useState, useTransition, useOptimistic } from "react";
-import { markInquiryAsRead, deleteInquiry, replyToInquiry } from "@/lib/actions/inquiry";
-import { Mail, Phone, Trash2, Eye, EyeOff, ChevronDown, ChevronUp, Clock, User } from "lucide-react";
+import { markInquiryAsRead, deleteInquiry, replyToInquiry, bulkDeleteInquiries, bulkMarkInquiriesAsRead } from "@/lib/actions/inquiry";
+import { Mail, Phone, Trash2, Eye, EyeOff, ChevronDown, ChevronUp, Clock, User, CheckSquare, Square, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type Inquiry = {
     id: string;
@@ -12,7 +19,8 @@ type Inquiry = {
     guestPhone: string | null;
     subject: string | null;
     message: string;
-    status: string;
+    inquiryType: "client" | "support";
+    status: "new" | "read" | "replied" | "closed";
     isRead: boolean;
     reply: string | null;
     createdAt: Date;
@@ -23,17 +31,16 @@ type Filter = "all" | "unread" | "read";
 export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: Inquiry[], hideReply?: boolean }) {
     const [filter, setFilter] = useState<Filter>("all");
     const [expanded, setExpanded] = useState<string | null>(null);
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [isPending, startTransition] = useTransition();
 
     const [optimisticInquiries, setOptimisticInquiries] = useOptimistic(
         inquiries,
-        (current, { action, id }: { action: "markRead" | "delete", id: string }) => {
-            if (action === "markRead") {
-                return current.map(i => i.id === id ? { ...i, isRead: true } : i);
-            }
-            if (action === "delete") {
-                return current.filter(i => i.id !== id);
-            }
+        (current, { action, id, ids }: { action: "markRead" | "delete" | "bulkMarkRead" | "bulkDelete", id?: string, ids?: string[] }) => {
+            if (action === "markRead") return current.map(i => i.id === id ? { ...i, isRead: true } : i);
+            if (action === "delete") return current.filter(i => i.id !== id);
+            if (action === "bulkMarkRead") return current.map(i => ids?.includes(i.id) ? { ...i, isRead: true } : i);
+            if (action === "bulkDelete") return current.filter(i => !ids?.includes(i.id));
             return current;
         }
     );
@@ -44,46 +51,119 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
 
     const unreadCount = optimisticInquiries.filter(i => !i.isRead).length;
 
+    const toggleSelect = (id: string) => {
+        setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedIds.length === filtered.length) setSelectedIds([]);
+        else setSelectedIds(filtered.map(i => i.id));
+    };
+
+    async function handleBulkMarkRead() {
+        if (!selectedIds.length) return;
+        startTransition(async () => {
+            try {
+                setOptimisticInquiries({ action: "bulkMarkRead", ids: selectedIds });
+                const res = await bulkMarkInquiriesAsRead(selectedIds);
+                if (res.success) {
+                    toast.success(res.message);
+                    setSelectedIds([]);
+                } else toast.error(res.message);
+            } catch (error) {
+                toast.error("Failed to update inquiries");
+            }
+        });
+    }
+
+    async function handleBulkDelete() {
+        if (!selectedIds.length || !confirm(`Delete ${selectedIds.length} inquiries?`)) return;
+        startTransition(async () => {
+            try {
+                setOptimisticInquiries({ action: "bulkDelete", ids: selectedIds });
+                const res = await bulkDeleteInquiries(selectedIds);
+                if (res.success) {
+                    toast.success(res.message);
+                    setSelectedIds([]);
+                } else toast.error(res.message);
+            } catch (error) {
+                toast.error("Failed to delete inquiries");
+            }
+        });
+    }
+
     function handleMarkRead(id: string) {
         startTransition(async () => {
-            setOptimisticInquiries({ action: "markRead", id });
-            await markInquiryAsRead(id);
+            try {
+                setOptimisticInquiries({ action: "markRead", id });
+                await markInquiryAsRead(id);
+                toast.success("Marked as read");
+            } catch (error) {
+                toast.error("Failed to update inquiry");
+            }
         });
     }
 
     function handleDelete(id: string) {
         if (!confirm("Delete this inquiry? This cannot be undone.")) return;
         startTransition(async () => {
-            setOptimisticInquiries({ action: "delete", id });
-            await deleteInquiry(id);
+            try {
+                setOptimisticInquiries({ action: "delete", id });
+                await deleteInquiry(id);
+                toast.success("Inquiry deleted");
+            } catch (error) {
+                toast.error("Failed to delete inquiry");
+            }
         });
     }
 
     return (
         <div className="space-y-4">
-            {/* Filter Tabs */}
-            <div className="flex items-center gap-2 flex-wrap">
-                {(["all", "unread", "read"] as Filter[]).map(f => (
-                    <button
-                        key={f}
-                        onClick={() => setFilter(f)}
-                        style={{
-                            padding: "6px 16px",
-                            borderRadius: "999px",
-                            fontSize: "13px",
-                            fontWeight: 600,
-                            cursor: "pointer",
-                            border: "none",
-                            background: filter === f ? "hsl(var(--primary))" : "hsl(var(--secondary))",
-                            color: filter === f ? "hsl(var(--primary-foreground))" : "hsl(var(--muted-foreground))",
-                            transition: "all 0.15s",
-                        }}
-                    >
-                        {f === "all" ? `All (${inquiries.length})` :
-                            f === "unread" ? `Unread (${unreadCount})` :
-                                `Read (${inquiries.length - unreadCount})`}
-                    </button>
-                ))}
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                    {(["all", "unread", "read"] as Filter[]).map(f => (
+                        <button
+                            key={f}
+                            onClick={() => setFilter(f)}
+                            style={{
+                                padding: "6px 16px",
+                                borderRadius: "999px",
+                                fontSize: "13px",
+                                fontWeight: 600,
+                                cursor: "pointer",
+                                border: "none",
+                                background: filter === f ? "hsl(var(--primary))" : "hsl(var(--secondary))",
+                                color: filter === f ? "hsl(var(--primary-foreground))" : "hsl(var(--muted-foreground))",
+                                transition: "all 0.15s",
+                            }}
+                        >
+                            {f === "all" ? `All (${inquiries.length})` :
+                                f === "unread" ? `Unread (${unreadCount})` :
+                                    `Read (${inquiries.length - unreadCount})`}
+                        </button>
+                    ))}
+                </div>
+
+                {selectedIds.length > 0 && (
+                    <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-2">
+                        <span className="text-xs font-bold text-primary px-2">{selectedIds.length} Selected</span>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button size="sm" variant="outline" className="h-8 gap-1 rounded-lg">
+                                    <MoreHorizontal className="w-4 h-4" /> Bulk Actions
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="rounded-xl shadow-xl">
+                                <DropdownMenuItem onClick={handleBulkMarkRead} className="gap-2 cursor-pointer">
+                                    <Eye className="w-4 h-4" /> Mark as Read
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={handleBulkDelete} className="gap-2 text-red-500 cursor-pointer">
+                                    <Trash2 className="w-4 h-4" /> Delete Multi
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                )}
             </div>
 
             {/* Table */}
@@ -94,15 +174,26 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
                 </div>
             ) : (
                 <div className="space-y-2">
+                    <div className="px-4 flex items-center gap-3">
+                        <button onClick={toggleSelectAll} className="p-1 rounded hover:bg-secondary/20 transition-colors border-none bg-transparent cursor-pointer">
+                            {selectedIds.length === filtered.length && filtered.length > 0 ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4 text-muted-foreground" />}
+                        </button>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Select All</span>
+                    </div>
+
                     {filtered.map((inq) => (
                         <div
                             key={inq.id}
-                            className={`rounded-2xl border transition-all ${inq.isRead ? "bg-card border-border" : "bg-primary/5 border-primary/20"}`}
+                            className={`rounded-2xl border transition-all ${inq.isRead ? "bg-card border-border" : "bg-primary/5 border-primary/20"} ${selectedIds.includes(inq.id) ? "ring-2 ring-primary ring-offset-2" : ""}`}
                         >
                             {/* Row Header */}
                             <div className="flex items-start gap-3 p-4">
+                                <button onClick={() => toggleSelect(inq.id)} className="pt-1.5 p-1 rounded hover:bg-secondary/20 transition-colors border-none bg-transparent cursor-pointer shrink-0">
+                                    {selectedIds.includes(inq.id) ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4 text-muted-foreground" />}
+                                </button>
+
                                 {/* Unread dot */}
-                                <div style={{ paddingTop: "6px", flexShrink: 0 }}>
+                                <div style={{ paddingTop: "10px", flexShrink: 0 }}>
                                     <div style={{
                                         width: "8px", height: "8px", borderRadius: "50%",
                                         background: inq.isRead ? "transparent" : "hsl(var(--primary))",
@@ -111,21 +202,21 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
                                 </div>
 
                                 {/* Info */}
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 flex-wrap">
+                                <div className="flex-1 min-w-0" onClick={() => setExpanded(expanded === inq.id ? null : inq.id)}>
+                                    <div className="flex items-center gap-2 flex-wrap cursor-pointer">
                                         <span className="font-semibold text-sm">{inq.guestName || "Anonymous"}</span>
                                         {inq.guestEmail && (
-                                            <a href={`mailto:${inq.guestEmail}`} className="text-xs text-primary flex items-center gap-1 hover:underline">
+                                            <a href={`mailto:${inq.guestEmail}`} onClick={(e) => e.stopPropagation()} className="text-xs text-primary flex items-center gap-1 hover:underline">
                                                 <Mail className="w-3 h-3" />{inq.guestEmail}
                                             </a>
                                         )}
                                         {inq.guestPhone && (
-                                            <a href={`tel:${inq.guestPhone}`} className="text-xs text-green-600 flex items-center gap-1 hover:underline">
+                                            <a href={`tel:${inq.guestPhone}`} onClick={(e) => e.stopPropagation()} className="text-xs text-green-600 flex items-center gap-1 hover:underline">
                                                 <Phone className="w-3 h-3" />{inq.guestPhone}
                                             </a>
                                         )}
                                     </div>
-                                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 cursor-pointer">
                                         {inq.subject ? <><strong>{inq.subject}:</strong> </> : ""}{inq.message}
                                     </p>
                                     <div className="flex items-center gap-1 mt-1">
@@ -180,10 +271,20 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
                                                 </div>
                                             ) : (
                                                 <form
-                                                    action={(formData) => {
+                                                    action={async (formData) => {
                                                         const text = formData.get("reply") as string;
                                                         if (!text) return;
-                                                        startTransition(() => replyToInquiry(inq.id, text));
+                                                        startTransition(async () => {
+                                                            try {
+                                                                const res = await replyToInquiry(inq.id, text);
+                                                                if (res.success) {
+                                                                    toast.success(res.message);
+                                                                    setExpanded(null);
+                                                                } else toast.error(res.message);
+                                                            } catch (error) {
+                                                                toast.error("Failed to send reply");
+                                                            }
+                                                        });
                                                     }}
                                                     className="mt-4 space-y-3"
                                                 >

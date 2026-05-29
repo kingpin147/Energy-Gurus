@@ -7,15 +7,13 @@ import { revalidatePath, revalidateTag } from "next/cache";
 
 import { getUserRole } from "@/lib/roles";
 
-async function checkAdmin() {
+async function isAdmin() {
     const role = await getUserRole();
-    if (role !== 'super-admin' && role !== 'admin') {
-        throw new Error("Unauthorized");
-    }
+    return role === 'super-admin' || role === 'admin';
 }
 
 export async function addPodcast(formData: FormData) {
-    await checkAdmin();
+    if (!await isAdmin()) return { success: false, message: "Unauthorized" };
 
     const title = formData.get("title")?.toString();
     const description = formData.get("description")?.toString();
@@ -24,7 +22,7 @@ export async function addPodcast(formData: FormData) {
     const guestName = formData.get("guestName")?.toString();
 
     if (!title || !youtubeUrl) {
-        throw new Error("Title and YouTube URL are required.");
+        return { success: false, message: "Title and YouTube URL are required." };
     }
 
     try {
@@ -40,29 +38,32 @@ export async function addPodcast(formData: FormData) {
         revalidateTag('homepage', {});
         revalidatePath("/[locale]/dashboard/content", "page");
         revalidatePath("/podcast", "page");
+        return { success: true, message: "Podcast added successfully" };
     } catch (error) {
         console.error("Failed to add podcast:", error);
-        throw new Error("Failed to add podcast. Please try again.");
+        return { success: false, message: "Failed to add podcast. Please try again." };
     }
 }
 
 export async function deletePodcast(id: string) {
-    if (!id) return;
-    await checkAdmin();
+    if (!id) return { success: false, message: "Invalid ID" };
+    if (!await isAdmin()) return { success: false, message: "Unauthorized" };
+
     try {
         await db.delete(podcasts).where(eq(podcasts.id, id));
         revalidateTag('podcasts', {});
         revalidateTag('homepage', {});
         revalidatePath("/[locale]/dashboard/content", "page");
         revalidatePath("/podcast", "page");
+        return { success: true, message: "Podcast deleted" };
     } catch (error) {
         console.error("Failed to delete podcast:", error);
-        throw new Error("Failed to delete podcast.");
+        return { success: false, message: "Failed to delete podcast." };
     }
 }
 
 export async function addLiveQA(formData: FormData) {
-    await checkAdmin();
+    if (!await isAdmin()) return { success: false, message: "Unauthorized" };
 
     const topic = formData.get("topic")?.toString();
     const description = formData.get("description")?.toString();
@@ -83,7 +84,7 @@ export async function addLiveQA(formData: FormData) {
     }
 
     if (!topic || !youtubeUrl) {
-        throw new Error("Topic and YouTube URL are required.");
+        return { success: false, message: "Topic and YouTube URL are required." };
     }
 
     try {
@@ -103,23 +104,26 @@ export async function addLiveQA(formData: FormData) {
         revalidateTag('homepage', {});
         revalidatePath("/[locale]/dashboard/content", "page");
         revalidatePath("/live-qa", "page");
+        return { success: true, message: "Live QA scheduled successfully" };
     } catch (error) {
         console.error("Failed to add Live QA:", error);
-        throw new Error("Failed to schedule Live QA.");
+        return { success: false, message: "Failed to schedule Live QA." };
     }
 }
 
 export async function deleteLiveQA(id: string) {
-    if (!id) return;
-    await checkAdmin();
+    if (!id) return { success: false, message: "Invalid ID" };
+    if (!await isAdmin()) return { success: false, message: "Unauthorized" };
+
     try {
         await db.delete(liveQA).where(eq(liveQA.id, id));
         revalidateTag('live-qa', {});
         revalidateTag('homepage', {});
         revalidatePath("/[locale]/dashboard/content", "page");
         revalidatePath("/live-qa", "page");
+        return { success: true, message: "Session deleted" };
     } catch (error) {
         console.error("Failed to delete Live QA:", error);
-        throw new Error("Failed to delete session.");
+        return { success: false, message: "Failed to delete session." };
     }
 }

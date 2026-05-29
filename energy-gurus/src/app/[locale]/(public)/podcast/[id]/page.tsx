@@ -17,15 +17,38 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
     if (!podcast) return {};
 
+    const title = `${podcast.title} | EnergyGurus Podcast`;
+    const description = podcast.description?.slice(0, 160) || `Listen to this expert energy insight episode: ${podcast.title} on Energy Gurus.`;
+
     return {
-        title: `${podcast.title} | EnergyGurus Podcast`,
-        description: podcast.description?.slice(0, 160),
+        title,
+        description,
+        openGraph: {
+            title,
+            description,
+            type: "video.other",
+            url: `https://energygurus.pk/podcast/${id}`,
+            images: [
+                {
+                    url: `https://img.youtube.com/vi/${podcast.youtubeUrl.split("v=")[1]?.split("&")[0] || podcast.youtubeUrl.split("/").pop()}/maxresdefault.jpg`,
+                    width: 1280,
+                    height: 720,
+                    alt: podcast.title,
+                }
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: [`https://img.youtube.com/vi/${podcast.youtubeUrl.split("v=")[1]?.split("&")[0] || podcast.youtubeUrl.split("/").pop()}/maxresdefault.jpg`],
+        }
     };
 }
 
 export default async function EpisodePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    
+
     let episode;
     try {
         const results = await db.select().from(podcasts).where(eq(podcasts.id, id));
@@ -83,7 +106,7 @@ export default async function EpisodePage({ params }: { params: Promise<{ id: st
                         <p className="text-lg leading-relaxed text-muted-foreground mb-8">
                             {episode.description}
                         </p>
-                   </div>
+                    </div>
                 </div>
 
                 {/* Right Column: Sidebar / CTAs */}
@@ -131,7 +154,7 @@ export default async function EpisodePage({ params }: { params: Promise<{ id: st
 function VideoEmbed({ url }: { url: string }) {
     const videoId = url.split("v=")[1]?.split("&")[0] || url.split("/").pop();
     if (!videoId) return null;
-    
+
     return (
         <iframe
             className="w-full h-full"

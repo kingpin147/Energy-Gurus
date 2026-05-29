@@ -237,7 +237,22 @@ export const brandCertifications = pgTable('brand_certifications', {
   brandIdIdx: index('brand_certifications_brand_id_idx').on(table.brandId),
 }));
 
-export const usersRelations = relations(users, ({ one }) => ({
+export const notifications = pgTable('notifications', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  title: text('title').notNull(),
+  message: text('message').notNull(),
+  type: text('type').$type<'inquiry' | 'reply' | 'system'>().default('inquiry').notNull(),
+  link: text('link'),
+  senderLogoUrl: text('sender_logo_url'),
+  isRead: boolean('is_read').default(false).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index('notifications_user_id_idx').on(table.userId),
+  userReadIdx: index('notifications_user_read_idx').on(table.userId, table.isRead),
+}));
+
+export const usersRelations = relations(users, ({ one, many }) => ({
   epcInstaller: one(epcInstallers, {
     fields: [users.id],
     references: [epcInstallers.userId],
@@ -245,6 +260,14 @@ export const usersRelations = relations(users, ({ one }) => ({
   brand: one(brands, {
     fields: [users.id],
     references: [brands.userId],
+  }),
+  notifications: many(notifications),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
   }),
 }));
 
