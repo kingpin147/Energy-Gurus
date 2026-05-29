@@ -14,6 +14,7 @@ import { PodcastForm } from "@/components/forms/podcast-form";
 import { LiveQAForm } from "@/components/forms/live-qa-form";
 import { DeleteContentButton } from "@/components/dashboard/delete-content-button";
 import { unstable_cache } from "next/cache";
+import { LiveQAStatusSelect } from "@/components/dashboard/live-qa-status-select";
 
 const getPodcastsData = unstable_cache(
     async (sortVal: string, q?: string) => {
@@ -186,12 +187,7 @@ export default async function ContentManagementPage({
                                                     />
                                                 </div>
                                                 <div className="absolute bottom-4 left-4">
-                                                    <span className={`text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest shadow-lg ${session.status === 'live' ? 'bg-red-500 text-white animate-pulse' :
-                                                        session.status === 'upcoming' ? 'bg-blue-500 text-white' :
-                                                            'bg-gray-500 text-white'
-                                                        }`}>
-                                                        {session.status}
-                                                    </span>
+                                                    <LiveQAStatusSelect id={session.id} initialStatus={session.status} />
                                                 </div>
                                             </div>
                                             <div className="p-6">

@@ -127,3 +127,23 @@ export async function deleteLiveQA(id: string) {
         return { success: false, message: "Failed to delete session." };
     }
 }
+export async function updateLiveQAStatus(id: string, status: 'upcoming' | 'live' | 'archived') {
+    if (!id || !status) return { success: false, message: "Missing data" };
+    if (!await isAdmin()) return { success: false, message: "Unauthorized" };
+
+    try {
+        await db.update(liveQA)
+            .set({ status })
+            .where(eq(liveQA.id, id));
+
+        revalidateTag('live-qa', {});
+        revalidateTag('homepage', {});
+        revalidatePath("/[locale]/dashboard/content", "page");
+        revalidatePath("/live-qa", "page");
+
+        return { success: true, message: `Status updated to ${status}` };
+    } catch (error) {
+        console.error("Failed to update Live QA status:", error);
+        return { success: false, message: "Failed to update status." };
+    }
+}

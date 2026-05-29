@@ -7,25 +7,14 @@ import { podcasts, epcInstallers, reviews, users, brands, liveQA, epcOffices, ep
 import { desc, count, eq, sql, asc, and } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import { getEpcCompleteness, getBrandCompleteness } from "@/lib/utils/completeness";
+import { getFeaturedLiveQASession } from "@/lib/utils/live-qa";
 
 const getHomepageData = unstable_cache(
     async () => {
         try {
             const latestPodcasts = await db.select().from(podcasts).orderBy(desc(podcasts.createdAt)).limit(3);
 
-            const upcomingQA = await db.select()
-                .from(liveQA)
-                .where(eq(liveQA.status, 'upcoming'))
-                .orderBy(asc(liveQA.sessionDate))
-                .limit(1);
-
-            const activeQA = await db.select()
-                .from(liveQA)
-                .where(eq(liveQA.status, 'live'))
-                .orderBy(desc(liveQA.createdAt))
-                .limit(1);
-
-            const targetQA = activeQA.length > 0 ? activeQA[0] : upcomingQA[0] || null;
+            const targetQA = await getFeaturedLiveQASession();
 
             const rawEpcs = await db.select({
                 id: epcInstallers.id,
@@ -184,9 +173,9 @@ export default async function Homepage() {
 
                             <div className="flex-1 p-8 md:p-20 flex flex-col justify-center relative z-10">
                                 <div className="flex flex-wrap items-center gap-3 mb-10">
-                                    <span className={`px-4 py-2 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 ${targetQA.status === 'live' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-primary/10 text-primary border border-primary/20'}`}>
-                                        <div className={`w-2 h-2 rounded-full ${targetQA.status === 'live' ? 'bg-red-500 animate-pulse' : 'bg-primary'}`} />
-                                        {targetQA.status === 'live' ? 'Live Now' : 'Upcoming Session'}
+                                    <span className={`px-4 py-2 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 ${targetQA.status === 'live' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : targetQA.status === 'upcoming' ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-slate-500/10 text-slate-500 border border-slate-500/20'}`}>
+                                        <div className={`w-2 h-2 rounded-full ${targetQA.status === 'live' ? 'bg-red-500 animate-pulse' : targetQA.status === 'upcoming' ? 'bg-primary' : 'bg-slate-500'}`} />
+                                        {targetQA.status === 'live' ? 'Live Now' : targetQA.status === 'upcoming' ? 'Upcoming Session' : 'Archived Session'}
                                     </span>
                                     {targetQA.sessionDate && (
                                         <span className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 bg-slate-100/50 px-4 py-2 rounded-xl border border-slate-200">
