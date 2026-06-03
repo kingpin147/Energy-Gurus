@@ -40,6 +40,7 @@ interface EpcProfileData {
   projects: EpcProject[];
   rating: number | null;
   count: number;
+  isActive: boolean;
 }
 
 export async function generateMetadata({
@@ -104,20 +105,15 @@ export default async function EpcProfilePage({
       .where(eq(epcProjects.epcId, id));
     const { rating, count } = await getProfileRating(id);
 
-    profileData = { installer, offices, projects, rating, count };
+    profileData = { installer, offices, projects, rating, count, isActive: (installer as any).user?.isActive || false };
     await redis.set(cacheKey, profileData, { ex: 3600 });
   }
 
   if (!profileData) return notFound();
 
-  const { installer, offices, projects, rating, count } = profileData;
+  const { installer, offices, projects, rating, count, isActive } = profileData;
 
-  // Always verify active status even from cache
-  const [userData] = await db
-    .select({ isActive: users.isActive })
-    .from(users)
-    .where(eq(users.id, installer.userId));
-  if (!userData?.isActive) notFound();
+  if (!isActive) notFound();
 
   // Enforce 50% completeness threshold
   const { score } = getEpcCompleteness(

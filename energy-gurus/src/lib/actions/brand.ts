@@ -90,11 +90,14 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
     await redis.del(CACHE_KEYS.BRAND_DETAILS(b.id));
     await redis.del(CACHE_KEYS.BRANDS_LIST);
 
-    // Revalidate BEFORE redirect
+    // Revalidate cache
     revalidatePath("/", "layout");
 
-    // Redirect back with success message
-    redirect(`/dashboard/brand?msg=profile_updated&t=${Date.now()}`);
+    // Only redirect when called from a form action (FormData path).
+    // Programmatic calls (logo/gallery upload) handle their own feedback via toast + router.refresh().
+    if (isFormData) {
+      redirect(`/dashboard/brand?msg=profile_updated&t=${Date.now()}`);
+    }
   } else {
     console.error("No brand found to update for user:", targetUserId);
   }

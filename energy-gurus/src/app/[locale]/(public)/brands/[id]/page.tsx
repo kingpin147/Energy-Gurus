@@ -28,6 +28,7 @@ interface BrandProfileData {
   certifications: Certification[];
   rating: number | null;
   count: number;
+  isActive: boolean;
 }
 
 export async function generateMetadata({
@@ -79,11 +80,17 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
       notFound();
     }
 
+    const [userData] = await db.select({ isActive: users.isActive }).from(users).where(eq(users.id, brand.userId));
+    if (!userData?.isActive) {
+      console.log(`[Brand Profile] 404: User is not active for brand id ${id}`);
+      notFound();
+    }
+
     const brandProducts = await db.select().from(products).where(eq(products.brandId, id));
     const certifications = await db.select().from(brandCertifications).where(eq(brandCertifications.brandId, id));
     const { rating, count } = await getProfileRating(id);
 
-    profileData = { brand, brandProducts, certifications, rating, count };
+    profileData = { brand, brandProducts, certifications, rating, count, isActive: userData.isActive };
     await redis.set(cacheKey, profileData, { ex: 3600 });
   }
 
@@ -92,11 +99,9 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
     return notFound();
   }
 
-  const { brand, brandProducts, certifications, rating, count } = profileData;
+  const { brand, brandProducts, certifications, rating, count, isActive } = profileData;
 
-  // Always check if the user is active, even if coming from cache
-  const [userData] = await db.select({ isActive: users.isActive }).from(users).where(eq(users.id, brand.userId));
-  if (!userData?.isActive) {
+  if (!isActive) {
     console.log(`[Brand Profile] 404: User is not active for brand id ${id}`);
     notFound();
   }

@@ -116,8 +116,8 @@ export function ProjectGallery({ images, videos = [], name, autoPlayInterval = 4
                 key={i}
                 onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
                 className={`rounded-full transition-all duration-300 ${i === current
-                    ? "w-5 h-1.5 bg-white"
-                    : "w-1.5 h-1.5 bg-white/50 hover:bg-white/80"
+                  ? "w-5 h-1.5 bg-white"
+                  : "w-1.5 h-1.5 bg-white/50 hover:bg-white/80"
                   }`}
                 aria-label={`Go to media ${i + 1}`}
               />

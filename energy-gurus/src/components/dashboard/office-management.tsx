@@ -4,6 +4,8 @@ import { addEpcOffice, updateEpcOffice, deleteEpcOffice } from "@/lib/actions/ep
 import { Plus, Trash2, MapPin, Loader2, Edit2, X, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface Office {
     id: string;
@@ -19,6 +21,7 @@ interface OfficeManagementProps {
 }
 
 export function OfficeManagement({ epcId, initialOffices }: OfficeManagementProps) {
+    const router = useRouter();
     const [offices, setOffices] = useState(initialOffices);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingOffice, setEditingOffice] = useState<Office | null>(null);
@@ -46,13 +49,18 @@ export function OfficeManagement({ epcId, initialOffices }: OfficeManagementProp
 
             if (editingOffice) {
                 await updateEpcOffice(editingOffice.id, officeData);
+                toast.success("Office location updated");
             } else {
                 await addEpcOffice(epcId, officeData);
+                toast.success("Office location added");
             }
 
             setIsFormOpen(false);
             setEditingOffice(null);
-            window.location.reload();
+            router.refresh();
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to save office location");
         } finally {
             setIsLoading(false);
         }
@@ -60,8 +68,14 @@ export function OfficeManagement({ epcId, initialOffices }: OfficeManagementProp
 
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this office?")) return;
-        await deleteEpcOffice(id);
-        setOffices((prev: Office[]) => prev.filter((o: Office) => o.id !== id));
+        try {
+            await deleteEpcOffice(id);
+            setOffices((prev: Office[]) => prev.filter((o: Office) => o.id !== id));
+            toast.success("Office location removed");
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to delete office");
+        }
     };
 
     return (

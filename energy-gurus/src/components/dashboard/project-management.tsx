@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useR2Upload } from "@/lib/hooks/use-r2-upload";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface Project {
     id: string;
@@ -28,6 +29,7 @@ interface ProjectManagementProps {
 }
 
 export function ProjectManagement({ epcId, initialProjects }: ProjectManagementProps) {
+    const router = useRouter();
     const [projects, setProjects] = useState(initialProjects);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -105,15 +107,20 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
 
             if (editingProject) {
                 await updateEpcProject(editingProject.id, projectData);
+                toast.success("Project updated successfully");
             } else {
                 await addEpcProject(epcId, projectData);
+                toast.success("Project published successfully");
             }
 
             setIsFormOpen(false);
             setEditingProject(null);
             setUploadedImages([]);
             setUploadedVideos([]);
-            window.location.reload();
+            router.refresh();
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to save project");
         } finally {
             setIsLoading(false);
         }
@@ -121,8 +128,14 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
 
     const handleDelete = async (id: string) => {
         if (!confirm("Delete this project?")) return;
-        await deleteEpcProject(id);
-        setProjects((prev: Project[]) => prev.filter((p: Project) => p.id !== id));
+        try {
+            await deleteEpcProject(id);
+            setProjects((prev: Project[]) => prev.filter((p: Project) => p.id !== id));
+            toast.success("Project removed");
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to delete project");
+        }
     };
 
     const removeImage = (url: string) => {

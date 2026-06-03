@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Mail, Phone, MapPin, MessageSquare, Instagram, Linkedin, Twitter, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { submitPublicContact } from "@/lib/actions/inquiries";
+import { submitPublicContact } from "@/lib/actions/inquiry";
 
 export default function ContactPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,7 +25,7 @@ export default function ContactPage() {
         } else {
             setError(result.error || "An unexpected error occurred.");
         }
-        
+
         setIsSubmitting(false);
     };
 
@@ -99,7 +99,7 @@ export default function ContactPage() {
                             ) : (
                                 <CardContent className="p-8 md:p-12">
                                     <h3 className="text-2xl font-bold mb-8">Send us a Message</h3>
-                                    
+
                                     {error && (
                                         <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 text-sm font-medium">
                                             {error}

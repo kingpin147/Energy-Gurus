@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { DatasheetUpload } from "@/components/dashboard/DatasheetUpload";
 import { addProductModel } from "@/lib/actions/brand";
+import { toast } from "sonner";
 
 export function AddProductDialog() {
     const [open, setOpen] = useState(false);
@@ -18,10 +19,12 @@ export function AddProductDialog() {
         try {
             const formData = new FormData(e.currentTarget);
             await addProductModel(formData);
+            toast.success("Product model added successfully");
             setOpen(false);
             formRef.current?.reset();
         } catch (err) {
             console.error("Failed to add product:", err);
+            toast.error("Failed to add product model");
         } finally {
             setLoading(false);
         }
