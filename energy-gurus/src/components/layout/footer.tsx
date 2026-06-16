@@ -33,10 +33,7 @@ export function Footer() {
                         <h4 className="font-bold mb-4">Sitemap</h4>
                         <ul className="space-y-2 text-sm text-muted-foreground">
                             <li><Link href="/" className="hover:text-primary">Home</Link></li>
-                            <li><Link href="/podcast" className="hover:text-primary">Podcast</Link></li>
                             <li><Link href="/epcs" className="hover:text-primary">EPCs & Installers</Link></li>
-                            <li><Link href="/brands" className="hover:text-primary">Solar Brands</Link></li>
-                            <li><Link href="/live-qa" className="hover:text-primary">Live QA Sessions</Link></li>
                             <li><Link href="/about" className="hover:text-primary">About Us</Link></li>
                         </ul>
                     </div>
