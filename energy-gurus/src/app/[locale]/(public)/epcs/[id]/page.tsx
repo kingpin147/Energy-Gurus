@@ -17,18 +17,20 @@ import {
   Award,
   Layers,
   ChevronRight,
+  Shield,
+  Settings,
+  Headset,
+  CheckCircle2,
+  Play
 } from "lucide-react";
-import { ProjectGallery } from "@/components/shared/ProjectGallery";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { ReviewForm } from "@/components/forms/review-form";
 import { ReviewList } from "@/components/reviews/review-list";
 import { getProfileRating } from "@/lib/actions/reviews";
-import { SocialLinkTracker } from "@/components/brands/SocialLinkTracker";
 import { redis, CACHE_KEYS } from "@/lib/redis";
 import { InferSelectModel } from "drizzle-orm";
 import { EpcContactButtons } from "@/components/shared/EpcContactButtons";
-import { ShareButton } from "@/components/shared/ShareButton";
 
 type EpcInstaller = InferSelectModel<typeof epcInstallers>;
 type EpcOffice = InferSelectModel<typeof epcOffices>;
@@ -74,6 +76,11 @@ export async function generateMetadata({
       images: installer.logoUrl ? [installer.logoUrl] : [],
     }
   };
+}
+
+function getYouTubeId(url: string) {
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&]{11})/);
+  return match ? match[1] : null;
 }
 
 export default async function EpcProfilePage({
@@ -123,55 +130,18 @@ export default async function EpcProfilePage({
   );
   if (score < 50) notFound();
 
+  const inverters = Array.from(new Set(projects.map(p => p.inverterModel).filter(Boolean)));
+  const batteries = Array.from(new Set(projects.map(p => p.batteryModel).filter(Boolean)));
+  const panels = Array.from(new Set(projects.map(p => p.solarPanelModel).filter(Boolean)));
+  const youtubeProjects = projects.filter(p => (p as any).youtubeUrl);
+
   const whatsappNumber =
     (
       installer.socialLinks as { platform: string; url: string }[] | null
     )?.find((l) => l.platform === "WhatsApp" && l.url && l.url.trim() !== "")?.url.replace(/\D/g, "") || null;
 
-  const socialLinks = (
-    installer.socialLinks as { platform: string; url: string }[] | null
-  )?.filter((l) => l.platform !== "WhatsApp" && l.url && l.url.trim() !== "") ?? [];
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    name: installer.companyName,
-    description:
-      installer.about ||
-      `Verified EPC solar installer: ${installer.companyName}`,
-    logo: installer.logoUrl || undefined,
-    url: installer.website || undefined,
-    address:
-      offices.length > 0
-        ? {
-          "@type": "PostalAddress",
-          addressLocality: offices[0].city,
-          streetAddress: [
-            offices[0].officeNumber,
-            offices[0].block,
-            offices[0].area,
-          ]
-            .filter(Boolean)
-            .join(", "),
-        }
-        : undefined,
-    aggregateRating:
-      rating && count > 0
-        ? {
-          "@type": "AggregateRating",
-          ratingValue: rating.toFixed(1),
-          reviewCount: count,
-        }
-        : undefined,
-  };
-
   return (
-    <div className="min-h-screen bg-[#f5f6f8] text-foreground selection:bg-primary/20">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-
+    <div className="min-h-screen bg-white text-foreground selection:bg-primary/20 pb-20">
       {/* Top nav bar */}
       <div className="bg-white border-b border-border/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 h-14 flex items-center gap-3">
@@ -186,350 +156,257 @@ export default async function EpcProfilePage({
           <span className="text-sm font-semibold text-foreground truncate max-w-[200px]">
             {installer.companyName}
           </span>
-          {installer.isVerified && (
-            <span className="ml-auto flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-              <ShieldCheck className="w-3 h-3" /> Verified
-            </span>
-          )}
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* ── LEFT SIDEBAR ── */}
-          <aside className="lg:col-span-4 xl:col-span-3 space-y-4">
-            {/* Profile Card */}
-            <div className="bg-white rounded-2xl border border-border/60 overflow-hidden shadow-sm">
-              {/* Hero banner */}
-              <div className="h-32 bg-gradient-to-br from-primary/20 via-primary/10 to-accent/20 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-30">
-                  <div className="absolute top-2 right-4 w-20 h-20 rounded-full bg-primary/20 blur-2xl" />
-                  <div className="absolute bottom-0 left-8 w-16 h-16 rounded-full bg-accent/30 blur-xl" />
-                </div>
-                {/* Decorative grid lines */}
-                <svg
-                  className="absolute inset-0 w-full h-full opacity-10"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <defs>
-                    <pattern
-                      id="grid"
-                      width="20"
-                      height="20"
-                      patternUnits="userSpaceOnUse"
-                    >
-                      <path
-                        d="M 20 0 L 0 0 0 20"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="0.5"
-                      />
-                    </pattern>
-                  </defs>
-                  <rect width="100%" height="100%" fill="url(#grid)" />
-                </svg>
+      <div className="container mx-auto px-4 py-8 max-w-[1200px]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          {/* ── LEFT SIDEBAR (1/3) ── */}
+          <aside className="lg:col-span-1 space-y-8 flex flex-col items-center">
+            
+            {/* Big Circular Profile Area */}
+            <div className="w-full flex flex-col items-center">
+              <div className="w-64 h-64 rounded-full border-4 border-primary/10 overflow-hidden relative mb-[-24px] shadow-lg bg-white flex items-center justify-center">
+                {installer.logoUrl ? (
+                  <Image
+                    src={installer.logoUrl}
+                    fill
+                    className="object-contain p-4"
+                    alt={installer.companyName}
+                  />
+                ) : (
+                  <div className="text-4xl font-black text-primary/30 uppercase">
+                    {installer.companyName.substring(0, 2)}
+                  </div>
+                )}
+              </div>
+              
+              <div className="bg-primary text-primary-foreground px-8 py-3 rounded-full z-10 flex items-center gap-2 shadow-md">
+                <Award className="w-5 h-5 text-yellow-400" />
+                <span className="font-black tracking-widest uppercase text-sm">SOLAR INSTALLER</span>
+              </div>
+            </div>
+
+            {/* Rating Section */}
+            <div className="text-center space-y-1">
+              <div className="flex items-center justify-center gap-1.5 text-yellow-400">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star key={star} className={`w-6 h-6 ${rating && rating >= star ? "fill-current" : rating && rating >= star - 0.5 ? "fill-current opacity-50" : "text-gray-200"}`} />
+                ))}
+                <span className="text-2xl font-black text-foreground ml-2">
+                  {rating ? rating.toFixed(1) : "0.0"}/5
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground font-medium">
+                ({count}+ Happy Customers)
+              </p>
+            </div>
+
+            {/* Certified Installer Section */}
+            <div className="w-full">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="h-px bg-border flex-1"></div>
+                <h3 className="font-black text-primary tracking-widest text-sm">CERTIFIED INSTALLER</h3>
+                <div className="h-px bg-border flex-1"></div>
               </div>
 
-              <div className="px-6 pb-6">
-                {/* Logo overlapping banner */}
-                <div className="relative -mt-14 mb-4">
-                  <div className="w-28 h-28 rounded-2xl border-4 border-white bg-white shadow-lg flex items-center justify-center overflow-hidden">
-                    {installer.logoUrl ? (
-                      <Image
-                        src={installer.logoUrl}
-                        width={96}
-                        height={96}
-                        className="object-contain w-full h-full p-2"
-                        alt={installer.companyName}
-                      />
-                    ) : (
-                      <ShieldCheck className="w-12 h-12 text-primary/30" />
-                    )}
+              <div className="space-y-4">
+                {/* Inverters */}
+                <div className="flex items-center gap-4 border border-border/50 rounded-xl p-3 bg-secondary/5">
+                  <div className="w-10 h-10 bg-white rounded-lg border border-border flex items-center justify-center shrink-0 shadow-sm">
+                    <Zap className="w-5 h-5 text-primary" />
                   </div>
-                </div>
-
-                {/* Name & CEO */}
-                <h1 className="text-xl font-black tracking-tight leading-tight mb-1">
-                  {installer.companyName}
-                </h1>
-                {installer.ceoName && (
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Led by{" "}
-                    <span className="font-semibold text-foreground">
-                      {installer.ceoName}
-                    </span>
-                  </p>
-                )}
-
-                {/* Rating row */}
-                {count > 0 ? (
-                  <div className="flex items-center gap-2 mb-4">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-black text-sm">
-                      {rating?.toFixed(1)}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      ({count} {count === 1 ? "review" : "reviews"})
-                    </span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 mb-4 text-xs text-muted-foreground">
-                    <Star className="w-3.5 h-3.5" />
-                    No reviews yet
-                  </div>
-                )}
-
-                {/* Meta chips */}
-                <div className="flex flex-wrap gap-2 mb-5">
-                  {installer.isVerified && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-50 text-green-700 border border-green-200 rounded-full text-[10px] font-black uppercase tracking-widest">
-                      <ShieldCheck className="w-2.5 h-2.5" /> Verified
-                    </span>
-                  )}
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/5 text-primary border border-primary/20 rounded-full text-[10px] font-black uppercase tracking-widest">
-                    <Calendar className="w-2.5 h-2.5" />{" "}
-                    Since {new Date(installer.createdAt).getFullYear()}
-                  </span>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-accent/10 text-accent-foreground border border-accent/20 rounded-full text-[10px] font-black uppercase tracking-widest">
-                    <Globe className="w-2.5 h-2.5" /> Nationwide
-                  </span>
-                </div>
-
-                {/* Sectors */}
-                {installer.sectors &&
-                  (installer.sectors as string[]).length > 0 && (
-                    <div className="mb-5">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-2">
-                        Sectors
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {(installer.sectors as string[]).map((sector) => (
-                          <span
-                            key={sector}
-                            className="px-2.5 py-1 bg-secondary text-secondary-foreground rounded-lg text-[10px] font-bold border border-border/50"
-                          >
-                            {sector}
-                          </span>
-                        ))}
-                      </div>
+                  <div className="flex-1">
+                    <div className="text-[10px] font-black tracking-widest text-muted-foreground uppercase mb-1">INVERTERS</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {inverters.length > 0 ? inverters.map(model => (
+                        <span key={model} className="text-xs font-bold text-primary bg-white border border-border/50 px-2 py-0.5 rounded-md shadow-sm">{model}</span>
+                      )) : <span className="text-xs text-muted-foreground">Various Brands</span>}
                     </div>
-                  )}
-
-                {/* Certifications */}
-                {(installer as any).certifications &&
-                  ((installer as any).certifications as string[]).length >
-                  0 && (
-                    <div className="mb-5">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-2">
-                        Certifications
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {(
-                          (installer as any).certifications as string[]
-                        ).map((cert) => (
-                          <span
-                            key={cert}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-[10px] font-bold"
-                          >
-                            <Award className="w-2.5 h-2.5" /> {cert}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                {/* Rate & Share row */}
-                <div className="flex gap-2 mb-4">
-                  <a
-                    href="#reviews"
-                    className="flex-1 h-10 rounded-xl border border-border bg-white hover:bg-secondary/50 transition-colors flex items-center justify-center gap-1.5 text-sm font-bold text-foreground"
-                  >
-                    <Star className="w-4 h-4 text-yellow-500" /> Rate
-                  </a>
-                  <ShareButton
-                    companyName={installer.companyName}
-                    className="flex-1 h-10 rounded-xl border border-border bg-white hover:bg-secondary/50 transition-colors flex items-center justify-center gap-1.5 text-sm font-bold text-foreground"
-                  />
+                  </div>
                 </div>
 
-                {/* Social links */}
-                {socialLinks.length > 0 && (
-                  <div className="mb-4 flex flex-wrap gap-2">
-                    {socialLinks.map((link, i) => (
-                      <SocialLinkTracker
-                        key={i}
-                        link={link}
-                        id={installer.id}
-                        name={installer.companyName}
-                        type="epc"
-                        variant="light"
-                      />
-                    ))}
+                {/* Batteries */}
+                <div className="flex items-center gap-4 border border-border/50 rounded-xl p-3 bg-secondary/5">
+                  <div className="w-10 h-10 bg-white rounded-lg border border-border flex items-center justify-center shrink-0 shadow-sm">
+                    <Layers className="w-5 h-5 text-primary" />
                   </div>
-                )}
+                  <div className="flex-1">
+                    <div className="text-[10px] font-black tracking-widest text-muted-foreground uppercase mb-1">BATTERIES</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {batteries.length > 0 ? batteries.map(model => (
+                        <span key={model} className="text-xs font-bold text-primary bg-white border border-border/50 px-2 py-0.5 rounded-md shadow-sm">{model}</span>
+                      )) : <span className="text-xs text-muted-foreground">Various Brands</span>}
+                    </div>
+                  </div>
+                </div>
 
-                {/* Contact CTA */}
-                <EpcContactButtons
+                {/* Panels */}
+                <div className="flex items-center gap-4 border border-border/50 rounded-xl p-3 bg-secondary/5">
+                  <div className="w-10 h-10 bg-white rounded-lg border border-border flex items-center justify-center shrink-0 shadow-sm">
+                    <Building2 className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-[10px] font-black tracking-widest text-muted-foreground uppercase mb-1">SOLAR PANELS</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {panels.length > 0 ? panels.map(model => (
+                        <span key={model} className="text-xs font-bold text-primary bg-white border border-border/50 px-2 py-0.5 rounded-md shadow-sm">{model}</span>
+                      )) : <span className="text-xs text-muted-foreground">Various Brands</span>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Traits */}
+            <div className="w-full bg-primary rounded-2xl p-6 text-primary-foreground grid grid-cols-4 gap-4 text-center mt-4">
+              <div className="flex flex-col items-center gap-2">
+                <Shield className="w-6 h-6 text-white/80" />
+                <span className="text-[9px] font-black tracking-widest uppercase leading-tight">FULLY<br/>INSURED</span>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <Settings className="w-6 h-6 text-white/80" />
+                <span className="text-[9px] font-black tracking-widest uppercase leading-tight">QUALITY<br/>WORKMANSHIP</span>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <CheckCircle2 className="w-6 h-6 text-white/80" />
+                <span className="text-[9px] font-black tracking-widest uppercase leading-tight">PROFESSIONAL<br/>SERVICE</span>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <Headset className="w-6 h-6 text-white/80" />
+                <span className="text-[9px] font-black tracking-widest uppercase leading-tight">AFTER SALES<br/>SUPPORT</span>
+              </div>
+            </div>
+
+            {/* Contact CTA */}
+            <div className="w-full pt-4">
+               <EpcContactButtons
                   epcId={installer.id}
                   companyName={installer.companyName}
                   userId={installer.userId}
                   website={installer.website}
                   whatsappNumber={whatsappNumber}
                 />
-
-                <p className="text-[10px] text-muted-foreground/50 text-center mt-3">
-                  By continuing, you agree to our{" "}
-                  <span className="underline cursor-pointer">Terms</span> &{" "}
-                  <span className="underline cursor-pointer">Privacy Policy</span>
-                </p>
-              </div>
             </div>
 
-            {/* Stats card */}
-            <div className="bg-white rounded-2xl border border-border/60 p-5 shadow-sm">
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-4">
-                Quick Stats
-              </p>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Layers className="w-3.5 h-3.5 text-primary" />
-                    </div>
-                    Projects
-                  </div>
-                  <span className="font-black text-sm">{projects.length}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Building2 className="w-3.5 h-3.5 text-primary" />
-                    </div>
-                    Offices
-                  </div>
-                  <span className="font-black text-sm">{offices.length}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <div className="w-7 h-7 rounded-lg bg-yellow-50 flex items-center justify-center">
-                      <Star className="w-3.5 h-3.5 text-yellow-500" />
-                    </div>
-                    Reviews
-                  </div>
-                  <span className="font-black text-sm">{count}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <div className="w-7 h-7 rounded-lg bg-green-50 flex items-center justify-center">
-                      <ShieldCheck className="w-3.5 h-3.5 text-green-600" />
-                    </div>
-                    Verification
-                  </div>
-                  <span
-                    className={`font-black text-xs px-2 py-0.5 rounded-full ${installer.isVerified
-                      ? "bg-green-100 text-green-700"
-                      : "bg-secondary text-muted-foreground"
-                      }`}
-                  >
-                    {installer.isVerified ? "Verified" : "Pending"}
-                  </span>
-                </div>
-              </div>
-            </div>
           </aside>
 
-          {/* ── RIGHT CONTENT ── */}
-          <section className="lg:col-span-8 xl:col-span-9 space-y-5">
-            {/* About */}
-            <div className="bg-white rounded-2xl border border-border/60 p-6 shadow-sm">
-              <h2 className="text-base font-black uppercase tracking-widest text-foreground mb-4 flex items-center gap-2">
-                <span className="w-1 h-5 bg-primary rounded-full inline-block" />
-                About {installer.companyName}
-              </h2>
-              <p className="text-base text-foreground/80 leading-relaxed">
-                {installer.about ||
-                  "Company vision and core values information is currently unavailable."}
-              </p>
+          {/* ── RIGHT CONTENT (2/3) ── */}
+          <section className="lg:col-span-2 space-y-12">
+            
+            {/* About Us */}
+            <div>
+              <h2 className="text-2xl font-black text-primary mb-4 uppercase tracking-tight">ABOUT US</h2>
+              <div className="flex gap-4 items-start">
+                <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-6 h-6 text-primary-foreground" />
+                </div>
+                <div className="text-lg text-foreground/80 leading-relaxed font-medium">
+                  {installer.about ? (
+                    <p>{installer.about}</p>
+                  ) : (
+                    <p>
+                      We are a professional solar installation company committed to delivering high-quality, reliable and affordable solar energy solutions for homes and businesses. Our goal is to help you save on energy bills while contributing to a cleaner and greener future.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
 
-              {/* Website link */}
-              {installer.website && (
-                <a
-                  href={installer.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 mt-4 text-sm font-semibold text-primary hover:underline"
-                >
-                  <Globe className="w-4 h-4" />
-                  {installer.website.replace(/^https?:\/\//, "")}
-                </a>
+            {/* Installer Projects Videos */}
+            <div>
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0">
+                  <Play className="w-5 h-5 text-primary-foreground ml-0.5" />
+                </div>
+                <h2 className="text-xl font-black text-primary uppercase tracking-widest flex-1">INSTALLER PROJECTS VIDEOS</h2>
+                <div className="h-px bg-border flex-1 max-w-[100px] hidden md:block"></div>
+              </div>
+
+              {youtubeProjects.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {youtubeProjects.slice(0, 3).map((project, i) => {
+                    const videoId = getYouTubeId((project as any).youtubeUrl);
+                    return (
+                      <div key={project.id} className="rounded-2xl overflow-hidden aspect-video bg-black relative group shadow-sm border border-border">
+                        {videoId ? (
+                          <>
+                            <img src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`} alt={project.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                            <a href={(project as any).youtubeUrl} target="_blank" rel="noopener noreferrer" className="absolute inset-0 flex items-center justify-center">
+                              <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                <Play className="w-5 h-5 text-primary ml-1" />
+                              </div>
+                            </a>
+                            <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                              {project.name}
+                            </div>
+                          </>
+                        ) : (
+                          <div className="flex items-center justify-center w-full h-full text-white/50 text-xs">Invalid URL</div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground italic bg-secondary/10 p-6 rounded-2xl text-center border border-border border-dashed">
+                  No video projects uploaded yet.
+                </div>
               )}
             </div>
 
-            {/* Geographic Hubs */}
-            {offices.length > 0 && (
-              <div className="bg-white rounded-2xl border border-border/60 p-6 shadow-sm">
-                <h2 className="text-base font-black uppercase tracking-widest text-foreground mb-4 flex items-center gap-2">
-                  <span className="w-1 h-5 bg-primary rounded-full inline-block" />
-                  Office Locations
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {offices.map((office) => (
-                    <div
-                      key={office.id}
-                      className="flex items-start gap-3 p-4 bg-secondary/30 rounded-xl border border-border/40 hover:border-primary/30 transition-colors"
-                    >
-                      <div className="w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
-                        <MapPin className="w-4 h-4 text-primary" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-black text-sm leading-tight">
-                          {office.city || "N/A"}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-0.5 break-words">
-                          {[office.officeNumber, office.block, office.area]
-                            .filter(Boolean)
-                            .join(", ") || "Address details unavailable"}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+            {/* Testimonials */}
+            <div>
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0">
+                  <MessageSquare className="w-5 h-5 text-primary-foreground" />
                 </div>
+                <h2 className="text-xl font-black text-primary uppercase tracking-widest flex-1">TESTIMONIALS</h2>
+                <div className="h-px bg-border flex-1 max-w-[100px] hidden md:block"></div>
               </div>
-            )}
 
-            {/* Reviews */}
-            <div
-              id="reviews"
-              className="bg-white rounded-2xl border border-border/60 p-6 shadow-sm"
-            >
-              <h2 className="text-base font-black uppercase tracking-widest text-foreground mb-6 flex items-center gap-2">
-                <span className="w-1 h-5 bg-primary rounded-full inline-block" />
-                Verified Experiences
-                {count > 0 && (
-                  <span className="ml-auto text-xs font-black text-muted-foreground bg-secondary px-2.5 py-1 rounded-full">
-                    {count}
-                  </span>
-                )}
-              </h2>
-
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                {/* Review form */}
-                <div className="lg:col-span-2">
-                  <div className="bg-secondary/30 rounded-xl p-5 border border-border/40">
-                    <h3 className="text-sm font-black uppercase tracking-widest mb-4 flex items-center gap-2">
-                      <MessageSquare className="w-4 h-4 text-primary" />
-                      Leave a Review
-                    </h3>
-                    <ReviewForm targetId={id} targetType="epc" />
-                  </div>
-                </div>
-
-                {/* Review list */}
-                <div className="lg:col-span-3">
-                  <ReviewList targetId={id} />
-                </div>
+              <div className="mb-6">
+                <ReviewForm targetId={id} targetType="epc" />
               </div>
+              <ReviewList targetId={id} />
             </div>
+
+            {/* Hire Me Banner */}
+            <div className="bg-primary rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-8 text-primary-foreground shadow-xl relative overflow-hidden">
+               {/* Decorative background circle */}
+               <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+               
+               <div className="flex items-center gap-6 relative z-10">
+                 <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shrink-0">
+                   <ShieldCheck className="w-10 h-10 text-primary" />
+                 </div>
+                 <div>
+                   <h2 className="text-4xl font-black text-yellow-400 tracking-tight mb-2">HIRE ME</h2>
+                   <p className="text-white/90 font-medium">Let&apos;s talk about your solar needs.</p>
+                   <p className="text-white/70 text-sm">Get a free consultation and quote today!</p>
+                 </div>
+               </div>
+
+               <div className="space-y-3 relative z-10">
+                 <div className="flex items-center gap-3">
+                   <CheckCircle2 className="w-5 h-5 text-yellow-400 shrink-0" />
+                   <span className="font-bold text-sm tracking-wide">FREE SITE SURVEY</span>
+                 </div>
+                 <div className="flex items-center gap-3">
+                   <CheckCircle2 className="w-5 h-5 text-yellow-400 shrink-0" />
+                   <span className="font-bold text-sm tracking-wide">BEST PRICE GUARANTEE</span>
+                 </div>
+                 <div className="flex items-center gap-3">
+                   <CheckCircle2 className="w-5 h-5 text-yellow-400 shrink-0" />
+                   <span className="font-bold text-sm tracking-wide">CUSTOM SOLUTIONS</span>
+                 </div>
+                 <div className="flex items-center gap-3">
+                   <CheckCircle2 className="w-5 h-5 text-yellow-400 shrink-0" />
+                   <span className="font-bold text-sm tracking-wide">100% CUSTOMER SATISFACTION</span>
+                 </div>
+               </div>
+            </div>
+
           </section>
         </div>
       </div>

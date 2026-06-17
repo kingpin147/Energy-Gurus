@@ -12,23 +12,23 @@ export default function AboutPage() {
                 {/* Premium Abstract Network Asset */}
                 <div className="absolute inset-0 z-0">
                     <Image
-                        src="/hero_solar_banner.png"
+                        src="/new_hero_banner_2.jpg"
                         alt="Network Background"
                         fill
                         priority
-                        className="object-cover opacity-20 md:opacity-40 transition-opacity duration-1000 scale-105"
+                        className="object-cover opacity-100 transition-opacity duration-1000 scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-white/40 to-white"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60"></div>
                 </div>
 
                 <div className="container mx-auto px-6 text-center max-w-5xl relative z-10 animate-reveal">
-                    <div className="inline-flex items-center gap-3 bg-primary/10 text-primary px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-primary/20 mb-10 animate-soft-float">
+                    <div className="inline-flex items-center gap-3 bg-primary/80 backdrop-blur-md border border-white/30 text-white px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-10 animate-soft-float shadow-sm">
                         <Award className="w-4 h-4" /> Engineering Excellence
                     </div>
-                    <h1 className="text-4xl md:text-7xl font-black mb-8 text-slate-900 tracking-tighter leading-[1] uppercase md:px-0 px-4">
-                        Independent Energy <span className="text-primary">Insights</span> for Pakistan
+                    <h1 className="text-4xl md:text-7xl font-black mb-8 text-white drop-shadow-lg tracking-tighter leading-[1] uppercase md:px-0 px-4">
+                        Independent Energy <span className="text-primary drop-shadow-md">Insights</span> for Pakistan
                     </h1>
-                    <p className="text-lg md:text-2xl text-slate-600 font-medium leading-relaxed mb-12 opacity-90 max-w-3xl mx-auto">
+                    <p className="text-lg md:text-2xl text-white drop-shadow-md font-medium leading-relaxed mb-12 opacity-90 max-w-3xl mx-auto">
                         EnergyGurus is a professional platform dedicated to delivering data-driven analysis, expert commentary, and engineering standards across Pakistan&apos;s energy sector.
                     </p>
                     <div className="flex flex-wrap justify-center gap-5">

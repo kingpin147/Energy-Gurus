@@ -68,25 +68,25 @@ export default async function Homepage() {
                 {/* Premium Abstract Background Asset */}
                 <div className="absolute inset-0 z-0">
                     <Image
-                        src="/hero_solar_banner.png"
+                        src="/new_hero_banner.jpg"
                         alt="Background"
                         fill
                         priority
-                        className="object-cover opacity-30 md:opacity-60 transition-opacity duration-1000"
+                        className="object-cover opacity-100 transition-opacity duration-1000"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-white/50 to-white"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60"></div>
                 </div>
 
                 <div className="max-w-[1200px] mx-auto px-6 py-20 md:py-32 relative z-10 flex flex-col items-center text-center animate-reveal">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-8 md:mb-12 animate-soft-float">
+                    <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/80 backdrop-blur-md border border-white/30 text-white text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-8 md:mb-12 animate-soft-float shadow-sm">
                         <ShieldCheck className="w-4 h-4" /> Authenticity Guaranteed
                     </div>
 
-                    <h1 className="text-4xl sm:text-5xl md:text-8xl font-black tracking-tighter text-slate-900 mb-8 leading-[1] md:leading-[0.85]">
-                        EnergyGurus<span className="text-primary">.Online</span>
+                    <h1 className="text-4xl sm:text-5xl md:text-8xl font-black tracking-tighter text-white drop-shadow-lg mb-8 leading-[1] md:leading-[0.85]">
+                        EnergyGurus<span className="text-primary drop-shadow-md">.Online</span>
                     </h1>
 
-                    <p className="text-base md:text-2xl text-slate-600 max-w-3xl mx-auto font-medium leading-relaxed mb-12 opacity-80 px-4 md:px-0">
+                    <p className="text-base md:text-2xl text-white drop-shadow-md max-w-3xl mx-auto font-medium leading-relaxed mb-12 opacity-90 px-4 md:px-0">
                         The industry standard for verified solar infrastructure. Connect with certified EPCs, audit global brands, and access technical intelligence.
                     </p>
 

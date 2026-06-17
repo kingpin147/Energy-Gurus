@@ -21,6 +21,7 @@ interface Project {
     solarPanelModel: string | null;
     images: string[] | null;
     videos: string[] | null;
+    youtubeUrl: string | null;
 }
 
 interface ProjectManagementProps {
@@ -103,6 +104,7 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
                 solarPanelModel: formData.get("solarPanelModel") as string,
                 images: uploadedImages,
                 videos: uploadedVideos,
+                youtubeUrl: formData.get("youtubeUrl") as string,
             };
 
             if (editingProject) {
@@ -239,6 +241,10 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
                                             <input name="batteryModel" defaultValue={editingProject?.batteryModel || ""} placeholder="Battery Brand/Model" className="w-full border rounded-xl p-3 bg-background outline-none text-sm" />
                                         </div>
                                     </div>
+                                    <div className="pt-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest mb-2 block flex items-center gap-1"><Zap className="w-3 h-3 text-red-500 fill-current" /> YouTube Video URL</label>
+                                        <input name="youtubeUrl" defaultValue={editingProject?.youtubeUrl || ""} placeholder="https://youtube.com/watch?v=..." className="w-full border rounded-xl p-3 bg-background outline-none text-sm" />
+                                    </div>
                                 </div>
                             </div>
 
@@ -366,6 +372,11 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
                                 {project.videos && project.videos.length > 0 && (
                                     <span className="bg-accent/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-sm">
                                         <VideoIcon className="w-3 h-3 inline mr-1" /> HD Video
+                                    </span>
+                                )}
+                                {project.youtubeUrl && (
+                                    <span className="bg-red-500/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-sm">
+                                        <VideoIcon className="w-3 h-3 inline mr-1" /> YouTube
                                     </span>
                                 )}
                             </div>

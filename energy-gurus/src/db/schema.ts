@@ -66,6 +66,7 @@ export const epcProjects = pgTable('epc_projects', {
   solarPanelModel: text('solar_panel_model'),
   images: jsonb('images').$type<string[]>().default([]),
   videos: jsonb('videos').$type<string[]>().default([]),
+  youtubeUrl: text('youtube_url'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => ({
