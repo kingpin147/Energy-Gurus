@@ -166,19 +166,16 @@ export default async function EpcProfilePage({
             
             {/* Big Circular Profile Area */}
             <div className="w-full flex flex-col items-center">
-              <div className="w-64 h-64 rounded-full border-4 border-primary/10 overflow-hidden relative mb-[-24px] shadow-lg bg-white flex items-center justify-center">
-                {installer.logoUrl ? (
-                  <Image
-                    src={installer.logoUrl}
-                    fill
-                    className="object-contain p-4"
-                    alt={installer.companyName}
-                  />
-                ) : (
-                  <div className="text-4xl font-black text-primary/30 uppercase">
-                    {installer.companyName.substring(0, 2)}
-                  </div>
-                )}
+              <div className="w-64 h-64 bg-white rounded-full border-8 border-primary/5 shadow-2xl relative flex items-center justify-center p-2 mb-[-2rem] z-0">
+                <div className="relative w-full h-full rounded-full overflow-hidden">
+                  {installer.logoUrl ? (
+                    <Image src={installer.logoUrl} alt={installer.companyName} fill className="object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+                      <span className="text-6xl font-black text-slate-300 uppercase">{installer.companyName.substring(0, 2)}</span>
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div className="bg-primary text-primary-foreground px-8 py-3 rounded-full z-10 flex items-center gap-2 shadow-md">
