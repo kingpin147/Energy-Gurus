@@ -291,9 +291,9 @@ export default async function EpcProfilePage({
           {/* ── RIGHT CONTENT (2/3) ── */}
           <section className="lg:col-span-2 space-y-12">
             
-            {/* About Us */}
+            {/* About Section */}
             <div>
-              <h2 className="text-2xl font-black text-primary mb-4 uppercase tracking-tight">ABOUT US</h2>
+              <h2 className="text-2xl font-black text-primary mb-4 uppercase tracking-tight">ABOUT {installer.companyName}</h2>
               <div className="flex gap-4 items-start">
                 <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shrink-0">
                   <ShieldCheck className="w-6 h-6 text-primary-foreground" />
@@ -309,6 +309,26 @@ export default async function EpcProfilePage({
                 </div>
               </div>
             </div>
+
+            {/* Operating Cities */}
+            {offices.length > 0 && (
+              <div>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0">
+                    <MapPin className="w-5 h-5 text-primary-foreground ml-0.5" />
+                  </div>
+                  <h2 className="text-xl font-black text-primary uppercase tracking-widest flex-1">OPERATING CITIES</h2>
+                  <div className="h-px bg-border flex-1 max-w-[100px] hidden md:block"></div>
+                </div>
+                <div className="flex flex-wrap gap-2 pl-0 md:pl-14">
+                  {Array.from(new Set(offices.map(o => o.city))).filter(Boolean).map(city => (
+                    <span key={city} className="bg-secondary/10 text-secondary-foreground px-4 py-2 rounded-full text-sm font-bold border border-border/50 shadow-sm">
+                      {city}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Installer Projects Videos */}
             <div>
