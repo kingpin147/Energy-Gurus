@@ -72,8 +72,8 @@ function SidebarLink({ href, icon, label, active = false }: { href: string, icon
         <Link
             href={href as any}
             className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${active
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-secondary hover:text-primary"
+                ? "bg-ink text-white"
+                : "text-slate-custom hover:bg-paper hover:text-ink"
                 }`}
         >
             {icon}

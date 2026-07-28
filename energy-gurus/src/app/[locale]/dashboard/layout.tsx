@@ -33,27 +33,27 @@ export default async function DashboardLayout({
 
             {/* Desktop Sidebar — only visible at 1024px+ */}
             <aside className="desktop-sidebar">
-                <div className="h-16 flex items-center px-6 border-b">
+                <div className="h-[72px] flex items-center px-6 border-b border-line">
                     <Link href="/" className="flex items-center space-x-2">
-                        <div className="bg-primary p-1 rounded-lg">
-                            <Mic className="h-5 w-5 text-white" />
+                        <div className="bg-ink p-1 rounded-lg text-amber font-space-grotesk font-bold">
+                            EG
                         </div>
-                        <span className="text-lg font-bold text-primary">EnergyGurus</span>
+                        <span className="text-lg font-space-grotesk font-bold text-ink">EnergyGurus</span>
                     </Link>
                 </div>
 
                 <Sidebar role={role} />
 
-                <div className="p-4 border-t space-y-4">
+                <div className="p-4 border-t border-line space-y-4">
                     <Link
                         href="/"
-                        className="flex items-center space-x-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                        className="flex items-center space-x-2 text-sm text-slate-custom hover:text-ink transition-colors font-medium"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         <span>Back to Site</span>
                     </Link>
                     <div className="flex flex-col gap-3">
-                        <span className="text-xs font-medium uppercase text-muted-foreground px-1">Account</span>
+                        <span className="font-ibm-plex-mono text-[0.7rem] uppercase text-slate-custom px-1 tracking-widest">Account</span>
                         <div className="flex items-center gap-3 px-1">
                             <NotificationBell />
                             <UserNav />
@@ -74,7 +74,9 @@ export default async function DashboardLayout({
                     display: flex;
                     flex-direction: column;
                     height: 100vh;
-                    background: hsl(var(--secondary) / 0.1);
+                    background: var(--paper);
+                    color: var(--graphite);
+                    font-family: 'Inter', sans-serif;
                     overflow: hidden;
                 }
                 .mobile-nav-wrapper {
@@ -83,8 +85,8 @@ export default async function DashboardLayout({
                 .desktop-sidebar {
                     display: none;
                     width: 256px;
-                    border-right: 1px solid hsl(var(--border));
-                    background: hsl(var(--card));
+                    border-right: 1px solid var(--line);
+                    background: #fff;
                     flex-direction: column;
                     flex-shrink: 0;
                 }
@@ -92,6 +94,7 @@ export default async function DashboardLayout({
                     flex: 1;
                     overflow-y: auto;
                     overflow-x: hidden;
+                    background: var(--paper);
                 }
                 @media (min-width: 1024px) {
                     .dashboard-layout {

@@ -14,18 +14,18 @@ export function MobileDashboardNav({ role }: { role: UserRole }) {
     return (
         <>
             {/* Mobile Header */}
-            <header className="h-16 border-b bg-card flex items-center justify-between px-4 sticky top-0 z-40">
+            <header className="h-16 border-b bg-white flex items-center justify-between px-4 sticky top-0 z-40">
                 <Link href="/" className="flex items-center space-x-2">
-                    <div className="bg-primary p-1 rounded-lg">
+                    <div className="bg-amber text-ink p-1 rounded-lg">
                         <Mic className="h-5 w-5 text-white" />
                     </div>
-                    <span className="text-lg font-bold text-primary">EnergyGurus</span>
+                    <span className="text-lg font-bold text-amber">EnergyGurus</span>
                 </Link>
                 <div className="flex items-center gap-2">
                     <NotificationBell />
                     <button
                         onClick={() => setIsOpen(true)}
-                        className="p-2 text-muted-foreground bg-transparent border-none cursor-pointer"
+                        className="p-2 text-slate-custom bg-transparent border-none cursor-pointer"
                     >
                         <Menu className="h-6 w-6" />
                     </button>
@@ -42,10 +42,10 @@ export function MobileDashboardNav({ role }: { role: UserRole }) {
                     />
 
                     {/* Drawer Content */}
-                    <div className="relative w-64 max-w-[80%] h-full bg-card flex flex-col shadow-2xl animate-in slide-in-from-left duration-300">
+                    <div className="relative w-64 max-w-[80%] h-full bg-white flex flex-col shadow-2xl animate-in slide-in-from-left duration-300">
                         <div className="h-16 flex items-center justify-between px-6 border-b">
-                            <span className="font-bold text-primary">Menu</span>
-                            <button onClick={() => setIsOpen(false)} className="text-muted-foreground bg-transparent border-none cursor-pointer">
+                            <span className="font-bold text-amber">Menu</span>
+                            <button onClick={() => setIsOpen(false)} className="text-slate-custom bg-transparent border-none cursor-pointer">
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
@@ -57,13 +57,13 @@ export function MobileDashboardNav({ role }: { role: UserRole }) {
                         <div className="p-4 border-t space-y-4">
                             <Link
                                 href="/"
-                                className="flex items-center space-x-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                                className="flex items-center space-x-2 text-sm text-slate-custom hover:text-amber transition-colors"
                             >
                                 <ArrowLeft className="w-4 h-4" />
                                 <span>Back to Site</span>
                             </Link>
                             <div className="flex flex-col gap-3">
-                                <span className="text-xs font-medium uppercase text-muted-foreground px-1">Account</span>
+                                <span className="text-xs font-medium uppercase text-slate-custom px-1">Account</span>
                                 <UserNav />
                             </div>
                         </div>

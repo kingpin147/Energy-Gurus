@@ -21,12 +21,12 @@ export default function TooManyRequestsPage() {
     }, [countdown]);
 
     return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="min-h-screen bg-paper flex items-center justify-center p-4 relative overflow-hidden">
             {/* Background glows */}
             <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-1/4 right-1/3 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-1/4 right-1/3 w-96 h-96 bg-amber/5 text-ink rounded-full blur-3xl pointer-events-none" />
 
-            <div className="max-w-lg w-full bg-card rounded-[2.5rem] shadow-2xl p-10 md:p-14 text-center space-y-8 relative z-10 border border-border/50">
+            <div className="max-w-lg w-full bg-white rounded-[2.5rem] shadow-2xl p-10 md:p-14 text-center space-y-8 relative z-10 border border-line/50">
 
                 {/* Icon */}
                 <div className="w-24 h-24 bg-orange-50 text-orange-500 rounded-[2rem] flex items-center justify-center mx-auto shadow-inner">
@@ -38,21 +38,21 @@ export default function TooManyRequestsPage() {
                     <div className="inline-block bg-orange-100 text-orange-600 text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
                         429 — Slow Down
                     </div>
-                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-graphite">
                         Too Many Requests
                     </h1>
-                    <p className="text-muted-foreground leading-relaxed">
+                    <p className="text-slate-custom leading-relaxed">
                         It looks like you're navigating quite quickly. Please take a brief pause and refresh the page; it will be available for you again in just a moment.                    </p>
                 </div>
 
                 {/* Countdown */}
-                <div className="p-6 bg-secondary/10 rounded-2xl border border-secondary/20 space-y-3">
-                    <div className="flex items-center justify-center gap-2 text-foreground font-bold">
-                        <Timer className="w-5 h-5 text-primary" />
+                <div className="p-6 bg-paper/10 rounded-2xl border border-paper/20 space-y-3">
+                    <div className="flex items-center justify-center gap-2 text-graphite font-bold">
+                        <Timer className="w-5 h-5 text-amber" />
                         <span>Auto-retry in</span>
                     </div>
                     <div className={`text-6xl font-black tabular-nums transition-all ${
-                        countdown <= 10 ? "text-orange-500" : "text-primary"
+                        countdown <= 10 ? "text-orange-500" : "text-amber"
                     }`}>
                         {canRetry ? "✓" : countdown}
                     </div>

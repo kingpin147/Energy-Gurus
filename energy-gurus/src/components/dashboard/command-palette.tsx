@@ -59,60 +59,60 @@ export function CommandPalette({ role }: CommandPaletteProps) {
             <DialogContent className="max-w-2xl p-0 overflow-hidden border-none shadow-2xl bg-white/95 backdrop-blur-xl rounded-2xl">
                 <Command className="flex flex-col h-full bg-transparent">
                     <div className="flex items-center border-b px-4 py-4 gap-3">
-                        <Search className="w-5 h-5 text-muted-foreground opacity-50" />
+                        <Search className="w-5 h-5 text-slate-custom opacity-50" />
                         <CommandInput
                             placeholder="Type a command or search..."
-                            className="flex-1 bg-transparent border-none focus:ring-0 outline-none text-base font-medium placeholder:text-muted-foreground/50"
+                            className="flex-1 bg-transparent border-none focus:ring-0 outline-none text-base font-medium placeholder:text-slate-custom/50"
                         />
-                        <div className="px-2 py-1 rounded-md bg-secondary/10 text-[10px] font-black uppercase tracking-widest opacity-40">
+                        <div className="px-2 py-1 rounded-md bg-paper/10 text-[10px] font-black uppercase tracking-widest opacity-40">
                             ESC
                         </div>
                     </div>
                     <CommandList className="max-h-[400px] overflow-y-auto p-2 scrollbar-none">
-                        <CommandEmpty className="py-12 text-center text-sm text-muted-foreground italic">
+                        <CommandEmpty className="py-12 text-center text-sm text-slate-custom italic">
                             No results found. Try searching for "Inbox" or "Users".
                         </CommandEmpty>
 
-                        <CommandGroup heading="Navigation" className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 mb-2">
-                            <CommandItem onSelect={() => runCommand(() => router.push("/dashboard"))} className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-primary/5 transition-colors group">
-                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                    <LayoutDashboard className="w-4 h-4 text-primary" />
+                        <CommandGroup heading="Navigation" className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-custom/40 mb-2">
+                            <CommandItem onSelect={() => runCommand(() => router.push("/dashboard"))} className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-amber/5 text-ink transition-colors group">
+                                <div className="w-8 h-8 rounded-lg bg-amber/10 text-ink flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <LayoutDashboard className="w-4 h-4 text-amber" />
                                 </div>
-                                <span className="font-bold text-sm text-foreground">Overview</span>
+                                <span className="font-bold text-sm text-graphite">Overview</span>
                                 <span className="ml-auto text-[10px] font-black opacity-0 group-hover:opacity-20 uppercase tracking-widest">Go to</span>
                             </CommandItem>
 
-                            <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/inbox"))} className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-primary/5 transition-colors group">
-                                <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                    <Mail className="w-4 h-4 text-accent" />
+                            <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/inbox"))} className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-amber/5 text-ink transition-colors group">
+                                <div className="w-8 h-8 rounded-lg bg-paper/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <Mail className="w-4 h-4 text-amber" />
                                 </div>
-                                <span className="font-bold text-sm text-foreground">Inbox & Inquiries</span>
+                                <span className="font-bold text-sm text-graphite">Inbox & Inquiries</span>
                             </CommandItem>
                         </CommandGroup>
 
                         {role === 'super-admin' && (
-                            <CommandGroup heading="Administration" className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 mb-2 mt-4">
-                                <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/users"))} className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-primary/5 transition-colors group">
+                            <CommandGroup heading="Administration" className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-custom/40 mb-2 mt-4">
+                                <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/users"))} className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-amber/5 text-ink transition-colors group">
                                     <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                                         <Users className="w-4 h-4 text-blue-500" />
                                     </div>
-                                    <span className="font-bold text-sm text-foreground">User Management</span>
+                                    <span className="font-bold text-sm text-graphite">User Management</span>
                                 </CommandItem>
-                                <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/analytics"))} className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-primary/5 transition-colors group">
+                                <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/analytics"))} className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-amber/5 text-ink transition-colors group">
                                     <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                                         <Shield className="w-4 h-4 text-purple-500" />
                                     </div>
-                                    <span className="font-bold text-sm text-foreground">Security & Analytics</span>
+                                    <span className="font-bold text-sm text-graphite">Security & Analytics</span>
                                 </CommandItem>
                             </CommandGroup>
                         )}
 
-                        <CommandGroup heading="Settings" className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 mb-2 mt-4">
-                            <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/settings"))} className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-primary/5 transition-colors group">
+                        <CommandGroup heading="Settings" className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-custom/40 mb-2 mt-4">
+                            <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/settings"))} className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-amber/5 text-ink transition-colors group">
                                 <div className="w-8 h-8 rounded-lg bg-slate-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                                     <Settings className="w-4 h-4 text-slate-500" />
                                 </div>
-                                <span className="font-bold text-sm text-foreground">Profile Settings</span>
+                                <span className="font-bold text-sm text-graphite">Profile Settings</span>
                             </CommandItem>
                         </CommandGroup>
                     </CommandList>

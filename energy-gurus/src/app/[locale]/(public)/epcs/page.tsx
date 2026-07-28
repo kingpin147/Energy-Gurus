@@ -87,172 +87,148 @@ export default async function EpcListingPage({
   const installers = await getInstallers(sort, q, city, sector);
 
   return (
-    <div className="min-h-screen bg-background selection:bg-primary/20">
-      {/* Background Decorative Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[10%] -right-[10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute -bottom-[10%] -left-[10%] w-[40%] h-[40%] bg-accent/5 rounded-full blur-[100px]" />
+    <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 overflow-x-hidden min-h-screen">
+      
+      <header className="bg-ink text-white pt-[64px] pb-[44px]">
+        <div className="max-w-[1180px] mx-auto px-8">
+          <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-[18px]">
+            <span className="w-5 h-[1px] bg-amber"></span>
+            Installer Directory
+          </p>
+          <h1 className="font-space-grotesk font-semibold text-[clamp(2rem,4vw,2.8rem)] tracking-[-0.01em]">
+            Find a certified installer near you.
+          </h1>
+          <p className="text-paper/70 max-w-[560px] mt-[14px] text-[1.02rem]">
+            Every installer in our network is vetted for certification, licensing, and track record — so you can request a quote with confidence.
+          </p>
+        </div>
+      </header>
+
+      <div className="bg-white border-b border-line sticky top-[72px] z-40">
+        <div className="max-w-[1180px] mx-auto px-8 py-[18px] flex flex-wrap gap-5 items-center">
+          <div className="flex items-center gap-2 border border-line rounded-[3px] px-3.5 py-2.5 bg-paper min-w-[220px]">
+            <span className="font-ibm-plex-mono text-[0.8rem] text-slate-custom">📍</span>
+            <ListSearch
+              placeholder="Search company..."
+              className="border-none bg-transparent font-sans text-[0.88rem] w-full outline-none focus:ring-0 p-0 shadow-none h-auto"
+            />
+          </div>
+          <div className="flex items-center gap-2.5 w-full sm:w-auto">
+            <label className="font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom">Sort</label>
+            <div className="border border-line rounded-[3px] bg-paper text-graphite flex items-center px-2 py-1">
+              <ListSort
+                defaultValue="top-rated"
+                options={[
+                  { label: "Top Rated", value: "top-rated" },
+                  { label: "Lowest Rated", value: "lowest-rated" },
+                  { label: "Newest First", value: "latest" },
+                  { label: "Oldest First", value: "oldest" },
+                ]}
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5 w-full sm:w-auto ml-0 sm:ml-4 border-l-0 sm:border-l border-line sm:pl-4">
+             <ListFilters cities={PAKISTAN_CITIES} sectors={EPC_SECTORS} />
+          </div>
+          
+          <span className="ml-auto font-ibm-plex-mono text-[0.82rem] text-slate-custom mt-4 sm:mt-0">
+            {installers.length} installers found
+          </span>
+        </div>
       </div>
 
-      <div className="container mx-auto py-20 px-6 relative z-10">
-        {/* Header Section */}
-        <div className="flex flex-col items-center text-center gap-8 mb-24 max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-[0.2em]">
-            <Zap className="w-3.5 h-3.5 fill-current" />
-            Verified Expert Network
+      <section className="py-[48px] pb-[96px]">
+        <div className="max-w-[1180px] mx-auto px-8">
+
+          {/* Ad Banner — top of listing */}
+          <div className="mb-8 w-full flex justify-center">
+            <AdBanner variant="horizontal" slot={1} />
           </div>
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.85] text-foreground">
-            Certified <span className="text-gradient">EPC Installers</span>
-          </h1>
-          <p className="text-lg md:text-2xl text-muted-foreground font-medium leading-relaxed opacity-80">
-            Connect with top-tier solar energy experts. Our directory features verified EPC companies with proven track records in high-efficiency installations.
-          </p>
 
-          <div className="w-full max-w-4xl mt-8 flex flex-col gap-6">
-            <div className="flex flex-col md:flex-row gap-4 w-full">
-              <ListSearch
-                placeholder="Search by company name..."
-                className="pl-12 h-16 bg-white/50 backdrop-blur-xl border-border/50 rounded-2xl focus:ring-primary/20 focus:border-primary transition-all text-base font-medium shadow-sm"
-              />
-              <div className="flex gap-4">
-                <ListSort
-                  defaultValue="top-rated"
-                  options={[
-                    { label: "Newest First", value: "latest" },
-                    { label: "Top Rated", value: "top-rated" },
-                    { label: "Lowest Rated", value: "lowest-rated" },
-                    { label: "Oldest First", value: "oldest" },
-                  ]}
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-center border-t border-border/30 pt-6">
-              <ListFilters cities={PAKISTAN_CITIES} sectors={EPC_SECTORS} />
-            </div>
-          </div>
-        </div>
-
-        {/* Ad Banner — top of listing */}
-        <div className="mb-8">
-          <AdBanner variant="horizontal" slot={1} />
-        </div>
-
-        {/* Horizontal list */}
-        <div className="space-y-4">
-          {installers.map((installer) => (
-            <TrackedLink
-              key={installer.id}
-              href={`/epcs/${installer.id}` as any}
-              className="group block"
-              eventName="epc_profile_view"
-              eventProperties={{ epcId: installer.id, companyName: installer.companyName }}
-            >
-              <div className="bg-white border border-border/60 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-md transition-all duration-300 flex flex-col sm:flex-row">
-
-                {/* Left — logo panel */}
-                <div className="relative w-full sm:w-52 shrink-0 bg-gradient-to-br from-secondary/40 to-secondary/20 flex items-center justify-center p-6 min-h-[140px]">
-                  {installer.isVerified && (
-                    <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 text-primary text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border border-primary/20 shadow-sm">
-                      <ShieldCheck className="w-3 h-3" /> Verified
-                    </div>
-                  )}
-                  {installer.logoUrl ? (
-                    <Image
-                      src={installer.logoUrl}
-                      width={80}
-                      height={80}
-                      className="object-contain w-20 h-20 rounded-xl"
-                      alt={installer.companyName}
-                    />
-                  ) : (
-                    <div className="w-20 h-20 rounded-xl bg-white border border-border/50 flex items-center justify-center shadow-sm">
-                      <Briefcase className="w-8 h-8 text-primary/20" />
-                    </div>
-                  )}
-                  {/* CEO label below logo */}
-                  {installer.ceoName && (
-                    <div className="absolute bottom-3 left-0 right-0 px-3 text-center">
-                      <p className="text-[9px] text-muted-foreground font-medium truncate">{installer.ceoName}</p>
-                    </div>
-                  )}
+          <div className="flex flex-col gap-4">
+            {installers.map((installer) => (
+              <TrackedLink
+                key={installer.id}
+                href={`/epcs/${installer.id}` as any}
+                className="bg-white border border-line rounded-[4px] p-6 sm:p-7 grid grid-cols-1 sm:grid-cols-[56px_1fr_auto] gap-[22px] items-center hover:border-teal transition-colors"
+                eventName="epc_profile_view"
+                eventProperties={{ epcId: installer.id, companyName: installer.companyName }}
+              >
+                
+                <div className="w-[56px] h-[56px] rounded-[6px] bg-ink text-amber flex items-center justify-center font-space-grotesk font-bold text-[1.15rem] overflow-hidden self-start sm:self-center">
+                    {installer.logoUrl ? (
+                      <Image
+                        src={installer.logoUrl}
+                        width={56}
+                        height={56}
+                        className="object-cover w-full h-full"
+                        alt={installer.companyName}
+                      />
+                    ) : (
+                      installer.companyName.substring(0, 2).toUpperCase()
+                    )}
                 </div>
 
-                {/* Middle — details */}
-                <div className="flex-1 p-5 flex flex-col justify-between min-w-0">
-                  <div>
-                    {/* Name + rating */}
-                    <div className="flex items-center gap-3 flex-wrap mb-1">
-                      <h2 className="text-lg font-black tracking-tight text-foreground group-hover:text-primary transition-colors">
+                <div>
+                  <div className="flex items-center gap-3">
+                      <h3 className="font-space-grotesk font-semibold text-[1.12rem] text-ink mb-1">
                         {installer.companyName}
-                      </h2>
-                      {installer.avgRating ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-yellow-50 border border-yellow-200 rounded-full text-xs font-black text-yellow-700">
-                          <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
-                          {installer.avgRating.toFixed(1)}
-                        </span>
-                      ) : null}
-                    </div>
-
-                    <hr className="border-border/40 my-2" />
-
-                    {/* About */}
-                    <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mb-3">
-                      {installer.about || "Verified solar EPC company providing turnkey installation services."}
-                    </p>
-
-                    {/* Stats row */}
-                    <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1.5">
-                        <MessageSquare className="w-3.5 h-3.5 text-primary" />
-                        <strong className="text-foreground">{installer.reviewCount || 0}</strong> reviews
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-primary" />
-                        Nationwide
-                      </span>
-                      {installer.sectors && (installer.sectors as string[]).length > 0 && (
-                        <span className="flex items-center gap-1.5">
-                          <Zap className="w-3.5 h-3.5 text-primary" />
-                          {(installer.sectors as string[]).slice(0, 2).join(", ")}
-                          {(installer.sectors as string[]).length > 2 && ` +${(installer.sectors as string[]).length - 2}`}
-                        </span>
+                      </h3>
+                      {installer.isVerified && (
+                          <ShieldCheck className="w-4 h-4 text-teal" />
                       )}
-                    </div>
+                  </div>
+                  <div className="text-[0.88rem] text-slate-custom mb-[10px]">
+                    Nationwide · {installer.projectsCount || 0} projects
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {installer.sectors && (installer.sectors as string[]).map((sector, i) => (
+                        <span key={i} className="font-ibm-plex-mono text-[0.68rem] tracking-[0.05em] uppercase text-teal bg-[rgba(47,110,98,0.1)] px-[9px] py-1 rounded-[20px]">
+                            {sector}
+                        </span>
+                    ))}
+                    {(installer.certifications as string[])?.slice(0,2).map((cert, i) => (
+                        <span key={`cert-${i}`} className="font-ibm-plex-mono text-[0.68rem] tracking-[0.05em] uppercase text-teal bg-[rgba(47,110,98,0.1)] px-[9px] py-1 rounded-[20px]">
+                            {cert}
+                        </span>
+                    ))}
                   </div>
                 </div>
 
-                {/* Right — CTA */}
-                <div className="flex items-center justify-center sm:justify-end px-5 py-4 sm:py-0 shrink-0">
-                  <span className="inline-flex items-center gap-2 px-5 py-2.5 border border-border rounded-full text-sm font-bold text-foreground group-hover:border-primary group-hover:text-primary transition-all">
-                    View Profile <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <div className="text-left sm:text-right flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2.5 mt-[6px] sm:mt-0">
+                  <div className="font-ibm-plex-mono text-[0.88rem] text-graphite flex items-center gap-1.5">
+                    <span className="text-amber flex items-center">
+                        <Star className="w-4 h-4 fill-current mr-1" /> 
+                    </span>
+                    {installer.avgRating ? installer.avgRating.toFixed(1) : "N/A"} ({installer.reviewCount || 0})
+                  </div>
+                  <span className="text-[0.85rem] font-semibold text-ink border border-line rounded-[3px] px-4 py-[9px] hover:border-ink transition-colors">
+                    View Profile
                   </span>
                 </div>
 
-              </div>
-            </TrackedLink>
-          ))}
-        </div>
-
-        {/* Mid-listing ad banner */}
-        {installers.length >= 3 && (
-          <div className="mt-8">
-            <AdBanner variant="inline" slot={2} />
+              </TrackedLink>
+            ))}
           </div>
-        )}
 
-        {installers.length === 0 && (
-          <div className="mt-20 py-32 text-center bg-white/40 backdrop-blur-xl rounded-[3.5rem] border-4 border-dashed border-border/50">
-            <div className="w-24 h-24 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-8 animate-float">
-              <Briefcase className="w-10 h-10 text-primary/20" />
+          {/* Mid-listing ad banner */}
+          {installers.length >= 3 && (
+            <div className="mt-8 w-full flex justify-center">
+              <AdBanner variant="inline" slot={2} />
             </div>
-            <h3 className="text-3xl font-black text-foreground mb-4 tracking-tight">No Certified Installers Yet</h3>
-            <p className="text-muted-foreground font-medium max-w-md mx-auto text-lg leading-relaxed">
-              We are currently vetting and onboarding top-tier solar EPC companies. Please check back shortly for the updated directory.
-            </p>
-          </div>
-        )}
-      </div>
+          )}
+
+          {installers.length === 0 && (
+            <div className="mt-12 py-20 text-center bg-white border border-line rounded-[4px]">
+              <Briefcase className="w-12 h-12 text-slate-custom/20 mx-auto mb-4" />
+              <h3 className="text-xl font-space-grotesk font-semibold text-ink mb-2">No Certified Installers Yet</h3>
+              <p className="text-slate-custom font-medium max-w-md mx-auto text-[0.95rem] leading-relaxed">
+                We are currently vetting and onboarding top-tier solar EPC companies. Please check back shortly.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

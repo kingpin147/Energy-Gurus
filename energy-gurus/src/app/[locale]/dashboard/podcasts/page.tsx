@@ -35,7 +35,7 @@ export default async function PodcastsPage({
       <div>
         <h1 className="text-2xl font-bold mb-6">Podcast Management</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-card border rounded-lg p-6">
+          <div className="bg-white border rounded-lg p-6">
             <h2 className="text-lg font-semibold mb-4">Add New Podcast</h2>
             <form action={async (formData) => { "use server"; await addPodcast(formData); }} className="space-y-4">
               <input name="title" placeholder="Episode Title" className="w-full border rounded p-2" required />
@@ -45,7 +45,7 @@ export default async function PodcastsPage({
                 <input name="guestName" placeholder="Guest Name" className="w-full border rounded p-2" />
                 <input name="guestDesignation" placeholder="Designation" className="w-full border rounded p-2" />
               </div>
-              <button className="bg-primary text-primary-foreground w-full py-2 rounded font-medium hover:opacity-90">
+              <button className="bg-amber text-ink text-ink w-full py-2 rounded font-medium hover:opacity-90">
                 Save Podcast
               </button>
             </form>
@@ -66,9 +66,9 @@ export default async function PodcastsPage({
               <div key={p.id} className="border p-3 rounded-lg flex justify-between items-center bg-white shadow-sm">
                 <div>
                   <p className="font-medium text-sm">{p.title}</p>
-                  <p className="text-xs text-muted-foreground">{p.guestName}</p>
+                  <p className="text-xs text-slate-custom">{p.guestName}</p>
                 </div>
-                <a href={p.youtubeUrl} target="_blank" className="text-primary text-xs font-bold hover:underline">View</a>
+                <a href={p.youtubeUrl} target="_blank" className="text-amber text-xs font-bold hover:underline">View</a>
               </div>
             ))}
           </div>
@@ -80,13 +80,13 @@ export default async function PodcastsPage({
       <div>
         <h1 className="text-2xl font-bold mb-6">Live QA Management</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-card border rounded-lg p-6">
+          <div className="bg-white border rounded-lg p-6">
             <h2 className="text-lg font-semibold mb-4">Add New QA Session</h2>
             <form action={async (formData) => { "use server"; await addLiveQA(formData); }} className="space-y-4">
               <input name="topic" placeholder="Session Topic" className="w-full border rounded p-2" required />
               <input name="youtubeUrl" placeholder="YouTube URL" className="w-full border rounded p-2" required />
               <input name="expertName" placeholder="Expert Name" className="w-full border rounded p-2" />
-              <button className="bg-primary text-primary-foreground w-full py-2 rounded font-medium hover:opacity-90 transition-opacity">
+              <button className="bg-amber text-ink text-ink w-full py-2 rounded font-medium hover:opacity-90 transition-opacity">
                 Save QA Session
               </button>
             </form>
@@ -107,9 +107,9 @@ export default async function PodcastsPage({
               <div key={q.id} className="border p-3 rounded-lg flex justify-between items-center bg-white shadow-sm">
                 <div>
                   <p className="font-medium text-sm">{q.topic}</p>
-                  <p className="text-xs text-muted-foreground">{q.expertName}</p>
+                  <p className="text-xs text-slate-custom">{q.expertName}</p>
                 </div>
-                <a href={q.youtubeUrl} target="_blank" className="text-primary text-xs font-bold hover:underline">View</a>
+                <a href={q.youtubeUrl} target="_blank" className="text-amber text-xs font-bold hover:underline">View</a>
               </div>
             ))}
           </div>

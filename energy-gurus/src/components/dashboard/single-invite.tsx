@@ -33,7 +33,7 @@ export function SingleInvite() {
         <Card className="border-none shadow-sm rounded-3xl h-fit">
             <CardHeader>
                 <CardTitle className="text-xl flex items-center gap-2">
-                    <MailPlus className="w-5 h-5 text-primary" />
+                    <MailPlus className="w-5 h-5 text-amber" />
                     Invite User
                 </CardTitle>
             </CardHeader>
@@ -45,7 +45,7 @@ export function SingleInvite() {
                             name="email"
                             type="email"
                             placeholder="user@example.com"
-                            className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none"
+                            className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
                             required
                             disabled={isPending}
                         />
@@ -55,19 +55,19 @@ export function SingleInvite() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                             <label className="cursor-pointer">
                                 <input type="radio" name="role" value="epc" className="peer sr-only" defaultChecked disabled={isPending} />
-                                <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary hover:bg-secondary transition-colors">
+                                <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-amber text-ink peer-checked:text-white peer-checked:border-amber hover:bg-paper transition-colors">
                                     EPC Installer
                                 </div>
                             </label>
                             <label className="cursor-pointer">
                                 <input type="radio" name="role" value="brand" className="peer sr-only" disabled={isPending} />
-                                <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary hover:bg-secondary transition-colors">
+                                <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-amber text-ink peer-checked:text-white peer-checked:border-amber hover:bg-paper transition-colors">
                                     Solar Brand
                                 </div>
                             </label>
                             <label className="cursor-pointer">
                                 <input type="radio" name="role" value="admin" className="peer sr-only" disabled={isPending} />
-                                <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary hover:bg-secondary transition-colors">
+                                <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-amber text-ink peer-checked:text-white peer-checked:border-amber hover:bg-paper transition-colors">
                                     Admin
                                 </div>
                             </label>

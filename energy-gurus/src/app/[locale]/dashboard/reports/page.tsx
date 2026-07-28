@@ -8,7 +8,7 @@ export default function ReportsPage() {
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">System Reports</h1>
-                    <p className="text-muted-foreground">Download and analyze system performance and maintenance records.</p>
+                    <p className="text-slate-custom">Download and analyze system performance and maintenance records.</p>
                 </div>
             </div>
 
@@ -16,7 +16,7 @@ export default function ReportsPage() {
             <div className="space-y-4">
                 <div>
                     <h2 className="text-xl font-bold tracking-tight">Operational Data Exports</h2>
-                    <p className="text-sm text-muted-foreground font-medium">Download live Excel-compatible spreadsheets containing active platform records.</p>
+                    <p className="text-sm text-slate-custom font-medium">Download live Excel-compatible spreadsheets containing active platform records.</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <Card className="hover:shadow-md transition-shadow border-none shadow-sm rounded-3xl overflow-hidden bg-white/50 backdrop-blur-xl">
@@ -29,7 +29,7 @@ export default function ReportsPage() {
                             </div>
                             <div>
                                 <h3 className="font-bold text-lg mb-1">User Base Roster</h3>
-                                <p className="text-xs text-muted-foreground">Full roster of all registered admin, EPC, and brand accounts with login states.</p>
+                                <p className="text-xs text-slate-custom">Full roster of all registered admin, EPC, and brand accounts with login states.</p>
                             </div>
                             <Button asChild variant="outline" className="w-full gap-2 rounded-xl font-bold h-11 border-blue-200 text-blue-600 hover:bg-blue-50">
                                 <a href="/api/reports?type=users" download>
@@ -49,7 +49,7 @@ export default function ReportsPage() {
                             </div>
                             <div>
                                 <h3 className="font-bold text-lg mb-1">InMail Leads & Inquiries</h3>
-                                <p className="text-xs text-muted-foreground">Historical records of guest leads, corporate questions, and dialog histories.</p>
+                                <p className="text-xs text-slate-custom">Historical records of guest leads, corporate questions, and dialog histories.</p>
                             </div>
                             <Button asChild variant="outline" className="w-full gap-2 rounded-xl font-bold h-11 border-green-200 text-green-600 hover:bg-green-50">
                                 <a href="/api/reports?type=inquiries" download>
@@ -69,7 +69,7 @@ export default function ReportsPage() {
                             </div>
                             <div>
                                 <h3 className="font-bold text-lg mb-1">Customer Reviews Feed</h3>
-                                <p className="text-xs text-muted-foreground">Complete feed of rating scores, author emails, comments, and replies.</p>
+                                <p className="text-xs text-slate-custom">Complete feed of rating scores, author emails, comments, and replies.</p>
                             </div>
                             <Button asChild variant="outline" className="w-full gap-2 rounded-xl font-bold h-11 border-orange-200 text-orange-600 hover:bg-orange-50">
                                 <a href="/api/reports?type=reviews" download>
@@ -89,7 +89,7 @@ export default function ReportsPage() {
                             </div>
                             <div>
                                 <h3 className="font-bold text-lg mb-1">Telemetry & Monitoring</h3>
-                                <p className="text-xs text-muted-foreground">Historical power flow, grid export, and self-consumption metrics from all assets.</p>
+                                <p className="text-xs text-slate-custom">Historical power flow, grid export, and self-consumption metrics from all assets.</p>
                             </div>
                             <Button asChild variant="outline" className="w-full gap-2 rounded-xl font-bold h-11 border-purple-200 text-purple-600 hover:bg-purple-50">
                                 <a href="/api/reports?type=monitoring" download>
@@ -131,8 +131,8 @@ export default function ReportsPage() {
                 </CardHeader>
                 <CardContent>
                     <div className="relative overflow-x-auto">
-                        <table className="w-full text-sm text-left text-muted-foreground">
-                            <thead className="text-xs uppercase bg-secondary/20">
+                        <table className="w-full text-sm text-left text-slate-custom">
+                            <thead className="text-xs uppercase bg-paper/20">
                                 <tr>
                                     <th className="px-6 py-3">Name</th>
                                     <th className="px-6 py-3">Email</th>
@@ -159,13 +159,13 @@ function ReportCard({ title, date, type, status }: { title: string, date: string
         <Card className="hover:shadow-md transition-shadow">
             <CardContent className="pt-6">
                 <div className="flex justify-between items-start mb-4">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                        <FileText className="w-6 h-6 text-primary" />
+                    <div className="p-2 bg-amber/10 text-ink rounded-lg">
+                        <FileText className="w-6 h-6 text-amber" />
                     </div>
-                    <span className="text-xs font-medium px-2 py-1 bg-secondary rounded-full">{status}</span>
+                    <span className="text-xs font-medium px-2 py-1 bg-paper rounded-full">{status}</span>
                 </div>
                 <h3 className="font-bold text-lg mb-1">{title}</h3>
-                <p className="text-xs text-muted-foreground mb-4">{type} • {date}</p>
+                <p className="text-xs text-slate-custom mb-4">{type} • {date}</p>
                 <Button variant="outline" size="sm" className="w-full gap-2">
                     <Download className="w-3 h-3" /> Download PDF
                 </Button>
@@ -176,8 +176,8 @@ function ReportCard({ title, date, type, status }: { title: string, date: string
 
 function LeadRow({ name, email, service, date, status }: { name: string, email: string, service: string, date: string, status: string }) {
     return (
-        <tr className="border-b hover:bg-secondary/10 transition-colors">
-            <td className="px-6 py-4 font-medium text-foreground">{name}</td>
+        <tr className="border-b hover:bg-paper/10 transition-colors">
+            <td className="px-6 py-4 font-medium text-graphite">{name}</td>
             <td className="px-6 py-4">{email}</td>
             <td className="px-6 py-4">{service}</td>
             <td className="px-6 py-4">{date}</td>

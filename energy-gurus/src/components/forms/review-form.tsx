@@ -26,14 +26,14 @@ export function ReviewForm({ targetId, targetType }: { targetId: string, targetT
                     <Star className="w-8 h-8 fill-current" />
                 </div>
                 <h3 className="text-xl font-bold">Review Submitted!</h3>
-                <p className="text-muted-foreground text-sm">Thank you for your feedback. It helps the community make better energy decisions.</p>
+                <p className="text-slate-custom text-sm">Thank you for your feedback. It helps the community make better energy decisions.</p>
                 <Button variant="outline" className="rounded-xl" onClick={() => setStatus('idle')}>Write another</Button>
             </div>
         );
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 bg-secondary/5 p-8 rounded-[2.5rem] border border-secondary/10 shadow-sm">
+        <form onSubmit={handleSubmit} className="space-y-6 bg-paper/5 p-8 rounded-[2.5rem] border border-paper/10 shadow-sm">
             <input type="hidden" name="targetId" value={targetId} />
             <input type="hidden" name="targetType" value={targetType} />
 
@@ -67,7 +67,7 @@ export function ReviewForm({ targetId, targetType }: { targetId: string, targetT
                                 className={`w-8 h-8 ${
                                     (hover || rating) >= star
                                     ? "text-yellow-500 fill-current shadow-yellow-500/20"
-                                    : "text-secondary-foreground/20"
+                                    : "text-slate-custom/20"
                                 }`}
                             />
                         </button>

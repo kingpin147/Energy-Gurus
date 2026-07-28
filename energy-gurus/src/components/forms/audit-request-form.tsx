@@ -50,14 +50,14 @@ export function AuditRequestForm() {
     if (status === "success") {
         return (
             <CardContent className="p-8 flex flex-col items-center text-center space-y-4 animate-in fade-in zoom-in duration-300">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-2">
-                    <CheckCircle2 className="w-10 h-10 text-primary" />
+                <div className="w-16 h-16 bg-amber/10 text-ink rounded-full flex items-center justify-center mb-2">
+                    <CheckCircle2 className="w-10 h-10 text-amber" />
                 </div>
                 <h3 className="text-2xl font-bold">Request Received!</h3>
-                <p className="text-muted-foreground">
-                    Thank you, <span className="text-foreground font-semibold">{formData.name}</span>.
+                <p className="text-slate-custom">
+                    Thank you, <span className="text-graphite font-semibold">{formData.name}</span>.
                     Our certified auditors will review your details for <span className="italic">{formData.address}</span>
-                    and contact you at <span className="text-foreground font-semibold">{formData.phone}</span> within 24 hours.
+                    and contact you at <span className="text-graphite font-semibold">{formData.phone}</span> within 24 hours.
                 </p>
                 <Button variant="outline" onClick={() => setStatus("idle")} className="mt-4">
                     Send Another Request
@@ -115,7 +115,7 @@ export function AuditRequestForm() {
                 <div className="space-y-2">
                     <label className="text-sm font-medium">Energy Goal</label>
                     <select
-                        className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        className="w-full h-10 rounded-md border border-input bg-paper px-3 py-2 text-sm"
                         value={formData.goal}
                         onChange={e => setFormData({ ...formData, goal: e.target.value })}
                         disabled={status === "loading"}

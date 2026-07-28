@@ -46,14 +46,14 @@ export function DeleteUserButton({ userId, userName, userEmail }: DeleteUserButt
             onClick={() => !loading && setOpen(false)}
           />
           {/* Dialog */}
-          <div className="relative bg-white rounded-2xl border border-border/60 shadow-2xl p-6 w-full max-w-sm mx-4 space-y-4">
+          <div className="relative bg-white rounded-2xl border border-line/60 shadow-2xl p-6 w-full max-w-sm mx-4 space-y-4">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-5 h-5 text-red-600" />
               </div>
               <div>
-                <h3 className="font-black text-base text-foreground">Delete User</h3>
-                <p className="text-sm text-muted-foreground mt-1">
+                <h3 className="font-black text-base text-graphite">Delete User</h3>
+                <p className="text-sm text-slate-custom mt-1">
                   This will permanently delete <strong>{userName || userEmail}</strong> and all their data — profile, projects, offices, reviews, and files. This cannot be undone.
                 </p>
               </div>

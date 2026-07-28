@@ -56,26 +56,26 @@ export default async function ContentManagementPage({
     return (
         <div className="p-4 md:p-8 space-y-8">
             <div className="flex flex-col md:flex-row md:items-center gap-4">
-                <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shrink-0">
+                <div className="w-12 h-12 bg-amber text-ink rounded-2xl flex items-center justify-center shrink-0">
                     <Video className="w-6 h-6 text-white" />
                 </div>
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Content Management</h1>
-                    <p className="text-muted-foreground text-sm md:text-base">Manage your YouTube video embeds for Podcasts and Live QA sessions.</p>
+                    <p className="text-slate-custom text-sm md:text-base">Manage your YouTube video embeds for Podcasts and Live QA sessions.</p>
                 </div>
             </div>
 
             <Tabs defaultValue="podcasts" className="w-full">
-                <TabsList className="flex flex-wrap w-fit bg-secondary/20 p-1.5 rounded-2xl mb-12 border border-secondary/30">
+                <TabsList className="flex flex-wrap w-fit bg-paper/20 p-1.5 rounded-2xl mb-12 border border-paper/30">
                     <TabsTrigger
                         value="podcasts"
-                        className="px-6 md:px-10 py-3 rounded-xl font-bold gap-3 transition-all text-muted-foreground hover:bg-primary/5 hover:text-primary data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20"
+                        className="px-6 md:px-10 py-3 rounded-xl font-bold gap-3 transition-all text-slate-custom hover:bg-amber/5 text-ink hover:text-amber data-[state=active]:bg-amber text-ink data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20"
                     >
                         <Mic className="w-4 h-4" /> Podcasts
                     </TabsTrigger>
                     <TabsTrigger
                         value="liveqa"
-                        className="px-6 md:px-10 py-3 rounded-xl font-bold gap-3 transition-all text-muted-foreground hover:bg-primary/5 hover:text-primary data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20"
+                        className="px-6 md:px-10 py-3 rounded-xl font-bold gap-3 transition-all text-slate-custom hover:bg-amber/5 text-ink hover:text-amber data-[state=active]:bg-amber text-ink data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20"
                     >
                         <Video className="w-4 h-4" /> Live QA
                     </TabsTrigger>
@@ -127,9 +127,9 @@ export default async function ContentManagementPage({
                                             </div>
                                             <div className="p-6">
                                                 <h4 className="font-bold text-lg mb-1 line-clamp-1">{podcast.title}</h4>
-                                                <p className="text-xs text-muted-foreground font-medium mb-4">{podcast.guestName}</p>
+                                                <p className="text-xs text-slate-custom font-medium mb-4">{podcast.guestName}</p>
                                                 <div className="flex items-center justify-between">
-                                                    <p className="text-[10px] text-muted-foreground font-mono truncate max-w-[120px] opacity-60">{podcast.youtubeUrl}</p>
+                                                    <p className="text-[10px] text-slate-custom font-mono truncate max-w-[120px] opacity-60">{podcast.youtubeUrl}</p>
                                                     <Button variant="ghost" size="sm" className="h-8 rounded-lg text-[10px] font-bold" asChild>
                                                         <a href={podcast.youtubeUrl} target="_blank" rel="noopener noreferrer">View</a>
                                                     </Button>
@@ -177,7 +177,7 @@ export default async function ContentManagementPage({
                                                 {session.thumbnailUrl ? (
                                                     <img src={session.thumbnailUrl} className="w-full h-full object-cover" alt="" />
                                                 ) : (
-                                                    <Calendar className="w-12 h-12 text-primary" />
+                                                    <Calendar className="w-12 h-12 text-amber" />
                                                 )}
                                                 <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <DeleteContentButton
@@ -192,9 +192,9 @@ export default async function ContentManagementPage({
                                             </div>
                                             <div className="p-6">
                                                 <h4 className="font-bold text-lg mb-1 line-clamp-1">{session.topic}</h4>
-                                                <p className="text-xs text-muted-foreground font-medium mb-4">{session.expertName}</p>
+                                                <p className="text-xs text-slate-custom font-medium mb-4">{session.expertName}</p>
                                                 <div className="flex items-center justify-between">
-                                                    <p className="text-[10px] text-muted-foreground font-medium opacity-60">
+                                                    <p className="text-[10px] text-slate-custom font-medium opacity-60">
                                                         {session.sessionDate ? new Date(session.sessionDate).toLocaleDateString() : "TBD"}
                                                     </p>
                                                     <Button variant="ghost" size="sm" className="h-8 rounded-lg text-[10px] font-bold gap-1.5" asChild>

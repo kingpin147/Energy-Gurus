@@ -46,11 +46,11 @@ export function AddProductDialog() {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Model Name</label>
-                                <input name="name" placeholder="e.g. Hi-MO 6" className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" required />
+                                <input name="name" placeholder="e.g. Hi-MO 6" className="w-full border rounded-xl p-3 bg-paper/5 outline-none" required />
                             </div>
                             <div>
                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Category</label>
-                                <select name="category" className="w-full border rounded-xl p-3 bg-secondary/5 outline-none">
+                                <select name="category" className="w-full border rounded-xl p-3 bg-paper/5 outline-none">
                                     <option>Solar Panels</option>
                                     <option>Inverters</option>
                                     <option>Batteries</option>
@@ -60,11 +60,11 @@ export function AddProductDialog() {
                         </div>
                         <div>
                             <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Description</label>
-                            <textarea name="description" placeholder="Technical highlights..." className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" rows={3} />
+                            <textarea name="description" placeholder="Technical highlights..." className="w-full border rounded-xl p-3 bg-paper/5 outline-none" rows={3} />
                         </div>
                         <div>
                             <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Serial/Model Prefix</label>
-                            <input name="serialNumber" placeholder="LR5-72HPH" className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
+                            <input name="serialNumber" placeholder="LR5-72HPH" className="w-full border rounded-xl p-3 bg-paper/5 outline-none" />
                         </div>
                         <DatasheetUpload />
                         <Button type="submit" disabled={loading} className="w-full h-12 rounded-xl font-bold mt-2">

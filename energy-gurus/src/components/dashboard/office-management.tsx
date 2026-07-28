@@ -82,7 +82,7 @@ export function OfficeManagement({ epcId, initialOffices }: OfficeManagementProp
         <div className="space-y-8">
             <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold flex items-center gap-2">
-                    <Building2 className="w-6 h-6 text-primary" /> Company Offices
+                    <Building2 className="w-6 h-6 text-amber" /> Company Offices
                 </h3>
                 <Button
                     onClick={() => isFormOpen ? setIsFormOpen(false) : openAddForm()}
@@ -95,8 +95,8 @@ export function OfficeManagement({ epcId, initialOffices }: OfficeManagementProp
             </div>
 
             {isFormOpen && (
-                <Card className="border-none shadow-xl rounded-[2.5rem] bg-secondary/5 overflow-hidden">
-                    <CardHeader className="bg-primary/5 border-b border-primary/10 p-8">
+                <Card className="border-none shadow-xl rounded-[2.5rem] bg-paper/5 overflow-hidden">
+                    <CardHeader className="bg-amber/5 text-ink border-b border-amber/10 p-8">
                         <CardTitle className="text-2xl font-bold">{editingOffice ? "Edit Office Location" : "New Office Location"}</CardTitle>
                     </CardHeader>
                     <CardContent className="p-8">
@@ -104,19 +104,19 @@ export function OfficeManagement({ epcId, initialOffices }: OfficeManagementProp
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">City / Region</label>
-                                    <input name="city" defaultValue={editingOffice?.city || ""} placeholder="e.g. Islamabad" className="w-full border rounded-2xl p-4 bg-background outline-none focus:ring-2 focus:ring-primary transition-all" required />
+                                    <input name="city" defaultValue={editingOffice?.city || ""} placeholder="e.g. Islamabad" className="w-full border rounded-2xl p-4 bg-paper outline-none focus:ring-2 focus:ring-primary transition-all" required />
                                 </div>
                                 <div>
                                     <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">Office / Unit Number</label>
-                                    <input name="officeNumber" defaultValue={editingOffice?.officeNumber || ""} placeholder="e.g. Office 402, 4th Floor" className="w-full border rounded-2xl p-4 bg-background outline-none focus:ring-2 focus:ring-primary transition-all" />
+                                    <input name="officeNumber" defaultValue={editingOffice?.officeNumber || ""} placeholder="e.g. Office 402, 4th Floor" className="w-full border rounded-2xl p-4 bg-paper outline-none focus:ring-2 focus:ring-primary transition-all" />
                                 </div>
                                 <div>
                                     <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">Block / Phase</label>
-                                    <input name="block" defaultValue={editingOffice?.block || ""} placeholder="e.g. Block D, Gulberg" className="w-full border rounded-2xl p-4 bg-background outline-none focus:ring-2 focus:ring-primary transition-all" />
+                                    <input name="block" defaultValue={editingOffice?.block || ""} placeholder="e.g. Block D, Gulberg" className="w-full border rounded-2xl p-4 bg-paper outline-none focus:ring-2 focus:ring-primary transition-all" />
                                 </div>
                                 <div>
                                     <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">Street / Area</label>
-                                    <input name="area" defaultValue={editingOffice?.area || ""} placeholder="e.g. Main Boulevard" className="w-full border rounded-2xl p-4 bg-background outline-none focus:ring-2 focus:ring-primary transition-all" />
+                                    <input name="area" defaultValue={editingOffice?.area || ""} placeholder="e.g. Main Boulevard" className="w-full border rounded-2xl p-4 bg-paper outline-none focus:ring-2 focus:ring-primary transition-all" />
                                 </div>
                             </div>
                             <Button type="submit" disabled={isLoading} className="w-full h-14 rounded-2xl font-bold text-lg shadow-lg shadow-primary/20">
@@ -132,7 +132,7 @@ export function OfficeManagement({ epcId, initialOffices }: OfficeManagementProp
                     <Card key={office.id} className="border-none shadow-sm rounded-[2rem] overflow-hidden group hover:shadow-xl transition-all duration-500 bg-white">
                         <CardContent className="p-8">
                             <div className="flex justify-between items-start mb-6">
-                                <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors duration-500">
+                                <div className="w-12 h-12 rounded-2xl bg-amber/5 text-ink flex items-center justify-center group-hover:bg-amber text-ink group-hover:text-white transition-colors duration-500">
                                     <MapPin className="w-6 h-6" />
                                 </div>
                                 <div className="flex gap-2">
@@ -140,7 +140,7 @@ export function OfficeManagement({ epcId, initialOffices }: OfficeManagementProp
                                         onClick={() => openEditForm(office)}
                                         variant="ghost"
                                         size="icon"
-                                        className="text-primary hover:bg-primary/10 rounded-xl"
+                                        className="text-amber hover:bg-amber/10 text-ink rounded-xl"
                                     >
                                         <Edit2 className="w-4 h-4" />
                                     </Button>
@@ -155,14 +155,14 @@ export function OfficeManagement({ epcId, initialOffices }: OfficeManagementProp
                                 </div>
                             </div>
                             <h4 className="text-xl font-bold mb-2">{office.city}</h4>
-                            <p className="text-sm text-muted-foreground font-medium leading-relaxed">
+                            <p className="text-sm text-slate-custom font-medium leading-relaxed">
                                 {[office.officeNumber, office.block, office.area].filter(Boolean).join(", ")}
                             </p>
-                            <div className="mt-6 pt-6 border-t border-secondary/10">
+                            <div className="mt-6 pt-6 border-t border-paper/10">
                                 <a
                                     href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${office.officeNumber || ''} ${office.block || ''} ${office.area || ''} ${office.city}`)}`}
                                     target="_blank"
-                                    className="text-[10px] font-black uppercase tracking-widest text-primary hover:opacity-70 transition-opacity"
+                                    className="text-[10px] font-black uppercase tracking-widest text-amber hover:opacity-70 transition-opacity"
                                 >
                                     View on Map →
                                 </a>
@@ -171,10 +171,10 @@ export function OfficeManagement({ epcId, initialOffices }: OfficeManagementProp
                     </Card>
                 ))}
                 {offices.length === 0 && !isFormOpen && (
-                    <div className="col-span-full py-20 text-center bg-secondary/5 rounded-[3rem] border-2 border-dashed border-secondary/20">
-                        <Building2 className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
+                    <div className="col-span-full py-20 text-center bg-paper/5 rounded-[3rem] border-2 border-dashed border-paper/20">
+                        <Building2 className="w-12 h-12 text-slate-custom/20 mx-auto mb-4" />
                         <h4 className="font-bold text-lg">No Offices Listed</h4>
-                        <p className="text-muted-foreground text-sm max-w-xs mx-auto mt-2 font-medium">
+                        <p className="text-slate-custom text-sm max-w-xs mx-auto mt-2 font-medium">
                             Add your office locations so customers can find you easily.
                         </p>
                     </div>

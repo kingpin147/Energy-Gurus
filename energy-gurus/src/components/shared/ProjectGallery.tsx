@@ -46,7 +46,7 @@ export function ProjectGallery({ images, videos = [], name, autoPlayInterval = 4
 
   if (total === 0) {
     return (
-      <div className="w-full h-full bg-secondary/10 flex items-center justify-center">
+      <div className="w-full h-full bg-paper/10 flex items-center justify-center">
         <ImageIcon className="w-16 h-16 opacity-5" />
       </div>
     );

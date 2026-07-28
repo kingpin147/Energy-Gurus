@@ -51,7 +51,7 @@ export function ListFilters({ cities = [], sectors = [] }: ListFiltersProps) {
             {cities.length > 0 && (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className={`h-11 rounded-xl gap-2 border-primary/10 min-w-[130px] justify-between transition-all ${currentCity ? "bg-primary/5 border-primary/30 text-primary" : "bg-white"}`}>
+                        <Button variant="outline" className={`h-11 rounded-xl gap-2 border-amber/10 min-w-[130px] justify-between transition-all ${currentCity ? "bg-amber/5 text-ink border-amber/30 text-amber" : "bg-white"}`}>
                             <div className="flex items-center gap-2">
                                 <MapPin className="w-4 h-4 opacity-70" />
                                 <span className="text-sm font-bold">{currentCity || "All Cities"}</span>
@@ -59,7 +59,7 @@ export function ListFilters({ cities = [], sectors = [] }: ListFiltersProps) {
                             <ChevronDown className="w-4 h-4 opacity-40" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-[180px] rounded-xl p-1 shadow-xl border-primary/5">
+                    <DropdownMenuContent align="start" className="w-[180px] rounded-xl p-1 shadow-xl border-amber/5">
                         <DropdownMenuItem onClick={() => handleFilter("city", "")} className="rounded-lg cursor-pointer font-bold text-xs py-2 px-3">
                             All Cities
                         </DropdownMenuItem>
@@ -67,7 +67,7 @@ export function ListFilters({ cities = [], sectors = [] }: ListFiltersProps) {
                             <DropdownMenuItem
                                 key={city}
                                 onClick={() => handleFilter("city", city)}
-                                className={`rounded-lg cursor-pointer font-medium text-sm py-2 px-3 ${currentCity === city ? "bg-primary/10 text-primary font-bold" : ""}`}
+                                className={`rounded-lg cursor-pointer font-medium text-sm py-2 px-3 ${currentCity === city ? "bg-amber/10 text-ink text-amber font-bold" : ""}`}
                             >
                                 {city}
                             </DropdownMenuItem>
@@ -80,7 +80,7 @@ export function ListFilters({ cities = [], sectors = [] }: ListFiltersProps) {
             {sectors.length > 0 && (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className={`h-11 rounded-xl gap-2 border-primary/10 min-w-[130px] justify-between transition-all ${currentSector ? "bg-primary/5 border-primary/30 text-primary" : "bg-white"}`}>
+                        <Button variant="outline" className={`h-11 rounded-xl gap-2 border-amber/10 min-w-[130px] justify-between transition-all ${currentSector ? "bg-amber/5 text-ink border-amber/30 text-amber" : "bg-white"}`}>
                             <div className="flex items-center gap-2">
                                 <Zap className="w-4 h-4 opacity-70" />
                                 <span className="text-sm font-bold">{currentSector || "All Sectors"}</span>
@@ -88,7 +88,7 @@ export function ListFilters({ cities = [], sectors = [] }: ListFiltersProps) {
                             <ChevronDown className="w-4 h-4 opacity-40" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-[180px] rounded-xl p-1 shadow-xl border-primary/5">
+                    <DropdownMenuContent align="start" className="w-[180px] rounded-xl p-1 shadow-xl border-amber/5">
                         <DropdownMenuItem onClick={() => handleFilter("sector", "")} className="rounded-lg cursor-pointer font-bold text-xs py-2 px-3">
                             All Sectors
                         </DropdownMenuItem>
@@ -96,7 +96,7 @@ export function ListFilters({ cities = [], sectors = [] }: ListFiltersProps) {
                             <DropdownMenuItem
                                 key={sector}
                                 onClick={() => handleFilter("sector", sector)}
-                                className={`rounded-lg cursor-pointer font-medium text-sm py-2 px-3 ${currentSector === sector ? "bg-primary/10 text-primary font-bold" : ""}`}
+                                className={`rounded-lg cursor-pointer font-medium text-sm py-2 px-3 ${currentSector === sector ? "bg-amber/10 text-ink text-amber font-bold" : ""}`}
                             >
                                 {sector}
                             </DropdownMenuItem>
@@ -110,7 +110,7 @@ export function ListFilters({ cities = [], sectors = [] }: ListFiltersProps) {
                     variant="ghost"
                     size="sm"
                     onClick={clearFilters}
-                    className="h-11 rounded-xl text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-all gap-2"
+                    className="h-11 rounded-xl text-xs font-black uppercase tracking-widest text-slate-custom hover:text-red-500 hover:bg-red-50 transition-all gap-2"
                 >
                     <X className="w-4 h-4" /> Clear
                 </Button>

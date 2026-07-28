@@ -79,15 +79,15 @@ export function LiveQAForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">Topic</label>
-                <input name="topic" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none transition-all" required />
+                <input name="topic" className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none transition-all" required />
             </div>
             <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">Description</label>
-                <textarea name="description" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none h-24 transition-all" />
+                <textarea name="description" className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none h-24 transition-all" />
             </div>
             <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">YouTube URL</label>
-                <input name="youtubeUrl" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none transition-all" required />
+                <input name="youtubeUrl" className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none transition-all" required />
             </div>
             <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">Thumbnail Image (Required)</label>
@@ -141,11 +141,11 @@ export function LiveQAForm() {
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-widest opacity-60">Expert Name</label>
-                    <input name="expertName" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none transition-all" />
+                    <input name="expertName" className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none transition-all" />
                 </div>
                 <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-widest opacity-60">Expert Title</label>
-                    <input name="expertTitle" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none transition-all" placeholder="e.g. Solar Engineer" />
+                    <input name="expertTitle" className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none transition-all" placeholder="e.g. Solar Engineer" />
                 </div>
             </div>
             <div className="space-y-2">
@@ -164,10 +164,10 @@ export function LiveQAForm() {
                                 type="button"
                                 onClick={() => expertPhotoInputRef.current?.click()}
                                 disabled={isUploading || isSubmitting}
-                                className="w-full bg-secondary/10 hover:bg-secondary/20 text-primary font-bold rounded-xl h-10 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                                className="w-full bg-paper/10 hover:bg-paper/20 text-amber font-bold rounded-xl h-10 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                             >
                                 {localIsExpertUploading ? (
-                                    <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                    <div className="w-3 h-3 border-2 border-amber border-t-transparent rounded-full animate-spin" />
                                 ) : (
                                     <UserCircle className="w-4 h-4" />
                                 )}
@@ -175,12 +175,12 @@ export function LiveQAForm() {
                             </button>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-3 p-2 bg-secondary/5 border rounded-xl animate-in fade-in slide-in-from-top-1">
+                        <div className="flex items-center gap-3 p-2 bg-paper/5 border rounded-xl animate-in fade-in slide-in-from-top-1">
                             <div className="w-10 h-10 rounded-full border bg-white overflow-hidden shrink-0">
                                 <img src={expertPhotoUrl} className="w-full h-full object-cover" alt="" />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-[10px] text-primary font-bold">Photo Uploaded</p>
+                                <p className="text-[10px] text-amber font-bold">Photo Uploaded</p>
                             </div>
                             <Button variant="ghost" size="sm" type="button" onClick={() => setExpertPhotoUrl("")} className="h-8 text-[10px] font-bold">Change</Button>
                         </div>
@@ -191,7 +191,7 @@ export function LiveQAForm() {
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-widest opacity-60">Status</label>
-                    <select name="status" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none appearance-none transition-all">
+                    <select name="status" className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none appearance-none transition-all">
                         <option value="upcoming">Upcoming</option>
                         <option value="live">Live Now</option>
                         <option value="archived">Archived</option>
@@ -199,7 +199,7 @@ export function LiveQAForm() {
                 </div>
                 <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-widest opacity-60">Session Date/Time</label>
-                    <input name="sessionDate" type="datetime-local" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none transition-all" />
+                    <input name="sessionDate" type="datetime-local" className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none transition-all" />
                 </div>
             </div>
             <Button

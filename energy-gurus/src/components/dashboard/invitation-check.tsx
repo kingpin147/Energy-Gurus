@@ -28,7 +28,7 @@ export function InvitationCheck({ userId, email }: { userId: string, email: stri
 
     return (
         <div className="fixed bottom-8 right-8 z-50 animate-in slide-in-from-bottom-10 duration-500">
-            <div className="bg-primary text-primary-foreground p-8 rounded-[2.5rem] shadow-2xl shadow-primary/20 max-w-md relative border-4 border-white/10">
+            <div className="bg-amber text-ink text-ink p-8 rounded-[2.5rem] shadow-2xl shadow-primary/20 max-w-md relative border-4 border-white/10">
                 <button 
                     onClick={() => setDismissed(true)}
                     className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition-colors"
@@ -37,19 +37,19 @@ export function InvitationCheck({ userId, email }: { userId: string, email: stri
                 </button>
                 
                 <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 bg-accent text-accent-foreground rounded-2xl flex items-center justify-center">
+                    <div className="w-12 h-12 bg-paper text-ink rounded-2xl flex items-center justify-center">
                         <PartyPopper className="w-6 h-6" />
                     </div>
                     <h3 className="text-xl font-bold">Welcome, Guru!</h3>
                 </div>
                 
                 <p className="text-sm opacity-90 leading-relaxed mb-6">
-                    An administrator has pre-assigned you the <span className="font-black uppercase tracking-widest text-accent">[{role}]</span> role. 
+                    An administrator has pre-assigned you the <span className="font-black uppercase tracking-widest text-amber">[{role}]</span> role. 
                     Your dashboard is now fully unlocked.
                 </p>
                 
                 <Button 
-                    className="w-full bg-white text-primary font-bold rounded-xl"
+                    className="w-full bg-white text-amber font-bold rounded-xl"
                     onClick={() => window.location.reload()}
                 >
                     Refresh Dashboard

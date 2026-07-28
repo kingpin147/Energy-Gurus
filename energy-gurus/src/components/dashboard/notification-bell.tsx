@@ -89,8 +89,8 @@ export function NotificationBell() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full bg-secondary/10 hover:bg-secondary/20 transition-all">
-                    <Bell className="h-5 w-5 text-primary" />
+                <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full bg-paper/10 hover:bg-paper/20 transition-all">
+                    <Bell className="h-5 w-5 text-amber" />
                     {unreadCount > 0 && (
                         <Badge
                             className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white border-2 border-white animate-in zoom-in"
@@ -101,15 +101,15 @@ export function NotificationBell() {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80 p-0 rounded-2xl overflow-hidden shadow-2xl border-white/20 bg-white/95 backdrop-blur-xl">
-                <div className="flex items-center justify-between p-4 bg-primary/5 border-b">
+                <div className="flex items-center justify-between p-4 bg-amber/5 text-ink border-b">
                     <div className="flex flex-col">
-                        <span className="text-sm font-bold text-primary">Notifications</span>
-                        <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Stay Updated</span>
+                        <span className="text-sm font-bold text-amber">Notifications</span>
+                        <span className="text-[10px] text-slate-custom uppercase tracking-widest font-bold">Stay Updated</span>
                     </div>
                     {unreadCount > 0 && (
                         <button
                             onClick={handleMarkAllAsRead}
-                            className="text-[10px] font-black uppercase text-primary hover:underline"
+                            className="text-[10px] font-black uppercase text-amber hover:underline"
                         >
                             Mark all as read
                         </button>
@@ -117,9 +117,9 @@ export function NotificationBell() {
                 </div>
                 <ScrollArea className="h-80">
                     {notifications.length === 0 ? (
-                        <div className="p-8 text-center bg-secondary/5 rounded-2xl border-2 border-dashed">
-                            <Bell className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-20" />
-                            <p className="text-sm text-muted-foreground">No new notifications</p>
+                        <div className="p-8 text-center bg-paper/5 rounded-2xl border-2 border-dashed">
+                            <Bell className="w-8 h-8 text-slate-custom mx-auto mb-2 opacity-20" />
+                            <p className="text-sm text-slate-custom">No new notifications</p>
                         </div>
                     ) : (
                         <div className="flex flex-col gap-2 p-2">
@@ -128,7 +128,7 @@ export function NotificationBell() {
                                     key={n.id}
                                     href={n.link || "#"}
                                     onClick={() => handleMarkAsRead(n.id)}
-                                    className={`flex flex-col gap-1.5 p-4 rounded-2xl transition-all border border-transparent hover:bg-secondary/10 hover:border-border/50 relative group ${!n.isRead ? 'bg-primary/5 border-primary/10' : 'bg-transparent'}`}
+                                    className={`flex flex-col gap-1.5 p-4 rounded-2xl transition-all border border-transparent hover:bg-paper/10 hover:border-line/50 relative group ${!n.isRead ? 'bg-amber/5 text-ink border-amber/10' : 'bg-transparent'}`}
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className="relative">
@@ -136,10 +136,10 @@ export function NotificationBell() {
                                                 <img
                                                     src={n.senderLogoUrl}
                                                     alt="Sender"
-                                                    className="w-10 h-10 rounded-full object-contain bg-white border border-border/50 shadow-sm"
+                                                    className="w-10 h-10 rounded-full object-contain bg-white border border-line/50 shadow-sm"
                                                 />
                                             ) : (
-                                                <div className={`p-2 rounded-xl border ${n.type === 'inquiry' ? 'bg-primary/10 text-primary border-primary/20' :
+                                                <div className={`p-2 rounded-xl border ${n.type === 'inquiry' ? 'bg-amber/10 text-ink text-amber border-amber/20' :
                                                     n.type === 'reply' ? 'bg-orange-100 text-orange-600 border-orange-200' :
                                                         'bg-blue-100 text-blue-600 border-blue-200'
                                                     }`}>
@@ -147,15 +147,15 @@ export function NotificationBell() {
                                                 </div>
                                             )}
                                             {!n.isRead && (
-                                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full border-2 border-white" />
+                                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber text-ink rounded-full border-2 border-white" />
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center justify-between gap-2 mb-0.5">
-                                                <span className={`text-xs font-black tracking-tight truncate ${!n.isRead ? 'text-foreground' : 'text-muted-foreground'}`}>{n.title}</span>
-                                                <span className="text-[10px] text-muted-foreground whitespace-nowrap opacity-60 font-bold">{new Date(n.createdAt).toLocaleDateString()}</span>
+                                                <span className={`text-xs font-black tracking-tight truncate ${!n.isRead ? 'text-graphite' : 'text-slate-custom'}`}>{n.title}</span>
+                                                <span className="text-[10px] text-slate-custom whitespace-nowrap opacity-60 font-bold">{new Date(n.createdAt).toLocaleDateString()}</span>
                                             </div>
-                                            <p className={`text-xs leading-relaxed line-clamp-2 ${!n.isRead ? 'text-muted-foreground font-medium' : 'text-muted-foreground/60'}`}>{n.message}</p>
+                                            <p className={`text-xs leading-relaxed line-clamp-2 ${!n.isRead ? 'text-slate-custom font-medium' : 'text-slate-custom/60'}`}>{n.message}</p>
                                         </div>
                                     </div>
 
@@ -163,7 +163,7 @@ export function NotificationBell() {
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-7 w-7 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50"
+                                            className="h-7 w-7 rounded-lg text-slate-custom hover:text-red-500 hover:bg-red-50"
                                             onClick={(e) => {
                                                 handleDelete(e, n.id);
                                             }}
@@ -178,7 +178,7 @@ export function NotificationBell() {
                 </ScrollArea>
                 <DropdownMenuSeparator />
                 <div className="p-2">
-                    <Button variant="ghost" className="w-full text-[10px] font-bold uppercase tracking-widest h-8 text-muted-foreground hover:text-primary" asChild>
+                    <Button variant="ghost" className="w-full text-[10px] font-bold uppercase tracking-widest h-8 text-slate-custom hover:text-amber" asChild>
                         <Link href="/dashboard/inbox">View All In Inbox</Link>
                     </Button>
                 </div>

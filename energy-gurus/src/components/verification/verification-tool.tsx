@@ -22,7 +22,7 @@ export function VerificationTool({ brandName, defaultSN = "" }: { brandName: str
         <div className="max-w-xl mx-auto text-center space-y-8 py-8">
             <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto transition-colors duration-500 ${
                 result?.status === 'genuine' ? 'bg-green-100 text-green-600' : 
-                result?.status === 'not_found' ? 'bg-red-100 text-red-600' : 'bg-primary/10 text-primary'
+                result?.status === 'not_found' ? 'bg-red-100 text-red-600' : 'bg-amber/10 text-ink text-amber'
             }`}>
                 {result?.status === 'genuine' ? <CheckCircle2 className="w-10 h-10" /> : 
                  result?.status === 'not_found' ? <XCircle className="w-10 h-10" /> : <Search className="w-10 h-10" />}
@@ -33,7 +33,7 @@ export function VerificationTool({ brandName, defaultSN = "" }: { brandName: str
                     {result?.status === 'genuine' ? "Authentic Product Found" : 
                      result?.status === 'not_found' ? "Verification Failed" : "Authenticity Guaranteed"}
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-slate-custom">
                     {result?.status === 'genuine' 
                         ? `This ${result.productName} is a genuine ${result.brandName} product.`
                         : result?.status === 'not_found' 
@@ -54,7 +54,7 @@ export function VerificationTool({ brandName, defaultSN = "" }: { brandName: str
                     {result && (
                         <button 
                             onClick={() => {setResult(null); setSn("");}}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary font-bold text-xs"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-custom hover:text-amber font-bold text-xs"
                         >
                             CLEAR
                         </button>
@@ -84,7 +84,7 @@ export function VerificationTool({ brandName, defaultSN = "" }: { brandName: str
             )}
 
             {!result && (
-                <div className="grid grid-cols-2 gap-4 text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                <div className="grid grid-cols-2 gap-4 text-xs font-medium uppercase tracking-widest text-slate-custom">
                     <div className="flex items-center justify-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-green-500" />
                         <span>Warranty Status</span>

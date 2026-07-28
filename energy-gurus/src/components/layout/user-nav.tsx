@@ -23,7 +23,7 @@ export function UserNav() {
   if (!isLoaded) {
     return (
       <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <Loader2 className="h-5 w-5 animate-spin text-slate-custom" />
       </Button>
     );
   }
@@ -32,7 +32,7 @@ export function UserNav() {
     return (
       <Link
         href="/sign-in"
-        style={{ backgroundColor: "#006d6d", color: "#c8f5f5", padding: "6px 20px", borderRadius: "8px", fontWeight: 700, fontSize: "14px", whiteSpace: "nowrap", textDecoration: "none", display: "inline-block" }}
+        className="bg-teal text-white px-5 py-2 rounded-lg font-bold text-sm whitespace-nowrap inline-block hover:opacity-90 transition-opacity"
       >
         Sign In
       </Link>
@@ -49,18 +49,18 @@ export function UserNav() {
         >
           <Avatar className="h-8 w-8 shrink-0">
             <AvatarImage src={(user.publicMetadata?.brandLogo as string) || user.imageUrl} alt={user.fullName ?? ""} />
-            <AvatarFallback className="bg-[#006d6d] text-white">
+            <AvatarFallback className="bg-teal text-white">
               {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
             </AvatarFallback>
           </Avatar>
-          <span className="user-name-text text-sm font-semibold text-[#005353] truncate max-w-[140px]">{user.fullName}</span>
+          <span className="user-name-text text-sm font-semibold text-ink truncate max-w-[140px]">{user.fullName}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount sideOffset={8}>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{user.fullName}</p>
-            <p className="text-xs leading-none text-muted-foreground">
+            <p className="text-xs leading-none text-slate-custom">
               {user.primaryEmailAddress?.emailAddress}
             </p>
           </div>

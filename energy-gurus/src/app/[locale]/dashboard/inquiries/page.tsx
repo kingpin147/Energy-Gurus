@@ -28,15 +28,15 @@ export default async function InquiriesPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
-                        <Inbox className="w-7 h-7 text-primary" />
+                        <Inbox className="w-7 h-7 text-amber" />
                         My Inquiries
                     </h1>
-                    <p className="text-muted-foreground text-sm mt-1">
+                    <p className="text-slate-custom text-sm mt-1">
                         Customer messages received from your public profile
                     </p>
                 </div>
                 {unreadCount > 0 && (
-                    <div className="w-fit flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-xl text-sm font-bold">
+                    <div className="w-fit flex items-center gap-2 bg-amber/10 text-ink text-amber px-4 py-2 rounded-xl text-sm font-bold">
                         <Mail className="w-4 h-4" />
                         {unreadCount} unread message{unreadCount !== 1 ? "s" : ""}
                     </div>

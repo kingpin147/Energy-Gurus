@@ -40,29 +40,29 @@ export default async function LiveQAQuestionsPage({ params }: { params: { id: st
                     </Button>
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Session Questions</h1>
-                        <p className="text-muted-foreground">{session.topic}</p>
+                        <p className="text-slate-custom">{session.topic}</p>
                     </div>
                 </div>
-                <div className="px-4 py-2 bg-primary/10 rounded-xl">
-                    <p className="text-xs font-bold text-primary uppercase tracking-widest">{questions.length} Questions Submitted</p>
+                <div className="px-4 py-2 bg-amber/10 text-ink rounded-xl">
+                    <p className="text-xs font-bold text-amber uppercase tracking-widest">{questions.length} Questions Submitted</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
                 {questions.length === 0 ? (
                     <Card className="border-2 border-dashed py-12 text-center">
-                        <MessageCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-                        <p className="text-muted-foreground font-medium">No questions submitted yet.</p>
+                        <MessageCircle className="w-12 h-12 text-slate-custom mx-auto mb-4 opacity-20" />
+                        <p className="text-slate-custom font-medium">No questions submitted yet.</p>
                     </Card>
                 ) : (
                     questions.map((q) => (
-                        <Card key={q.id} className={`border-none shadow-sm rounded-2xl overflow-hidden transition-all ${q.isHighlighted ? 'ring-2 ring-primary bg-primary/5' : ''}`}>
+                        <Card key={q.id} className={`border-none shadow-sm rounded-2xl overflow-hidden transition-all ${q.isHighlighted ? 'ring-2 ring-primary bg-amber/5 text-ink' : ''}`}>
                             <CardContent className="p-6">
                                 <div className="flex items-start justify-between gap-6">
                                     <div className="flex-1 space-y-2">
                                         <div className="flex items-center gap-2">
                                             <span className="font-bold text-sm">{q.userName}</span>
-                                            <span className="text-[10px] text-muted-foreground">• {new Date(q.createdAt).toLocaleTimeString()}</span>
+                                            <span className="text-[10px] text-slate-custom">• {new Date(q.createdAt).toLocaleTimeString()}</span>
                                             {q.isAnswered && (
                                                 <span className="flex items-center gap-1 text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
                                                     <CheckCircle2 className="w-3 h-3" /> Answered
@@ -89,7 +89,7 @@ export default async function LiveQAQuestionsPage({ params }: { params: { id: st
                                             <Button 
                                                 size="sm" 
                                                 variant={q.isHighlighted ? "default" : "outline"} 
-                                                className={`rounded-lg text-[10px] font-bold h-8 gap-1.5 ${q.isHighlighted ? '' : 'hover:bg-primary/5'}`}
+                                                className={`rounded-lg text-[10px] font-bold h-8 gap-1.5 ${q.isHighlighted ? '' : 'hover:bg-amber/5 text-ink'}`}
                                             >
                                                 <Star className={`w-3.5 h-3.5 ${q.isHighlighted ? 'fill-current' : ''}`} /> 
                                                 {q.isHighlighted ? 'Highlighted' : 'Highlight Live'}

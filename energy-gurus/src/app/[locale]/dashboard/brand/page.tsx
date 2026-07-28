@@ -71,17 +71,17 @@ export default async function BrandDashboard() {
                 </div>
             )}
             <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
+                <div className="w-12 h-12 bg-amber text-ink rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
                     <Building2 className="w-6 h-6 text-white" />
                 </div>
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">{myBrand.brandName}</h1>
-                    <p className="text-muted-foreground">Brand Management Portal & Product Verification</p>
+                    <p className="text-slate-custom">Brand Management Portal & Product Verification</p>
                 </div>
             </div>
 
             {/* Profile Completeness Score Card */}
-            <div className="bg-white/50 backdrop-blur-xl border border-border/50 p-6 rounded-[2rem] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="bg-white/50 backdrop-blur-xl border border-line/50 p-6 rounded-[2rem] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="space-y-2 flex-1">
                     <div className="flex justify-between items-center text-sm">
                         <span className="font-black uppercase tracking-widest text-[11px] opacity-60">Profile Completeness</span>
@@ -92,7 +92,7 @@ export default async function BrandDashboard() {
                             {score}% Complete
                         </span>
                     </div>
-                    <div className="w-full h-3 bg-secondary/30 rounded-full overflow-hidden">
+                    <div className="w-full h-3 bg-paper/30 rounded-full overflow-hidden">
                         <div
                             className={`h-full rounded-full transition-all duration-500 ${score === 100 ? "bg-green-500" :
                                 score >= 70 ? "bg-blue-500" :
@@ -105,21 +105,21 @@ export default async function BrandDashboard() {
 
                 {missing.length > 0 ? (
                     <div className="text-xs md:text-right max-w-sm">
-                        <span className="font-bold text-muted-foreground block mb-1">Missing Checkpoints to hit 100%:</span>
-                        <span className="text-muted-foreground font-medium">
+                        <span className="font-bold text-slate-custom block mb-1">Missing Checkpoints to hit 100%:</span>
+                        <span className="text-slate-custom font-medium">
                             {missing.join(", ")}
                         </span>
                     </div>
                 ) : (
                     <div className="text-xs md:text-right">
                         <span className="font-black text-green-600 block mb-1">🎉 Perfectly Complete Profile!</span>
-                        <span className="text-muted-foreground font-medium">Your brand details are fully populated and optimized for public searches.</span>
+                        <span className="text-slate-custom font-medium">Your brand details are fully populated and optimized for public searches.</span>
                     </div>
                 )}
             </div>
 
             <Tabs defaultValue="profile" className="w-full">
-                <TabsList className="grid w-full grid-cols-4 h-14 p-1 bg-secondary/20 rounded-xl mb-8">
+                <TabsList className="grid w-full grid-cols-4 h-14 p-1 bg-paper/20 rounded-xl mb-8">
                     <TabsTrigger value="profile" className="rounded-lg font-bold gap-2">
                         <Building2 className="w-4 h-4" /> Profile
                     </TabsTrigger>
@@ -144,37 +144,37 @@ export default async function BrandDashboard() {
                                 <form action={updateBrandProfile} className="space-y-4">
                                     <div>
                                         <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Brand Name</label>
-                                        <input name="brandName" defaultValue={myBrand.brandName} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" required />
+                                        <input name="brandName" defaultValue={myBrand.brandName} className="w-full border rounded-xl p-3 bg-paper/5 outline-none" required />
                                     </div>
                                     <div>
                                         <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Head Office Address</label>
-                                        <input name="headOffice" defaultValue={myBrand.headOffice || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" placeholder="123 Energy St, Solar City" />
+                                        <input name="headOffice" defaultValue={myBrand.headOffice || ""} className="w-full border rounded-xl p-3 bg-paper/5 outline-none" placeholder="123 Energy St, Solar City" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Country Head Name</label>
-                                            <input name="countryHead" defaultValue={myBrand.countryHead || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
+                                            <input name="countryHead" defaultValue={myBrand.countryHead || ""} className="w-full border rounded-xl p-3 bg-paper/5 outline-none" />
                                         </div>
                                         <div>
                                             <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Customer Care Lead</label>
-                                            <input name="customerCareHead" defaultValue={myBrand.customerCareHead || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
+                                            <input name="customerCareHead" defaultValue={myBrand.customerCareHead || ""} className="w-full border rounded-xl p-3 bg-paper/5 outline-none" />
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Customer Care Number</label>
-                                            <input name="customerCare" defaultValue={myBrand.customerCare || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
+                                            <input name="customerCare" defaultValue={myBrand.customerCare || ""} className="w-full border rounded-xl p-3 bg-paper/5 outline-none" />
                                         </div>
                                         <div>
                                             <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Official Website</label>
-                                            <input name="website" defaultValue={myBrand.website || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" />
+                                            <input name="website" defaultValue={myBrand.website || ""} className="w-full border rounded-xl p-3 bg-paper/5 outline-none" />
                                         </div>
                                     </div>
                                     <BrandRepsForm initialReps={(myBrand.reps as any[]) || []} />
                                     <div className="grid grid-cols-1 gap-4">
                                         <div>
                                             <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 block">Warranty Registry URL</label>
-                                            <input name="warrantyUrl" defaultValue={myBrand.warrantyUrl || ""} className="w-full border rounded-xl p-3 bg-secondary/5 outline-none" placeholder="https://..." />
+                                            <input name="warrantyUrl" defaultValue={myBrand.warrantyUrl || ""} className="w-full border rounded-xl p-3 bg-paper/5 outline-none" placeholder="https://..." />
                                         </div>
                                     </div>
                                     <Button type="submit" className="w-full h-12 rounded-xl font-bold mt-2">Update Profile</Button>
@@ -202,7 +202,7 @@ export default async function BrandDashboard() {
                 <TabsContent value="products" className="space-y-8">
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-bold flex items-center gap-2">
-                            <Package className="w-5 h-5 text-primary" /> Product Ecosystem
+                            <Package className="w-5 h-5 text-amber" /> Product Ecosystem
                         </h2>
                         <AddProductDialog />
                     </div>
@@ -214,20 +214,20 @@ export default async function BrandDashboard() {
                                     <div className="flex justify-between items-start mb-6">
                                         <div className="space-y-1">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest">{product.category}</span>
+                                                <span className="bg-amber/10 text-ink text-amber px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest">{product.category}</span>
                                                 <h4 className="font-bold text-xl">{product.name}</h4>
                                             </div>
-                                            <p className="text-sm text-muted-foreground">{product.description || "No model description"}</p>
+                                            <p className="text-sm text-slate-custom">{product.description || "No model description"}</p>
                                         </div>
                                         <div className="flex items-start gap-2">
-                                            <div className="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                                            <div className="bg-amber/10 text-ink text-amber px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
                                                 <Hash className="w-3 h-3" /> {serialCount} Serials Active
                                             </div>
                                             <DeleteProductButton productId={product.id} productName={product.name} />
                                         </div>
                                     </div>
 
-                                    <div className="pt-6 border-t border-secondary/10">
+                                    <div className="pt-6 border-t border-paper/10">
                                         <label className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-3 block">Bulk Serial Injection</label>
                                         <form action={async (formData) => {
                                             "use server";
@@ -238,7 +238,7 @@ export default async function BrandDashboard() {
                                                 name="serials"
                                                 rows={3}
                                                 placeholder="Paste serial numbers...&#10;SN-882-991&#10;SN-882-992"
-                                                className="w-full border rounded-2xl p-4 text-sm bg-secondary/5 focus:ring-2 focus:ring-primary outline-none font-mono"
+                                                className="w-full border rounded-2xl p-4 text-sm bg-paper/5 focus:ring-2 focus:ring-primary outline-none font-mono"
                                             />
                                             <Button type="submit" variant="secondary" className="w-full rounded-xl font-bold h-11">
                                                 <ShieldCheck className="w-4 h-4 mr-2" /> Verify & Import Codes

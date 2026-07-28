@@ -40,7 +40,7 @@ export function BrandLogoUpload({ initialLogo }: BrandLogoUploadProps) {
     };
 
     return (
-        <div className="bg-secondary/5 p-6 rounded-[2.5rem] border border-dashed border-secondary/20">
+        <div className="bg-paper/5 p-6 rounded-[2.5rem] border border-dashed border-paper/20">
             <div className="flex flex-col items-center gap-6">
                 <div className="space-y-1 text-center">
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 block">Official Brand Logo</label>
@@ -60,10 +60,10 @@ export function BrandLogoUpload({ initialLogo }: BrandLogoUploadProps) {
                             </button>
                         </div>
                     ) : (
-                        <div className="w-32 h-32 rounded-[2rem] border-4 border-dashed border-secondary/20 flex flex-col items-center justify-center bg-secondary/5 group-hover:bg-secondary/10 transition-colors">
+                        <div className="w-32 h-32 rounded-[2rem] border-4 border-dashed border-paper/20 flex flex-col items-center justify-center bg-paper/5 group-hover:bg-paper/10 transition-colors">
                             {isUploading ? (
                                 <div className="flex flex-col items-center gap-2">
-                                    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                    <div className="w-6 h-6 border-2 border-amber border-t-transparent rounded-full animate-spin" />
                                     <span className="text-[8px] font-black uppercase tracking-widest opacity-40">Uploading...</span>
                                 </div>
                             ) : (
@@ -93,7 +93,7 @@ export function BrandLogoUpload({ initialLogo }: BrandLogoUploadProps) {
                     <button
                         onClick={() => fileInputRef.current?.click()}
                         disabled={isUploading}
-                        className="w-full bg-primary text-white font-bold rounded-xl px-4 h-11 text-[10px] uppercase tracking-[0.1em] hover:scale-[1.02] shadow-lg shadow-primary/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                        className="w-full bg-amber text-ink text-white font-bold rounded-xl px-4 h-11 text-[10px] uppercase tracking-[0.1em] hover:scale-[1.02] shadow-lg shadow-primary/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                         <Upload className="w-4 h-4" />
                         {isUploading ? "Uploading..." : "Upload Brand Logo"}

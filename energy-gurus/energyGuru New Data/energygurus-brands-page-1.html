@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solar Brands — EnergyGurus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12213A; --paper:#F5F6F3; --amber:#E8A33D;
+    --teal:#2F6E62; --slate:#4A5A73; --graphite:#1B1F24;
+    --line: rgba(18,33,58,0.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Inter', sans-serif; color:var(--graphite); background:var(--paper); line-height:1.5;}
+  h1,h2,h3{font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:-0.01em;}
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 32px;}
+  :focus-visible{outline:2px solid var(--amber); outline-offset:3px;}
+
+  nav{position:sticky; top:0; z-index:50; background:rgba(245,246,243,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line);}
+  nav .wrap{display:flex; align-items:center; justify-content:space-between; height:72px;}
+  .logo{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:1.02rem; display:flex; align-items:center; gap:10px;}
+  .nav-links{display:flex; gap:32px; font-size:0.92rem; font-weight:500; color:var(--slate);}
+  .nav-links a.active{color:var(--ink); font-weight:600;}
+  .nav-links a:hover{color:var(--ink);}
+  .nav-cta{background:var(--ink); color:var(--paper); padding:11px 20px; border-radius:3px; font-size:0.88rem;}
+  @media(max-width:860px){ .nav-links{display:none;} }
+
+  .page-head{background:var(--ink); color:#fff; padding:64px 0 44px;}
+  .eyebrow{font-family:'IBM Plex Mono', monospace; font-size:0.76rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--amber); display:flex; align-items:center; gap:10px; margin-bottom:18px;}
+  .eyebrow::before{content:""; width:20px; height:1px; background:var(--amber);}
+  .page-head h1{font-size:clamp(2rem,4vw,2.8rem);}
+  .page-head p{color:rgba(245,246,243,0.7); max-width:560px; margin-top:14px; font-size:1.02rem;}
+
+  /* filter bar */
+  .filters{background:#fff; border-bottom:1px solid var(--line); position:sticky; top:72px; z-index:40;}
+  .filters .wrap{display:flex; gap:28px; padding:18px 32px; flex-wrap:wrap; align-items:center;}
+  .filter-group{display:flex; align-items:center; gap:10px;}
+  .filter-group label{font-family:'IBM Plex Mono', monospace; font-size:0.72rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--slate);}
+  .filter-group select{
+    border:1px solid var(--line); border-radius:3px; padding:8px 12px;
+    font-family:'Inter'; font-size:0.88rem; background:var(--paper); color:var(--graphite);
+  }
+  .result-count{margin-left:auto; font-family:'IBM Plex Mono', monospace; font-size:0.82rem; color:var(--slate);}
+
+  /* grid */
+  .grid-section{padding:56px 0 96px;}
+  .brand-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:20px;
+  }
+  .brand-card{
+    background:#fff; border:1px solid var(--line); border-radius:4px;
+    padding:26px; display:flex; flex-direction:column; gap:14px;
+    transition:border-color .15s;
+  }
+  .brand-card:hover{border-color:var(--teal);}
+  .brand-top{display:flex; justify-content:space-between; align-items:flex-start;}
+  .brand-mark{
+    width:44px; height:44px; border-radius:4px;
+    background:var(--ink); color:var(--amber);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk'; font-weight:700; font-size:1.1rem;
+  }
+  .cat-tag{
+    font-family:'IBM Plex Mono', monospace; font-size:0.68rem;
+    letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--teal); background:rgba(47,110,98,0.1);
+    padding:4px 9px; border-radius:20px; height:fit-content;
+  }
+  .brand-card h3{font-size:1.15rem; color:var(--ink);}
+  .spec-line{font-family:'IBM Plex Mono', monospace; font-size:0.82rem; color:var(--slate);}
+  .brand-card .cta{
+    margin-top:auto; padding-top:10px; font-size:0.86rem; font-weight:600; color:var(--ink);
+    display:inline-flex; align-items:center; gap:6px; border-top:1px solid var(--line);
+  }
+  .brand-card .cta::after{content:"→"; transition:transform .15s;}
+  .brand-card:hover .cta::after{transform:translateX(3px);}
+
+  @media(max-width:900px){ .brand-grid{grid-template-columns:repeat(2,1fr);} }
+  @media(max-width:640px){ .brand-grid{grid-template-columns:1fr;} .filters .wrap{gap:16px;} }
+
+  footer{background:var(--ink); color:rgba(245,246,243,0.55); padding:32px 0; text-align:center; font-size:0.82rem; margin-top:40px;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="energygurus-homepage.html" class="logo"><svg width="34" height="34" viewBox="0 0 100 100" style="flex-shrink:0;"><rect width="100" height="100" rx="20" fill="#12213A"/><g transform="translate(4,4) scale(0.8)"><g fill="none" stroke="#F5F6F3" stroke-width="3.5" stroke-linecap="round"><path d="M60,8 A52,52 0 0,1 108,44"/><path d="M112,58 A52,52 0 0,1 100,98"/><path d="M88,108 A52,52 0 0,1 46,111"/><path d="M20,96 A52,52 0 0,1 10,56"/><path d="M16,42 A52,52 0 0,1 44,12"/></g><rect x="30" y="34" width="42" height="42" rx="5" fill="#12213A" stroke="#F5F6F3" stroke-width="3.5"/><rect x="56" y="58" width="36" height="36" rx="5" fill="#E8A33D"/><rect x="66" y="52" width="16" height="8" rx="2" fill="#E8A33D"/><path d="M62,74 L70,82 L84,64" fill="none" stroke="#12213A" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></g></svg><span style="display:flex; flex-direction:column; line-height:1.15;"><span>EnergyGurus<span style="color:#E8A33D;">.Online</span></span><span style="font-family:'IBM Plex Mono',monospace; font-weight:500; font-size:0.56rem; letter-spacing:0.08em; color:#4A5A73; text-transform:uppercase;">Authenticity Guaranteed</span></span></a>
+    <div class="nav-links">
+      <a href="energygurus-brands-page.html" class="active">Solar Brands</a>
+      <a href="#">Find an Installer</a>
+      <a href="#">Monitoring &amp; O&amp;M</a>
+      <a href="#">Podcast</a>
+    </div>
+    <a href="#" class="nav-cta">Get Started</a>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <p class="eyebrow">Brand Directory</p>
+    <h1>Compare solar brands, side by side.</h1>
+    <p>Panels, inverters, and batteries — reviewed on specs, warranty, and real-world performance. No sponsored rankings, just the facts.</p>
+  </div>
+</header>
+
+<div class="filters">
+  <div class="wrap">
+    <div class="filter-group">
+      <label for="cat">Category</label>
+      <select id="cat">
+        <option>All</option><option>Panels</option><option>Inverters</option><option>Batteries</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="tier">Price Tier</label>
+      <select id="tier">
+        <option>All</option><option>Budget</option><option>Mid-range</option><option>Premium</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="sort">Sort</label>
+      <select id="sort">
+        <option>Efficiency: High to Low</option><option>Warranty: Longest First</option>
+      </select>
+    </div>
+    <span class="result-count">40 brands</span>
+  </div>
+</div>
+
+<section class="grid-section">
+  <div class="wrap">
+    <div class="brand-grid">
+
+      <div class="brand-card">
+        <div class="brand-top"><div class="brand-mark">SR</div><span class="cat-tag">Panels</span></div>
+        <h3>SunRidge Panels</h3>
+        <div class="spec-line">22.1% efficiency · 25-yr warranty</div>
+        <span class="cta">View Brand</span>
+      </div>
+
+      <div class="brand-card">
+        <div class="brand-top"><div class="brand-mark">VT</div><span class="cat-tag">Inverters</span></div>
+        <h3>VoltTide Inverters</h3>
+        <div class="spec-line">98.6% peak efficiency · 12-yr warranty</div>
+        <span class="cta">View Brand</span>
+      </div>
+
+      <div class="brand-card">
+        <div class="brand-top"><div class="brand-mark">CE</div><span class="cat-tag">Batteries</span></div>
+        <h3>CoreCell Energy</h3>
+        <div class="spec-line">13.5 kWh capacity · 10-yr warranty</div>
+        <span class="cta">View Brand</span>
+      </div>
+
+      <div class="brand-card">
+        <div class="brand-top"><div class="brand-mark">HL</div><span class="cat-tag">Panels</span></div>
+        <h3>Helion Panels</h3>
+        <div class="spec-line">20.8% efficiency · 20-yr warranty</div>
+        <span class="cta">View Brand</span>
+      </div>
+
+      <div class="brand-card">
+        <div class="brand-top"><div class="brand-mark">AX</div><span class="cat-tag">Inverters</span></div>
+        <h3>Axiom Grid</h3>
+        <div class="spec-line">97.9% peak efficiency · 15-yr warranty</div>
+        <span class="cta">View Brand</span>
+      </div>
+
+      <div class="brand-card">
+        <div class="brand-top"><div class="brand-mark">TR</div><span class="cat-tag">Batteries</span></div>
+        <h3>Terra Reserve</h3>
+        <div class="spec-line">10.2 kWh capacity · 12-yr warranty</div>
+        <span class="cta">View Brand</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>© 2026 EnergyGurus.online — All rights reserved.</footer>
+
+</body>
+</html>

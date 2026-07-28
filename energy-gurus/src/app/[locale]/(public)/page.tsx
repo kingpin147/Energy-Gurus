@@ -61,123 +61,240 @@ export default async function Homepage() {
     const { topEpcs } = await getHomepageData();
 
     return (
-        <div className="bg-white text-slate-900 font-sans selection:bg-primary/20 overflow-x-hidden">
-
-            {/* ─── HERO BANNER ─── */}
-            <section className="relative w-full min-h-[85vh] flex items-center justify-center border-b border-slate-100 bg-white overflow-hidden mobile-first">
-                {/* Premium Abstract Background Asset */}
-                <div className="absolute inset-0 z-0">
-                    <Image
-                        src="/new_hero_banner.jpg"
-                        alt="Background"
-                        fill
-                        priority
-                        className="object-cover opacity-100 transition-opacity duration-1000"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60"></div>
+        <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 overflow-x-hidden">
+            {/* ---- HERO ---- */}
+            <header className="relative bg-ink text-paper overflow-hidden pt-24">
+                {/* Background effects */}
+                <div 
+                    className="absolute inset-0 pointer-events-none" 
+                    style={{ 
+                        background: 'radial-gradient(ellipse 900px 500px at 80% 0%, rgba(232,163,61,0.16), transparent 60%)' 
+                    }}
+                />
+                
+                <div className="max-w-[1180px] mx-auto px-8 relative z-10">
+                    <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-5">
+                        <span className="w-5 h-[1px] bg-amber"></span>
+                        Live Solar Intelligence
+                    </p>
+                    <h1 className="font-space-grotesk font-semibold text-[clamp(2.4rem,5vw,4rem)] leading-[1.06] tracking-[-0.01em] max-w-[820px] text-white">
+                        Your trusted guide to solar — from first question to full <em className="not-italic text-amber">install</em>.
+                    </h1>
+                    <p className="text-[1.15rem] text-paper/72 max-w-[560px] my-6 mb-9">
+                        Compare certified brands, connect with vetted installers, and keep your system running strong with expert monitoring — all backed by facts, not sales pitches.
+                    </p>
+                    <div className="flex flex-wrap gap-3.5 mb-16">
+                        <Link href="/dashboard" className="bg-amber text-ink px-6 py-4 rounded-[3px] text-[0.95rem] font-semibold hover:bg-[#f2b458] transition-colors">
+                            Get Started
+                        </Link>
+                        <Link href="/brands" className="bg-transparent text-white border border-white/30 px-6 py-4 rounded-[3px] text-[0.95rem] font-semibold hover:border-white transition-colors">
+                            Compare Solar Brands
+                        </Link>
+                        <Link href="/podcast" className="bg-transparent text-white border border-white/30 px-6 py-4 rounded-[3px] text-[0.95rem] font-semibold hover:border-white transition-colors">
+                            Explore the Facts
+                        </Link>
+                    </div>
                 </div>
 
-                <div className="max-w-[1200px] mx-auto px-6 py-20 md:py-32 relative z-10 flex flex-col items-center text-center animate-reveal">
-                    <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/80 backdrop-blur-md border border-white/30 text-white text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-8 md:mb-12 animate-soft-float shadow-sm">
-                        <ShieldCheck className="w-4 h-4" /> Authenticity Guaranteed
+                <div className="relative z-10 border-t border-paper/15 grid grid-cols-1 md:grid-cols-3">
+                    <div className="px-8 py-7 md:border-r border-b md:border-b-0 border-paper/15">
+                        <div className="font-ibm-plex-mono text-[1.9rem] text-amber flex items-baseline gap-1.5">
+                            250<span className="text-[0.95rem] text-paper/50">+</span>
+                        </div>
+                        <div className="text-[0.78rem] text-paper/55 uppercase tracking-[0.08em] mt-1.5">
+                            Certified Installers
+                        </div>
                     </div>
+                    <div className="px-8 py-7 md:border-r border-b md:border-b-0 border-paper/15">
+                        <div className="font-ibm-plex-mono text-[1.9rem] text-amber flex items-baseline gap-1.5">
+                            40<span className="text-[0.95rem] text-paper/50">+</span>
+                        </div>
+                        <div className="text-[0.78rem] text-paper/55 uppercase tracking-[0.08em] mt-1.5">
+                            Brands Reviewed
+                        </div>
+                    </div>
+                    <div className="px-8 py-7">
+                        <div className="font-ibm-plex-mono text-[1.9rem] text-amber flex items-baseline gap-1.5">
+                            120<span className="text-[0.95rem] text-paper/50">eps</span>
+                        </div>
+                        <div className="text-[0.78rem] text-paper/55 uppercase tracking-[0.08em] mt-1.5">
+                            Real Talk On Solar
+                        </div>
+                    </div>
+                </div>
+                
+                <svg className="block w-full h-[56px] bg-transparent" viewBox="0 0 1200 56" preserveAspectRatio="none">
+                    <path d="M0,40 C150,10 300,50 450,20 C600,5 750,45 900,18 C1050,2 1150,35 1200,25 L1200,56 L0,56 Z" fill="var(--color-paper)"/>
+                </svg>
+            </header>
 
-                    <h1 className="text-4xl sm:text-5xl md:text-8xl font-black tracking-tighter text-white drop-shadow-lg mb-8 leading-[1] md:leading-[0.85]">
-                        EnergyGurus<span className="text-primary drop-shadow-md">.Online</span>
-                    </h1>
-
-                    <p className="text-base md:text-2xl text-white drop-shadow-md max-w-3xl mx-auto font-medium leading-relaxed mb-12 opacity-90 px-4 md:px-0">
-                        The industry standard for verified solar infrastructure. Connect with certified EPCs, audit global brands, and access technical intelligence.
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-4 sm:px-0">
-                        <Link
-                            href="/epcs"
-                            className="bg-primary text-white p-5 md:px-10 md:py-5 rounded-2xl font-black text-[10px] md:text-[11px] uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 group"
-                        >
-                            Find Installers <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
-                        </Link>
+            {/* ---- THREE WAYS IN ---- */}
+            <section className="py-22">
+                <div className="max-w-[1180px] mx-auto px-8">
+                    <div className="max-w-[640px] mb-14">
+                        <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-teal flex items-center gap-2.5 mb-5">
+                            <span className="w-5 h-[1px] bg-teal"></span>
+                            Three Ways In
+                        </p>
+                        <h2 className="font-space-grotesk font-semibold text-[clamp(1.6rem,3vw,2.3rem)] tracking-[-0.01em] text-ink">
+                            Whatever brought you here, we've got a path.
+                        </h2>
+                        <p className="text-slate-custom mt-3.5 text-[1.02rem]">
+                            Browse by brand, get matched with an installer, or start with the facts — no wrong door.
+                        </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-[1px] bg-line border border-line rounded-[4px] overflow-hidden">
+                        <div className="bg-paper p-9 px-7 flex flex-col group">
+                            <div className="font-ibm-plex-mono text-[0.72rem] tracking-[0.1em] text-teal mb-4.5">01 · INSTALL</div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.25rem] tracking-[-0.01em] text-ink mb-2.5">Connect with certified professionals</h3>
+                            <p className="text-slate-custom text-[0.95rem] grow">
+                                Every installer in our network is vetted for certification, experience, and customer track record. Get matched with a professional who fits your home and budget.
+                            </p>
+                            <Link href="/epcs" className="mt-5.5 text-[0.88rem] font-semibold text-ink inline-flex items-center gap-1.5">
+                                Find an Installer <ArrowRight className="w-4 h-4 group-hover:translate-x-[3px] transition-transform" />
+                            </Link>
+                        </div>
+                        <div className="bg-paper p-9 px-7 flex flex-col group">
+                            <div className="font-ibm-plex-mono text-[0.72rem] tracking-[0.1em] text-teal mb-4.5">02 · COMPARE</div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.25rem] tracking-[-0.01em] text-ink mb-2.5">Unbiased brand comparisons</h3>
+                            <p className="text-slate-custom text-[0.95rem] grow">
+                                Panels, inverters, batteries — we break down specs, warranties, and real-world performance so you can choose with confidence, not guesswork.
+                            </p>
+                            <Link href="/brands" className="mt-5.5 text-[0.88rem] font-semibold text-ink inline-flex items-center gap-1.5">
+                                Browse Brands <ArrowRight className="w-4 h-4 group-hover:translate-x-[3px] transition-transform" />
+                            </Link>
+                        </div>
+                        <div className="bg-paper p-9 px-7 flex flex-col group">
+                            <div className="font-ibm-plex-mono text-[0.72rem] tracking-[0.1em] text-teal mb-4.5">03 · LEARN</div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.25rem] tracking-[-0.01em] text-ink mb-2.5">Solar, explained simply</h3>
+                            <p className="text-slate-custom text-[0.95rem] grow">
+                                Our podcast cuts through industry jargon with straight answers on costs, savings, and what actually matters when going solar.
+                            </p>
+                            <Link href="/podcast" className="mt-5.5 text-[0.88rem] font-semibold text-ink inline-flex items-center gap-1.5">
+                                Listen Now <ArrowRight className="w-4 h-4 group-hover:translate-x-[3px] transition-transform" />
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <div className="max-w-[1200px] mx-auto px-6 py-20 lg:py-40 space-y-32 lg:space-y-56">
-
-                {/* ─── 3. TOP EPCs ─── */}
-                <section>
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 lg:mb-20 gap-6">
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-3">
-                                <div className="w-2 h-8 bg-primary rounded-full shadow-[0_0_15px_rgba(0,109,109,0.3)]" />
-                                <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-slate-900 uppercase">Certified Installers</h2>
-                            </div>
-                            <p className="text-slate-500 font-medium text-lg md:text-xl">Engineering excellence for industrial and residential portfolios.</p>
+            {/* ---- THE PROCESS ---- */}
+            <section className="py-22">
+                <div className="max-w-[1180px] mx-auto px-8">
+                    <div className="max-w-[640px] mb-14">
+                        <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-teal flex items-center gap-2.5 mb-5">
+                            <span className="w-5 h-[1px] bg-teal"></span>
+                            The Process
+                        </p>
+                        <h2 className="font-space-grotesk font-semibold text-[clamp(1.6rem,3vw,2.3rem)] tracking-[-0.01em] text-ink">
+                            Three steps to solar confidence.
+                        </h2>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                        <div className="relative pl-[52px]">
+                            <div className="absolute left-0 top-0 font-ibm-plex-mono text-[0.85rem] text-amber border border-amber w-[34px] h-[34px] rounded-full flex items-center justify-center">1</div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.1rem] tracking-[-0.01em] text-ink mb-2">Browse</h3>
+                            <p className="text-slate-custom text-[0.94rem]">Explore brands and installers vetted for quality and reliability.</p>
                         </div>
-                        <Link href="/epcs" className="text-primary font-black flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] hover:gap-4 transition-all group">
-                            EPC Search <ArrowRight className="w-4 h-4 group-hover:translate-x-1" />
+                        <div className="relative pl-[52px]">
+                            <div className="absolute left-0 top-0 font-ibm-plex-mono text-[0.85rem] text-amber border border-amber w-[34px] h-[34px] rounded-full flex items-center justify-center">2</div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.1rem] tracking-[-0.01em] text-ink mb-2">Connect</h3>
+                            <p className="text-slate-custom text-[0.94rem]">Request a quote and get matched with the right installer for your home.</p>
+                        </div>
+                        <div className="relative pl-[52px]">
+                            <div className="absolute left-0 top-0 font-ibm-plex-mono text-[0.85rem] text-amber border border-amber w-[34px] h-[34px] rounded-full flex items-center justify-center">3</div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.1rem] tracking-[-0.01em] text-ink mb-2">Monitor</h3>
+                            <p className="text-slate-custom text-[0.94rem]">Keep your system performing at its best with our Monitoring & O&M services.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ---- MONITORING ---- */}
+            <section className="bg-ink text-paper py-22">
+                <div className="max-w-[1180px] mx-auto px-8 grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-16 items-center">
+                    <div>
+                        <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-5">
+                            <span className="w-5 h-[1px] bg-amber"></span>
+                            Monitoring & O&M
+                        </p>
+                        <h2 className="font-space-grotesk font-semibold text-[clamp(1.6rem,3vw,2.2rem)] tracking-[-0.01em] text-white">
+                            Solar doesn't stop at installation.
+                        </h2>
+                        <p className="text-paper/70 my-4.5 mb-6.5 max-w-[480px]">
+                            We help you protect your investment long after the panels go up — with real-time performance monitoring, proactive maintenance, and fast fault detection.
+                        </p>
+                        <Link href="/monitoring" className="inline-block bg-amber text-ink px-6 py-4 rounded-[3px] text-[0.95rem] font-semibold hover:bg-[#f2b458] transition-colors">
+                            Learn About Monitoring & O&M
                         </Link>
                     </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 md:gap-12">
-                        {topEpcs.map((epc) => (
-                            <Link href={`/epcs/${epc.id}` as any} key={epc.id} className="group flex flex-col glass rounded-[3rem] p-8 md:p-10 border border-white/40 hover:border-primary/30 hover:shadow-2xl transition-all duration-500 hover:-translate-y-3">
-                                <div className="flex justify-between items-start mb-10">
-                                    <div className="w-20 h-20 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center justify-center p-4 group-hover:scale-110 transition-transform duration-500">
-                                        {epc.logoUrl ? (
-                                            <Image src={epc.logoUrl} alt={epc.companyName || "Logo"} width={56} height={56} className="object-contain" />
-                                        ) : (
-                                            <Zap className="w-10 h-10 text-slate-200" />
-                                        )}
-                                    </div>
-                                    <div className="bg-white/70 backdrop-blur px-4 py-2 rounded-xl flex items-center gap-2 border border-white/50 shadow-sm">
-                                        <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                                        <span className="text-sm font-black text-slate-900">{epc.avgRating?.toFixed(1) || "N/A"}</span>
-                                    </div>
-                                </div>
-                                <h4 className="text-2xl font-black text-slate-900 mb-3 tracking-tighter">{epc.companyName}</h4>
-                                <p className="text-slate-500 text-base font-medium line-clamp-2 mb-10 flex-1 leading-relaxed opacity-80">
-                                    {epc.about || "Verified energy solution provider with certified engineering team."}
-                                </p>
-                                <div className="flex items-center justify-between text-primary font-black text-[10px] uppercase tracking-[0.2em] pt-6 border-t border-slate-100/50">
-                                    Book Audit <ArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                </div>
-                            </Link>
-                        ))}
+                    <div className="border border-paper/15 rounded-[4px] p-7 bg-paper/5">
+                        <div className="flex justify-between items-center py-3.5 border-b border-paper/10 font-ibm-plex-mono text-[0.85rem]">
+                            <span>System Output</span><span>4.82 kW</span>
+                        </div>
+                        <div className="flex justify-between items-center py-3.5 border-b border-paper/10 font-ibm-plex-mono text-[0.85rem]">
+                            <span>Panel Health</span><span className="text-teal bg-[rgba(47,110,98,0.18)] px-2.5 py-[3px] rounded-full text-[0.72rem]">Nominal</span>
+                        </div>
+                        <div className="flex justify-between items-center py-3.5 border-b border-paper/10 font-ibm-plex-mono text-[0.85rem]">
+                            <span>Last Fault Check</span><span>—</span>
+                        </div>
+                        <div className="flex justify-between items-center py-3.5 font-ibm-plex-mono text-[0.85rem]">
+                            <span>Uptime (30d)</span><span>99.8%</span>
+                        </div>
                     </div>
-                </section>
+                </div>
+            </section>
 
-            </div>
-
-            {/* ─── DIRECTORY FOOTER / CTA ─── */}
-            <section className="border-t border-slate-100 bg-slate-50/40 py-24 lg:py-56 overflow-hidden relative">
-                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
-                <div className="max-w-[1200px] mx-auto px-6 grid lg:grid-cols-2 gap-24 items-center">
-                    <div className="animate-reveal">
-                        <h2 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter mb-10 leading-[0.9]">
-                            Verified <span className="text-primary">Engineering</span>.
-                        </h2>
-                        <p className="text-slate-500 text-lg md:text-2xl font-medium leading-relaxed mb-16 opacity-80">
-                            EnergyGurus bridges the gap between global technology providers and regional energy transition. ensuring that every node is verified.
+            {/* ---- PODCAST ---- */}
+            <section className="py-22">
+                <div className="max-w-[1180px] mx-auto px-8">
+                    <div className="max-w-[640px] mb-14">
+                        <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-teal flex items-center gap-2.5 mb-5">
+                            <span className="w-5 h-[1px] bg-teal"></span>
+                            The Podcast
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-6">
-                            <Link href="/about" className="glass px-12 py-6 rounded-[2rem] font-black text-[11px] uppercase tracking-[0.2em] text-slate-900 hover:bg-white transition-all shadow-xl flex items-center justify-center gap-3">
-                                <Info className="w-6 h-6" /> Our Mission
-                            </Link>
-                            <Link href="/contact" className="bg-slate-900 text-white px-12 py-6 rounded-[2rem] font-black text-[11px] uppercase tracking-[0.2em] hover:bg-black transition-all shadow-2xl flex items-center justify-center gap-3">
-                                <Phone className="w-6 h-6 text-accent" /> Contact Us
+                        <h2 className="font-space-grotesk font-semibold text-[clamp(1.6rem,3vw,2.3rem)] tracking-[-0.01em] text-ink">
+                            Straight talk on solar.
+                        </h2>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-8 items-center bg-white border border-line rounded-[4px] p-7 group">
+                        <div className="aspect-square rounded-[4px] bg-ink flex items-center justify-center max-w-[160px] sm:max-w-full" style={{ backgroundImage: 'repeating-linear-gradient(135deg, var(--color-teal) 0 2px, transparent 2px 14px)' }}>
+                            <div className="w-12 h-12 rounded-full bg-amber flex items-center justify-center text-ink group-hover:scale-110 transition-transform">
+                                <Play className="w-5 h-5 ml-1 fill-ink" />
+                            </div>
+                        </div>
+                        <div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.2rem] tracking-[-0.01em] text-ink mb-2">Latest Episode — What Actually Determines Your Payback Period</h3>
+                            <p className="text-slate-custom text-[0.95rem] mb-3.5">New episodes breaking down the facts and figures behind solar energy — no jargon, no sales pressure.</p>
+                            <Link href="/podcast" className="text-ink font-semibold text-[0.88rem] flex items-center gap-1.5">
+                                Listen to the Latest Episode <ArrowRight className="w-4 h-4 group-hover:translate-x-[3px] transition-transform" />
                             </Link>
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-8 md:gap-12 relative">
-                        <div className="absolute inset-0 bg-primary/5 blur-[100px] rounded-full"></div>
-                        <div className="glass p-10 md:p-14 rounded-[3.5rem] border border-white/60 shadow-2xl text-center group hover:-translate-y-4 transition-all duration-500 relative z-10">
-                            <ShieldCheck className="w-12 h-12 text-primary mx-auto mb-8 group-hover:scale-125 transition-transform duration-500" />
-                            <h4 className="font-black text-slate-900 text-sm uppercase tracking-[0.1em]">Verified Safety</h4>
+                </div>
+            </section>
+
+            {/* ---- NEWSLETTER / QUOTE ---- */}
+            <section className="py-22">
+                <div className="max-w-[1180px] mx-auto px-8">
+                    <div className="bg-white border border-line rounded-[4px] p-11 flex justify-between items-center gap-8 flex-wrap">
+                        <div>
+                            <h2 className="font-space-grotesk font-semibold text-[1.4rem] tracking-[-0.01em] text-ink mb-1.5">Stay informed.</h2>
+                            <p className="text-slate-custom text-[0.95rem]">Get solar facts, brand updates, and installer insights delivered straight to your inbox.</p>
                         </div>
-                        <div className="glass p-10 md:p-14 rounded-[3.5rem] border border-white/60 shadow-2xl text-center group hover:-translate-y-4 transition-all duration-500 relative z-10">
-                            <Zap className="w-12 h-12 text-amber-500 mx-auto mb-8 group-hover:scale-125 transition-transform duration-500" />
-                            <h4 className="font-black text-slate-900 text-sm uppercase tracking-[0.1em]">High Yield</h4>
-                        </div>
+                        <form className="flex gap-2.5" action="#">
+                            <input 
+                                type="email" 
+                                placeholder="you@email.com" 
+                                aria-label="Email address"
+                                className="px-4 py-[13px] border border-line rounded-[3px] font-sans text-[0.9rem] min-w-[220px] focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-3"
+                            />
+                            <button type="submit" className="bg-amber text-ink px-5 py-[13px] rounded-[3px] font-semibold text-[0.9rem] hover:bg-[#f2b458] transition-colors">
+                                Subscribe
+                            </button>
+                        </form>
                     </div>
                 </div>
             </section>

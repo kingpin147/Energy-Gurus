@@ -25,14 +25,14 @@ export function BrandRepsForm({ initialReps }: { initialReps: any[] }) {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Brand Representatives</label>
-                <Button type="button" variant="ghost" size="sm" onClick={addRep} className="h-7 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 gap-1.5 transition-all">
+                <Button type="button" variant="ghost" size="sm" onClick={addRep} className="h-7 text-[10px] font-black uppercase tracking-widest text-amber hover:bg-amber/5 text-ink gap-1.5 transition-all">
                     <Plus className="w-3.5 h-3.5" /> Add Representative
                 </Button>
             </div>
 
             <div className="space-y-3">
                 {reps.map((rep, index) => (
-                    <div key={index} className="flex flex-col sm:flex-row gap-4 items-start sm:items-center bg-secondary/5 p-5 rounded-[2rem] border border-dashed border-secondary/20 relative group transition-all hover:bg-secondary/10">
+                    <div key={index} className="flex flex-col sm:flex-row gap-4 items-start sm:items-center bg-paper/5 p-5 rounded-[2rem] border border-dashed border-paper/20 relative group transition-all hover:bg-paper/10">
                         <div className="flex-1 w-full space-y-1.5">
                             <div className="flex items-center gap-2 px-1">
                                 <User className="w-3 h-3 opacity-30" />
@@ -41,7 +41,7 @@ export function BrandRepsForm({ initialReps }: { initialReps: any[] }) {
                             <input
                                 value={rep.name}
                                 onChange={(e) => updateRep(index, "name", e.target.value)}
-                                className="w-full bg-transparent border-b border-secondary/10 px-1 py-1 outline-none text-sm font-bold focus:border-primary transition-colors"
+                                className="w-full bg-transparent border-b border-paper/10 px-1 py-1 outline-none text-sm font-bold focus:border-amber transition-colors"
                                 placeholder="e.g. John Doe"
                             />
                         </div>
@@ -53,7 +53,7 @@ export function BrandRepsForm({ initialReps }: { initialReps: any[] }) {
                             <input
                                 value={rep.designation}
                                 onChange={(e) => updateRep(index, "designation", e.target.value)}
-                                className="w-full bg-transparent border-b border-secondary/10 px-1 py-1 outline-none text-sm focus:border-primary transition-colors"
+                                className="w-full bg-transparent border-b border-paper/10 px-1 py-1 outline-none text-sm focus:border-amber transition-colors"
                                 placeholder="e.g. Regional Manager"
                             />
                         </div>
@@ -70,7 +70,7 @@ export function BrandRepsForm({ initialReps }: { initialReps: any[] }) {
                 ))}
 
                 {reps.length === 0 && (
-                    <div className="text-center py-10 border-2 border-dashed border-secondary/10 rounded-[2.5rem] opacity-30 bg-secondary/5">
+                    <div className="text-center py-10 border-2 border-dashed border-paper/10 rounded-[2.5rem] opacity-30 bg-paper/5">
                         <User className="w-8 h-8 mx-auto mb-3 opacity-20" />
                         <p className="text-[10px] font-black uppercase tracking-widest">No representatives listed</p>
                     </div>

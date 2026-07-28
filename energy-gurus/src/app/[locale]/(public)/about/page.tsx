@@ -6,7 +6,7 @@ import { Link } from "@/i18n/routing";
 
 export default function AboutPage() {
     return (
-        <div className="flex flex-col min-h-screen bg-white font-sans selection:bg-primary/20">
+        <div className="flex flex-col min-h-screen bg-white font-sans selection:bg-amber/20 text-ink">
             {/* ─── HERO SECTION ─── */}
             <section className="relative w-full py-24 lg:py-48 flex items-center justify-center overflow-hidden border-b border-slate-100">
                 {/* Premium Abstract Network Asset */}
@@ -22,21 +22,21 @@ export default function AboutPage() {
                 </div>
 
                 <div className="container mx-auto px-6 text-center max-w-5xl relative z-10 animate-reveal">
-                    <div className="inline-flex items-center gap-3 bg-primary/80 backdrop-blur-md border border-white/30 text-white px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-10 animate-soft-float shadow-sm">
+                    <div className="inline-flex items-center gap-3 bg-amber/80 text-ink backdrop-blur-md border border-white/30 text-white px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-10 animate-soft-float shadow-sm">
                         <Award className="w-4 h-4" /> Engineering Excellence
                     </div>
                     <h1 className="text-4xl md:text-7xl font-black mb-8 text-white drop-shadow-lg tracking-tighter leading-[1] uppercase md:px-0 px-4">
-                        Independent Energy <span className="text-primary drop-shadow-md">Insights</span> for Pakistan
+                        Independent Energy <span className="text-amber drop-shadow-md">Insights</span> for Pakistan
                     </h1>
                     <p className="text-lg md:text-2xl text-white drop-shadow-md font-medium leading-relaxed mb-12 opacity-90 max-w-3xl mx-auto">
                         EnergyGurus is a professional platform dedicated to delivering data-driven analysis, expert commentary, and engineering standards across Pakistan&apos;s energy sector.
                     </p>
                     <div className="flex flex-wrap justify-center gap-5">
                         <div className="glass px-6 py-3 rounded-2xl flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.1em] text-slate-900 shadow-lg border border-white/60">
-                            <ShieldCheck className="w-5 h-5 text-primary" /> Professional Integrity
+                            <ShieldCheck className="w-5 h-5 text-amber" /> Professional Integrity
                         </div>
                         <div className="glass px-6 py-3 rounded-2xl flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.1em] text-slate-900 shadow-lg border border-white/60">
-                            <Globe className="w-5 h-5 text-primary" /> Locally Optimized
+                            <Globe className="w-5 h-5 text-amber" /> Locally Optimized
                         </div>
                     </div>
                 </div>
@@ -48,7 +48,7 @@ export default function AboutPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 lg:gap-32 items-center">
                         <div className="space-y-10 animate-reveal">
                             <div className="space-y-4">
-                                <span className="text-primary font-black uppercase tracking-[0.3em] text-[10px]">Technical Vision</span>
+                                <span className="text-amber font-black uppercase tracking-[0.3em] text-[10px]">Technical Vision</span>
                                 <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter uppercase">Our Mission</h2>
                             </div>
                             <div className="space-y-6">
@@ -78,7 +78,7 @@ export default function AboutPage() {
             <section className="py-24 md:py-40 bg-slate-50/50 border-y border-slate-100">
                 <div className="container mx-auto px-6 max-w-7xl">
                     <div className="text-center space-y-4 mb-20 md:mb-32">
-                        <span className="text-primary font-black uppercase tracking-[0.3em] text-[10px]">The Engineering Board</span>
+                        <span className="text-amber font-black uppercase tracking-[0.3em] text-[10px]">The Engineering Board</span>
                         <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter uppercase">Leadership Team</h2>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-16">
@@ -99,7 +99,7 @@ export default function AboutPage() {
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 md:gap-12 items-center opacity-40 grayscale group hover:opacity-100 transition-all duration-700">
                         {[1, 2, 3, 4, 5, 6].map(i => (
-                            <div key={i} className="glass h-20 px-6 rounded-[2rem] border border-white/60 flex items-center justify-center font-black text-[10px] uppercase tracking-widest text-slate-400 hover:text-primary hover:border-primary/30 hover:scale-110 transition-all duration-300 shadow-sm cursor-default">
+                            <div key={i} className="glass h-20 px-6 rounded-[2rem] border border-white/60 flex items-center justify-center font-black text-[10px] uppercase tracking-widest text-slate-400 hover:text-amber hover:border-amber/30 hover:scale-110 transition-all duration-300 shadow-sm cursor-default">
                                 Node {i}
                             </div>
                         ))}
@@ -113,7 +113,7 @@ export default function AboutPage() {
 function StatCard({ value, label, icon, color }: { value: string, label: string, icon: any, color: 'primary' | 'accent' }) {
     return (
         <div className="glass aspect-square flex flex-col items-center justify-center p-8 text-center gap-6 rounded-[2.5rem] border border-white/60 shadow-xl group hover:-translate-y-2 transition-all duration-500">
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-2 shadow-sm border ${color === 'primary' ? 'bg-primary/10 border-primary/20 text-primary' : 'bg-amber-500/10 border-amber-500/20 text-amber-500'}`}>
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-2 shadow-sm border ${color === 'primary' ? 'bg-amber/10 text-ink border-amber/20 text-amber' : 'bg-amber-500/10 border-amber-500/20 text-amber-500'}`}>
                 {icon}
             </div>
             <div className="space-y-1">
@@ -132,8 +132,8 @@ function TeamMember({ name, role, bio }: { name: string, role: string, bio: stri
                 <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent opacity-60"></div>
             </div>
             <CardContent className="p-10 md:p-14 relative bg-white/40 backdrop-blur-3xl">
-                <h4 className="text-2xl font-black mb-2 text-slate-900 tracking-tight group-hover:text-primary transition-colors">{name}</h4>
-                <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-8">{role}</p>
+                <h4 className="text-2xl font-black mb-2 text-slate-900 tracking-tight group-hover:text-amber transition-colors">{name}</h4>
+                <p className="text-[10px] font-black text-amber uppercase tracking-[0.2em] mb-8">{role}</p>
                 <p className="text-base text-slate-500 font-medium leading-relaxed opacity-80">{bio}</p>
             </CardContent>
         </Card>

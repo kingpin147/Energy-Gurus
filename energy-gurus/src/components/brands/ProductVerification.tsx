@@ -41,28 +41,28 @@ export function ProductVerification({ brandId }: { brandId: string }) {
 
     return (
         <div className="space-y-8">
-            <div className="bg-primary/5 p-8 md:p-12 rounded-[3.5rem] border border-primary/10">
+            <div className="bg-amber/5 text-ink p-8 md:p-12 rounded-[3.5rem] border border-amber/10">
                 <div className="max-w-2xl mx-auto text-center space-y-8">
                     <div className="space-y-3">
                         <h3 className="text-3xl font-black tracking-tight">Authenticity Audit</h3>
-                        <p className="text-muted-foreground text-sm font-medium italic">
+                        <p className="text-slate-custom text-sm font-medium italic">
                             Validate your hardware and check warranty status through the global serial registry.
                         </p>
                     </div>
 
                     <form onSubmit={handleVerify} className="flex flex-col md:flex-row gap-4">
                         <div className="relative flex-1">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground opacity-40" />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-custom opacity-40" />
                             <input 
                                 value={serial}
                                 onChange={(e) => setSerial(e.target.value)}
                                 placeholder="Enter Serial Number (e.g. SN-882-991)" 
-                                className="w-full h-14 pl-12 pr-6 rounded-2xl border-2 border-primary/5 bg-white outline-none focus:border-primary/20 transition-all font-mono text-sm"
+                                className="w-full h-14 pl-12 pr-6 rounded-2xl border-2 border-amber/5 bg-white outline-none focus:border-amber/20 transition-all font-mono text-sm"
                             />
                         </div>
                         <Button 
                             disabled={loading}
-                            className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] bg-primary text-white shadow-xl shadow-primary/20 hover:scale-105 transition-all"
+                            className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] bg-amber text-ink text-white shadow-xl shadow-primary/20 hover:scale-105 transition-all"
                         >
                             {loading ? "Scanning..." : "Verify Identity"}
                         </Button>
@@ -94,7 +94,7 @@ export function ProductVerification({ brandId }: { brandId: string }) {
                                     <div className="space-y-2">
                                         <p className="text-[10px] font-black uppercase tracking-widest opacity-30 leading-none">Product Model</p>
                                         <p className="text-2xl font-black flex items-center gap-3">
-                                            <Zap className="w-6 h-6 text-primary" /> {result.product.name}
+                                            <Zap className="w-6 h-6 text-amber" /> {result.product.name}
                                         </p>
                                     </div>
                                     <div className="space-y-2">
@@ -112,7 +112,7 @@ export function ProductVerification({ brandId }: { brandId: string }) {
                                         <p className="text-lg font-bold">{result.warrantyExpiry ? new Date(result.warrantyExpiry).toLocaleDateString() : "Check Manual"}</p>
                                     </div>
                                 </div>
-                                <div className="pt-8 border-t border-border/50">
+                                <div className="pt-8 border-t border-line/50">
                                     <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] opacity-40">
                                         <ShieldCheck className="w-4 h-4" /> Blockchain Verified Ledger Item: {result.id.slice(0, 8)}...
                                     </div>

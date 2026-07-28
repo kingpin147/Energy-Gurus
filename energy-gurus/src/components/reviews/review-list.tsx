@@ -25,9 +25,9 @@ export async function ReviewList({ targetId }: { targetId: string }) {
 
     if (allReviews.length === 0) {
         return (
-            <div className="py-12 text-center bg-secondary/10 rounded-[2rem] border-2 border-dashed">
-                <Star className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-                <p className="text-muted-foreground font-medium">No reviews yet. Be the first to share your experience!</p>
+            <div className="py-12 text-center bg-paper/10 rounded-[2rem] border-2 border-dashed">
+                <Star className="w-12 h-12 text-slate-custom mx-auto mb-4 opacity-20" />
+                <p className="text-slate-custom font-medium">No reviews yet. Be the first to share your experience!</p>
             </div>
         );
     }
@@ -41,13 +41,13 @@ export async function ReviewList({ targetId }: { targetId: string }) {
                             <div className="flex items-center gap-4">
                                 <Avatar className="w-12 h-12 rounded-2xl">
                                     <AvatarImage src={review.brandLogo || review.epcLogo || undefined} />
-                                    <AvatarFallback className="bg-primary/10 text-primary">
+                                    <AvatarFallback className="bg-amber/10 text-ink text-amber">
                                         <User className="w-6 h-6" />
                                     </AvatarFallback>
                                 </Avatar>
                                 <div>
                                     <p className="font-bold">{review.userName || "Verified User"}</p>
-                                    <p className="text-xs text-muted-foreground">{new Date(review.createdAt).toLocaleDateString()}</p>
+                                    <p className="text-xs text-slate-custom">{new Date(review.createdAt).toLocaleDateString()}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-1 text-yellow-500 bg-yellow-500/10 px-3 py-1.5 rounded-xl">
@@ -55,14 +55,14 @@ export async function ReviewList({ targetId }: { targetId: string }) {
                                 <span className="text-sm font-black">{review.rating}</span>
                             </div>
                         </div>
-                        <p className="text-muted-foreground leading-relaxed italic">
+                        <p className="text-slate-custom leading-relaxed italic">
                             "{review.comment}"
                         </p>
 
                         {(review as any).reply && (
-                            <div className="mt-6 p-6 bg-primary/5 rounded-2xl border-l-4 border-primary space-y-2">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-primary opacity-60">Company Reply</p>
-                                <p className="text-sm text-foreground leading-relaxed">{(review as any).reply}</p>
+                            <div className="mt-6 p-6 bg-amber/5 text-ink rounded-2xl border-l-4 border-amber space-y-2">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-amber opacity-60">Company Reply</p>
+                                <p className="text-sm text-graphite leading-relaxed">{(review as any).reply}</p>
                             </div>
                         )}
                     </CardContent>

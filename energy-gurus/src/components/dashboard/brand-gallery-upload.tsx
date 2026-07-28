@@ -64,14 +64,14 @@ export function BrandGalleryUpload({ initialPhotos }: BrandGalleryUploadProps) {
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className="aspect-square rounded-2xl border-2 border-dashed border-secondary/20 flex flex-col items-center justify-center bg-secondary/5 hover:bg-secondary/10 transition-all gap-2"
+          className="aspect-square rounded-2xl border-2 border-dashed border-paper/20 flex flex-col items-center justify-center bg-paper/5 hover:bg-paper/10 transition-all gap-2"
         >
           {isUploading ? (
-            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-amber border-t-transparent rounded-full animate-spin" />
           ) : (
             <>
-              <div className="p-2 bg-primary/10 rounded-xl">
-                <Plus className="w-5 h-5 text-primary" />
+              <div className="p-2 bg-amber/10 text-ink rounded-xl">
+                <Plus className="w-5 h-5 text-amber" />
               </div>
               <span className="text-[8px] font-black uppercase tracking-widest opacity-40">Add Photos</span>
             </>

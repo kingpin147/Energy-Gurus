@@ -73,19 +73,19 @@ export default function SettingsPage() {
     return (
         <div className="p-8 space-y-8 max-w-4xl mx-auto">
             <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center">
-                    <User className="w-6 h-6 text-primary" />
+                <div className="w-12 h-12 bg-amber/10 text-ink rounded-2xl flex items-center justify-center">
+                    <User className="w-6 h-6 text-amber" />
                 </div>
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Account Settings</h1>
-                    <p className="text-muted-foreground">Manage your personal information and preferences.</p>
+                    <p className="text-slate-custom">Manage your personal information and preferences.</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Profile Card */}
                 <Card className="lg:col-span-2 border-none shadow-sm rounded-3xl overflow-hidden">
-                    <CardHeader className="bg-secondary/5 border-b">
+                    <CardHeader className="bg-paper/5 border-b">
                         <CardTitle className="text-xl">Profile Information</CardTitle>
                         <CardDescription>Your public account details.</CardDescription>
                     </CardHeader>
@@ -94,14 +94,14 @@ export default function SettingsPage() {
                         <div className="flex items-center gap-6">
                             <Avatar className="w-20 h-20 rounded-2xl border-4 border-white shadow-xl shrink-0">
                                 <AvatarImage src={(user?.publicMetadata?.brandLogo as string) || user?.imageUrl} />
-                                <AvatarFallback className="bg-primary text-white text-2xl font-bold">
+                                <AvatarFallback className="bg-amber text-ink text-white text-2xl font-bold">
                                     {user?.firstName?.charAt(0) || user?.emailAddresses[0]?.emailAddress?.charAt(0)?.toUpperCase() || "?"}
                                 </AvatarFallback>
                             </Avatar>
                             <div>
                                 <h3 className="text-xl font-bold">{user?.fullName || "Energy Guru"}</h3>
-                                <p className="text-muted-foreground text-sm">{user?.emailAddresses[0]?.emailAddress}</p>
-                                <span className="mt-2 inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary border border-primary/20">
+                                <p className="text-slate-custom text-sm">{user?.emailAddresses[0]?.emailAddress}</p>
+                                <span className="mt-2 inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber/10 text-ink text-amber border border-amber/20">
                                     {roleLabel}
                                 </span>
                             </div>
@@ -116,7 +116,7 @@ export default function SettingsPage() {
                                     <input
                                         value={firstName}
                                         onChange={e => setFirstName(e.target.value)}
-                                        className="w-full p-3 border rounded-xl bg-secondary/5 focus:ring-2 focus:ring-primary outline-none font-medium"
+                                        className="w-full p-3 border rounded-xl bg-paper/5 focus:ring-2 focus:ring-primary outline-none font-medium"
                                         placeholder="First Name"
                                     />
                                 </div>
@@ -125,7 +125,7 @@ export default function SettingsPage() {
                                     <input
                                         value={lastName}
                                         onChange={e => setLastName(e.target.value)}
-                                        className="w-full p-3 border rounded-xl bg-secondary/5 focus:ring-2 focus:ring-primary outline-none font-medium"
+                                        className="w-full p-3 border rounded-xl bg-paper/5 focus:ring-2 focus:ring-primary outline-none font-medium"
                                         placeholder="Last Name"
                                     />
                                 </div>
@@ -144,10 +144,10 @@ export default function SettingsPage() {
 
                 {/* Locale Sidebar */}
                 <div className="space-y-6">
-                    <Card className="border-none shadow-sm rounded-3xl bg-secondary/5">
+                    <Card className="border-none shadow-sm rounded-3xl bg-paper/5">
                         <CardHeader>
                             <CardTitle className="text-lg flex items-center gap-2">
-                                <Globe className="w-5 h-5 text-primary" /> Locale
+                                <Globe className="w-5 h-5 text-amber" /> Locale
                             </CardTitle>
                         </CardHeader>
                         <CardContent>

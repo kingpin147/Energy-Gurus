@@ -27,7 +27,7 @@ export function NewsletterForm({ variant = "default" }: { variant?: "default" | 
 
     if (status === "success") {
         return (
-            <div className="flex items-center gap-2 text-primary animate-in fade-in slide-in-from-bottom-2">
+            <div className="flex items-center gap-2 text-amber animate-in fade-in slide-in-from-bottom-2">
                 <CheckCircle2 className="w-5 h-5" />
                 <span className="font-medium text-sm">Successfully subscribed!</span>
             </div>
@@ -67,7 +67,7 @@ export function NewsletterForm({ variant = "default" }: { variant?: "default" | 
             <Button
                 size="lg"
                 type="submit"
-                className="rounded-full h-12 px-10 font-bold bg-primary text-primary-foreground transition-all hover:scale-105 active:scale-95"
+                className="rounded-full h-12 px-10 font-bold bg-amber text-ink text-ink transition-all hover:scale-105 active:scale-95"
                 disabled={status === "loading"}
             >
                 {status === "loading" ? "Subscribing..." : "Subscribe Now"}

@@ -1,68 +1,29 @@
 import { Link } from "@/i18n/routing";
-import { Mic, Facebook, Twitter, Linkedin, Youtube, Mail } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { NewsletterForm } from "@/components/forms/newsletter-form";
 
 export function Footer() {
     return (
-        <footer className="bg-secondary/20 border-t py-12 lg:py-16">
-            <div className="container mx-auto px-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-12">
-                    {/* Brand Column */}
-                    <div className="space-y-4">
-                        <Link href="/" className="flex items-center space-x-2">
-                            <div className="bg-primary p-1 rounded-lg">
-                                <Mic className="h-5 w-5 text-white" />
-                            </div>
-                            <span className="text-xl font-bold tracking-tight text-primary">EnergyGurus.Online</span>
-                        </Link>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                            Energy insights for Pakistan. Delivering expert analysis, weekly podcast episodes, and verified hardware validation.
-                        </p>
-                        <div className="flex space-x-4">
-                            <Link href="#" className="text-muted-foreground hover:text-primary"><Facebook className="h-5 w-5" /></Link>
-                            <Link href="#" className="text-muted-foreground hover:text-primary"><Twitter className="h-5 w-5" /></Link>
-                            <Link href="#" className="text-muted-foreground hover:text-primary"><Linkedin className="h-5 w-5" /></Link>
-                            <Link href="#" className="text-muted-foreground hover:text-primary"><Youtube className="h-5 w-5" /></Link>
-                        </div>
+        <footer className="bg-ink text-paper/60 py-14 pb-8 text-[0.88rem]">
+            <div className="max-w-[1180px] mx-auto px-8 flex justify-between items-start flex-wrap gap-6">
+                <div className="max-w-[340px] text-paper/85 font-space-grotesk text-[1rem]">
+                    Powering informed solar decisions — brands, installers, and expertise, all in one place.
+                </div>
+                
+                <div className="flex gap-14 flex-wrap">
+                    <div className="flex flex-col gap-2.5">
+                        <Link href="/brands" className="text-paper/60 hover:text-white transition-colors">Solar Brands</Link>
+                        <Link href="/epcs" className="text-paper/60 hover:text-white transition-colors">Find an Installer</Link>
+                        <Link href="/monitoring" className="text-paper/60 hover:text-white transition-colors">Monitoring & O&M</Link>
                     </div>
-
-                    {/* Sitemap Column */}
-                    <div>
-                        <h4 className="font-bold mb-4">Sitemap</h4>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li><Link href="/" className="hover:text-primary">Home</Link></li>
-                            <li><Link href="/epcs" className="hover:text-primary">EPCs & Installers</Link></li>
-                            <li><Link href="/about" className="hover:text-primary">About Us</Link></li>
-                        </ul>
-                    </div>
-
-                    {/* Legal Column */}
-                    <div>
-                        <h4 className="font-bold mb-4">Legal</h4>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li><Link href="/privacy" className="hover:text-primary">Privacy Policy</Link></li>
-                            <li><Link href="/terms" className="hover:text-primary">Terms of Use</Link></li>
-                            <li><Link href="/cookies" className="hover:text-primary">Cookie Policy</Link></li>
-                        </ul>
-                    </div>
-
-                    {/* Newsletter Column */}
-                    <div>
-                        <h4 className="font-bold mb-4">Newsletter</h4>
-                        <p className="text-sm text-muted-foreground mb-4">
-                            Get the latest energy news and podcast episodes delivered to your inbox.
-                        </p>
-                        <div className="flex space-x-2">
-                            <NewsletterForm variant="minimal" />
-                        </div>
+                    <div className="flex flex-col gap-2.5">
+                        <Link href="/podcast" className="text-paper/60 hover:text-white transition-colors">Podcast</Link>
+                        <Link href="/privacy" className="text-paper/60 hover:text-white transition-colors">Privacy Policy</Link>
+                        <Link href="/terms" className="text-paper/60 hover:text-white transition-colors">Terms of Use</Link>
                     </div>
                 </div>
-
-                <div className="border-t pt-8 text-center text-sm text-muted-foreground">
-                    <p>© {new Date().getFullYear()} EnergyGurus. All rights reserved.</p>
-                </div>
+            </div>
+            
+            <div className="max-w-[1180px] mx-auto px-8 mt-12 border-t border-paper/12 pt-5 text-[0.78rem]">
+                © {new Date().getFullYear()} EnergyGurus.online — All rights reserved.
             </div>
         </footer>
     );

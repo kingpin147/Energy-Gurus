@@ -4,12 +4,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter), sans-serif;
   --font-display: var(--font-outfit), sans-serif;
   --font-inter: var(--font-inter);
+  --font-space-grotesk: var(--font-space-grotesk);
+  --font-ibm-plex-mono: var(--font-ibm-plex-mono);
   --font-noto: "Noto Sans", sans-serif;
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -48,6 +50,13 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+  --color-ink: #12213A;
+  --color-paper: #F5F6F3;
+  --color-amber: #E8A33D;
+  --color-teal: #2F6E62;
+  --color-slate-custom: #4A5A73;
+  --color-graphite: #1B1F24;
+  --color-line: rgba(18, 33, 58, 0.12);
 }
 
 :root {

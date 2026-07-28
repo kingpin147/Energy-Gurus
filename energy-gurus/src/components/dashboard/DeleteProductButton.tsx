@@ -48,14 +48,14 @@ export function DeleteProductButton({ productId, productName }: DeleteProductBut
                         onClick={() => !loading && setOpen(false)}
                     />
                     {/* Dialog */}
-                    <div className="relative bg-white rounded-2xl border border-border/60 shadow-2xl p-6 w-full max-w-sm space-y-4">
+                    <div className="relative bg-white rounded-2xl border border-line/60 shadow-2xl p-6 w-full max-w-sm space-y-4">
                         <div className="flex items-start gap-3">
                             <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
                                 <AlertTriangle className="w-5 h-5 text-red-600" />
                             </div>
                             <div>
-                                <h3 className="font-black text-base text-foreground">Delete Product</h3>
-                                <p className="text-sm text-muted-foreground mt-1">
+                                <h3 className="font-black text-base text-graphite">Delete Product</h3>
+                                <p className="text-sm text-slate-custom mt-1">
                                     Are you sure you want to delete <strong>{productName}</strong>? This will also remove the technical datasheet and any associated media from our cloud storage.
                                 </p>
                             </div>

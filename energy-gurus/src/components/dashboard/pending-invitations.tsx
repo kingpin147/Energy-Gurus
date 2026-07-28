@@ -60,7 +60,7 @@ export function PendingInvitations({ initialInvites }: { initialInvites: Invitat
                 <div className="overflow-x-auto">
                     <table className="w-full text-left min-w-[600px]">
                         <thead>
-                            <tr className="bg-secondary/5 border-b">
+                            <tr className="bg-paper/5 border-b">
                                 <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Email</th>
                                 <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60">Pre-assigned Role</th>
                                 <th className="p-6 text-xs font-bold uppercase tracking-widest opacity-60 text-right">Action</th>
@@ -71,7 +71,7 @@ export function PendingInvitations({ initialInvites }: { initialInvites: Invitat
                                 <tr key={invite.id} className="border-b">
                                     <td className="p-6 font-medium">{invite.email}</td>
                                     <td className="p-6">
-                                        <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-secondary text-muted-foreground border">
+                                        <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-paper text-slate-custom border">
                                             {invite.role}
                                         </span>
                                     </td>

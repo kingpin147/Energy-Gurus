@@ -124,12 +124,12 @@ export default async function UserManagementPage({
         <div className="p-8 space-y-8">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
+                    <div className="w-12 h-12 bg-amber text-ink rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
                         <UsersIcon className="w-6 h-6 text-white" />
                     </div>
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
-                        <p className="text-muted-foreground text-sm">Manage platform access, roles, and administrative permissions.</p>
+                        <p className="text-slate-custom text-sm">Manage platform access, roles, and administrative permissions.</p>
                     </div>
                 </div>
                 <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto items-center">
@@ -173,9 +173,9 @@ export default async function UserManagementPage({
                     <PendingInvitations initialInvites={pendingInvites as any} />
 
                     <Card className="border-none shadow-xl shadow-secondary/5 rounded-3xl overflow-hidden">
-                        <CardHeader className="bg-secondary/10 p-6 border-b">
+                        <CardHeader className="bg-paper/10 p-6 border-b">
                             <CardTitle className="text-xl flex items-center gap-2">
-                                <ShieldAlert className="w-5 h-5 text-primary" />
+                                <ShieldAlert className="w-5 h-5 text-amber" />
                                 Registered Users
                             </CardTitle>
                         </CardHeader>
@@ -183,7 +183,7 @@ export default async function UserManagementPage({
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse min-w-[800px]">
                                     <thead>
-                                        <tr className="bg-secondary/5 border-b">
+                                        <tr className="bg-paper/5 border-b">
                                             <th className="p-6 text-[10px] font-black uppercase tracking-widest opacity-40">User</th>
                                             <th className="p-6 text-[10px] font-black uppercase tracking-widest opacity-40">Email</th>
                                             <th className="p-6 text-[10px] font-black uppercase tracking-widest opacity-40">Role</th>
@@ -198,19 +198,19 @@ export default async function UserManagementPage({
                                             const userLogo = user.brandLogo || user.epcLogo;
 
                                             return (
-                                                <tr key={user.id} className="border-b hover:bg-secondary/5 transition-colors group">
+                                                <tr key={user.id} className="border-b hover:bg-paper/5 transition-colors group">
                                                     <td className="p-6">
                                                         <div className="flex items-center gap-4">
                                                             <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
                                                                 <AvatarImage src={userLogo || undefined} />
-                                                                <AvatarFallback className="bg-primary/10 text-primary">
+                                                                <AvatarFallback className="bg-amber/10 text-ink text-amber">
                                                                     <UserIcon className="w-5 h-5" />
                                                                 </AvatarFallback>
                                                             </Avatar>
-                                                            <span className="font-bold whitespace-nowrap text-foreground group-hover:text-primary transition-colors">{user.name || "N/A"}</span>
+                                                            <span className="font-bold whitespace-nowrap text-graphite group-hover:text-amber transition-colors">{user.name || "N/A"}</span>
                                                         </div>
                                                     </td>
-                                                    <td className="p-6 text-muted-foreground text-sm whitespace-nowrap">{user.email}</td>
+                                                    <td className="p-6 text-slate-custom text-sm whitespace-nowrap">{user.email}</td>
                                                     <td className="p-6">
                                                         <Badge
                                                             variant="outline"
@@ -218,7 +218,7 @@ export default async function UserManagementPage({
                                                             className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${displayRole === 'super-admin' ? 'bg-red-50 text-red-600 border-red-100' :
                                                                 displayRole === 'admin' ? 'bg-blue-50 text-blue-600 border-blue-100' :
                                                                     displayRole === 'epc' ? 'bg-green-50 text-green-600 border-green-100' :
-                                                                        'bg-secondary/50 text-muted-foreground border-transparent'
+                                                                        'bg-paper/50 text-slate-custom border-transparent'
                                                                 }`}
                                                         >
                                                             {displayRole.replace('-', ' ')}

@@ -146,7 +146,7 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
 
                 {selectedIds.length > 0 && (
                     <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-2">
-                        <span className="text-xs font-bold text-primary px-2">{selectedIds.length} Selected</span>
+                        <span className="text-xs font-bold text-amber px-2">{selectedIds.length} Selected</span>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button size="sm" variant="outline" className="h-8 gap-1 rounded-lg">
@@ -168,28 +168,28 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
 
             {/* Table */}
             {filtered.length === 0 ? (
-                <div className="text-center py-16 text-muted-foreground">
+                <div className="text-center py-16 text-slate-custom">
                     <Mail className="w-10 h-10 mx-auto mb-3 opacity-30" />
                     <p className="font-medium">No {filter === "all" ? "" : filter} inquiries yet</p>
                 </div>
             ) : (
                 <div className="space-y-2">
                     <div className="px-4 flex items-center gap-3">
-                        <button onClick={toggleSelectAll} className="p-1 rounded hover:bg-secondary/20 transition-colors border-none bg-transparent cursor-pointer">
-                            {selectedIds.length === filtered.length && filtered.length > 0 ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4 text-muted-foreground" />}
+                        <button onClick={toggleSelectAll} className="p-1 rounded hover:bg-paper/20 transition-colors border-none bg-transparent cursor-pointer">
+                            {selectedIds.length === filtered.length && filtered.length > 0 ? <CheckSquare className="w-4 h-4 text-amber" /> : <Square className="w-4 h-4 text-slate-custom" />}
                         </button>
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Select All</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-custom">Select All</span>
                     </div>
 
                     {filtered.map((inq) => (
                         <div
                             key={inq.id}
-                            className={`rounded-2xl border transition-all ${inq.isRead ? "bg-card border-border" : "bg-primary/5 border-primary/20"} ${selectedIds.includes(inq.id) ? "ring-2 ring-primary ring-offset-2" : ""}`}
+                            className={`rounded-2xl border transition-all ${inq.isRead ? "bg-white border-line" : "bg-amber/5 text-ink border-amber/20"} ${selectedIds.includes(inq.id) ? "ring-2 ring-primary ring-offset-2" : ""}`}
                         >
                             {/* Row Header */}
                             <div className="flex items-start gap-3 p-4">
-                                <button onClick={() => toggleSelect(inq.id)} className="pt-1.5 p-1 rounded hover:bg-secondary/20 transition-colors border-none bg-transparent cursor-pointer shrink-0">
-                                    {selectedIds.includes(inq.id) ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4 text-muted-foreground" />}
+                                <button onClick={() => toggleSelect(inq.id)} className="pt-1.5 p-1 rounded hover:bg-paper/20 transition-colors border-none bg-transparent cursor-pointer shrink-0">
+                                    {selectedIds.includes(inq.id) ? <CheckSquare className="w-4 h-4 text-amber" /> : <Square className="w-4 h-4 text-slate-custom" />}
                                 </button>
 
                                 {/* Unread dot */}
@@ -206,7 +206,7 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
                                     <div className="flex items-center gap-2 flex-wrap cursor-pointer">
                                         <span className="font-semibold text-sm">{inq.guestName || "Anonymous"}</span>
                                         {inq.guestEmail && (
-                                            <a href={`mailto:${inq.guestEmail}`} onClick={(e) => e.stopPropagation()} className="text-xs text-primary flex items-center gap-1 hover:underline">
+                                            <a href={`mailto:${inq.guestEmail}`} onClick={(e) => e.stopPropagation()} className="text-xs text-amber flex items-center gap-1 hover:underline">
                                                 <Mail className="w-3 h-3" />{inq.guestEmail}
                                             </a>
                                         )}
@@ -216,12 +216,12 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
                                             </a>
                                         )}
                                     </div>
-                                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 cursor-pointer">
+                                    <p className="text-xs text-slate-custom mt-0.5 line-clamp-1 cursor-pointer">
                                         {inq.subject ? <><strong>{inq.subject}:</strong> </> : ""}{inq.message}
                                     </p>
                                     <div className="flex items-center gap-1 mt-1">
-                                        <Clock className="w-3 h-3 text-muted-foreground" />
-                                        <span className="text-[11px] text-muted-foreground">
+                                        <Clock className="w-3 h-3 text-slate-custom" />
+                                        <span className="text-[11px] text-slate-custom">
                                             {new Date(inq.createdAt).toLocaleDateString("en-PK", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                                         </span>
                                     </div>
@@ -231,7 +231,7 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
                                 <div className="flex items-center gap-1 shrink-0">
                                     <button
                                         onClick={() => setExpanded(expanded === inq.id ? null : inq.id)}
-                                        className="p-1.5 rounded-lg text-muted-foreground hover:bg-secondary transition-colors border-none bg-transparent cursor-pointer"
+                                        className="p-1.5 rounded-lg text-slate-custom hover:bg-paper transition-colors border-none bg-transparent cursor-pointer"
                                         title="Expand"
                                     >
                                         {expanded === inq.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -240,7 +240,7 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
                                         <button
                                             onClick={() => handleMarkRead(inq.id)}
                                             disabled={isPending}
-                                            className="p-1.5 rounded-lg text-primary hover:bg-primary/10 transition-colors border-none bg-transparent cursor-pointer"
+                                            className="p-1.5 rounded-lg text-amber hover:bg-amber/10 text-ink transition-colors border-none bg-transparent cursor-pointer"
                                             title="Mark as read"
                                         >
                                             <Eye className="w-4 h-4" />
@@ -259,15 +259,15 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
 
                             {/* Expanded Content */}
                             {expanded === inq.id && (
-                                <div className="px-4 pb-4 pt-0 border-t border-dashed border-border ml-7">
-                                    <p className="text-sm text-foreground leading-relaxed mt-3 whitespace-pre-wrap">{inq.message}</p>
+                                <div className="px-4 pb-4 pt-0 border-t border-dashed border-line ml-7">
+                                    <p className="text-sm text-graphite leading-relaxed mt-3 whitespace-pre-wrap">{inq.message}</p>
 
                                     {!hideReply && (
                                         <>
                                             {inq.reply ? (
-                                                <div className="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/10">
-                                                    <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Reply</p>
-                                                    <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{inq.reply}</p>
+                                                <div className="mt-4 p-4 rounded-xl bg-amber/5 text-ink border border-amber/10">
+                                                    <p className="text-xs font-bold text-amber uppercase tracking-widest mb-2">Reply</p>
+                                                    <p className="text-sm text-graphite leading-relaxed whitespace-pre-wrap">{inq.reply}</p>
                                                 </div>
                                             ) : (
                                                 <form
@@ -291,7 +291,7 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
                                                     <textarea
                                                         name="reply"
                                                         placeholder="Type your reply here to maintain the chat in the dashboard..."
-                                                        className="w-full min-h-[100px] p-3 rounded-xl border bg-secondary/5 focus:ring-2 focus:ring-primary outline-none resize-none text-sm transition-all"
+                                                        className="w-full min-h-[100px] p-3 rounded-xl border bg-paper/5 focus:ring-2 focus:ring-primary outline-none resize-none text-sm transition-all"
                                                         required
                                                     />
                                                     <div className="flex justify-end">
@@ -305,8 +305,8 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
                                     )}
 
                                     {hideReply && (
-                                        <div className="mt-4 p-4 rounded-xl bg-secondary/5 border border-dashed text-center">
-                                            <p className="text-xs text-muted-foreground italic">Public inquiry. Please contact via email or phone provided above.</p>
+                                        <div className="mt-4 p-4 rounded-xl bg-paper/5 border border-dashed text-center">
+                                            <p className="text-xs text-slate-custom italic">Public inquiry. Please contact via email or phone provided above.</p>
                                         </div>
                                     )}
                                 </div>

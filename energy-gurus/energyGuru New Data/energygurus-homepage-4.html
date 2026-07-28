@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EnergyGurus — Your Trusted Guide to Solar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12213A;
+    --paper:#F5F6F3;
+    --amber:#E8A33D;
+    --teal:#2F6E62;
+    --slate:#4A5A73;
+    --graphite:#1B1F24;
+    --line: rgba(18,33,58,0.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Inter', sans-serif;
+    color:var(--graphite);
+    background:var(--paper);
+    line-height:1.5;
+  }
+  h1,h2,h3{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  .mono{
+    font-family:'IBM Plex Mono', monospace;
+  }
+  a{color:inherit; text-decoration:none;}
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 32px;
+  }
+  button, .btn{
+    cursor:pointer;
+    border:none;
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+  }
+  :focus-visible{
+    outline:2px solid var(--amber);
+    outline-offset:3px;
+  }
+
+  /* ---- NAV ---- */
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(245,246,243,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  nav .wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    height:72px;
+  }
+  .logo{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:1.02rem;
+    display:flex; align-items:center; gap:10px;
+  }
+  .nav-links{
+    display:flex; gap:32px;
+    font-size:0.92rem; font-weight:500;
+    color:var(--slate);
+  }
+  .nav-links a:hover{color:var(--ink);}
+  .nav-cta{
+    background:var(--ink); color:var(--paper);
+    padding:11px 20px; border-radius:3px;
+    font-size:0.88rem;
+  }
+  .nav-cta:hover{background:var(--teal);}
+  @media(max-width:860px){ .nav-links{display:none;} }
+
+  /* ---- HERO ---- */
+  .hero{
+    position:relative;
+    background:var(--ink);
+    color:var(--paper);
+    overflow:hidden;
+    padding:96px 0 0;
+  }
+  .hero::before{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      linear-gradient(180deg, transparent 0%, rgba(18,33,58,0) 60%, var(--paper) 100%),
+      radial-gradient(ellipse 900px 500px at 80% 0%, rgba(232,163,61,0.16), transparent 60%);
+    pointer-events:none;
+  }
+  .hero-inner{position:relative; z-index:2;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.76rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--amber);
+    display:flex; align-items:center; gap:10px;
+    margin-bottom:22px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:20px; height:1px;
+    background:var(--amber);
+  }
+  .hero h1{
+    font-size:clamp(2.4rem, 5vw, 4rem);
+    line-height:1.06;
+    max-width:820px;
+    color:#fff;
+  }
+  .hero h1 em{
+    font-style:normal;
+    color:var(--amber);
+  }
+  .hero p.lead{
+    font-size:1.15rem;
+    color:rgba(245,246,243,0.72);
+    max-width:560px;
+    margin:24px 0 36px;
+  }
+  .hero-ctas{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:64px;}
+  .btn-primary{
+    background:var(--amber); color:var(--ink);
+    padding:15px 26px; border-radius:3px; font-size:0.95rem;
+  }
+  .btn-primary:hover{background:#f2b458;}
+  .btn-ghost{
+    background:transparent; color:#fff;
+    border:1px solid rgba(255,255,255,0.28) !important;
+    padding:15px 26px; border-radius:3px; font-size:0.95rem;
+  }
+  .btn-ghost:hover{border-color:#fff !important;}
+
+  /* ---- METER STRIP (signature element) ---- */
+  .meter{
+    position:relative; z-index:2;
+    border-top:1px solid rgba(245,246,243,0.14);
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+  }
+  .meter-cell{
+    padding:28px 32px;
+    border-right:1px solid rgba(245,246,243,0.14);
+  }
+  .meter-cell:last-child{border-right:none;}
+  .meter-val{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:1.9rem;
+    color:var(--amber);
+    display:flex; align-items:baseline; gap:6px;
+  }
+  .meter-val .unit{font-size:0.95rem; color:rgba(245,246,243,0.5);}
+  .meter-label{
+    font-size:0.78rem;
+    color:rgba(245,246,243,0.55);
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    margin-top:6px;
+  }
+  @media(max-width:700px){
+    .meter{grid-template-columns:1fr;}
+    .meter-cell{border-right:none; border-bottom:1px solid rgba(245,246,243,0.14);}
+  }
+
+  /* waveform divider */
+  .waveform{
+    display:block; width:100%; height:56px;
+    background:var(--paper);
+  }
+
+  /* ---- SECTION shared ---- */
+  section{padding:88px 0;}
+  .section-head{max-width:640px; margin-bottom:56px;}
+  .section-head .eyebrow{color:var(--teal);}
+  .section-head .eyebrow::before{background:var(--teal);}
+  .section-head h2{font-size:clamp(1.6rem,3vw,2.3rem); color:var(--ink);}
+  .section-head p{color:var(--slate); margin-top:14px; font-size:1.02rem;}
+
+  /* ---- THREE COLUMN ---- */
+  .cols{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .col-card{
+    background:var(--paper);
+    padding:36px 30px;
+    display:flex; flex-direction:column;
+  }
+  .col-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.72rem;
+    letter-spacing:0.1em;
+    color:var(--teal);
+    margin-bottom:18px;
+  }
+  .col-card h3{font-size:1.25rem; margin-bottom:10px; color:var(--ink);}
+  .col-card p{color:var(--slate); font-size:0.95rem; flex-grow:1;}
+  .col-card .cta{
+    margin-top:22px; font-size:0.88rem; font-weight:600;
+    color:var(--ink); display:inline-flex; align-items:center; gap:6px;
+  }
+  .col-card .cta::after{content:"→"; transition:transform .15s;}
+  .col-card:hover .cta::after{transform:translateX(3px);}
+  @media(max-width:860px){ .cols{grid-template-columns:1fr;} }
+
+  /* ---- HOW IT WORKS (real sequence -> numbering justified) ---- */
+  .steps{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:40px;
+  }
+  .step{position:relative; padding-left:52px;}
+  .step .num{
+    position:absolute; left:0; top:0;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.85rem;
+    color:var(--amber);
+    border:1px solid var(--amber);
+    width:34px; height:34px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .step h3{font-size:1.1rem; margin-bottom:8px; color:var(--ink);}
+  .step p{color:var(--slate); font-size:0.94rem;}
+  @media(max-width:860px){ .steps{grid-template-columns:1fr;} }
+
+  /* ---- FEATURE BAND (Monitoring) ---- */
+  .band{
+    background:var(--ink);
+    color:var(--paper);
+  }
+  .band .wrap{
+    display:grid;
+    grid-template-columns:1.1fr 0.9fr;
+    gap:64px;
+    align-items:center;
+  }
+  .band .eyebrow{color:var(--amber);}
+  .band .eyebrow::before{background:var(--amber);}
+  .band h2{color:#fff; font-size:clamp(1.6rem,3vw,2.2rem);}
+  .band p{color:rgba(245,246,243,0.7); margin:18px 0 26px; max-width:480px;}
+  .band .btn-primary{display:inline-block;}
+  .pulse-panel{
+    border:1px solid rgba(245,246,243,0.16);
+    border-radius:4px;
+    padding:28px;
+    background:rgba(245,246,243,0.03);
+  }
+  .pulse-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 0;
+    border-bottom:1px solid rgba(245,246,243,0.1);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.85rem;
+  }
+  .pulse-row:last-child{border-bottom:none;}
+  .pulse-ok{color:var(--teal); background:rgba(47,110,98,0.18); padding:3px 10px; border-radius:20px; font-size:0.72rem;}
+  @media(max-width:860px){ .band .wrap{grid-template-columns:1fr;} }
+
+  /* ---- PODCAST ---- */
+  .podcast-card{
+    display:grid;
+    grid-template-columns:220px 1fr;
+    gap:32px;
+    align-items:center;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:28px;
+  }
+  .podcast-art{
+    aspect-ratio:1;
+    border-radius:4px;
+    background:
+      repeating-linear-gradient(135deg, var(--teal) 0 2px, transparent 2px 14px),
+      var(--ink);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .podcast-art .play{
+    width:48px; height:48px; border-radius:50%;
+    background:var(--amber);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink); font-size:1rem;
+  }
+  .podcast-card h3{color:var(--ink); font-size:1.2rem; margin-bottom:8px;}
+  .podcast-card p{color:var(--slate); font-size:0.95rem; margin-bottom:14px;}
+  @media(max-width:640px){ .podcast-card{grid-template-columns:1fr;} .podcast-art{max-width:160px;} }
+
+  /* ---- NEWSLETTER ---- */
+  .news{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:44px;
+    display:flex; justify-content:space-between; align-items:center; gap:32px;
+    flex-wrap:wrap;
+  }
+  .news h2{color:var(--ink); font-size:1.4rem; margin-bottom:6px;}
+  .news p{color:var(--slate); font-size:0.95rem;}
+  .news form{display:flex; gap:10px;}
+  .news input{
+    padding:13px 16px; border:1px solid var(--line); border-radius:3px;
+    font-family:'Inter'; font-size:0.9rem; min-width:220px;
+  }
+
+  /* ---- FOOTER ---- */
+  footer{
+    background:var(--ink); color:rgba(245,246,243,0.6);
+    padding:56px 0 32px;
+    font-size:0.88rem;
+  }
+  footer .wrap{
+    display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:24px;
+  }
+  footer .tag{max-width:340px; color:rgba(245,246,243,0.85); font-family:'Space Grotesk'; font-size:1rem;}
+  footer .cols-f{display:flex; gap:56px; flex-wrap:wrap;}
+  footer .cols-f a{display:block; margin-bottom:10px; color:rgba(245,246,243,0.6);}
+  footer .cols-f a:hover{color:#fff;}
+  footer .bottom{margin-top:48px; border-top:1px solid rgba(245,246,243,0.12); padding-top:20px; font-size:0.78rem;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="energygurus-homepage.html" class="logo"><svg width="34" height="34" viewBox="0 0 100 100" style="flex-shrink:0;"><rect width="100" height="100" rx="20" fill="#12213A"/><g transform="translate(4,4) scale(0.8)"><g fill="none" stroke="#F5F6F3" stroke-width="3.5" stroke-linecap="round"><path d="M60,8 A52,52 0 0,1 108,44"/><path d="M112,58 A52,52 0 0,1 100,98"/><path d="M88,108 A52,52 0 0,1 46,111"/><path d="M20,96 A52,52 0 0,1 10,56"/><path d="M16,42 A52,52 0 0,1 44,12"/></g><rect x="30" y="34" width="42" height="42" rx="5" fill="#12213A" stroke="#F5F6F3" stroke-width="3.5"/><rect x="56" y="58" width="36" height="36" rx="5" fill="#E8A33D"/><rect x="66" y="52" width="16" height="8" rx="2" fill="#E8A33D"/><path d="M62,74 L70,82 L84,64" fill="none" stroke="#12213A" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></g></svg><span style="display:flex; flex-direction:column; line-height:1.15;"><span>EnergyGurus<span style="color:#E8A33D;">.Online</span></span><span style="font-family:'IBM Plex Mono',monospace; font-weight:500; font-size:0.56rem; letter-spacing:0.08em; color:#4A5A73; text-transform:uppercase;">Authenticity Guaranteed</span></span></a>
+    <div class="nav-links">
+      <a href="energygurus-brands-page.html">Solar Brands</a>
+      <a href="energygurus-installer-page.html">Find an Installer</a>
+      <a href="energygurus-monitoring-page.html">Monitoring &amp; O&amp;M</a>
+      <a href="energygurus-podcast-page.html">Podcast</a>
+    </div>
+    <a href="#quote" class="nav-cta">Get Started</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-inner">
+    <p class="eyebrow">Live Solar Intelligence</p>
+    <h1>Your trusted guide to solar — from first question to full <em>install</em>.</h1>
+    <p class="lead">Compare certified brands, connect with vetted installers, and keep your system running strong with expert monitoring — all backed by facts, not sales pitches.</p>
+    <div class="hero-ctas">
+      <button class="btn-primary">Get Started</button>
+      <button class="btn-ghost">Compare Solar Brands</button>
+      <button class="btn-ghost">Explore the Facts</button>
+    </div>
+  </div>
+  <div class="meter">
+    <div class="meter-cell"><div class="meter-val">250<span class="unit">+</span></div><div class="meter-label">Certified Installers</div></div>
+    <div class="meter-cell"><div class="meter-val">40<span class="unit">+</span></div><div class="meter-label">Brands Reviewed</div></div>
+    <div class="meter-cell"><div class="meter-val">120<span class="unit">eps</span></div><div class="meter-label">Real Talk On Solar</div></div>
+  </div>
+  <svg class="waveform" viewBox="0 0 1200 56" preserveAspectRatio="none">
+    <path d="M0,40 C150,10 300,50 450,20 C600,5 750,45 900,18 C1050,2 1150,35 1200,25 L1200,56 L0,56 Z" fill="#F5F6F3"/>
+  </svg>
+</header>
+
+<section id="pillars">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Three Ways In</p>
+      <h2>Whatever brought you here, we've got a path.</h2>
+      <p>Browse by brand, get matched with an installer, or start with the facts — no wrong door.</p>
+    </div>
+    <div class="cols">
+      <div class="col-card">
+        <div class="col-tag">01 · INSTALL</div>
+        <h3>Connect with certified professionals</h3>
+        <p>Every installer in our network is vetted for certification, experience, and customer track record. Get matched with a professional who fits your home and budget.</p>
+        <span class="cta">Find an Installer</span>
+      </div>
+      <div class="col-card">
+        <div class="col-tag">02 · COMPARE</div>
+        <h3>Unbiased brand comparisons</h3>
+        <p>Panels, inverters, batteries — we break down specs, warranties, and real-world performance so you can choose with confidence, not guesswork.</p>
+        <span class="cta">Browse Brands</span>
+      </div>
+      <div class="col-card">
+        <div class="col-tag">03 · LEARN</div>
+        <h3>Solar, explained simply</h3>
+        <p>Our podcast cuts through industry jargon with straight answers on costs, savings, and what actually matters when going solar.</p>
+        <span class="cta">Listen Now</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">The Process</p>
+      <h2>Three steps to solar confidence.</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <h3>Browse</h3>
+        <p>Explore brands and installers vetted for quality and reliability.</p>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <h3>Connect</h3>
+        <p>Request a quote and get matched with the right installer for your home.</p>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <h3>Monitor</h3>
+        <p>Keep your system performing at its best with our Monitoring &amp; O&amp;M services.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="monitoring" class="band">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Monitoring &amp; O&amp;M</p>
+      <h2>Solar doesn't stop at installation.</h2>
+      <p>We help you protect your investment long after the panels go up — with real-time performance monitoring, proactive maintenance, and fast fault detection.</p>
+      <button class="btn-primary">Learn About Monitoring &amp; O&amp;M</button>
+    </div>
+    <div class="pulse-panel">
+      <div class="pulse-row"><span>System Output</span><span>4.82 kW</span></div>
+      <div class="pulse-row"><span>Panel Health</span><span class="pulse-ok">Nominal</span></div>
+      <div class="pulse-row"><span>Last Fault Check</span><span>—</span></div>
+      <div class="pulse-row"><span>Uptime (30d)</span><span>99.8%</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="podcast">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">The Podcast</p>
+      <h2>Straight talk on solar.</h2>
+    </div>
+    <div class="podcast-card">
+      <div class="podcast-art"><div class="play">▶</div></div>
+      <div>
+        <h3>Latest Episode — What Actually Determines Your Payback Period</h3>
+        <p>New episodes breaking down the facts and figures behind solar energy — no jargon, no sales pressure.</p>
+        <span class="cta" style="color:var(--ink); font-weight:600;">Listen to the Latest Episode →</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="quote">
+  <div class="wrap">
+    <div class="news">
+      <div>
+        <h2>Stay informed.</h2>
+        <p>Get solar facts, brand updates, and installer insights delivered straight to your inbox.</p>
+      </div>
+      <form onsubmit="return false;">
+        <input type="email" placeholder="you@email.com" aria-label="Email address">
+        <button class="btn-primary" type="submit">Subscribe</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="tag">Powering informed solar decisions — brands, installers, and expertise, all in one place.</div>
+    <div class="cols-f">
+      <div>
+        <a href="energygurus-brands-page.html">Solar Brands</a>
+        <a href="energygurus-installer-page.html">Find an Installer</a>
+        <a href="energygurus-monitoring-page.html">Monitoring &amp; O&amp;M</a>
+      </div>
+      <div>
+        <a href="energygurus-podcast-page.html">Podcast</a>
+        <a href="#learn">Learn</a>
+        <a href="#about">About</a>
+      </div>
+    </div>
+  </div>
+  <div class="wrap bottom">© 2026 EnergyGurus.online — All rights reserved.</div>
+</footer>
+
+</body>
+</html>

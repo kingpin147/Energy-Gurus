@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitoring & O&M — EnergyGurus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12213A; --paper:#F5F6F3; --amber:#E8A33D;
+    --teal:#2F6E62; --slate:#4A5A73; --graphite:#1B1F24;
+    --line: rgba(18,33,58,0.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Inter', sans-serif; color:var(--graphite); background:var(--paper); line-height:1.5;}
+  h1,h2,h3{font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:-0.01em;}
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 32px;}
+  :focus-visible{outline:2px solid var(--amber); outline-offset:3px;}
+  button{cursor:pointer; border:none; font-family:'Inter'; font-weight:600;}
+
+  nav{position:sticky; top:0; z-index:50; background:rgba(245,246,243,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line);}
+  nav .wrap{display:flex; align-items:center; justify-content:space-between; height:72px;}
+  .logo{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:1.02rem; display:flex; align-items:center; gap:10px;}
+  .nav-links{display:flex; gap:32px; font-size:0.92rem; font-weight:500; color:var(--slate);}
+  .nav-links a.active{color:var(--ink); font-weight:600;}
+  .nav-links a:hover{color:var(--ink);}
+  .nav-cta{background:var(--ink); color:var(--paper); padding:11px 20px; border-radius:3px; font-size:0.88rem;}
+  @media(max-width:860px){ .nav-links{display:none;} }
+
+  .eyebrow{font-family:'IBM Plex Mono', monospace; font-size:0.76rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--amber); display:flex; align-items:center; gap:10px; margin-bottom:18px;}
+  .eyebrow::before{content:""; width:20px; height:1px; background:var(--amber);}
+
+  /* hero */
+  .hero{background:var(--ink); color:#fff; padding:88px 0 60px; position:relative; overflow:hidden;}
+  .hero::before{content:""; position:absolute; inset:0; background:radial-gradient(ellipse 800px 460px at 85% 0%, rgba(232,163,61,0.14), transparent 60%); pointer-events:none;}
+  .hero-inner{position:relative; z-index:2; display:grid; grid-template-columns:1.1fr 0.9fr; gap:56px; align-items:center;}
+  .hero h1{font-size:clamp(2rem,4vw,2.9rem);}
+  .hero p.lead{color:rgba(245,246,243,0.72); margin:18px 0 30px; max-width:480px; font-size:1.05rem;}
+  .btn-primary{background:var(--amber); color:var(--ink); padding:15px 26px; border-radius:3px; font-size:0.95rem;}
+  .btn-primary:hover{background:#f2b458;}
+  @media(max-width:860px){ .hero-inner{grid-template-columns:1fr;} }
+
+  .pulse-panel{border:1px solid rgba(245,246,243,0.16); border-radius:4px; padding:26px; background:rgba(245,246,243,0.03);}
+  .pulse-title{font-family:'IBM Plex Mono', monospace; font-size:0.72rem; letter-spacing:0.08em; text-transform:uppercase; color:rgba(245,246,243,0.5); margin-bottom:14px;}
+  .pulse-row{display:flex; justify-content:space-between; align-items:center; padding:13px 0; border-bottom:1px solid rgba(245,246,243,0.1); font-family:'IBM Plex Mono', monospace; font-size:0.85rem;}
+  .pulse-row:last-child{border-bottom:none;}
+  .pulse-ok{color:var(--teal); background:rgba(47,110,98,0.18); padding:3px 10px; border-radius:20px; font-size:0.72rem;}
+
+  /* why section */
+  section{padding:80px 0;}
+  .why{display:grid; grid-template-columns:0.9fr 1.1fr; gap:56px; align-items:center;}
+  .why h2{font-size:clamp(1.5rem,3vw,2.1rem); color:var(--ink); margin-bottom:16px;}
+  .why p{color:var(--slate); font-size:1.02rem;}
+  .decay-chart{background:#fff; border:1px solid var(--line); border-radius:4px; padding:24px;}
+  .decay-chart svg{width:100%; height:auto; display:block;}
+  @media(max-width:860px){ .why{grid-template-columns:1fr;} }
+
+  /* pillars */
+  .section-head{max-width:640px; margin-bottom:48px;}
+  .section-head .eyebrow{color:var(--teal);}
+  .section-head .eyebrow::before{background:var(--teal);}
+  .section-head h2{font-size:clamp(1.5rem,3vw,2.1rem); color:var(--ink);}
+  .pillars{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:4px; overflow:hidden;}
+  .pillar{background:var(--paper); padding:32px 28px;}
+  .pillar-icon{width:38px; height:38px; border-radius:6px; background:var(--ink); color:var(--amber); display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono'; font-weight:600; margin-bottom:18px;}
+  .pillar h3{font-size:1.1rem; color:var(--ink); margin-bottom:8px;}
+  .pillar p{color:var(--slate); font-size:0.93rem;}
+  @media(max-width:860px){ .pillars{grid-template-columns:1fr;} }
+
+  /* pricing */
+  .tiers{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  .tier{background:#fff; border:1px solid var(--line); border-radius:6px; padding:32px 26px; position:relative;}
+  .tier.popular{border-color:var(--amber); box-shadow:0 0 0 1px var(--amber);}
+  .popular-flag{position:absolute; top:-12px; left:26px; background:var(--amber); color:var(--ink); font-family:'IBM Plex Mono'; font-size:0.68rem; letter-spacing:0.06em; text-transform:uppercase; padding:4px 10px; border-radius:20px;}
+  .tier h3{font-size:1.2rem; color:var(--ink); margin-bottom:14px;}
+  .tier ul{list-style:none; margin:18px 0 26px;}
+  .tier li{font-size:0.9rem; color:var(--slate); padding:8px 0; border-top:1px solid var(--line);}
+  .tier li:first-child{border-top:none;}
+  .tier-btn{width:100%; padding:13px; border-radius:3px; font-size:0.9rem; background:var(--paper); border:1px solid var(--line) !important; color:var(--ink);}
+  .tier.popular .tier-btn{background:var(--ink); color:#fff; border-color:var(--ink) !important;}
+  @media(max-width:860px){ .tiers{grid-template-columns:1fr;} }
+
+  /* trust stats */
+  .stats{background:var(--ink); color:#fff;}
+  .stat-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px;}
+  .stat{padding:36px 28px; border-right:1px solid rgba(245,246,243,0.14);}
+  .stat:last-child{border-right:none;}
+  .stat-val{font-family:'IBM Plex Mono', monospace; font-size:2rem; color:var(--amber);}
+  .stat-label{font-size:0.82rem; color:rgba(245,246,243,0.6); text-transform:uppercase; letter-spacing:0.06em; margin-top:6px;}
+  @media(max-width:700px){ .stat-grid{grid-template-columns:1fr;} .stat{border-right:none; border-bottom:1px solid rgba(245,246,243,0.14);} }
+
+  /* cta */
+  .final-cta{text-align:center; padding:96px 0;}
+  .final-cta h2{font-size:clamp(1.6rem,3vw,2.3rem); color:var(--ink); margin-bottom:24px;}
+
+  footer{background:var(--ink); color:rgba(245,246,243,0.55); padding:32px 0; text-align:center; font-size:0.82rem;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="energygurus-homepage.html" class="logo"><svg width="34" height="34" viewBox="0 0 100 100" style="flex-shrink:0;"><rect width="100" height="100" rx="20" fill="#12213A"/><g transform="translate(4,4) scale(0.8)"><g fill="none" stroke="#F5F6F3" stroke-width="3.5" stroke-linecap="round"><path d="M60,8 A52,52 0 0,1 108,44"/><path d="M112,58 A52,52 0 0,1 100,98"/><path d="M88,108 A52,52 0 0,1 46,111"/><path d="M20,96 A52,52 0 0,1 10,56"/><path d="M16,42 A52,52 0 0,1 44,12"/></g><rect x="30" y="34" width="42" height="42" rx="5" fill="#12213A" stroke="#F5F6F3" stroke-width="3.5"/><rect x="56" y="58" width="36" height="36" rx="5" fill="#E8A33D"/><rect x="66" y="52" width="16" height="8" rx="2" fill="#E8A33D"/><path d="M62,74 L70,82 L84,64" fill="none" stroke="#12213A" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></g></svg><span style="display:flex; flex-direction:column; line-height:1.15;"><span>EnergyGurus<span style="color:#E8A33D;">.Online</span></span><span style="font-family:'IBM Plex Mono',monospace; font-weight:500; font-size:0.56rem; letter-spacing:0.08em; color:#4A5A73; text-transform:uppercase;">Authenticity Guaranteed</span></span></a>
+    <div class="nav-links">
+      <a href="#">Solar Brands</a>
+      <a href="#">Find an Installer</a>
+      <a href="energygurus-monitoring-page.html" class="active">Monitoring &amp; O&amp;M</a>
+      <a href="#">Podcast</a>
+    </div>
+    <a href="#" class="nav-cta">Get Started</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-inner">
+    <div>
+      <p class="eyebrow">Monitoring &amp; O&amp;M</p>
+      <h1>Solar doesn't stop at installation.</h1>
+      <p class="lead">Protect your investment long after the panels go up — with real-time performance monitoring, proactive maintenance, and fast fault detection.</p>
+      <button class="btn-primary">Request Monitoring Setup</button>
+    </div>
+    <div class="pulse-panel">
+      <div class="pulse-title">Live System Status</div>
+      <div class="pulse-row"><span>System Output</span><span>4.82 kW</span></div>
+      <div class="pulse-row"><span>Panel Health</span><span class="pulse-ok">Nominal</span></div>
+      <div class="pulse-row"><span>Last Fault Check</span><span>2 min ago</span></div>
+      <div class="pulse-row"><span>Uptime (30d)</span><span>99.8%</span></div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap why">
+    <div>
+      <p class="eyebrow" style="color:var(--teal);"><span style="display:inline-block;width:20px;height:1px;background:var(--teal);"></span>Why It Matters</p>
+      <h2>Every system degrades without oversight.</h2>
+      <p>Panels lose efficiency, inverters fail silently, and small faults compound into major repairs when nobody's watching. Monitoring is what turns a one-time install into decades of reliable output.</p>
+    </div>
+    <div class="decay-chart">
+      <svg viewBox="0 0 400 160">
+        <line x1="0" y1="140" x2="400" y2="140" stroke="#12213A" stroke-opacity="0.12"/>
+        <path d="M0,20 C80,30 120,35 180,50 C260,68 320,90 400,130" fill="none" stroke="#4A5A73" stroke-width="2" stroke-dasharray="5 5"/>
+        <path d="M0,20 C80,24 140,28 200,32 C280,38 340,42 400,46" fill="none" stroke="#E8A33D" stroke-width="2.5"/>
+        <text x="0" y="12" font-family="IBM Plex Mono" font-size="10" fill="#4A5A73">Output Over Time</text>
+        <text x="300" y="140" font-family="IBM Plex Mono" font-size="9" fill="#4A5A73">Unmonitored</text>
+        <text x="300" y="42" font-family="IBM Plex Mono" font-size="9" fill="#E8A33D">Monitored</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">What's Included</p>
+      <h2>Three layers of protection for your system.</h2>
+    </div>
+    <div class="pillars">
+      <div class="pillar">
+        <div class="pillar-icon">01</div>
+        <h3>Real-Time Monitoring</h3>
+        <p>Track output, panel health, and system performance from anywhere, with alerts the moment something looks off.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">02</div>
+        <h3>Proactive Maintenance</h3>
+        <p>Scheduled inspections and cleaning keep your system performing at peak efficiency year-round.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">03</div>
+        <h3>Fast Fault Detection</h3>
+        <p>Automated diagnostics catch issues early — before they cost you performance or money.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Pricing</p>
+      <h2>Choose your coverage level.</h2>
+    </div>
+    <div class="tiers">
+      <div class="tier">
+        <h3>Essential</h3>
+        <ul>
+          <li>Remote monitoring</li>
+          <li>Annual inspection</li>
+          <li>Email fault alerts</li>
+        </ul>
+        <button class="tier-btn">Select Essential</button>
+      </div>
+      <div class="tier popular">
+        <span class="popular-flag">Most Popular</span>
+        <h3>Plus</h3>
+        <ul>
+          <li>Everything in Essential</li>
+          <li>Biannual maintenance</li>
+          <li>Priority fault response</li>
+        </ul>
+        <button class="tier-btn">Select Plus</button>
+      </div>
+      <div class="tier">
+        <h3>Pro</h3>
+        <ul>
+          <li>Everything in Plus</li>
+          <li>Guaranteed uptime SLA</li>
+          <li>Dedicated account contact</li>
+        </ul>
+        <button class="tier-btn">Select Pro</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="wrap">
+    <div class="stat-grid">
+      <div class="stat"><div class="stat-val">99.8%</div><div class="stat-label">Uptime Guarantee</div></div>
+      <div class="stat"><div class="stat-val">&lt;2 hrs</div><div class="stat-label">Avg. Fault Response Time</div></div>
+      <div class="stat"><div class="stat-val">3,400+</div><div class="stat-label">Systems Monitored</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="final-cta">
+  <div class="wrap">
+    <h2>Keep your system performing at its best.</h2>
+    <button class="btn-primary">Request Monitoring Setup</button>
+  </div>
+</section>
+
+<footer>© 2026 EnergyGurus.online — All rights reserved.</footer>
+
+</body>
+</html>

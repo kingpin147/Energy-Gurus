@@ -20,13 +20,13 @@ export function BrandContactButtons({ brandId, brandName, userId, website, whats
         <div className="space-y-4">
             <Dialog>
                 <TrackedDialogTrigger
-                    className="w-full h-16 rounded-[1.8rem] font-black text-lg bg-primary text-white hover:bg-primary/90 gap-4 transition-all hover:scale-[1.02] shadow-xl shadow-primary/20 inline-flex items-center justify-center"
+                    className="w-full h-16 rounded-[1.8rem] font-black text-lg bg-amber text-ink text-white hover:bg-amber/90 text-ink gap-4 transition-all hover:scale-[1.02] shadow-xl shadow-primary/20 inline-flex items-center justify-center"
                     eventName="brand_contact_click"
                     eventProperties={{ brandId, brandName }}
                 >
                     <Mail className="w-6 h-6" /> InMail Contact
                 </TrackedDialogTrigger>
-                <DialogContent className="sm:max-w-[500px] rounded-[3rem] p-0 overflow-hidden border-none text-foreground">
+                <DialogContent className="sm:max-w-[500px] rounded-[3rem] p-0 overflow-hidden border-none text-graphite">
                     <div className="bg-[#0F172A] p-10 text-white">
                         <h3 className="text-3xl font-black tracking-tighter">Direct Inquiry</h3>
                         <p className="text-white/40 text-sm font-medium">Send a verified message to {brandName} headquarters.</p>

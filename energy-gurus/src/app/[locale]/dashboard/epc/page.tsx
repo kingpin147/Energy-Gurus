@@ -59,17 +59,17 @@ export default async function EpcDashboard() {
         </div>
       )}
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center">
+        <div className="w-12 h-12 bg-amber text-ink rounded-2xl flex items-center justify-center">
           <Briefcase className="w-6 h-6 text-white" />
         </div>
         <div>
           <h1 className="text-3xl font-bold tracking-tight">EPC Dashboard</h1>
-          <p className="text-muted-foreground">Manage your company profile, portfolio, and customer inquiries.</p>
+          <p className="text-slate-custom">Manage your company profile, portfolio, and customer inquiries.</p>
         </div>
       </div>
 
       {/* Profile Completeness Score Card */}
-      <div className="bg-white/50 backdrop-blur-xl border border-border/50 p-6 rounded-[2rem] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-white/50 backdrop-blur-xl border border-line/50 p-6 rounded-[2rem] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-2 flex-1">
           <div className="flex justify-between items-center text-sm">
             <span className="font-black uppercase tracking-widest text-[11px] opacity-60">Profile Completeness</span>
@@ -80,7 +80,7 @@ export default async function EpcDashboard() {
               {score}% Complete
             </span>
           </div>
-          <div className="w-full h-3 bg-secondary/30 rounded-full overflow-hidden">
+          <div className="w-full h-3 bg-paper/30 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${score === 100 ? "bg-green-500" :
                 score >= 70 ? "bg-blue-500" :
@@ -93,21 +93,21 @@ export default async function EpcDashboard() {
 
         {missing.length > 0 ? (
           <div className="text-xs md:text-right max-w-sm">
-            <span className="font-bold text-muted-foreground block mb-1">Missing Checkpoints to hit 100%:</span>
-            <span className="text-muted-foreground font-medium">
+            <span className="font-bold text-slate-custom block mb-1">Missing Checkpoints to hit 100%:</span>
+            <span className="text-slate-custom font-medium">
               {missing.join(", ")}
             </span>
           </div>
         ) : (
           <div className="text-xs md:text-right">
             <span className="font-black text-green-600 block mb-1">🎉 Perfectly Complete Profile!</span>
-            <span className="text-muted-foreground font-medium">Your profile is fully optimized for public directories and search engines.</span>
+            <span className="text-slate-custom font-medium">Your profile is fully optimized for public directories and search engines.</span>
           </div>
         )}
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="flex flex-wrap w-full h-auto p-1 bg-secondary/20 rounded-xl mb-8 gap-1">
+        <TabsList className="flex flex-wrap w-full h-auto p-1 bg-paper/20 rounded-xl mb-8 gap-1">
           <TabsTrigger value="profile" className="rounded-lg font-bold gap-2 flex-1 min-w-[120px] h-12">
             <Settings className="w-4 h-4" /> Profile
           </TabsTrigger>
@@ -185,7 +185,7 @@ export default async function EpcDashboard() {
               <Star className="w-10 h-10 text-yellow-500" />
               <div>
                 <h3 className="text-xl font-bold">Ratings & Feedback</h3>
-                <p className="text-muted-foreground text-sm">Monitor what customers are saying about your installations.</p>
+                <p className="text-slate-custom text-sm">Monitor what customers are saying about your installations.</p>
               </div>
             </div>
             <DashboardReviewList targetId={epc.id} targetType="epc" />

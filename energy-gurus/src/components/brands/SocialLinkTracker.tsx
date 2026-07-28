@@ -41,9 +41,9 @@ export function SocialLinkTracker({
     }
   }
 
-  const lightClass = "w-9 h-9 bg-secondary rounded-xl flex items-center justify-center hover:bg-primary hover:text-white transition-all border border-border/50 group"
-  const darkClass  = "w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center hover:bg-primary hover:text-white transition-all border border-white/5 group"
-  const lightIcon  = "w-4 h-4 text-foreground group-hover:text-white group-hover:scale-110 transition-transform"
+  const lightClass = "w-9 h-9 bg-paper rounded-xl flex items-center justify-center hover:bg-amber text-ink hover:text-white transition-all border border-line/50 group"
+  const darkClass  = "w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center hover:bg-amber text-ink hover:text-white transition-all border border-white/5 group"
+  const lightIcon  = "w-4 h-4 text-graphite group-hover:text-white group-hover:scale-110 transition-transform"
   const darkIcon   = "w-7 h-7 text-white group-hover:scale-110 transition-transform"
 
   return (

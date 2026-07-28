@@ -27,12 +27,12 @@ export default async function SupportPage() {
             {mySupportRequests.length > 0 && (
                 <div className="max-w-2xl mx-auto">
                     <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                        <MessageCircle className="w-5 h-5 text-primary" />
+                        <MessageCircle className="w-5 h-5 text-amber" />
                         My Support History
                     </h3>
                     <div className="space-y-4">
                         {mySupportRequests.map((req) => (
-                            <div key={req.id} className="bg-card border rounded-2xl p-5 shadow-sm">
+                            <div key={req.id} className="bg-white border rounded-2xl p-5 shadow-sm">
                                 <div className="flex justify-between items-start mb-3">
                                     <h4 className="font-semibold text-sm">{req.subject}</h4>
                                     <div className="flex items-center gap-2">
@@ -45,16 +45,16 @@ export default async function SupportPage() {
                                         </span>
                                     </div>
                                 </div>
-                                <p className="text-sm text-muted-foreground whitespace-pre-wrap mb-4">{req.message}</p>
+                                <p className="text-sm text-slate-custom whitespace-pre-wrap mb-4">{req.message}</p>
                                 
                                 {req.reply && (
-                                    <div className="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/10">
-                                        <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Admin Reply</p>
-                                        <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{req.reply}</p>
+                                    <div className="mt-4 p-4 rounded-xl bg-amber/5 text-ink border border-amber/10">
+                                        <p className="text-xs font-bold text-amber uppercase tracking-widest mb-2">Admin Reply</p>
+                                        <p className="text-sm text-graphite leading-relaxed whitespace-pre-wrap">{req.reply}</p>
                                     </div>
                                 )}
                                 
-                                <div className="flex items-center gap-1 mt-4 text-muted-foreground">
+                                <div className="flex items-center gap-1 mt-4 text-slate-custom">
                                     <Clock className="w-3.5 h-3.5" />
                                     <span className="text-xs">
                                         {new Date(req.createdAt).toLocaleDateString("en-PK", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}

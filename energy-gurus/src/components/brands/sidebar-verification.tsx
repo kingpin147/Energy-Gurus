@@ -24,12 +24,12 @@ export function SidebarVerification() {
     return (
         <div className="flex flex-col gap-5 items-center">
             <div className="relative w-full group">
-                <QrCode className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors w-5 h-5" />
+                <QrCode className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-custom group-focus-within:text-amber transition-colors w-5 h-5" />
                 <input 
                     type="text" 
                     value={sn}
                     onChange={(e) => setSn(e.target.value)}
-                    className="w-full pl-12 pr-4 h-14 bg-white/50 backdrop-blur-xl border border-border/50 rounded-2xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-base placeholder:text-muted-foreground/40 outline-none transition-all font-medium shadow-sm" 
+                    className="w-full pl-12 pr-4 h-14 bg-white/50 backdrop-blur-xl border border-line/50 rounded-2xl focus:ring-2 focus:ring-primary/20 focus:border-amber text-base placeholder:text-slate-custom/40 outline-none transition-all font-medium shadow-sm" 
                     placeholder="Serial Number..." 
                 />
             </div>
@@ -37,7 +37,7 @@ export function SidebarVerification() {
             <button 
                 onClick={handleVerify}
                 disabled={loading || !sn}
-                className="w-full h-14 bg-primary text-white rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-primary/90 active:scale-[0.98] transition-all text-[10px] disabled:opacity-50 disabled:pointer-events-none uppercase tracking-[0.2em] shadow-xl shadow-primary/20"
+                className="w-full h-14 bg-amber text-ink text-white rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-amber/90 text-ink active:scale-[0.98] transition-all text-[10px] disabled:opacity-50 disabled:pointer-events-none uppercase tracking-[0.2em] shadow-xl shadow-primary/20"
             >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -76,7 +76,7 @@ export function SidebarVerification() {
                 </div>
             )}
 
-            <p className="text-[10px] text-muted-foreground/40 italic text-center font-black uppercase tracking-[0.2em] mt-2">
+            <p className="text-[10px] text-slate-custom/40 italic text-center font-black uppercase tracking-[0.2em] mt-2">
                 Secure Global Authentication
             </p>
         </div>

@@ -38,8 +38,8 @@ export function ContactForm({ receiverId, receiverName, initialMessage }: { rece
                 <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
                     <CheckCircle2 className="w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground">Inquiry Sent!</h3>
-                <p className="text-muted-foreground text-sm max-w-xs mx-auto">Your message has been delivered to <strong>{receiverName}</strong>. They will contact you using the details you provided.</p>
+                <h3 className="text-xl font-bold text-graphite">Inquiry Sent!</h3>
+                <p className="text-slate-custom text-sm max-w-xs mx-auto">Your message has been delivered to <strong>{receiverName}</strong>. They will contact you using the details you provided.</p>
                 <Button variant="outline" className="rounded-xl" onClick={() => setIsSubmitted(false)}>Send another inquiry</Button>
             </div>
         );
@@ -59,7 +59,7 @@ export function ContactForm({ receiverId, receiverName, initialMessage }: { rece
                     name="guestName"
                     placeholder="Your full name"
                     defaultValue={isLoaded && user ? (user.fullName ?? "") : ""}
-                    className="w-full p-3 rounded-xl border bg-secondary/5 outline-none focus:ring-2 focus:ring-primary text-sm transition-all"
+                    className="w-full p-3 rounded-xl border bg-paper/5 outline-none focus:ring-2 focus:ring-primary text-sm transition-all"
                     required
                 />
             </div>
@@ -75,7 +75,7 @@ export function ContactForm({ receiverId, receiverName, initialMessage }: { rece
                         type="email"
                         placeholder="email@example.com"
                         defaultValue={isLoaded && user ? (user.primaryEmailAddress?.emailAddress ?? "") : ""}
-                        className="w-full p-3 rounded-xl border bg-secondary/5 outline-none focus:ring-2 focus:ring-primary text-sm transition-all"
+                        className="w-full p-3 rounded-xl border bg-paper/5 outline-none focus:ring-2 focus:ring-primary text-sm transition-all"
                         required
                     />
                 </div>
@@ -86,7 +86,7 @@ export function ContactForm({ receiverId, receiverName, initialMessage }: { rece
                     <input
                         name="guestPhone"
                         placeholder="+92 3XX XXXXXXX"
-                        className="w-full p-3 rounded-xl border bg-secondary/5 outline-none focus:ring-2 focus:ring-primary text-sm transition-all"
+                        className="w-full p-3 rounded-xl border bg-paper/5 outline-none focus:ring-2 focus:ring-primary text-sm transition-all"
                     />
                 </div>
             </div>
@@ -99,7 +99,7 @@ export function ContactForm({ receiverId, receiverName, initialMessage }: { rece
                 <textarea
                     name="message"
                     placeholder={`Describe what you need from ${receiverName}...`}
-                    className="w-full min-h-[120px] p-4 rounded-2xl border bg-secondary/5 focus:ring-2 focus:ring-primary outline-none transition-all resize-none text-sm"
+                    className="w-full min-h-[120px] p-4 rounded-2xl border bg-paper/5 focus:ring-2 focus:ring-primary outline-none transition-all resize-none text-sm"
                     required
                     defaultValue={initialMessage}
                 />

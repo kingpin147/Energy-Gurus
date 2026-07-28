@@ -136,13 +136,13 @@ export function BulkInvite() {
     <Card className="border-none shadow-sm rounded-3xl mt-6">
       <CardHeader>
         <CardTitle className="text-xl flex items-center gap-2">
-          <FileText className="w-5 h-5 text-primary" />
+          <FileText className="w-5 h-5 text-amber" />
           Bulk CSV Invitation
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-xs text-muted-foreground">
-          Upload a CSV with column headers <code className="bg-secondary/40 px-1 py-0.5 rounded font-bold">email</code> and optional <code className="bg-secondary/40 px-1 py-0.5 rounded font-bold">role</code> (epc, brand, or admin).
+        <p className="text-xs text-slate-custom">
+          Upload a CSV with column headers <code className="bg-paper/40 px-1 py-0.5 rounded font-bold">email</code> and optional <code className="bg-paper/40 px-1 py-0.5 rounded font-bold">role</code> (epc, brand, or admin).
         </p>
 
         <div
@@ -151,7 +151,7 @@ export function BulkInvite() {
           onDragLeave={handleDrag}
           onDrop={handleDrop}
           className={`border-2 border-dashed rounded-2xl p-8 text-center flex flex-col items-center justify-center cursor-pointer transition-colors relative ${
-            dragActive ? "border-primary bg-primary/5" : "border-border/60 hover:bg-secondary/10"
+            dragActive ? "border-amber bg-amber/5 text-ink" : "border-line/60 hover:bg-paper/10"
           }`}
         >
           <input
@@ -160,11 +160,11 @@ export function BulkInvite() {
             onChange={handleFileChange}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
-          <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3">
-            <Upload className="w-6 h-6 text-primary" />
+          <div className="w-12 h-12 bg-amber/10 text-ink rounded-full flex items-center justify-center mb-3">
+            <Upload className="w-6 h-6 text-amber" />
           </div>
-          <span className="text-sm font-bold text-foreground">Drag & Drop CSV file here</span>
-          <span className="text-xs text-muted-foreground mt-1">or click to browse local files</span>
+          <span className="text-sm font-bold text-graphite">Drag & Drop CSV file here</span>
+          <span className="text-xs text-slate-custom mt-1">or click to browse local files</span>
         </div>
 
         {error && (
@@ -183,11 +183,11 @@ export function BulkInvite() {
 
         {parsedInvites.length > 0 && (
           <div className="space-y-3">
-            <div className="max-h-32 overflow-y-auto border rounded-xl divide-y text-[11px] bg-secondary/5">
+            <div className="max-h-32 overflow-y-auto border rounded-xl divide-y text-[11px] bg-paper/5">
               {parsedInvites.map((inv, idx) => (
                 <div key={idx} className="p-2 flex justify-between items-center">
-                  <span className="font-medium text-foreground">{inv.email}</span>
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-primary/10 text-primary border border-primary/20">
+                  <span className="font-medium text-graphite">{inv.email}</span>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber/10 text-ink text-amber border border-amber/20">
                     {inv.role}
                   </span>
                 </div>

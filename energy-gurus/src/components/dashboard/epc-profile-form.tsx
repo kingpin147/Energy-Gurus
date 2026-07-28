@@ -65,7 +65,7 @@ export function EpcProfileForm({ epcId, defaultCompanyName, defaultCeoName, defa
                     <input
                         name="companyName"
                         defaultValue={defaultCompanyName}
-                        className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none"
+                        className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
                         required
                     />
                 </div>
@@ -74,7 +74,7 @@ export function EpcProfileForm({ epcId, defaultCompanyName, defaultCeoName, defa
                     <input
                         name="ceoName"
                         defaultValue={defaultCeoName}
-                        className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none"
+                        className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
                     />
                 </div>
             </div>
@@ -89,8 +89,8 @@ export function EpcProfileForm({ epcId, defaultCompanyName, defaultCeoName, defa
                             onClick={() => toggleSector(sector)}
                             className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
                                 selectedSectors.includes(sector) 
-                                ? "bg-primary text-white" 
-                                : "bg-secondary/10 text-muted-foreground hover:bg-secondary/20"
+                                ? "bg-amber text-ink text-white" 
+                                : "bg-paper/10 text-slate-custom hover:bg-paper/20"
                             }`}
                         >
                             {sector}
@@ -101,7 +101,7 @@ export function EpcProfileForm({ epcId, defaultCompanyName, defaultCeoName, defa
 
             <div>
                 <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Certifications</label>
-                <div className="flex flex-wrap gap-3 bg-secondary/5 border rounded-2xl p-4">
+                <div className="flex flex-wrap gap-3 bg-paper/5 border rounded-2xl p-4">
                     {certificationsList.map(cert => {
                         const isChecked = selectedCertifications.includes(cert);
                         return (
@@ -109,15 +109,15 @@ export function EpcProfileForm({ epcId, defaultCompanyName, defaultCeoName, defa
                                 key={cert}
                                 className={`flex items-center gap-3 p-3 rounded-xl border text-sm font-medium cursor-pointer transition-all ${
                                     isChecked
-                                    ? "bg-primary/5 border-primary text-primary"
-                                    : "bg-background hover:bg-secondary/5 border-border text-muted-foreground"
+                                    ? "bg-amber/5 text-ink border-amber text-amber"
+                                    : "bg-paper hover:bg-paper/5 border-line text-slate-custom"
                                 }`}
                             >
                                 <input
                                     type="checkbox"
                                     checked={isChecked}
                                     onChange={() => toggleCertification(cert)}
-                                    className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary"
+                                    className="w-4 h-4 rounded border-gray-300 text-amber focus:ring-primary accent-primary"
                                 />
                                 <span>{cert}</span>
                             </label>
@@ -132,7 +132,7 @@ export function EpcProfileForm({ epcId, defaultCompanyName, defaultCeoName, defa
                     name="about"
                     defaultValue={defaultAbout}
                     rows={4}
-                    className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none resize-none"
+                    className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none resize-none"
                 />
             </div>
 
@@ -141,7 +141,7 @@ export function EpcProfileForm({ epcId, defaultCompanyName, defaultCeoName, defa
                 <input
                     name="website"
                     defaultValue={defaultWebsite}
-                    className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none"
+                    className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
                 />
             </div>
 
@@ -163,7 +163,7 @@ export function EpcProfileForm({ epcId, defaultCompanyName, defaultCeoName, defa
             <button
                 type="submit"
                 disabled={status === "loading"}
-                className="w-full bg-primary text-primary-foreground h-12 rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60"
+                className="w-full bg-amber text-ink text-ink h-12 rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60"
             >
                 {status === "loading" ? (
                     <>

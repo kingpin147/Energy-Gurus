@@ -70,14 +70,14 @@ export function PortfolioUpload({ initialLogoUrl, initialPortfolio }: PortfolioU
             {logoUrl ? (
               <img src={logoUrl} className="max-h-full max-w-full object-contain" alt="Company Logo" />
             ) : (
-              <Briefcase className="w-8 h-8 text-primary/20" />
+              <Briefcase className="w-8 h-8 text-amber/20" />
             )}
           </div>
           <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={handleLogoChange} />
           <button
             onClick={() => logoInputRef.current?.click()}
             disabled={isUploading}
-            className="bg-primary text-white font-bold rounded-xl px-4 h-10 text-[10px] uppercase tracking-widest flex items-center gap-2 hover:scale-[1.02] transition-all disabled:opacity-50 shadow-lg shadow-primary/10"
+            className="bg-amber text-ink text-white font-bold rounded-xl px-4 h-10 text-[10px] uppercase tracking-widest flex items-center gap-2 hover:scale-[1.02] transition-all disabled:opacity-50 shadow-lg shadow-primary/10"
           >
             <Upload className="w-3 h-3" />
             {isUploading ? "Uploading..." : "Change Logo"}
@@ -102,13 +102,13 @@ export function PortfolioUpload({ initialLogoUrl, initialPortfolio }: PortfolioU
           <button
             onClick={() => portfolioInputRef.current?.click()}
             disabled={isUploading}
-            className="aspect-video rounded-2xl border-2 border-dashed border-secondary/20 flex flex-col items-center justify-center bg-secondary/5 hover:bg-secondary/10 transition-all gap-2"
+            className="aspect-video rounded-2xl border-2 border-dashed border-paper/20 flex flex-col items-center justify-center bg-paper/5 hover:bg-paper/10 transition-all gap-2"
           >
             {isUploading ? (
-              <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-amber border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
-                <Plus className="w-5 h-5 text-primary/40" />
+                <Plus className="w-5 h-5 text-amber/40" />
                 <span className="text-[8px] font-black uppercase tracking-widest opacity-40">Add Project</span>
               </>
             )}

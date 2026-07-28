@@ -53,27 +53,27 @@ export function SocialLinksForm({ type, initialLinks }: SocialLinksFormProps) {
             <form action={handleSubmit} className="space-y-3">
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold uppercase tracking-widest opacity-50 w-20 shrink-0">Facebook</span>
-                  <input name="facebook" placeholder="https://facebook.com/yourpage" defaultValue={initialLinks?.find(l => l.platform === "Facebook")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
+                  <input name="facebook" placeholder="https://facebook.com/yourpage" defaultValue={initialLinks?.find(l => l.platform === "Facebook")?.url || ""} className="w-full border rounded-xl p-3 bg-paper/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold uppercase tracking-widest opacity-50 w-20 shrink-0">LinkedIn</span>
-                  <input name="linkedin" placeholder="https://linkedin.com/company/yourpage" defaultValue={initialLinks?.find(l => l.platform === "LinkedIn")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
+                  <input name="linkedin" placeholder="https://linkedin.com/company/yourpage" defaultValue={initialLinks?.find(l => l.platform === "LinkedIn")?.url || ""} className="w-full border rounded-xl p-3 bg-paper/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold uppercase tracking-widest opacity-50 w-20 shrink-0">Instagram</span>
-                  <input name="instagram" placeholder="https://instagram.com/yourprofile" defaultValue={initialLinks?.find(l => l.platform === "Instagram")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
+                  <input name="instagram" placeholder="https://instagram.com/yourprofile" defaultValue={initialLinks?.find(l => l.platform === "Instagram")?.url || ""} className="w-full border rounded-xl p-3 bg-paper/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold uppercase tracking-widest opacity-50 w-20 shrink-0">YouTube</span>
-                  <input name="youtube" placeholder="https://youtube.com/yourchannel" defaultValue={initialLinks?.find(l => l.platform === "YouTube")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
+                  <input name="youtube" placeholder="https://youtube.com/yourchannel" defaultValue={initialLinks?.find(l => l.platform === "YouTube")?.url || ""} className="w-full border rounded-xl p-3 bg-paper/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold uppercase tracking-widest opacity-50 w-20 shrink-0">Twitter</span>
-                  <input name="twitter" placeholder="https://twitter.com/yourhandle" defaultValue={initialLinks?.find(l => l.platform === "Twitter")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
+                  <input name="twitter" placeholder="https://twitter.com/yourhandle" defaultValue={initialLinks?.find(l => l.platform === "Twitter")?.url || ""} className="w-full border rounded-xl p-3 bg-paper/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold uppercase tracking-widest opacity-50 w-20 shrink-0">WhatsApp</span>
-                  <input name="whatsapp" placeholder="+92 3XX XXXXXXX" defaultValue={initialLinks?.find(l => l.platform === "WhatsApp")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
+                  <input name="whatsapp" placeholder="+92 3XX XXXXXXX" defaultValue={initialLinks?.find(l => l.platform === "WhatsApp")?.url || ""} className="w-full border rounded-xl p-3 bg-paper/5 text-sm outline-none focus:ring-2 focus:ring-primary" />
                 </div>
 
                 {status === "success" && (
@@ -89,7 +89,7 @@ export function SocialLinksForm({ type, initialLinks }: SocialLinksFormProps) {
                     </div>
                 )}
 
-                <button type="submit" disabled={status === "loading"} className="w-full bg-secondary text-secondary-foreground h-10 rounded-xl font-bold text-sm hover:opacity-90 transition-opacity mt-2 disabled:opacity-50 flex items-center justify-center gap-2">
+                <button type="submit" disabled={status === "loading"} className="w-full bg-paper text-slate-custom h-10 rounded-xl font-bold text-sm hover:opacity-90 transition-opacity mt-2 disabled:opacity-50 flex items-center justify-center gap-2">
                     {status === "loading" ? <><Loader2 className="w-4 h-4 animate-spin" /> Updating...</> : "Update Social Links"}
                 </button>
             </form>
@@ -99,14 +99,14 @@ export function SocialLinksForm({ type, initialLinks }: SocialLinksFormProps) {
     return (
         <form action={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input name="facebook" placeholder="Facebook URL" defaultValue={initialLinks?.find(l => l.platform === "Facebook")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none" />
-                <input name="linkedin" placeholder="LinkedIn URL" defaultValue={initialLinks?.find(l => l.platform === "LinkedIn")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none" />
-                <input name="instagram" placeholder="Instagram URL" defaultValue={initialLinks?.find(l => l.platform === "Instagram")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none" />
-                <input name="youtube" placeholder="YouTube URL" defaultValue={initialLinks?.find(l => l.platform === "YouTube")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none" />
+                <input name="facebook" placeholder="Facebook URL" defaultValue={initialLinks?.find(l => l.platform === "Facebook")?.url || ""} className="w-full border rounded-xl p-3 bg-paper/5 text-sm outline-none" />
+                <input name="linkedin" placeholder="LinkedIn URL" defaultValue={initialLinks?.find(l => l.platform === "LinkedIn")?.url || ""} className="w-full border rounded-xl p-3 bg-paper/5 text-sm outline-none" />
+                <input name="instagram" placeholder="Instagram URL" defaultValue={initialLinks?.find(l => l.platform === "Instagram")?.url || ""} className="w-full border rounded-xl p-3 bg-paper/5 text-sm outline-none" />
+                <input name="youtube" placeholder="YouTube URL" defaultValue={initialLinks?.find(l => l.platform === "YouTube")?.url || ""} className="w-full border rounded-xl p-3 bg-paper/5 text-sm outline-none" />
             </div>
             <div>
                 <label className="text-[8px] font-black uppercase tracking-[0.2em] opacity-30 mb-2 block">WhatsApp Contact Number</label>
-                <input name="whatsapp" placeholder="+92 3XX XXXXXXX" defaultValue={initialLinks?.find(l => l.platform === "WhatsApp")?.url || ""} className="w-full border rounded-xl p-3 bg-secondary/5 text-sm outline-none font-bold text-green-600" />
+                <input name="whatsapp" placeholder="+92 3XX XXXXXXX" defaultValue={initialLinks?.find(l => l.platform === "WhatsApp")?.url || ""} className="w-full border rounded-xl p-3 bg-paper/5 text-sm outline-none font-bold text-green-600" />
             </div>
 
             {status === "success" && (
@@ -122,7 +122,7 @@ export function SocialLinksForm({ type, initialLinks }: SocialLinksFormProps) {
                 </div>
             )}
 
-            <Button type="submit" disabled={status === "loading"} className="w-full bg-secondary text-secondary-foreground rounded-xl font-bold h-11 hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+            <Button type="submit" disabled={status === "loading"} className="w-full bg-paper text-slate-custom rounded-xl font-bold h-11 hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
                 {status === "loading" ? <><Loader2 className="w-4 h-4 animate-spin" /> Updating...</> : "Update Network Links"}
             </Button>
         </form>

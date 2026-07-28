@@ -10,7 +10,7 @@ export default async function MonitoringDashboardPage() {
     const [latestStats] = await db.select().from(monitoringStats).orderBy(desc(monitoringStats.updatedAt)).limit(1);
 
     if (!latestStats) {
-        return <div className="p-8 text-center text-muted-foreground italic">No monitoring data available.</div>;
+        return <div className="p-8 text-center text-slate-custom italic">No monitoring data available.</div>;
     }
 
     return (
@@ -31,7 +31,7 @@ export default async function MonitoringDashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <GaugeCard title="Total Power Flow" value={latestStats.totalPowerFlow} unit="kW" trend="+2.4% vs last hour" color="text-yellow-500" />
                 <GaugeCard title="Grid Export" value={latestStats.gridExport} unit="kW" trend="Net Metering Active" color="text-green-500" />
-                <GaugeCard title="Self-Consumption" value={`${latestStats.selfConsumption}%`} unit="Ratio" trend="Optimal" color="text-primary" />
+                <GaugeCard title="Self-Consumption" value={`${latestStats.selfConsumption}%`} unit="Ratio" trend="Optimal" color="text-amber" />
             </div>
 
             {/* Chart Section */}
@@ -39,12 +39,12 @@ export default async function MonitoringDashboardPage() {
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Inverter Performance (Strings 1-4)</CardTitle>
                     <div className="flex gap-4 text-xs">
-                        <div className="flex items-center gap-1"><div className="w-3 h-3 bg-primary rounded-full" /> String 1</div>
-                        <div className="flex items-center gap-1"><div className="w-3 h-3 bg-accent rounded-full" /> String 2</div>
+                        <div className="flex items-center gap-1"><div className="w-3 h-3 bg-amber text-ink rounded-full" /> String 1</div>
+                        <div className="flex items-center gap-1"><div className="w-3 h-3 bg-paper rounded-full" /> String 2</div>
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="h-[400px] w-full bg-secondary/5 rounded-xl border border-dashed flex items-center justify-center text-muted-foreground italic">
+                    <div className="h-[400px] w-full bg-paper/5 rounded-xl border border-dashed flex items-center justify-center text-slate-custom italic">
                         [ Interactive Power Curve Graph Rendering ]
                     </div>
                 </CardContent>
@@ -101,12 +101,12 @@ function GaugeCard({ title, value, unit, trend, color }: { title: string, value:
     return (
         <Card className="border-t-4 border-t-primary">
             <CardContent className="pt-6">
-                <p className="text-sm font-medium text-muted-foreground mb-2">{title}</p>
+                <p className="text-sm font-medium text-slate-custom mb-2">{title}</p>
                 <div className="flex items-baseline gap-2">
                     <h2 className={`text-4xl font-bold ${color}`}>{value}</h2>
-                    <span className="text-muted-foreground font-medium">{unit}</span>
+                    <span className="text-slate-custom font-medium">{unit}</span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-4 flex items-center gap-1 font-medium italic underline decoration-accent/50">
+                <p className="text-xs text-slate-custom mt-4 flex items-center gap-1 font-medium italic underline decoration-accent/50">
                     {trend}
                 </p>
             </CardContent>
@@ -116,10 +116,10 @@ function GaugeCard({ title, value, unit, trend, color }: { title: string, value:
 
 function HealthItem({ label, status, temp, efficiency, voltage, color }: { label: string, status: string, temp: string, efficiency?: string, voltage?: string, color: string }) {
     return (
-        <div className="flex items-center justify-between p-3 bg-secondary/10 rounded-lg">
+        <div className="flex items-center justify-between p-3 bg-paper/10 rounded-lg">
             <div>
-                <p className="font-bold text-sm text-foreground">{label}</p>
-                <p className="text-xs text-muted-foreground">{efficiency || voltage} • {temp}</p>
+                <p className="font-bold text-sm text-graphite">{label}</p>
+                <p className="text-xs text-slate-custom">{efficiency || voltage} • {temp}</p>
             </div>
             <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full ${color}`}>
                 {status}
@@ -134,7 +134,7 @@ function AlertItem({ icon, message, time }: { icon: React.ReactNode, message: st
             <div className="mt-1">{icon}</div>
             <div>
                 <p className="text-sm font-medium">{message}</p>
-                <p className="text-xs text-muted-foreground">{time}</p>
+                <p className="text-xs text-slate-custom">{time}</p>
             </div>
         </div>
     );

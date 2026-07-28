@@ -51,11 +51,11 @@ export function PodcastForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">Title</label>
-                <input name="title" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none transition-all" required />
+                <input name="title" className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none transition-all" required />
             </div>
             <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">YouTube URL</label>
-                <input name="youtubeUrl" placeholder="https://youtube.com/watch?v=..." className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none transition-all" required />
+                <input name="youtubeUrl" placeholder="https://youtube.com/watch?v=..." className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none transition-all" required />
             </div>
             <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">Thumbnail Image (Required)</label>
@@ -108,11 +108,11 @@ export function PodcastForm() {
             </div>
             <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">Guest Name</label>
-                <input name="guestName" className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none transition-all" />
+                <input name="guestName" className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none transition-all" />
             </div>
             <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">Description</label>
-                <textarea name="description" rows={3} className="w-full border rounded-xl p-3 bg-secondary/5 focus:ring-2 focus:ring-primary outline-none transition-all" />
+                <textarea name="description" rows={3} className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none transition-all" />
             </div>
             <Button
                 type="submit"

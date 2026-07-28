@@ -10,7 +10,7 @@ export default function ResourcesPage() {
             {/* Header */}
             <div className="text-center max-w-3xl mx-auto mb-16">
                 <h1 className="text-4xl font-bold mb-4">Energy Knowledge Hub</h1>
-                <p className="text-lg text-muted-foreground">
+                <p className="text-lg text-slate-custom">
                     Indepentent analysis, practical guides, and engineering tools for Pakistan's energy transition.
                 </p>
             </div>
@@ -18,7 +18,7 @@ export default function ResourcesPage() {
             {/* Categories Search/Filter */}
             <div className="flex flex-col md:flex-row gap-4 mb-12 max-w-2xl mx-auto">
                 <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-custom" />
                     <Input placeholder="Search whitepapers, guides, tools..." className="pl-10 h-11" />
                 </div>
                 <Button variant="outline" className="h-11 gap-2">
@@ -34,9 +34,9 @@ export default function ResourcesPage() {
                     <section>
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-2xl font-bold flex items-center gap-2">
-                                <FileText className="text-primary w-6 h-6" /> Whitepapers & Policy Notes
+                                <FileText className="text-amber w-6 h-6" /> Whitepapers & Policy Notes
                             </h2>
-                            <Button variant="link" className="text-primary font-bold">View all</Button>
+                            <Button variant="link" className="text-amber font-bold">View all</Button>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <ResourceCard
@@ -60,9 +60,9 @@ export default function ResourcesPage() {
                     <section>
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-2xl font-bold flex items-center gap-2">
-                                <BookOpen className="text-primary w-6 h-6" /> Guides & How-tos
+                                <BookOpen className="text-amber w-6 h-6" /> Guides & How-tos
                             </h2>
-                            <Button variant="link" className="text-primary font-bold">View all</Button>
+                            <Button variant="link" className="text-amber font-bold">View all</Button>
                         </div>
                         <div className="space-y-4">
                             {[
@@ -71,9 +71,9 @@ export default function ResourcesPage() {
                                 "Maintaining your Lithium battery for 10+ years of life",
                                 "Understanding the impact of temperature on solar panel efficiency"
                             ].map((guide, i) => (
-                                <Link key={i} href="#" className="flex items-center justify-between p-4 bg-secondary/10 rounded-lg hover:bg-secondary/20 transition-colors group">
-                                    <span className="font-medium group-hover:text-primary transition-colors">{guide}</span>
-                                    <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                                <Link key={i} href="#" className="flex items-center justify-between p-4 bg-paper/10 rounded-lg hover:bg-paper/20 transition-colors group">
+                                    <span className="font-medium group-hover:text-amber transition-colors">{guide}</span>
+                                    <ArrowRight className="w-4 h-4 text-slate-custom group-hover:translate-x-1 transition-transform" />
                                 </Link>
                             ))}
                         </div>
@@ -84,7 +84,7 @@ export default function ResourcesPage() {
                 <aside className="space-y-8">
                     <section>
                         <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                            <Calculator className="text-primary w-6 h-6" /> Engineering Tools
+                            <Calculator className="text-amber w-6 h-6" /> Engineering Tools
                         </h2>
                         <div className="space-y-4">
                             <ToolCard
@@ -102,7 +102,7 @@ export default function ResourcesPage() {
                         </div>
                     </section>
 
-                    <Card className="bg-primary text-primary-foreground border-none">
+                    <Card className="bg-amber text-ink text-ink border-none">
                         <CardContent className="pt-8">
                             <h4 className="text-xl font-bold mb-4">Need a specialized analysis?</h4>
                             <p className="text-sm opacity-90 mb-6 leading-relaxed">
@@ -121,11 +121,11 @@ function ResourceCard({ type, title, description, date, gated = false }: { type:
     return (
         <Card className="flex flex-col h-full border-none shadow-sm hover:shadow-md transition-shadow group">
             <CardContent className="p-6 flex flex-col h-full">
-                <div className="text-xs font-bold text-accent uppercase tracking-widest mb-3">{type}</div>
-                <h4 className="text-lg font-bold mb-3 group-hover:text-primary transition-colors flex-1">{title}</h4>
-                <p className="text-sm text-muted-foreground line-clamp-3 mb-6">{description}</p>
+                <div className="text-xs font-bold text-amber uppercase tracking-widest mb-3">{type}</div>
+                <h4 className="text-lg font-bold mb-3 group-hover:text-amber transition-colors flex-1">{title}</h4>
+                <p className="text-sm text-slate-custom line-clamp-3 mb-6">{description}</p>
                 <div className="flex items-center justify-between mt-auto">
-                    <span className="text-xs text-muted-foreground">{date}</span>
+                    <span className="text-xs text-slate-custom">{date}</span>
                     <Button size="sm" variant={gated ? 'primary' : 'outline'} className="gap-2 font-bold px-4">
                         {gated ? (<><Download className="w-3 h-3" /> Get PDF</>) : 'Read More'}
                     </Button>
@@ -137,10 +137,10 @@ function ResourceCard({ type, title, description, date, gated = false }: { type:
 
 function ToolCard({ title, description }: { title: string, description: string }) {
     return (
-        <Card className="border-t-4 border-primary hover:bg-secondary/5 transition-colors cursor-pointer">
+        <Card className="border-t-4 border-amber hover:bg-paper/5 transition-colors cursor-pointer">
             <CardContent className="p-4">
                 <h4 className="font-bold text-sm mb-1">{title}</h4>
-                <p className="text-xs text-muted-foreground">{description}</p>
+                <p className="text-xs text-slate-custom">{description}</p>
             </CardContent>
         </Card>
     );

@@ -37,25 +37,25 @@ export function EpcContactButtons({ epcId, companyName, userId, website, whatsap
 
             <Dialog>
                 <TrackedDialogTrigger
-                    className="w-full h-12 rounded-xl font-bold text-sm bg-primary hover:bg-primary/90 text-white gap-2.5 shadow-md shadow-primary/20 transition-all hover:scale-[1.01] inline-flex items-center justify-center"
+                    className="w-full h-12 rounded-xl font-bold text-sm bg-amber text-ink hover:bg-amber/90 text-ink text-white gap-2.5 shadow-md shadow-primary/20 transition-all hover:scale-[1.01] inline-flex items-center justify-center"
                     eventName="epc_contact_click"
                     eventProperties={{ epcId, companyName }}
                 >
                     <Mail className="w-4 h-4" /> Direct Message
                 </TrackedDialogTrigger>
-                <DialogContent className="sm:max-w-lg rounded-2xl border border-border/60 p-0 overflow-hidden bg-white shadow-2xl">
+                <DialogContent className="sm:max-w-lg rounded-2xl border border-line/60 p-0 overflow-hidden bg-white shadow-2xl">
                     {/* Header */}
-                    <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-border/50">
+                    <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-line/50">
                         <DialogHeader className="space-y-0.5">
-                            <DialogTitle className="text-lg font-black text-foreground">
+                            <DialogTitle className="text-lg font-black text-graphite">
                                 Message {companyName}
                             </DialogTitle>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-slate-custom">
                                 Your inquiry goes directly to their inbox
                             </p>
                         </DialogHeader>
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 ml-4">
-                            <Mail className="w-5 h-5 text-primary" />
+                        <div className="w-10 h-10 rounded-xl bg-amber/10 text-ink flex items-center justify-center shrink-0 ml-4">
+                            <Mail className="w-5 h-5 text-amber" />
                         </div>
                     </div>
                     {/* Form */}
@@ -69,11 +69,11 @@ export function EpcContactButtons({ epcId, companyName, userId, website, whatsap
                 <TrackedLink
                     href={website}
                     target="_blank"
-                    className="w-full h-12 rounded-xl font-bold text-sm bg-secondary hover:bg-secondary/80 text-foreground border border-border/50 gap-2 transition-all inline-flex items-center justify-center"
+                    className="w-full h-12 rounded-xl font-bold text-sm bg-paper hover:bg-paper/80 text-graphite border border-line/50 gap-2 transition-all inline-flex items-center justify-center"
                     eventName="epc_website_click"
                     eventProperties={{ epcId, companyName, url: website }}
                 >
-                    <Globe className="w-4 h-4 text-primary" /> Visit Website <ExternalLink className="w-3 h-3 opacity-40 ml-0.5" />
+                    <Globe className="w-4 h-4 text-amber" /> Visit Website <ExternalLink className="w-3 h-3 opacity-40 ml-0.5" />
                 </TrackedLink>
             )}
         </div>

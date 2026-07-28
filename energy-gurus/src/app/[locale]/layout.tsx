@@ -3,7 +3,7 @@ import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import type { Metadata } from "next";
-import { Inter, Noto_Sans_Arabic, Outfit } from "next/font/google";
+import { Inter, Noto_Sans_Arabic, Outfit, Space_Grotesk, IBM_Plex_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { CSPostHogProvider } from '@/components/providers/PostHogProvider';
 import { Toaster } from 'sonner';
@@ -23,6 +23,18 @@ const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-ibm-plex-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
 });
 
 export async function generateMetadata({
@@ -73,48 +85,49 @@ export default async function RootLayout({
   return (
     <html lang={locale} className="scroll-smooth" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${outfit.variable} ${notoArabic.variable} font-sans antialiased`}
+        className={`${inter.variable} ${outfit.variable} ${notoArabic.variable} ${spaceGrotesk.variable} ${ibmPlexMono.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
         {isClerkConfigured ? (
           <ClerkProvider
             appearance={{
               variables: {
-                colorPrimary: "#006d6d",
-                colorText: "#1f2937",
+                colorPrimary: "#12213A",
+                colorText: "#1B1F24",
                 colorBackground: "#ffffff",
-                fontFamily: "var(--font-outfit), var(--font-inter), sans-serif",
-                borderRadius: "12px",
+                colorTextOnPrimaryBackground: "#ffffff",
+                fontFamily: "var(--font-space-grotesk), sans-serif",
+                borderRadius: "4px",
+              },
+              layout: {
+                logoImageUrl: "/logo-icon.svg",
               },
               elements: {
-                logoBox: {
-                  display: "none",
-                },
                 card: {
-                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
-                  border: "1px solid rgba(190, 201, 200, 0.5)",
-                  borderRadius: "16px",
+                  boxShadow: "0 8px 32px 0 rgba(18, 33, 58, 0.07)",
+                  border: "1px solid rgba(18, 33, 58, 0.12)",
+                  borderRadius: "4px",
                 },
                 headerTitle: {
-                  color: "#005353",
+                  color: "#12213A",
                   fontWeight: "700",
                 },
                 formButtonPrimary: {
-                  backgroundColor: "#006d6d",
-                  color: "#ffffff",
+                  backgroundColor: "#E8A33D",
+                  color: "#12213A",
                   fontWeight: "700",
-                  borderRadius: "8px",
+                  borderRadius: "4px",
                   transition: "all 0.2s ease",
                   "&:hover": {
-                    backgroundColor: "#005353",
+                    backgroundColor: "#f2b458",
                   },
                 },
                 footerActionLink: {
-                  color: "#006d6d",
+                  color: "#E8A33D",
                   fontWeight: "600",
                   transition: "all 0.2s ease",
                   "&:hover": {
-                    color: "#005353",
+                    color: "#f2b458",
                   },
                 },
               },

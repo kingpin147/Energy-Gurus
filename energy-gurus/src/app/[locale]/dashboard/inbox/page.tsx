@@ -33,25 +33,25 @@ export default async function AdminInboxPage() {
         <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
             {/* Analytics Overview */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-                <div className="bg-white p-6 rounded-[2rem] border border-border/60 shadow-sm">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60 mb-1">Total Volume</p>
+                <div className="bg-white p-6 rounded-[2rem] border border-line/60 shadow-sm">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-custom opacity-60 mb-1">Total Volume</p>
                     <div className="flex items-end gap-2">
                         <span className="text-3xl font-black">{allInquiries.length}</span>
-                        <span className="text-xs font-bold text-muted-foreground mb-1">Received</span>
+                        <span className="text-xs font-bold text-slate-custom mb-1">Received</span>
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-[2rem] border border-border/60 shadow-sm border-l-4 border-l-primary">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-primary opacity-80 mb-1">Active Support</p>
+                <div className="bg-white p-6 rounded-[2rem] border border-line/60 shadow-sm border-l-4 border-l-primary">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-amber opacity-80 mb-1">Active Support</p>
                     <div className="flex items-end gap-2">
-                        <span className="text-3xl font-black text-primary">{partnerInquiries.length}</span>
-                        <span className="text-xs font-bold text-muted-foreground mb-1">Partner Tickets</span>
+                        <span className="text-3xl font-black text-amber">{partnerInquiries.length}</span>
+                        <span className="text-xs font-bold text-slate-custom mb-1">Partner Tickets</span>
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-[2rem] border border-border/60 shadow-sm">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60 mb-1">Public Pulse</p>
+                <div className="bg-white p-6 rounded-[2rem] border border-line/60 shadow-sm">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-custom opacity-60 mb-1">Public Pulse</p>
                     <div className="flex items-end gap-2">
                         <span className="text-3xl font-black">{publicInquiries.length}</span>
-                        <span className="text-xs font-bold text-muted-foreground mb-1">Web Leads</span>
+                        <span className="text-xs font-bold text-slate-custom mb-1">Web Leads</span>
                     </div>
                 </div>
             </div>
@@ -60,10 +60,10 @@ export default async function AdminInboxPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
-                        <ShieldAlert className="w-7 h-7 text-primary" />
+                        <ShieldAlert className="w-7 h-7 text-amber" />
                         Admin Inbox
                     </h1>
-                    <p className="text-muted-foreground text-sm mt-1">
+                    <p className="text-slate-custom text-sm mt-1">
                         Manage support requests and public inquiries
                     </p>
                 </div>
@@ -105,12 +105,12 @@ export default async function AdminInboxPage() {
                 </TabsList>
 
                 <TabsContent value="partner" className="space-y-4">
-                    <div className="bg-primary/5 border border-primary/10 rounded-2xl p-6 mb-4">
+                    <div className="bg-amber/5 text-ink border border-amber/10 rounded-2xl p-6 mb-4">
                         <div className="flex items-center gap-3">
-                            <MessageSquare className="w-5 h-5 text-primary" />
+                            <MessageSquare className="w-5 h-5 text-amber" />
                             <h3 className="font-bold">Partner Support Tickets</h3>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-sm text-slate-custom mt-1">
                             Direct messages from EPC Installers and Brands. You can reply to these directly within the platform.
                         </p>
                     </div>
@@ -118,12 +118,12 @@ export default async function AdminInboxPage() {
                 </TabsContent>
 
                 <TabsContent value="public" className="space-y-4">
-                    <div className="bg-secondary/20 border border-secondary rounded-2xl p-6 mb-4">
+                    <div className="bg-paper/20 border border-paper rounded-2xl p-6 mb-4">
                         <div className="flex items-center gap-3">
-                            <Globe className="w-5 h-5 text-primary" />
+                            <Globe className="w-5 h-5 text-amber" />
                             <h3 className="font-bold">Public Website Inquiries</h3>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-sm text-slate-custom mt-1">
                             Messages from the Contact Us form on the public website. These users do not have dashboards; please contact them via the provided email or phone.
                         </p>
                     </div>

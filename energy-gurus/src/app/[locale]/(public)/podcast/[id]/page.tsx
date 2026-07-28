@@ -64,7 +64,7 @@ export default async function EpisodePage({ params }: { params: Promise<{ id: st
     return (
         <div className="container mx-auto px-4 py-12">
             {/* Back Button */}
-            <Button variant="ghost" className="mb-8 p-0 hover:bg-transparent text-muted-foreground hover:text-primary transition-colors" asChild>
+            <Button variant="ghost" className="mb-8 p-0 hover:bg-transparent text-slate-custom hover:text-amber transition-colors" asChild>
                 <Link href="/podcast">
                     <ArrowLeft className="mr-2 w-4 h-4" /> Back to Episodes
                 </Link>
@@ -74,10 +74,10 @@ export default async function EpisodePage({ params }: { params: Promise<{ id: st
                 {/* Left Column: Metadata & Player */}
                 <div className="flex-[2] space-y-8">
                     <div>
-                        <span className="text-accent font-bold uppercase tracking-widest text-sm mb-2 block">EnergyGurus Podcast</span>
+                        <span className="text-amber font-bold uppercase tracking-widest text-sm mb-2 block">EnergyGurus Podcast</span>
                         <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-6">{episode.title}</h1>
 
-                        <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground mb-8">
+                        <div className="flex flex-wrap items-center gap-6 text-sm text-slate-custom mb-8">
                             <div className="flex items-center gap-2">
                                 <Calendar className="w-4 h-4" /> {new Date(episode.createdAt).toLocaleDateString()}
                             </div>
@@ -103,7 +103,7 @@ export default async function EpisodePage({ params }: { params: Promise<{ id: st
 
                     <div className="prose prose-slate max-w-none">
                         <h3 className="text-2xl font-bold mb-4">Description</h3>
-                        <p className="text-lg leading-relaxed text-muted-foreground mb-8">
+                        <p className="text-lg leading-relaxed text-slate-custom mb-8">
                             {episode.description}
                         </p>
                     </div>
@@ -111,28 +111,28 @@ export default async function EpisodePage({ params }: { params: Promise<{ id: st
 
                 {/* Right Column: Sidebar / CTAs */}
                 <div className="flex-1 space-y-8">
-                    <Card className="bg-accent/10 border-none">
+                    <Card className="bg-paper/10 border-none">
                         <CardContent className="pt-6">
                             <h4 className="font-bold mb-4">About the Guest</h4>
                             <div className="flex items-center gap-4 mb-4">
-                                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                                    <Mic className="w-6 h-6 text-primary" />
+                                <div className="w-12 h-12 bg-amber/10 text-ink rounded-full flex items-center justify-center">
+                                    <Mic className="w-6 h-6 text-amber" />
                                 </div>
                                 <div>
                                     <p className="font-bold">{episode.guestName}</p>
-                                    <p className="text-xs text-muted-foreground">{episode.guestDesignation}</p>
+                                    <p className="text-xs text-slate-custom">{episode.guestDesignation}</p>
                                 </div>
                             </div>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-slate-custom">
                                 Professional insights from one of the industry's leading experts.
                             </p>
                         </CardContent>
                     </Card>
 
-                    <Card className="border-t-4 border-primary">
+                    <Card className="border-t-4 border-amber">
                         <CardContent className="pt-6">
                             <h4 className="text-xl font-bold mb-4">Take Action</h4>
-                            <p className="text-sm text-muted-foreground mb-6">
+                            <p className="text-sm text-slate-custom mb-6">
                                 Are you looking for certified installers or energy brands?
                             </p>
                             <div className="space-y-3">

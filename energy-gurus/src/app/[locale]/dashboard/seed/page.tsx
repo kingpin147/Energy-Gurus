@@ -43,12 +43,12 @@ export default function SeedPage() {
     return (
         <div className="p-12 max-w-2xl mx-auto space-y-8">
             <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+                <div className="w-12 h-12 bg-amber/10 text-ink rounded-2xl flex items-center justify-center text-amber">
                     <Database className="w-6 h-6" />
                 </div>
                 <div>
                     <h1 className="text-2xl font-black tracking-tight">Database Seeder</h1>
-                    <p className="text-muted-foreground text-sm">Populate or clear dummy data for testing</p>
+                    <p className="text-slate-custom text-sm">Populate or clear dummy data for testing</p>
                 </div>
             </div>
 
@@ -68,8 +68,8 @@ export default function SeedPage() {
             )}
 
             {/* What gets seeded */}
-            <div className="bg-secondary/30 rounded-xl p-5 border border-border/40 space-y-2 text-sm text-muted-foreground">
-                <p className="font-bold text-foreground text-xs uppercase tracking-widest mb-3">What gets seeded</p>
+            <div className="bg-paper/30 rounded-xl p-5 border border-line/40 space-y-2 text-sm text-slate-custom">
+                <p className="font-bold text-graphite text-xs uppercase tracking-widest mb-3">What gets seeded</p>
                 <ul className="space-y-1.5 list-disc list-inside">
                     <li>4 EPC installer profiles (Alpha Energy, Solar Peak, GreenVolt, SunCraft)</li>
                     <li>6 EPC offices across Karachi, Lahore, Islamabad, Faisalabad</li>
@@ -116,7 +116,7 @@ export default function SeedPage() {
                 </Button>
             </div>
 
-            <p className="text-xs text-muted-foreground/60 text-center">
+            <p className="text-xs text-slate-custom/60 text-center">
                 Clear removes only dummy accounts (emails ending in @energygurus.demo). Real user data is never affected.
             </p>
         </div>
