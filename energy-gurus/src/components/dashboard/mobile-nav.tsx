@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Link } from "@/i18n/routing";
+import { Logo } from "@/components/ui/logo";
 import { Menu, X, Mic, ArrowLeft } from "lucide-react";
 import Sidebar from "@/app/[locale]/dashboard/Sidebar";
 import { UserNav } from "@/components/layout/user-nav";
@@ -15,12 +16,7 @@ export function MobileDashboardNav({ role }: { role: UserRole }) {
         <>
             {/* Mobile Header */}
             <header className="h-16 border-b bg-white flex items-center justify-between px-4 sticky top-0 z-40">
-                <Link href="/" className="flex items-center space-x-2">
-                    <div className="bg-amber text-ink p-1 rounded-lg">
-                        <Mic className="h-5 w-5 text-white" />
-                    </div>
-                    <span className="text-lg font-bold text-amber">EnergyGurus</span>
-                </Link>
+                <Logo />
                 <div className="flex items-center gap-2">
                     <NotificationBell />
                     <button

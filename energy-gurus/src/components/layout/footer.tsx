@@ -1,11 +1,31 @@
 import { Link } from "@/i18n/routing";
+import { Twitter, Linkedin, Youtube, Facebook, Music2 } from "lucide-react";
 
 export function Footer() {
     return (
         <footer className="bg-ink text-paper/60 py-14 pb-8 text-[0.88rem]">
             <div className="max-w-[1180px] mx-auto px-8 flex justify-between items-start flex-wrap gap-6">
-                <div className="max-w-[340px] text-paper/85 font-space-grotesk text-[1rem]">
-                    Powering informed solar decisions — brands, installers, and expertise, all in one place.
+                <div className="flex flex-col gap-6 max-w-[340px]">
+                    <div className="text-paper/85 font-space-grotesk text-[1rem]">
+                        Powering informed solar decisions — brands, installers, and expertise, all in one place.
+                    </div>
+                    <div className="flex gap-3 items-center">
+                        <a href="https://www.tiktok.com/@energygurus.online" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-paper/5 border border-paper/10 text-amber hover:bg-amber hover:text-ink transition-colors" aria-label="TikTok">
+                            <Music2 className="w-5 h-5" />
+                        </a>
+                        <a href="https://www.linkedin.com/company/energygurusonline" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-paper/5 border border-paper/10 text-amber hover:bg-amber hover:text-ink transition-colors" aria-label="LinkedIn">
+                            <Linkedin className="w-5 h-5" />
+                        </a>
+                        <a href="https://x.com/energyguruspk" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-paper/5 border border-paper/10 text-amber hover:bg-amber hover:text-ink transition-colors" aria-label="X (Twitter)">
+                            <Twitter className="w-5 h-5" />
+                        </a>
+                        <a href="https://www.youtube.com/@energygurus.online" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-paper/5 border border-paper/10 text-amber hover:bg-amber hover:text-ink transition-colors" aria-label="YouTube">
+                            <Youtube className="w-5 h-5" />
+                        </a>
+                        <a href="https://www.facebook.com/energygurus.online" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-paper/5 border border-paper/10 text-amber hover:bg-amber hover:text-ink transition-colors" aria-label="Facebook">
+                            <Facebook className="w-5 h-5" />
+                        </a>
+                    </div>
                 </div>
                 
                 <div className="flex gap-14 flex-wrap">

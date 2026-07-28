@@ -1,4 +1,5 @@
 import { Link } from "@/i18n/routing";
+import { Logo } from "@/components/ui/logo";
 import { ArrowLeft, Mic } from "lucide-react";
 import { getUserRole } from "@/lib/roles";
 import Sidebar from "./Sidebar";
@@ -34,12 +35,7 @@ export default async function DashboardLayout({
             {/* Desktop Sidebar — only visible at 1024px+ */}
             <aside className="desktop-sidebar">
                 <div className="h-[72px] flex items-center px-6 border-b border-line">
-                    <Link href="/" className="flex items-center space-x-2">
-                        <div className="bg-ink p-1 rounded-lg text-amber font-space-grotesk font-bold">
-                            EG
-                        </div>
-                        <span className="text-lg font-space-grotesk font-bold text-ink">EnergyGurus</span>
-                    </Link>
+                    <Logo />
                 </div>
 
                 <Sidebar role={role} />

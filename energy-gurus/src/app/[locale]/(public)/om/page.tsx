@@ -1,191 +1,194 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-    ShieldCheck,
-    Settings2,
-    Wrench,
-    Truck,
-    Clock,
-    FileCheck,
-    CheckCircle2,
-    HelpCircle,
-    ArrowRight,
-    TrendingUp,
-    Inbox
-} from "lucide-react";
 import { Link } from "@/i18n/routing";
-import { Input } from "@/components/ui/input";
 
 export default function OMPage() {
     return (
-        <div className="flex flex-col min-h-screen">
-            {/* Hero Section */}
-            <section className="bg-amber text-ink text-ink py-20 lg:py-32 relative overflow-hidden">
-                <div className="container mx-auto px-4 relative z-10">
-                    <div className="max-w-3xl">
-                        <h1 className="text-4xl md:text-5xl font-bold mb-6">Maximize Uptime. Protect Your Investment.</h1>
-                        <p className="text-xl opacity-90 mb-8 leading-relaxed">
-                            Professional Operations & Maintenance (O&M) services for solar and storage systems. Transparent SLAs, guaranteed response times, and proactive performance optimization.
+        <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 overflow-x-hidden min-h-screen">
+            {/* HERO */}
+            <header className="relative bg-ink text-white pt-[88px] pb-[60px] overflow-hidden">
+                <div 
+                    className="absolute inset-0 pointer-events-none" 
+                    style={{ 
+                        background: 'radial-gradient(ellipse 800px 460px at 85% 0%, rgba(232,163,61,0.14), transparent 60%)' 
+                    }}
+                />
+                <div className="max-w-[1180px] mx-auto px-8 relative z-10 grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-14 items-center">
+                    <div>
+                        <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-[18px]">
+                            <span className="w-5 h-[1px] bg-amber"></span>
+                            Monitoring & O&M
                         </p>
-                        <div className="flex flex-wrap gap-4">
-                            <Button size="lg" variant="accent" className="font-bold px-8">Request a Quote</Button>
-                            <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-amber font-bold">View Packages</Button>
+                        <h1 className="font-space-grotesk font-semibold text-[clamp(2rem,4vw,2.9rem)] tracking-[-0.01em]">
+                            Solar doesn't stop at installation.
+                        </h1>
+                        <p className="text-[1.05rem] text-paper/72 max-w-[480px] my-[18px] mb-[30px]">
+                            Protect your investment long after the panels go up — with real-time performance monitoring, proactive maintenance, and fast fault detection.
+                        </p>
+                        <button className="bg-amber text-ink px-[26px] py-[15px] rounded-[3px] text-[0.95rem] font-semibold hover:bg-[#f2b458] transition-colors">
+                            Request Monitoring Setup
+                        </button>
+                    </div>
+                    <div className="border border-paper/15 rounded-[4px] p-[26px] bg-paper/5">
+                        <div className="font-ibm-plex-mono text-[0.72rem] tracking-[0.08em] uppercase text-paper/50 mb-[14px]">
+                            Live System Status
+                        </div>
+                        <div className="flex justify-between items-center py-[13px] border-b border-paper/10 font-ibm-plex-mono text-[0.85rem]">
+                            <span>System Output</span><span>4.82 kW</span>
+                        </div>
+                        <div className="flex justify-between items-center py-[13px] border-b border-paper/10 font-ibm-plex-mono text-[0.85rem]">
+                            <span>Panel Health</span><span className="text-teal bg-[rgba(47,110,98,0.18)] px-2.5 py-[3px] rounded-[20px] text-[0.72rem]">Nominal</span>
+                        </div>
+                        <div className="flex justify-between items-center py-[13px] border-b border-paper/10 font-ibm-plex-mono text-[0.85rem]">
+                            <span>Last Fault Check</span><span>2 min ago</span>
+                        </div>
+                        <div className="flex justify-between items-center py-[13px] font-ibm-plex-mono text-[0.85rem]">
+                            <span>Uptime (30d)</span><span>99.8%</span>
                         </div>
                     </div>
                 </div>
+            </header>
 
-                {/* Abstract Background Element */}
-                <div className="absolute top-0 right-0 w-1/3 h-full bg-paper/20 -skew-x-12 transform translate-x-1/2" />
-            </section>
-
-            {/* Offerings Grid */}
-            <section className="py-24 bg-paper">
-                <div className="container mx-auto px-4">
-                    <div className="text-center max-w-2xl mx-auto mb-20">
-                        <h2 className="text-3xl font-bold mb-4">Comprehensive O&M Solutions</h2>
-                        <p className="text-slate-custom">From individual sites to entire portfolios, we ensure your energy assets perform at their peak.</p>
+            {/* WHY IT MATTERS */}
+            <section className="py-[80px]">
+                <div className="max-w-[1180px] mx-auto px-8 grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-14 items-center">
+                    <div>
+                        <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-teal flex items-center gap-2.5 mb-[18px]">
+                            <span className="w-5 h-[1px] bg-teal"></span>
+                            Why It Matters
+                        </p>
+                        <h2 className="font-space-grotesk font-semibold text-[clamp(1.5rem,3vw,2.1rem)] text-ink tracking-[-0.01em] mb-4">
+                            Every system degrades without oversight.
+                        </h2>
+                        <p className="text-slate-custom text-[1.02rem]">
+                            Panels lose efficiency, inverters fail silently, and small faults compound into major repairs when nobody's watching. Monitoring is what turns a one-time install into decades of reliable output.
+                        </p>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                        <Card className="border-none bg-paper/10 overflow-hidden group">
-                            <CardContent className="p-8 space-y-6">
-                                <div className="p-4 bg-paper rounded-2xl inline-block shadow-sm"><Settings2 className="w-10 h-10 text-amber" /></div>
-                                <h3 className="text-2xl font-bold">Preventive Maintenance</h3>
-                                <p className="text-slate-custom leading-relaxed">
-                                    Scheduled site visits, thermal imaging of panels, string testing, inverter health checks, and connection tightening to prevent failures before they happen.
-                                </p>
-                                <ul className="space-y-3 text-sm font-medium">
-                                    <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-amber" /> Quarterly site inspections</li>
-                                    <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-amber" /> Array cleaning & debris removal</li>
-                                    <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-amber" /> Firmware updates & performance tuning</li>
-                                </ul>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="border-none bg-paper/10 overflow-hidden">
-                            <CardContent className="p-8 space-y-6">
-                                <div className="p-4 bg-paper rounded-2xl inline-block shadow-sm"><Wrench className="w-10 h-10 text-amber" /></div>
-                                <h3 className="text-2xl font-bold">Corrective Maintenance</h3>
-                                <p className="text-slate-custom leading-relaxed">
-                                    Rapid-response troubleshooting and repair. Our technicians are available for emergency dispatch to resolve inverter faults, string failures, or grid-tie issues.
-                                </p>
-                                <ul className="space-y-3 text-sm font-medium">
-                                    <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-amber" /> 24/48-hour response guarantees</li>
-                                    <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-amber" /> Spare parts management & logistics</li>
-                                    <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-amber" /> Warranty claiming support</li>
-                                </ul>
-                            </CardContent>
-                        </Card>
+                    <div className="bg-white border border-line rounded-[4px] p-6">
+                        <svg viewBox="0 0 400 160" className="w-full h-auto block">
+                            <line x1="0" y1="140" x2="400" y2="140" stroke="#12213A" strokeOpacity="0.12"/>
+                            <path d="M0,20 C80,30 120,35 180,50 C260,68 320,90 400,130" fill="none" stroke="#4A5A73" strokeWidth="2" strokeDasharray="5 5"/>
+                            <path d="M0,20 C80,24 140,28 200,32 C280,38 340,42 400,46" fill="none" stroke="#E8A33D" strokeWidth="2.5"/>
+                            <text x="0" y="12" fontFamily="IBM Plex Mono" fontSize="10" fill="#4A5A73">Output Over Time</text>
+                            <text x="300" y="140" fontFamily="IBM Plex Mono" fontSize="9" fill="#4A5A73">Unmonitored</text>
+                            <text x="300" y="42" fontFamily="IBM Plex Mono" fontSize="9" fill="#E8A33D">Monitored</text>
+                        </svg>
                     </div>
                 </div>
             </section>
 
-            {/* SLA Section */}
-            <section className="py-24 bg-amber text-ink text-ink">
-                <div className="container mx-auto px-4 text-center">
-                    <h2 className="text-3xl font-bold mb-16">Transparent Performance SLAs</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-5xl mx-auto">
-                        <SLACard icon={<Clock className="w-8 h-8" />} title="Response Time" value="< 24 Hours" description="For critical system failures." />
-                        <SLACard icon={<TrendingUp className="w-8 h-8" />} title="Uptime Guarantee" value="98.5%" description="Guaranteed system availability." />
-                        <SLACard icon={<FileCheck className="w-8 h-8" />} title="Reporting" value="Monthly" description="Detailed performance health reports." />
+            {/* WHAT'S INCLUDED */}
+            <section className="py-[80px]">
+                <div className="max-w-[1180px] mx-auto px-8">
+                    <div className="max-w-[640px] mb-12">
+                        <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-teal flex items-center gap-2.5 mb-[18px]">
+                            <span className="w-5 h-[1px] bg-teal"></span>
+                            What's Included
+                        </p>
+                        <h2 className="font-space-grotesk font-semibold text-[clamp(1.5rem,3vw,2.1rem)] text-ink tracking-[-0.01em]">
+                            Three layers of protection for your system.
+                        </h2>
                     </div>
-                </div>
-            </section>
-
-            {/* Contract Models / Pricing */}
-            <section className="py-24 bg-paper">
-                <div className="container mx-auto px-4">
-                    <div className="text-center max-w-2xl mx-auto mb-16">
-                        <h2 className="text-3xl font-bold mb-4">Flexible Contract Models</h2>
-                        <p className="text-slate-custom">Choose a plan that fits your risk profile and technical requirements.</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <PackageCard
-                            title="Basic Care"
-                            price="Pay-per-visit"
-                            description="Best for standard residential systems. On-demand support when you need it."
-                            features={["Site inspection", "Panel cleaning", "Health report"]}
-                        />
-                        <PackageCard
-                            title="Premium Secure"
-                            price="Retainer-based"
-                            description="Complete peace of mind. Proactive monitoring and guaranteed maintenance visits."
-                            features={["Quarterly visits", "Priority dispatch", "Full history logs", "Performance ROI guard"]}
-                            featured={true}
-                        />
-                        <PackageCard
-                            title="Enterprise"
-                            price="Outcome-based"
-                            description="For industrial & commercial portfolios. We share the risk with performance guarantees."
-                            features={["Fleet-wide management", "Whitelabel dashboard", "Uptime penalty/bonus", "Dedicated engineer"]}
-                        />
-                    </div>
-                </div>
-            </section>
-
-            {/* Final CTA / Form */}
-            <section className="py-24 bg-paper/20">
-                <div className="container mx-auto px-4 max-w-4xl">
-                    <Card className="p-8 md:p-12 shadow-xl border-none">
-                        <h2 className="text-3xl font-bold text-center mb-4">Get an O&M Proposal</h2>
-                        <p className="text-center text-slate-custom mb-12">Submit your site details and we'll prepare a custom maintenance strategy within 2 business days.</p>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Contact Name</label>
-                                <Input placeholder="Your Name" />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Phone</label>
-                                <Input placeholder="+92 XXX XXXXXXX" />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">System Size (kW)</label>
-                                <Input type="number" placeholder="e.g., 15" />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Inverter Brand</label>
-                                <Input placeholder="e.g., Sungrow, Growatt" />
-                            </div>
-                            <div className="col-span-1 md:col-span-2 space-y-2">
-                                <label className="text-sm font-medium">Brief description of requirements</label>
-                                <textarea className="w-full min-h-[100px] rounded-md border border-input bg-paper px-3 py-2 text-sm" placeholder="I need a quarterly cleaning schedule or corrective repair..." />
-                            </div>
-                            <Button className="col-span-1 md:col-span-2 font-bold py-6 text-lg" size="lg">Send Request</Button>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-[1px] bg-line border border-line rounded-[4px] overflow-hidden">
+                        <div className="bg-paper p-8 px-7">
+                            <div className="w-[38px] h-[38px] rounded-[6px] bg-ink text-amber flex items-center justify-center font-ibm-plex-mono font-semibold mb-[18px]">01</div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.1rem] text-ink mb-2">Real-Time Monitoring</h3>
+                            <p className="text-slate-custom text-[0.93rem]">Track output, panel health, and system performance from anywhere, with alerts the moment something looks off.</p>
                         </div>
-                    </Card>
+                        <div className="bg-paper p-8 px-7">
+                            <div className="w-[38px] h-[38px] rounded-[6px] bg-ink text-amber flex items-center justify-center font-ibm-plex-mono font-semibold mb-[18px]">02</div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.1rem] text-ink mb-2">Proactive Maintenance</h3>
+                            <p className="text-slate-custom text-[0.93rem]">Scheduled inspections and cleaning keep your system performing at peak efficiency year-round.</p>
+                        </div>
+                        <div className="bg-paper p-8 px-7">
+                            <div className="w-[38px] h-[38px] rounded-[6px] bg-ink text-amber flex items-center justify-center font-ibm-plex-mono font-semibold mb-[18px]">03</div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.1rem] text-ink mb-2">Fast Fault Detection</h3>
+                            <p className="text-slate-custom text-[0.93rem]">Automated diagnostics catch issues early — before they cost you performance or money.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* PRICING */}
+            <section className="py-[80px]">
+                <div className="max-w-[1180px] mx-auto px-8">
+                    <div className="max-w-[640px] mb-12">
+                        <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-teal flex items-center gap-2.5 mb-[18px]">
+                            <span className="w-5 h-[1px] bg-teal"></span>
+                            Pricing
+                        </p>
+                        <h2 className="font-space-grotesk font-semibold text-[clamp(1.5rem,3vw,2.1rem)] text-ink tracking-[-0.01em]">
+                            Choose your coverage level.
+                        </h2>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div className="bg-white border border-line rounded-[6px] p-8 px-[26px] relative">
+                            <h3 className="font-space-grotesk font-semibold text-[1.2rem] text-ink mb-[14px]">Essential</h3>
+                            <ul className="my-[18px] mb-[26px] space-y-0">
+                                <li className="text-[0.9rem] text-slate-custom py-2 border-t border-line first:border-t-0">Remote monitoring</li>
+                                <li className="text-[0.9rem] text-slate-custom py-2 border-t border-line">Annual inspection</li>
+                                <li className="text-[0.9rem] text-slate-custom py-2 border-t border-line">Email fault alerts</li>
+                            </ul>
+                            <button className="w-full py-[13px] rounded-[3px] text-[0.9rem] font-semibold bg-paper border border-line text-ink hover:bg-line transition-colors">
+                                Select Essential
+                            </button>
+                        </div>
+                        <div className="bg-white border border-amber rounded-[6px] p-8 px-[26px] relative shadow-[0_0_0_1px_var(--color-amber)]">
+                            <span className="absolute -top-[12px] left-[26px] bg-amber text-ink font-ibm-plex-mono text-[0.68rem] tracking-[0.06em] uppercase py-1 px-2.5 rounded-[20px]">Most Popular</span>
+                            <h3 className="font-space-grotesk font-semibold text-[1.2rem] text-ink mb-[14px]">Plus</h3>
+                            <ul className="my-[18px] mb-[26px] space-y-0">
+                                <li className="text-[0.9rem] text-slate-custom py-2 border-t border-line first:border-t-0">Everything in Essential</li>
+                                <li className="text-[0.9rem] text-slate-custom py-2 border-t border-line">Biannual maintenance</li>
+                                <li className="text-[0.9rem] text-slate-custom py-2 border-t border-line">Priority fault response</li>
+                            </ul>
+                            <button className="w-full py-[13px] rounded-[3px] text-[0.9rem] font-semibold bg-ink border border-ink text-white hover:bg-ink/90 transition-colors">
+                                Select Plus
+                            </button>
+                        </div>
+                        <div className="bg-white border border-line rounded-[6px] p-8 px-[26px] relative">
+                            <h3 className="font-space-grotesk font-semibold text-[1.2rem] text-ink mb-[14px]">Pro</h3>
+                            <ul className="my-[18px] mb-[26px] space-y-0">
+                                <li className="text-[0.9rem] text-slate-custom py-2 border-t border-line first:border-t-0">Everything in Plus</li>
+                                <li className="text-[0.9rem] text-slate-custom py-2 border-t border-line">Guaranteed uptime SLA</li>
+                                <li className="text-[0.9rem] text-slate-custom py-2 border-t border-line">Dedicated account contact</li>
+                            </ul>
+                            <button className="w-full py-[13px] rounded-[3px] text-[0.9rem] font-semibold bg-paper border border-line text-ink hover:bg-line transition-colors">
+                                Select Pro
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* TRUST STATS */}
+            <section className="bg-ink text-white">
+                <div className="max-w-[1180px] mx-auto px-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-[1px]">
+                        <div className="p-9 px-7 border-b md:border-b-0 md:border-r border-paper/15 last:border-r-0">
+                            <div className="font-ibm-plex-mono text-[2rem] text-amber">99.8%</div>
+                            <div className="text-[0.82rem] text-paper/60 uppercase tracking-[0.06em] mt-1.5">Uptime Guarantee</div>
+                        </div>
+                        <div className="p-9 px-7 border-b md:border-b-0 md:border-r border-paper/15 last:border-r-0">
+                            <div className="font-ibm-plex-mono text-[2rem] text-amber">&lt;2 hrs</div>
+                            <div className="text-[0.82rem] text-paper/60 uppercase tracking-[0.06em] mt-1.5">Avg. Fault Response Time</div>
+                        </div>
+                        <div className="p-9 px-7 border-b md:border-b-0 md:border-r border-paper/15 last:border-r-0">
+                            <div className="font-ibm-plex-mono text-[2rem] text-amber">3,400+</div>
+                            <div className="text-[0.82rem] text-paper/60 uppercase tracking-[0.06em] mt-1.5">Systems Monitored</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* FINAL CTA */}
+            <section className="text-center py-[96px]">
+                <div className="max-w-[1180px] mx-auto px-8">
+                    <h2 className="font-space-grotesk font-semibold text-[clamp(1.6rem,3vw,2.3rem)] text-ink tracking-[-0.01em] mb-6">
+                        Keep your system performing at its best.
+                    </h2>
+                    <button className="bg-amber text-ink px-[26px] py-[15px] rounded-[3px] text-[0.95rem] font-semibold hover:bg-[#f2b458] transition-colors">
+                        Request Monitoring Setup
+                    </button>
                 </div>
             </section>
         </div>
-    );
-}
-
-function SLACard({ icon, title, value, description }: { icon: React.ReactNode, title: string, value: string, description: string }) {
-    return (
-        <div className="flex flex-col items-center p-6 space-y-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10">
-            <div className="p-3 bg-paper/20 rounded-full text-amber">{icon}</div>
-            <h4 className="font-bold text-lg mb-0">{title}</h4>
-            <div className="text-3xl font-light text-amber">{value}</div>
-            <p className="text-sm opacity-80">{description}</p>
-        </div>
-    );
-}
-
-function PackageCard({ title, price, description, features, featured = false }: { title: string, price: string, description: string, features: string[], featured?: boolean }) {
-    return (
-        <Card className={`p-8 flex flex-col ${featured ? 'border-amber border-2 shadow-xl' : ''}`}>
-            <h4 className={`text-sm font-bold uppercase tracking-widest mb-2 ${featured ? 'text-amber' : 'text-slate-custom'}`}>{title}</h4>
-            <div className="text-2xl font-bold mb-4">{price}</div>
-            <p className="text-sm text-slate-custom mb-8 leading-relaxed">{description}</p>
-            <ul className="space-y-4 mb-8 text-sm flex-1">
-                {features.map((f, i) => (
-                    <li key={i} className="flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-amber" /> {f}
-                    </li>
-                ))}
-            </ul>
-            <Button variant={featured ? 'primary' : 'outline'} className="w-full font-bold">Request Quotation</Button>
-        </Card>
     );
 }
