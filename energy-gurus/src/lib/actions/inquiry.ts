@@ -22,6 +22,8 @@ export async function sendInquiry(formData: FormData) {
         const guestEmail = formData.get("guestEmail") as string;
         const guestPhone = formData.get("guestPhone") as string;
         const inquiryType = (formData.get("inquiryType") as string) ?? "client";
+        const metadataString = formData.get("metadata") as string;
+        const metadata = metadataString ? JSON.parse(metadataString) : null;
 
         if (!receiverId || !message) {
             return { success: false, message: "Missing required fields" };
@@ -37,6 +39,7 @@ export async function sendInquiry(formData: FormData) {
             inquiryType: inquiryType as "client" | "support",
             status: "new",
             isRead: false,
+            metadata,
         });
 
         // Fetch sender logo if registered

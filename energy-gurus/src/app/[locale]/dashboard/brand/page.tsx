@@ -57,7 +57,7 @@ export default async function BrandDashboard() {
     const { score, missing } = getBrandCompleteness(myBrand, brandProducts.length);
 
     return (
-        <div className="p-8 space-y-8 max-w-7xl mx-auto">
+        <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
             <ToastMessageListener />
             {score < 50 && (
                 <div className="bg-red-500/10 border-2 border-red-500/20 text-red-600 p-6 rounded-[2rem] flex items-center gap-4 shadow-lg shadow-red-500/5 animate-in fade-in slide-in-from-top-4 duration-500">

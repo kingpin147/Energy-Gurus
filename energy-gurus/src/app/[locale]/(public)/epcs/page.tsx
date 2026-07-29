@@ -9,6 +9,7 @@ import Image from "next/image";
 import { unstable_cache } from "next/cache";
 import { getEpcCompleteness } from "@/lib/utils/completeness";
 import { AdBanner } from "@/components/shared/AdBanner";
+import { CompareToggle } from "@/components/shared/compare-toggle";
 
 const getInstallers = unstable_cache(
   async (sort: string, q?: string, city?: string, sector?: string) => {
@@ -90,7 +91,7 @@ export default async function EpcListingPage({
     <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 overflow-x-hidden min-h-screen">
       
       <header className="bg-ink text-white pt-[64px] pb-[44px]">
-        <div className="max-w-[1180px] mx-auto px-8">
+        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
           <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-[18px]">
             <span className="w-5 h-[1px] bg-amber"></span>
             Installer Directory
@@ -105,14 +106,12 @@ export default async function EpcListingPage({
       </header>
 
       <div className="bg-white border-b border-line sticky top-[72px] z-40">
-        <div className="max-w-[1180px] mx-auto px-8 py-[18px] flex flex-wrap gap-5 items-center">
-          <div className="flex items-center gap-2 border border-line rounded-[3px] px-3.5 py-2.5 bg-paper min-w-[220px]">
-            <span className="font-ibm-plex-mono text-[0.8rem] text-slate-custom">📍</span>
-            <ListSearch
-              placeholder="Search company..."
-              className="border-none bg-transparent font-sans text-[0.88rem] w-full outline-none focus:ring-0 p-0 shadow-none h-auto"
-            />
-          </div>
+        <div className="max-w-[1180px] mx-auto px-5 md:px-8 py-[18px] flex flex-wrap gap-5 items-center">
+          <ListSearch
+            placeholder="Search company..."
+            icon={<span className="absolute left-3 top-1/2 -translate-y-1/2 font-ibm-plex-mono text-[0.8rem] text-slate-custom">📍</span>}
+            className="border border-line rounded-[3px] pr-3.5 py-2.5 font-sans text-[0.88rem] bg-paper text-graphite h-auto focus:ring-amber/20 focus:border-amber transition-all shadow-none w-full min-w-[220px]"
+          />
           <div className="flex items-center gap-2.5 w-full sm:w-auto">
             <label className="font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom">Sort</label>
             <div className="border border-line rounded-[3px] bg-paper text-graphite flex items-center px-2 py-1">
@@ -138,7 +137,7 @@ export default async function EpcListingPage({
       </div>
 
       <section className="py-[48px] pb-[96px]">
-        <div className="max-w-[1180px] mx-auto px-8">
+        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
 
           {/* Ad Banner — top of listing */}
           <div className="mb-8 w-full flex justify-center">
@@ -202,9 +201,12 @@ export default async function EpcListingPage({
                     </span>
                     {installer.avgRating ? installer.avgRating.toFixed(1) : "N/A"} ({installer.reviewCount || 0})
                   </div>
-                  <span className="text-[0.85rem] font-semibold text-ink border border-line rounded-[3px] px-4 py-[9px] hover:border-ink transition-colors">
-                    View Profile
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <CompareToggle id={installer.id} name={installer.companyName} type="epc" />
+                    <span className="text-[0.85rem] font-semibold text-ink border border-line rounded-[3px] px-4 py-[9px] hover:border-ink transition-colors">
+                      View Profile
+                    </span>
+                  </div>
                 </div>
 
               </TrackedLink>

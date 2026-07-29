@@ -43,7 +43,7 @@ export default async function PodcastListingPage({
     return (
         <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 overflow-x-hidden min-h-screen">
             <header className="bg-ink text-white pt-[64px]">
-                <div className="max-w-[1180px] mx-auto px-8">
+                <div className="max-w-[1180px] mx-auto px-5 md:px-8">
                     <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-[18px]">
                         <span className="w-5 h-[1px] bg-amber"></span>
                         The Podcast
@@ -56,7 +56,7 @@ export default async function PodcastListingPage({
                     </p>
                 </div>
                 <div className="bg-[#0e1b30] border-t border-white/10">
-                    <div className="max-w-[1180px] mx-auto px-8 py-[18px] flex flex-wrap gap-3.5">
+                    <div className="max-w-[1180px] mx-auto px-5 md:px-8 py-[18px] flex flex-wrap gap-3.5">
                         <a href="https://www.youtube.com/energygurus.online" target="_blank" rel="noopener" className="flex items-center gap-2 px-[18px] py-2.5 rounded-[3px] text-[0.85rem] bg-amber/10 text-amber border border-amber transition-colors hover:bg-amber/20 font-semibold">
                             <Youtube className="w-4 h-4" /> Watch on YouTube
                         </a>
@@ -76,7 +76,7 @@ export default async function PodcastListingPage({
                 const videoId = getYouTubeId(featured.youtubeUrl);
                 return (
                     <section className="py-[64px]">
-                        <div className="max-w-[1180px] mx-auto px-8 grid grid-cols-1 md:grid-cols-[1.3fr_0.9fr] gap-10">
+                        <div className="max-w-[1180px] mx-auto px-5 md:px-8 grid grid-cols-1 md:grid-cols-[1.3fr_0.9fr] gap-10">
                             <div>
                                 <div className="relative w-full pt-[56.25%] rounded-[6px] overflow-hidden border border-line bg-ink">
                                     <iframe 
@@ -126,7 +126,7 @@ export default async function PodcastListingPage({
 
             {/* Episodes Grid */}
             <section className="pb-[64px] pt-[0px]">
-                <div className="max-w-[1180px] mx-auto px-8">
+                <div className="max-w-[1180px] mx-auto px-5 md:px-8">
                     <div className="flex gap-2.5 flex-wrap mb-9 items-center justify-between">
                         <div className="flex gap-2.5 flex-wrap">
                             <span className="font-ibm-plex-mono text-[0.78rem] px-4 py-2 rounded-[20px] border border-ink bg-ink text-white cursor-pointer transition-colors">All</span>

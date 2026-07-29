@@ -155,6 +155,7 @@ export const inquiries = pgTable('inquiries', {
   status: text('status').default('new').notNull(),
   isRead: boolean('is_read').default(false).notNull(),
   inquiryType: text('inquiry_type').$type<'client' | 'support' | 'public'>().default('client').notNull(),
+  metadata: jsonb('metadata'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => ({

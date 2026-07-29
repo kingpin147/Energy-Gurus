@@ -4,7 +4,7 @@ import { Twitter, Linkedin, Youtube, Facebook, Music2 } from "lucide-react";
 export function Footer() {
     return (
         <footer className="bg-ink text-paper/60 py-14 pb-8 text-[0.88rem]">
-            <div className="max-w-[1180px] mx-auto px-8 flex justify-between items-start flex-wrap gap-6">
+            <div className="max-w-[1180px] mx-auto px-5 md:px-8 flex justify-between items-start flex-wrap gap-6">
                 <div className="flex flex-col gap-6 max-w-[340px]">
                     <div className="text-paper/85 font-space-grotesk text-[1rem]">
                         Powering informed solar decisions — brands, installers, and expertise, all in one place.
@@ -42,7 +42,7 @@ export function Footer() {
                 </div>
             </div>
             
-            <div className="max-w-[1180px] mx-auto px-8 mt-12 border-t border-paper/12 pt-5 text-[0.78rem]">
+            <div className="max-w-[1180px] mx-auto px-5 md:px-8 mt-12 border-t border-paper/12 pt-5 text-[0.78rem]">
                 © {new Date().getFullYear()} EnergyGurus.online — All rights reserved.
             </div>
         </footer>

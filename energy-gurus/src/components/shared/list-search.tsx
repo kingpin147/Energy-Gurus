@@ -10,9 +10,10 @@ interface ListSearchProps {
     placeholder?: string;
     paramName?: string;
     className?: string;
+    icon?: React.ReactNode;
 }
 
-export function ListSearch({ placeholder = "Search...", paramName = "q", className }: ListSearchProps) {
+export function ListSearch({ placeholder = "Search...", paramName = "q", className, icon }: ListSearchProps) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -36,12 +37,12 @@ export function ListSearch({ placeholder = "Search...", paramName = "q", classNa
 
     return (
         <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-custom" />
+            {icon !== undefined ? icon : <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-custom" />}
             <Input 
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 placeholder={placeholder} 
-                className={`pl-10 h-11 bg-white border-line rounded-[4px] focus-visible:ring-amber/20 ${className || ""}`} 
+                className={`h-11 bg-white border-line rounded-[4px] focus-visible:ring-amber/20 ${icon === null ? "pl-3" : "pl-10"} ${className || ""}`} 
             />
         </div>
     );

@@ -52,7 +52,7 @@ export default async function AnalyticsPage({
   ];
 
   return (
-    <div className="p-8 space-y-10 max-w-[1600px] mx-auto">
+    <div className="p-4 md:p-8 space-y-10 max-w-[1600px] mx-auto">
       <div className="flex justify-between items-end">
         <div className="space-y-1">
           <h1 className="text-4xl font-black tracking-tighter">Engagement Hub</h1>

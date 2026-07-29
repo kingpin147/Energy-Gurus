@@ -71,7 +71,7 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="p-8 space-y-8 max-w-4xl mx-auto">
+        <div className="p-4 md:p-8 space-y-8 max-w-4xl mx-auto">
             <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-amber/10 text-ink rounded-2xl flex items-center justify-center">
                     <User className="w-6 h-6 text-amber" />

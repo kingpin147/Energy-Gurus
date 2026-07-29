@@ -46,7 +46,7 @@ export default async function EpcDashboard() {
   const { score, missing } = getEpcCompleteness(epc, offices.length, projects.length);
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-8">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8">
       {score < 50 && (
         <div className="bg-red-500/10 border-2 border-red-500/20 text-red-600 p-6 rounded-[2rem] flex items-center gap-4 shadow-lg shadow-red-500/5 animate-in fade-in slide-in-from-top-4 duration-500">
           <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center shrink-0">

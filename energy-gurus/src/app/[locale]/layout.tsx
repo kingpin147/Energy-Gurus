@@ -7,6 +7,7 @@ import { Inter, Noto_Sans_Arabic, Outfit, Space_Grotesk, IBM_Plex_Mono } from "n
 import { ClerkProvider } from "@clerk/nextjs";
 import { CSPostHogProvider } from '@/components/providers/PostHogProvider';
 import { Toaster } from 'sonner';
+import { CompareProvider } from '@/components/shared/compare-context';
 import "../globals.css";
 
 const inter = Inter({
@@ -76,8 +77,10 @@ export default async function RootLayout({
   const content = (
     <CSPostHogProvider>
       <NextIntlClientProvider messages={messages}>
-        {children}
-        <Toaster position="top-right" expand={true} richColors />
+        <CompareProvider>
+          {children}
+          <Toaster position="top-right" expand={true} richColors />
+        </CompareProvider>
       </NextIntlClientProvider>
     </CSPostHogProvider>
   );

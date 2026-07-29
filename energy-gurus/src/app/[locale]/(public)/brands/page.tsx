@@ -11,6 +11,7 @@ import Image from "next/image";
 import { unstable_cache } from "next/cache";
 import { getBrandCompleteness } from "@/lib/utils/completeness";
 import { AdBanner } from "@/components/shared/AdBanner";
+import { CompareToggle } from "@/components/shared/compare-toggle";
 
 const getBrandsData = unstable_cache(
     async (sort: string, q?: string) => {
@@ -80,7 +81,7 @@ export default async function BrandsListingPage({
         <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 overflow-x-hidden min-h-screen">
             
             <header className="bg-ink text-white pt-[64px] pb-[44px]">
-                <div className="max-w-[1180px] mx-auto px-8">
+                <div className="max-w-[1180px] mx-auto px-5 md:px-8">
                     <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-[18px]">
                         <span className="w-5 h-[1px] bg-amber"></span>
                         Brand Directory
@@ -95,12 +96,12 @@ export default async function BrandsListingPage({
             </header>
 
             <div className="bg-white border-b border-line sticky top-[72px] z-40">
-                <div className="max-w-[1180px] mx-auto px-8 py-[18px] flex flex-wrap gap-7 items-center">
+                <div className="max-w-[1180px] mx-auto px-5 md:px-8 py-[18px] flex flex-wrap gap-7 items-center">
                     <div className="flex items-center gap-2.5 w-full sm:w-auto">
                         <label className="font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom">Search</label>
                         <ListSearch
                             placeholder="Brand name..."
-                            className="border border-line rounded-[3px] px-3 py-2 font-sans text-[0.88rem] bg-paper text-graphite h-auto focus:ring-amber/20 focus:border-amber transition-all shadow-none w-[200px]"
+                            className="border border-line rounded-[3px] pr-3 py-2 font-sans text-[0.88rem] bg-paper text-graphite h-auto focus:ring-amber/20 focus:border-amber transition-all shadow-none w-[200px]"
                         />
                     </div>
                     <div className="flex items-center gap-2.5 w-full sm:w-auto">
@@ -124,7 +125,7 @@ export default async function BrandsListingPage({
             </div>
 
             <section className="py-[56px] pb-[96px]">
-                <div className="max-w-[1180px] mx-auto px-8">
+                <div className="max-w-[1180px] mx-auto px-5 md:px-8">
                     
                     {(brandList?.length || 0) === 0 ? (
                         <div className="text-center py-20 bg-white border border-line rounded-[4px]">
@@ -171,9 +172,12 @@ export default async function BrandsListingPage({
                                             {brand.about || "Verified energy solution provider."}
                                         </div>
                                     </div>
-                                    <span className="mt-auto pt-[10px] text-[0.86rem] font-semibold text-ink inline-flex items-center gap-1.5 border-t border-line">
-                                        View Brand <ArrowRight className="w-4 h-4 group-hover:translate-x-[3px] transition-transform" />
-                                    </span>
+                                    <div className="mt-auto pt-[10px] flex items-center justify-between border-t border-line">
+                                        <CompareToggle id={brand.id} name={brand.brandName} type="brand" />
+                                        <span className="text-[0.86rem] font-semibold text-ink inline-flex items-center gap-1.5">
+                                            View Brand <ArrowRight className="w-4 h-4 group-hover:translate-x-[3px] transition-transform" />
+                                        </span>
+                                    </div>
                                 </TrackedLink>
                             ))}
                         </div>

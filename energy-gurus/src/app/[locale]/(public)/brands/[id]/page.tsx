@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getBrandCompleteness } from "@/lib/utils/completeness";
-import { Star, ShieldCheck, ArrowLeft, Zap, Shield, Award, Package, CheckCircle2, Info, HeadphonesIcon, Building2 } from "lucide-react";
+import { Star, ShieldCheck, ArrowLeft, Zap, Shield, Award, Package, CheckCircle2, Info, HeadphonesIcon, Building2, FileDown, ExternalLink } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -237,6 +237,9 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
                 <TabsTrigger value="verification" className="px-8 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 data-[state=active]:bg-amber text-ink data-[state=active]:text-white">
                   <ShieldCheck className="w-4 h-4" /> Verification
                 </TabsTrigger>
+                <TabsTrigger value="downloads" className="px-8 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 data-[state=active]:bg-amber text-ink data-[state=active]:text-white">
+                  <FileDown className="w-4 h-4" /> Resources
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="portfolio" className="space-y-12 outline-none">
@@ -302,6 +305,63 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
 
               <TabsContent value="verification" className="outline-none">
                 <ProductVerification brandId={brand.id} />
+              </TabsContent>
+
+              <TabsContent value="downloads" className="outline-none space-y-8">
+                <div className="flex items-center gap-6 mb-8">
+                  <div className="w-3 h-12 bg-amber text-ink rounded-full shadow-[0_0_30px_rgba(0,109,109,0.5)]" />
+                  <h2 className="text-5xl font-black tracking-tighter uppercase text-gradient">Resource Center</h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Warranty Document */}
+                  {brand.warrantyUrl ? (
+                    <a href={brand.warrantyUrl} target="_blank" rel="noopener noreferrer" className="group p-8 rounded-3xl bg-white border border-line/50 hover:border-amber transition-all flex items-start gap-5 shadow-sm hover:shadow-md">
+                      <div className="w-14 h-14 rounded-2xl bg-amber/10 text-amber flex items-center justify-center shrink-0">
+                        <ShieldCheck className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="font-space-grotesk font-bold text-xl text-ink mb-1 group-hover:text-amber transition-colors">Warranty Claim Form</h4>
+                        <p className="text-sm text-slate-custom leading-relaxed mb-4">Official warranty documentation and claim procedures.</p>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-teal flex items-center gap-1">
+                          View Document <ExternalLink className="w-3 h-3" />
+                        </span>
+                      </div>
+                    </a>
+                  ) : null}
+
+                  {/* Brand Profile / About Document */}
+                  <a href={brand.website || "#"} target="_blank" rel="noopener noreferrer" className="group p-8 rounded-3xl bg-white border border-line/50 hover:border-amber transition-all flex items-start gap-5 shadow-sm hover:shadow-md">
+                    <div className="w-14 h-14 rounded-2xl bg-amber/10 text-amber flex items-center justify-center shrink-0">
+                      <Building2 className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h4 className="font-space-grotesk font-bold text-xl text-ink mb-1 group-hover:text-amber transition-colors">Corporate Profile</h4>
+                      <p className="text-sm text-slate-custom leading-relaxed mb-4">Read more about {brand.brandName}&apos;s global presence and corporate philosophy.</p>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-teal flex items-center gap-1">
+                        Visit Website <ExternalLink className="w-3 h-3" />
+                      </span>
+                    </div>
+                  </a>
+
+                  {/* Product Datasheets Overview */}
+                  {brandProducts.length > 0 && (
+                    <div className="col-span-full mt-4">
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-4">Available Datasheets</h4>
+                      <div className="space-y-3">
+                        {brandProducts.map(product => product.datasheetUrl ? (
+                          <a key={product.id} href={product.datasheetUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-5 bg-white/50 backdrop-blur-xl border border-line/50 rounded-2xl hover:border-amber transition-all group">
+                            <div className="flex items-center gap-4">
+                              <FileDown className="w-5 h-5 text-slate-custom group-hover:text-amber transition-colors" />
+                              <span className="font-semibold text-ink">{product.name} Datasheet</span>
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-teal opacity-0 group-hover:opacity-100 transition-opacity">Download</span>
+                          </a>
+                        ) : null)}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </TabsContent>
             </Tabs>
 

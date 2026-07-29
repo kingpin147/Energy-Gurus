@@ -23,7 +23,7 @@ export default function MonitoringOverviewPage() {
                     className="absolute inset-0 pointer-events-none z-0" 
                     style={{ background: 'radial-gradient(ellipse 800px 460px at 85% 0%, rgba(232,163,61,0.14), transparent 60%)' }}
                 />
-                <div className="max-w-[1180px] mx-auto px-8 relative z-10 grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-14 items-center">
+                <div className="max-w-[1180px] mx-auto px-5 md:px-8 relative z-10 grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-14 items-center">
                     <div>
                         <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-[18px]">
                             <span className="w-5 h-[1px] bg-amber"></span>
@@ -60,7 +60,7 @@ export default function MonitoringOverviewPage() {
             </header>
 
             <section className="py-[80px]">
-                <div className="max-w-[1180px] mx-auto px-8 grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-14 items-center">
+                <div className="max-w-[1180px] mx-auto px-5 md:px-8 grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-14 items-center">
                     <div>
                         <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-teal flex items-center gap-2.5 mb-[18px]">
                             <span className="w-5 h-[1px] bg-teal"></span>
@@ -87,7 +87,7 @@ export default function MonitoringOverviewPage() {
             </section>
 
             <section className="py-[80px]">
-                <div className="max-w-[1180px] mx-auto px-8">
+                <div className="max-w-[1180px] mx-auto px-5 md:px-8">
                     <div className="max-w-[640px] mb-12">
                         <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-teal flex items-center gap-2.5 mb-[18px]">
                             <span className="w-5 h-[1px] bg-teal"></span>
@@ -118,7 +118,7 @@ export default function MonitoringOverviewPage() {
             </section>
 
             <section className="py-[80px]">
-                <div className="max-w-[1180px] mx-auto px-8">
+                <div className="max-w-[1180px] mx-auto px-5 md:px-8">
                     <div className="max-w-[640px] mb-12">
                         <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-teal flex items-center gap-2.5 mb-[18px]">
                             <span className="w-5 h-[1px] bg-teal"></span>
@@ -170,7 +170,7 @@ export default function MonitoringOverviewPage() {
             </section>
 
             <section className="bg-ink text-white py-0">
-                <div className="max-w-[1180px] mx-auto px-8">
+                <div className="max-w-[1180px] mx-auto px-5 md:px-8">
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-[1px] border-l border-r border-paper/15 border-transparent sm:border-paper/15">
                         <div className="p-9 px-7 border-b sm:border-b-0 sm:border-r border-paper/15">
                             <div className="font-ibm-plex-mono text-[2rem] text-amber">99.8%</div>
@@ -189,7 +189,7 @@ export default function MonitoringOverviewPage() {
             </section>
 
             <section className="text-center py-[96px]">
-                <div className="max-w-[1180px] mx-auto px-8">
+                <div className="max-w-[1180px] mx-auto px-5 md:px-8">
                     <h2 className="font-space-grotesk font-semibold text-[clamp(1.6rem,3vw,2.3rem)] text-ink mb-6 tracking-[-0.01em]">
                         Keep your system performing at its best.
                     </h2>

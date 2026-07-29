@@ -72,7 +72,7 @@ export default async function Homepage() {
                     }}
                 />
                 
-                <div className="max-w-[1180px] mx-auto px-8 relative z-10">
+                <div className="max-w-[1180px] mx-auto px-5 md:px-8 relative z-10">
                     <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-5">
                         <span className="w-5 h-[1px] bg-amber"></span>
                         Live Solar Intelligence
@@ -97,7 +97,7 @@ export default async function Homepage() {
                 </div>
 
                 <div className="relative z-10 border-t border-paper/15 grid grid-cols-1 md:grid-cols-3">
-                    <div className="px-8 py-7 md:border-r border-b md:border-b-0 border-paper/15">
+                    <div className="px-5 md:px-8 py-7 md:border-r border-b md:border-b-0 border-paper/15">
                         <div className="font-ibm-plex-mono text-[1.9rem] text-amber flex items-baseline gap-1.5">
                             250<span className="text-[0.95rem] text-paper/50">+</span>
                         </div>
@@ -105,7 +105,7 @@ export default async function Homepage() {
                             Certified Installers
                         </div>
                     </div>
-                    <div className="px-8 py-7 md:border-r border-b md:border-b-0 border-paper/15">
+                    <div className="px-5 md:px-8 py-7 md:border-r border-b md:border-b-0 border-paper/15">
                         <div className="font-ibm-plex-mono text-[1.9rem] text-amber flex items-baseline gap-1.5">
                             40<span className="text-[0.95rem] text-paper/50">+</span>
                         </div>
@@ -113,7 +113,7 @@ export default async function Homepage() {
                             Brands Reviewed
                         </div>
                     </div>
-                    <div className="px-8 py-7">
+                    <div className="px-5 md:px-8 py-7">
                         <div className="font-ibm-plex-mono text-[1.9rem] text-amber flex items-baseline gap-1.5">
                             120<span className="text-[0.95rem] text-paper/50">eps</span>
                         </div>
@@ -130,7 +130,7 @@ export default async function Homepage() {
 
             {/* ---- THREE WAYS IN ---- */}
             <section className="py-22">
-                <div className="max-w-[1180px] mx-auto px-8">
+                <div className="max-w-[1180px] mx-auto px-5 md:px-8">
                     <div className="max-w-[640px] mb-14">
                         <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-teal flex items-center gap-2.5 mb-5">
                             <span className="w-5 h-[1px] bg-teal"></span>
@@ -181,7 +181,7 @@ export default async function Homepage() {
 
             {/* ---- THE PROCESS ---- */}
             <section className="py-22">
-                <div className="max-w-[1180px] mx-auto px-8">
+                <div className="max-w-[1180px] mx-auto px-5 md:px-8">
                     <div className="max-w-[640px] mb-14">
                         <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-teal flex items-center gap-2.5 mb-5">
                             <span className="w-5 h-[1px] bg-teal"></span>
@@ -214,7 +214,7 @@ export default async function Homepage() {
 
             {/* ---- MONITORING ---- */}
             <section className="bg-ink text-paper py-22">
-                <div className="max-w-[1180px] mx-auto px-8 grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-16 items-center">
+                <div className="max-w-[1180px] mx-auto px-5 md:px-8 grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-16 items-center">
                     <div>
                         <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-5">
                             <span className="w-5 h-[1px] bg-amber"></span>
@@ -249,7 +249,7 @@ export default async function Homepage() {
 
             {/* ---- PODCAST ---- */}
             <section className="py-22">
-                <div className="max-w-[1180px] mx-auto px-8">
+                <div className="max-w-[1180px] mx-auto px-5 md:px-8">
                     <div className="max-w-[640px] mb-14">
                         <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-teal flex items-center gap-2.5 mb-5">
                             <span className="w-5 h-[1px] bg-teal"></span>
@@ -278,7 +278,7 @@ export default async function Homepage() {
 
             {/* ---- NEWSLETTER / QUOTE ---- */}
             <section className="py-22">
-                <div className="max-w-[1180px] mx-auto px-8">
+                <div className="max-w-[1180px] mx-auto px-5 md:px-8">
                     <div className="bg-white border border-line rounded-[4px] p-11 flex justify-between items-center gap-8 flex-wrap">
                         <div>
                             <h2 className="font-space-grotesk font-semibold text-[1.4rem] tracking-[-0.01em] text-ink mb-1.5">Stay informed.</h2>

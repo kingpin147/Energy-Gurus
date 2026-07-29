@@ -41,7 +41,7 @@ export default function SeedPage() {
     };
 
     return (
-        <div className="p-12 max-w-2xl mx-auto space-y-8">
+        <div className="p-4 md:p-12 max-w-2xl mx-auto space-y-8">
             <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-amber/10 text-ink rounded-2xl flex items-center justify-center text-amber">
                     <Database className="w-6 h-6" />

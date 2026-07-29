@@ -4,6 +4,7 @@ import { Mail, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ContactForm } from "@/components/forms/contact-form";
+import { QuoteForm } from "@/components/forms/quote-form";
 import { TrackedInteraction, TrackedLink } from "@/components/shared/AnalyticsTracker";
 import { TrackedDialogTrigger } from "@/components/shared/TrackedDialogTrigger";
 import { Globe, ExternalLink } from "lucide-react";
@@ -37,21 +38,21 @@ export function EpcContactButtons({ epcId, companyName, userId, website, whatsap
 
             <Dialog>
                 <TrackedDialogTrigger
-                    className="w-full h-12 rounded-xl font-bold text-sm bg-amber text-ink hover:bg-amber/90 text-ink text-white gap-2.5 shadow-md shadow-primary/20 transition-all hover:scale-[1.01] inline-flex items-center justify-center"
-                    eventName="epc_contact_click"
+                    className="w-full h-12 rounded-xl font-bold text-sm bg-amber text-ink hover:bg-amber/90 shadow-md shadow-primary/20 transition-all hover:scale-[1.01] inline-flex items-center justify-center gap-2.5"
+                    eventName="epc_quote_click"
                     eventProperties={{ epcId, companyName }}
                 >
-                    <Mail className="w-4 h-4" /> Direct Message
+                    <Mail className="w-4 h-4" /> Request a Quote
                 </TrackedDialogTrigger>
                 <DialogContent className="sm:max-w-lg rounded-2xl border border-line/60 p-0 overflow-hidden bg-white shadow-2xl">
                     {/* Header */}
                     <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-line/50">
                         <DialogHeader className="space-y-0.5">
                             <DialogTitle className="text-lg font-black text-graphite">
-                                Message {companyName}
+                                Request a Quote
                             </DialogTitle>
                             <p className="text-sm text-slate-custom">
-                                Your inquiry goes directly to their inbox
+                                Get a custom estimate from {companyName}
                             </p>
                         </DialogHeader>
                         <div className="w-10 h-10 rounded-xl bg-amber/10 text-ink flex items-center justify-center shrink-0 ml-4">
@@ -60,7 +61,7 @@ export function EpcContactButtons({ epcId, companyName, userId, website, whatsap
                     </div>
                     {/* Form */}
                     <div className="px-6 py-5">
-                        <ContactForm receiverId={userId} receiverName={companyName} />
+                        <QuoteForm receiverId={userId} receiverName={companyName} />
                     </div>
                 </DialogContent>
             </Dialog>
