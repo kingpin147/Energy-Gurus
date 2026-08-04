@@ -29,14 +29,7 @@ export function UserNav() {
   }
 
   if (!user) {
-    return (
-      <Link
-        href="/sign-in"
-        className="bg-teal text-white px-5 py-2 rounded-lg font-bold text-sm whitespace-nowrap inline-block hover:opacity-90 transition-opacity"
-      >
-        Sign In
-      </Link>
-    );
+    return null;
   }
 
   return (
