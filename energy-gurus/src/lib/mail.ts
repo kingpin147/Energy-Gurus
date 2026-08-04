@@ -187,3 +187,70 @@ export async function sendInvitationEmail(toEmail: string, role: string): Promis
     throw new Error("Failed to connect to email service. Please try again.");
   }
 }
+
+export async function sendAdminNotificationEmail(subject: string, messageHtml: string): Promise<boolean> {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) {
+    console.warn("BREVO_API_KEY is not configured. Cannot send admin notification emails.");
+    return false;
+  }
+
+  try {
+    const response = await fetchWithRetry("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "accept": "application/json",
+        "api-key": apiKey,
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        sender: {
+          name: "Energy Gurus System",
+          email: "energygurusonline@gmail.com"
+        },
+        to: [
+          {
+            email: "energygurusonline@gmail.com" // Sending to the admin email
+          }
+        ],
+        subject: `[Admin Alert] ${subject}`,
+        htmlContent: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background: #006d6d; color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+              .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; border: 1px solid #eee; border-top: none; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h2 style="margin: 0;">⚡ Energy Gurus Notification</h2>
+              </div>
+              <div class="content">
+                ${messageHtml}
+              </div>
+            </div>
+          </body>
+          </html>
+        `
+      })
+    });
+
+    if (response.ok) {
+      console.log(`✅ Admin notification email sent: ${subject}`);
+      return true;
+    } else {
+      console.error(`❌ Brevo API error for admin notification:`, await response.text());
+      return false;
+    }
+  } catch (error) {
+    console.error("❌ Failed to send admin notification email:", error);
+    return false;
+  }
+}
+

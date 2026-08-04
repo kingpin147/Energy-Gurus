@@ -286,3 +286,22 @@ export const brandsRelations = relations(brands, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export const monitoringRequests = pgTable('monitoring_requests', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  customerName: text('customer_name').notNull(),
+  address: text('address').notNull(),
+  contactNo: text('contact_no').notNull(),
+  email: text('email').notNull(),
+  cnic: text('cnic').notNull(),
+  customerType: text('customer_type').notNull(),
+  systemSize: text('system_size').notNull(),
+  package: text('package').notNull(),
+  monitoringHours: text('monitoring_hours').notNull(),
+  paymentPlan: text('payment_plan').notNull(),
+  amountPayable: text('amount_payable'),
+  status: text('status').$type<'pending' | 'contacted' | 'active'>().default('pending').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+

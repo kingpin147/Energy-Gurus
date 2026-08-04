@@ -5,6 +5,7 @@ import { inquiries, users, notifications, brands, epcInstallers } from "@/db/sch
 import { auth } from "@clerk/nextjs/server";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { sendAdminNotificationEmail } from "@/lib/mail";
 
 export async function sendInquiry(formData: FormData) {
     try {
@@ -123,6 +124,18 @@ export async function sendSupportMessage(formData: FormData) {
             link: "/dashboard/inbox",
             senderLogoUrl: null, // Admin notifications usually don't need sender logo or can be added later
         });
+
+        // Send email alert to admin
+        const emailHtml = `
+            <h3>New Support Request (Internal)</h3>
+            <p><strong>From:</strong> ${senderName} (${senderEmail})</p>
+            <p><strong>Subject:</strong> ${subject}</p>
+            <p><strong>Message:</strong></p>
+            <blockquote style="border-left: 4px solid #eee; padding-left: 10px;">${message.replace(/\n/g, '<br/>')}</blockquote>
+            <br/>
+            <p><a href="https://energygurus.net/dashboard/inbox">View in Inbox</a></p>
+        `;
+        sendAdminNotificationEmail(`Support Request: ${subject || "No Subject"}`, emailHtml).catch(console.error);
 
         revalidatePath("/[locale]/dashboard/support", "layout");
         return { success: true, message: "Support message sent" };
@@ -307,6 +320,19 @@ export async function submitPublicContact(formData: FormData) {
             message,
             inquiryType: "public",
         });
+
+        // Send email alert to admin
+        const emailHtml = `
+            <h3>New Contact Form Submission (Public)</h3>
+            <p><strong>From:</strong> ${guestName} (${guestEmail})</p>
+            <p><strong>Phone:</strong> ${guestPhone || 'Not provided'}</p>
+            <p><strong>Subject:</strong> ${subject}</p>
+            <p><strong>Message:</strong></p>
+            <blockquote style="border-left: 4px solid #eee; padding-left: 10px;">${message.replace(/\n/g, '<br/>')}</blockquote>
+            <br/>
+            <p><a href="https://energygurus.net/dashboard/inbox">View in Inbox</a></p>
+        `;
+        sendAdminNotificationEmail(`Public Contact: ${subject || "No Subject"}`, emailHtml).catch(console.error);
 
         revalidatePath("/", "layout");
         return { success: true };

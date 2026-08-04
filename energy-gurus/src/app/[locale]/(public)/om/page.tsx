@@ -1,4 +1,6 @@
 import { Link } from "@/i18n/routing";
+import PricingSection from "@/components/monitoring/PricingSection";
+import RequestForm from "@/components/monitoring/RequestForm";
 
 export default function OMPage() {
     return (
@@ -107,56 +109,7 @@ export default function OMPage() {
                 </div>
             </section>
 
-            {/* PRICING */}
-            <section className="py-[80px]">
-                <div className="max-w-[1180px] mx-auto px-5 md:px-8">
-                    <div className="max-w-[640px] mb-12">
-                        <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-teal flex items-center gap-2.5 mb-[18px]">
-                            <span className="w-5 h-[1px] bg-teal"></span>
-                            Pricing
-                        </p>
-                        <h2 className="font-space-grotesk font-semibold text-[clamp(1.5rem,3vw,2.1rem)] text-ink tracking-[-0.01em]">
-                            Choose your coverage level.
-                        </h2>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <div className="bg-white border border-line rounded-[6px] p-8 px-[26px] relative">
-                            <h3 className="font-space-grotesk font-semibold text-[1.2rem] text-ink mb-[14px]">Essential</h3>
-                            <ul className="my-[18px] mb-[26px] space-y-0">
-                                <li className="text-[0.9rem] text-slate-custom py-2 border-t border-line first:border-t-0">Remote monitoring</li>
-                                <li className="text-[0.9rem] text-slate-custom py-2 border-t border-line">Annual inspection</li>
-                                <li className="text-[0.9rem] text-slate-custom py-2 border-t border-line">Email fault alerts</li>
-                            </ul>
-                            <button className="w-full py-[13px] rounded-[3px] text-[0.9rem] font-semibold bg-paper border border-line text-ink hover:bg-line transition-colors">
-                                Select Essential
-                            </button>
-                        </div>
-                        <div className="bg-white border border-amber rounded-[6px] p-8 px-[26px] relative shadow-[0_0_0_1px_var(--color-amber)]">
-                            <span className="absolute -top-[12px] left-[26px] bg-amber text-ink font-ibm-plex-mono text-[0.68rem] tracking-[0.06em] uppercase py-1 px-2.5 rounded-[20px]">Most Popular</span>
-                            <h3 className="font-space-grotesk font-semibold text-[1.2rem] text-ink mb-[14px]">Plus</h3>
-                            <ul className="my-[18px] mb-[26px] space-y-0">
-                                <li className="text-[0.9rem] text-slate-custom py-2 border-t border-line first:border-t-0">Everything in Essential</li>
-                                <li className="text-[0.9rem] text-slate-custom py-2 border-t border-line">Biannual maintenance</li>
-                                <li className="text-[0.9rem] text-slate-custom py-2 border-t border-line">Priority fault response</li>
-                            </ul>
-                            <button className="w-full py-[13px] rounded-[3px] text-[0.9rem] font-semibold bg-ink border border-ink text-white hover:bg-ink/90 transition-colors">
-                                Select Plus
-                            </button>
-                        </div>
-                        <div className="bg-white border border-line rounded-[6px] p-8 px-[26px] relative">
-                            <h3 className="font-space-grotesk font-semibold text-[1.2rem] text-ink mb-[14px]">Pro</h3>
-                            <ul className="my-[18px] mb-[26px] space-y-0">
-                                <li className="text-[0.9rem] text-slate-custom py-2 border-t border-line first:border-t-0">Everything in Plus</li>
-                                <li className="text-[0.9rem] text-slate-custom py-2 border-t border-line">Guaranteed uptime SLA</li>
-                                <li className="text-[0.9rem] text-slate-custom py-2 border-t border-line">Dedicated account contact</li>
-                            </ul>
-                            <button className="w-full py-[13px] rounded-[3px] text-[0.9rem] font-semibold bg-paper border border-line text-ink hover:bg-line transition-colors">
-                                Select Pro
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <PricingSection />
 
             {/* TRUST STATS */}
             <section className="bg-ink text-white">
@@ -178,17 +131,7 @@ export default function OMPage() {
                 </div>
             </section>
 
-            {/* FINAL CTA */}
-            <section className="text-center py-[96px]">
-                <div className="max-w-[1180px] mx-auto px-5 md:px-8">
-                    <h2 className="font-space-grotesk font-semibold text-[clamp(1.6rem,3vw,2.3rem)] text-ink tracking-[-0.01em] mb-6">
-                        Keep your system performing at its best.
-                    </h2>
-                    <button className="bg-amber text-ink px-[26px] py-[15px] rounded-[3px] text-[0.95rem] font-semibold hover:bg-[#f2b458] transition-colors">
-                        Request Monitoring Setup
-                    </button>
-                </div>
-            </section>
+            <RequestForm />
         </div>
     );
 }
