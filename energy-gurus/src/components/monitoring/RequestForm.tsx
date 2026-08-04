@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { submitMonitoringRequest } from '@/app/[locale]/(public)/monitoring/actions';
 
 export default function RequestForm() {
@@ -13,6 +13,37 @@ export default function RequestForm() {
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [cnic, setCnic] = useState<string>('');
+
+    useEffect(() => {
+        const handleSelectPackage = (e: Event) => {
+            const customEvent = e as CustomEvent;
+            const { pkg: newPkg, size: newSize, hours: newHours, plan: newPlan } = customEvent.detail;
+            setPkg(newPkg);
+            setSize(newSize);
+            setHours(newHours);
+            setPlan(newPlan);
+            
+            if (newSize === 'contact') {
+                setShowModal(true);
+            }
+        };
+
+        document.addEventListener('selectPackage', handleSelectPackage);
+        return () => document.removeEventListener('selectPackage', handleSelectPackage);
+    }, []);
+
+    const handleCnicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let val = e.target.value.replace(/\D/g, '');
+        if (val.length > 13) val = val.slice(0, 13);
+        let formatted = val;
+        if (val.length > 5 && val.length <= 12) {
+            formatted = val.slice(0, 5) + '-' + val.slice(5);
+        } else if (val.length > 12) {
+            formatted = val.slice(0, 5) + '-' + val.slice(5, 12) + '-' + val.slice(12);
+        }
+        setCnic(formatted);
+    };
 
     const handleSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const val = e.target.value;
@@ -117,11 +148,11 @@ export default function RequestForm() {
                                 </div>
                                 <div>
                                     <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">Email Address</label>
-                                    <input type="email" name="email" required className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber" />
+                                    <input type="email" name="email" required pattern="[^@\s]+@[^@\s]+\.[^@\s]+" title="Please enter a valid email address" className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber" />
                                 </div>
                                 <div>
                                     <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">CNIC Number</label>
-                                    <input type="text" name="cnic" placeholder="XXXXX-XXXXXXX-X" required className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber" />
+                                    <input type="text" name="cnic" placeholder="XXXXX-XXXXXXX-X" value={cnic} onChange={handleCnicChange} pattern="^\d{5}-\d{7}-\d{1}$" title="Format: XXXXX-XXXXXXX-X" required className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber" />
                                 </div>
                                 <div>
                                     <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">Customer Type</label>

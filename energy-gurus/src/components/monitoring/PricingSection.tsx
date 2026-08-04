@@ -67,19 +67,7 @@ export default function PricingSection() {
                             <option value="2">24 Hours</option>
                         </select>
                     </div>
-                    <div className="flex flex-col gap-1">
-                        <label className="font-ibm-plex-mono text-[0.78rem] tracking-[0.06em] uppercase text-slate-custom">Payment Plan</label>
-                        <select 
-                            className="border border-line rounded-[3px] py-[9px] px-[14px] font-sans text-[0.9rem] bg-white text-ink outline-none focus-visible:ring-2 focus-visible:ring-amber"
-                            value={discount} 
-                            onChange={(e) => setDiscount(parseFloat(e.target.value))}
-                        >
-                            <option value="0">Monthly (No Advance)</option>
-                            <option value="0.2">Quarterly Advance (20% off)</option>
-                            <option value="0.4">Bi-Annual Advance (40% off)</option>
-                            <option value="0.6">Annual Advance (60% off)</option>
-                        </select>
-                    </div>
+
                 </div>
 
                 <div className="overflow-x-auto border border-line rounded-[6px] bg-white">
@@ -164,9 +152,18 @@ export default function PricingSection() {
                             </tr>
                             <tr>
                                 <td className="p-[16px_18px] text-left text-[0.88rem] font-semibold text-ink whitespace-nowrap border-none"></td>
-                                <td className="p-[16px_18px] text-left text-[0.88rem] border-none"><button onClick={() => { document.getElementById('request-form')?.scrollIntoView({behavior: 'smooth'}) }} className="px-4 py-[9px] rounded-[3px] text-[0.82rem] bg-paper border border-line text-ink whitespace-nowrap font-semibold hover:bg-line transition-colors">Select Basic</button></td>
-                                <td className="p-[16px_18px] text-left text-[0.88rem] border-none"><button onClick={() => { document.getElementById('request-form')?.scrollIntoView({behavior: 'smooth'}) }} className="px-4 py-[9px] rounded-[3px] text-[0.82rem] bg-paper border border-line text-ink whitespace-nowrap font-semibold hover:bg-line transition-colors">Select Moderate</button></td>
-                                <td className="p-[16px_18px] text-left text-[0.88rem] border-none bg-[rgba(232,163,61,0.06)]"><button onClick={() => { document.getElementById('request-form')?.scrollIntoView({behavior: 'smooth'}) }} className="px-4 py-[9px] rounded-[3px] text-[0.82rem] bg-ink border border-ink text-white whitespace-nowrap font-semibold hover:bg-ink/90 transition-colors">Select Comprehensive</button></td>
+                                <td className="p-[16px_18px] text-left text-[0.88rem] border-none"><button onClick={() => { 
+                                    document.dispatchEvent(new CustomEvent('selectPackage', { detail: { pkg: '1000', size, hours: hours.toString(), plan: discount.toString() } }));
+                                    document.getElementById('request-form')?.scrollIntoView({behavior: 'smooth'}) 
+                                }} className="px-4 py-[9px] rounded-[3px] text-[0.82rem] bg-paper border border-line text-ink whitespace-nowrap font-semibold hover:bg-line transition-colors">Select Basic</button></td>
+                                <td className="p-[16px_18px] text-left text-[0.88rem] border-none"><button onClick={() => { 
+                                    document.dispatchEvent(new CustomEvent('selectPackage', { detail: { pkg: '1800', size, hours: hours.toString(), plan: discount.toString() } }));
+                                    document.getElementById('request-form')?.scrollIntoView({behavior: 'smooth'}) 
+                                }} className="px-4 py-[9px] rounded-[3px] text-[0.82rem] bg-paper border border-line text-ink whitespace-nowrap font-semibold hover:bg-line transition-colors">Select Moderate</button></td>
+                                <td className="p-[16px_18px] text-left text-[0.88rem] border-none bg-[rgba(232,163,61,0.06)]"><button onClick={() => { 
+                                    document.dispatchEvent(new CustomEvent('selectPackage', { detail: { pkg: '3000', size, hours: hours.toString(), plan: discount.toString() } }));
+                                    document.getElementById('request-form')?.scrollIntoView({behavior: 'smooth'}) 
+                                }} className="px-4 py-[9px] rounded-[3px] text-[0.82rem] bg-ink border border-ink text-white whitespace-nowrap font-semibold hover:bg-ink/90 transition-colors">Select Comprehensive</button></td>
                             </tr>
                         </tbody>
                     </table>

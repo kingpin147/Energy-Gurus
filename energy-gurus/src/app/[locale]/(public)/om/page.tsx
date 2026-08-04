@@ -25,9 +25,9 @@ export default function OMPage() {
                         <p className="text-[1.05rem] text-paper/72 max-w-[480px] my-[18px] mb-[30px]">
                             Protect your investment long after the panels go up — with real-time performance monitoring, proactive maintenance, and fast fault detection.
                         </p>
-                        <button className="bg-amber text-ink px-[26px] py-[15px] rounded-[3px] text-[0.95rem] font-semibold hover:bg-[#f2b458] transition-colors">
+                        <a href="#request-form" className="inline-block bg-amber text-ink px-[26px] py-[15px] rounded-[3px] font-semibold text-[0.95rem] hover:bg-[#f2b458] transition-colors">
                             Request Monitoring Setup
-                        </button>
+                        </a>
                     </div>
                     <div className="border border-paper/15 rounded-[4px] p-[26px] bg-paper/5">
                         <div className="font-ibm-plex-mono text-[0.72rem] tracking-[0.08em] uppercase text-paper/50 mb-[14px]">
