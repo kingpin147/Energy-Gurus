@@ -1,36 +1,26 @@
 import { db } from "@/db";
-import { epcInstallers, epcOffices, epcProjects, users } from "@/db/schema";
+import { epcInstallers, epcOffices, epcProjects } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getEpcCompleteness } from "@/lib/utils/completeness";
 import {
   Globe,
-  Star,
-  ShieldCheck,
-  ArrowLeft,
-  MapPin,
-  Zap,
-  MessageSquare,
-  Building2,
-  Calendar,
-  Award,
-  Layers,
-  ChevronRight,
-  Shield,
-  Settings,
-  Headset,
-  CheckCircle2,
-  Play
+  Facebook,
+  Instagram,
+  Linkedin,
+  Youtube,
+  Play,
+  Star
 } from "lucide-react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { ReviewForm } from "@/components/forms/review-form";
 import { ReviewList } from "@/components/reviews/review-list";
-import { getProfileRating } from "@/lib/actions/reviews";
+import { getProfileRating, getTeamRating } from "@/lib/actions/reviews";
 import { redis, CACHE_KEYS } from "@/lib/redis";
 import { InferSelectModel } from "drizzle-orm";
-import { EpcContactButtons } from "@/components/shared/EpcContactButtons";
+import { InstallerQuoteForm } from "@/components/forms/installer-quote-form";
 
 type EpcInstaller = InferSelectModel<typeof epcInstallers>;
 type EpcOffice = InferSelectModel<typeof epcOffices>;
@@ -57,8 +47,8 @@ export async function generateMetadata({
 
   if (!installer) return {};
 
-  const title = `${installer.companyName} | Verified Solar EPC | Energy Gurus`;
-  const description = installer.about?.slice(0, 160) || `Learn more about ${installer.companyName}, a verified solar EPC installer providing high-quality energy solutions in Pakistan.`;
+  const title = `${installer.companyName} | Verified Solar EPC | EnergyGurus`;
+  const description = installer.about?.slice(0, 160) || `Learn more about ${installer.companyName}, a certified solar installer providing high-quality energy solutions.`;
 
   return {
     title,
@@ -78,6 +68,11 @@ export async function generateMetadata({
   };
 }
 
+function renderStars(rating: number) {
+  const fullStars = Math.floor(rating);
+  return "★".repeat(Math.min(5, fullStars)) + "☆".repeat(Math.max(0, 5 - fullStars));
+}
+
 function getYouTubeId(url: string) {
   const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&]{11})/);
   return match ? match[1] : null;
@@ -91,8 +86,7 @@ export default async function EpcProfilePage({
   const { id } = await params;
   const cacheKey = CACHE_KEYS.EPC_DETAILS(id);
 
-  let profileData: EpcProfileData | null =
-    await redis.get<EpcProfileData>(cacheKey);
+  let profileData: EpcProfileData | null = await redis.get<EpcProfileData>(cacheKey);
 
   if (!profileData) {
     const installer = await db.query.epcInstallers.findFirst({
@@ -102,331 +96,383 @@ export default async function EpcProfilePage({
 
     if (!installer || !(installer as any).user?.isActive) notFound();
 
-    const offices = await db
-      .select()
-      .from(epcOffices)
-      .where(eq(epcOffices.epcId, id));
-    const projects = await db
-      .select()
-      .from(epcProjects)
-      .where(eq(epcProjects.epcId, id));
+    const offices = await db.select().from(epcOffices).where(eq(epcOffices.epcId, id));
+    const projects = await db.select().from(epcProjects).where(eq(epcProjects.epcId, id));
     const { rating, count } = await getProfileRating(id);
 
     profileData = { installer, offices, projects, rating, count, isActive: (installer as any).user?.isActive || false };
     await redis.set(cacheKey, profileData, { ex: 3600 });
   }
 
-  if (!profileData) return notFound();
+  if (!profileData || !profileData.isActive) return notFound();
 
-  const { installer, offices, projects, rating, count, isActive } = profileData;
+  const { installer, offices, projects, rating, count } = profileData;
 
-  if (!isActive) notFound();
-
-  // Enforce 50% completeness threshold
-  const { score } = getEpcCompleteness(
-    installer,
-    offices.length,
-    projects.length
-  );
+  const { score } = getEpcCompleteness(installer, offices.length, projects.length);
   if (score < 50) notFound();
 
-  const inverters = Array.from(new Set(projects.map(p => p.inverterModel).filter(Boolean)));
-  const batteries = Array.from(new Set(projects.map(p => p.batteryModel).filter(Boolean)));
-  const panels = Array.from(new Set(projects.map(p => p.solarPanelModel).filter(Boolean)));
-  const youtubeProjects = projects.filter(p => (p as any).youtubeUrl);
+  const { rating: teamRating, count: teamCount } = await getTeamRating(installer.id, "epc");
 
-  const whatsappNumber =
-    (
-      installer.socialLinks as { platform: string; url: string }[] | null
-    )?.find((l) => l.platform === "WhatsApp" && l.url && l.url.trim() !== "")?.url.replace(/\D/g, "") || null;
+  const primaryCity = offices[0]?.city || "Lahore";
+  const yearsInBusiness = Math.max(1, new Date().getFullYear() - new Date(installer.createdAt).getFullYear());
+
+  const certBrands = (installer.certifications as string[])?.length > 0 
+    ? (installer.certifications as string[]) 
+    : ["LONGI", "JINKO", "JA", "TRINA", "HUAWEI"];
+
+  const sectorsList = (installer.sectors as string[])?.length > 0
+    ? (installer.sectors as string[])
+    : ["Residential", "Commercial", "Industrial", "Agriculture"];
+
+  const socialLinks = (installer.socialLinks as { platform: string; url: string }[] | null) || [];
+  const websiteUrl = installer.website || socialLinks.find(l => l.platform.toLowerCase() === "website")?.url || "#";
+  const facebookUrl = socialLinks.find(l => l.platform.toLowerCase() === "facebook")?.url || "#";
+  const instagramUrl = socialLinks.find(l => l.platform.toLowerCase() === "instagram")?.url || "#";
+  const linkedinUrl = socialLinks.find(l => l.platform.toLowerCase() === "linkedin")?.url || "#";
+  const youtubeUrl = socialLinks.find(l => l.platform.toLowerCase() === "youtube")?.url || "#";
 
   return (
-    <div className="min-h-screen bg-white text-graphite selection:bg-amber/20 text-ink pb-20">
-      {/* Top nav bar */}
-      <div className="bg-white border-b border-line/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-14 flex items-center gap-3">
-          <Link
-            href="/epcs"
-            className="flex items-center gap-1.5 text-sm font-medium text-slate-custom hover:text-amber transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            EPC Network
-          </Link>
-          <ChevronRight className="w-3.5 h-3.5 text-slate-custom/40" />
-          <span className="text-sm font-semibold text-graphite truncate max-w-[200px]">
-            {installer.companyName}
-          </span>
-        </div>
+    <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 min-h-screen">
+      
+      {/* Breadcrumb */}
+      <div className="max-w-[1180px] mx-auto px-5 md:px-8 pt-5 text-[0.84rem] text-slate-custom">
+        <Link href="/epcs" className="text-teal hover:underline">Find an Installer</Link> / {installer.companyName}
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-[1200px]">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* ── LEFT SIDEBAR (1/3) ── */}
-          <aside className="lg:col-span-1 space-y-8 flex flex-col items-center">
-            
-            {/* Big Circular Profile Area */}
-            <div className="w-full flex flex-col items-center">
-              <div className="w-64 h-64 bg-white rounded-full border-8 border-amber/5 shadow-2xl relative flex items-center justify-center p-2 mb-[-2rem] z-0">
-                <div className="relative w-full h-full rounded-full overflow-hidden">
-                  {installer.logoUrl ? (
-                    <Image src={installer.logoUrl} alt={installer.companyName} fill className="object-cover" />
-                  ) : (
-                    <div className="w-full h-full bg-slate-100 flex items-center justify-center">
-                      <span className="text-6xl font-black text-slate-300 uppercase">{installer.companyName.substring(0, 2)}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              <div className="bg-amber text-ink text-ink px-8 py-3 rounded-full z-10 flex items-center gap-2 shadow-md">
-                <Award className="w-5 h-5 text-yellow-400" />
-                <span className="font-black tracking-widest uppercase text-sm">SOLAR INSTALLER</span>
-              </div>
-            </div>
-
-            {/* Rating Section */}
-            <div className="text-center space-y-1">
-              <div className="flex items-center justify-center gap-1.5 text-yellow-400">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className={`w-6 h-6 ${rating && rating >= star ? "fill-current" : rating && rating >= star - 0.5 ? "fill-current opacity-50" : "text-gray-200"}`} />
-                ))}
-                <span className="text-2xl font-black text-graphite ml-2">
-                  {rating ? rating.toFixed(1) : "0.0"}/5
-                </span>
-              </div>
-              <p className="text-sm text-slate-custom font-medium">
-                ({count}+ Happy Customers)
-              </p>
-            </div>
-
-            {/* Certified Installer Section */}
-            <div className="w-full">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="h-px bg-border flex-1"></div>
-                <h3 className="font-black text-amber tracking-widest text-sm">CERTIFIED INSTALLER</h3>
-                <div className="h-px bg-border flex-1"></div>
-              </div>
-
-              <div className="space-y-4">
-                {/* Inverters */}
-                <div className="flex items-center gap-4 border border-line/50 rounded-xl p-3 bg-paper/5">
-                  <div className="w-10 h-10 bg-white rounded-lg border border-line flex items-center justify-center shrink-0 shadow-sm">
-                    <Zap className="w-5 h-5 text-amber" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-[10px] font-black tracking-widest text-slate-custom uppercase mb-1">INVERTERS</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {inverters.length > 0 ? inverters.map(model => (
-                        <span key={model} className="text-xs font-bold text-amber bg-white border border-line/50 px-2 py-0.5 rounded-md shadow-sm">{model}</span>
-                      )) : <span className="text-xs text-slate-custom">Various Brands</span>}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Batteries */}
-                <div className="flex items-center gap-4 border border-line/50 rounded-xl p-3 bg-paper/5">
-                  <div className="w-10 h-10 bg-white rounded-lg border border-line flex items-center justify-center shrink-0 shadow-sm">
-                    <Layers className="w-5 h-5 text-amber" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-[10px] font-black tracking-widest text-slate-custom uppercase mb-1">BATTERIES</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {batteries.length > 0 ? batteries.map(model => (
-                        <span key={model} className="text-xs font-bold text-amber bg-white border border-line/50 px-2 py-0.5 rounded-md shadow-sm">{model}</span>
-                      )) : <span className="text-xs text-slate-custom">Various Brands</span>}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Panels */}
-                <div className="flex items-center gap-4 border border-line/50 rounded-xl p-3 bg-paper/5">
-                  <div className="w-10 h-10 bg-white rounded-lg border border-line flex items-center justify-center shrink-0 shadow-sm">
-                    <Building2 className="w-5 h-5 text-amber" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-[10px] font-black tracking-widest text-slate-custom uppercase mb-1">SOLAR PANELS</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {panels.length > 0 ? panels.map(model => (
-                        <span key={model} className="text-xs font-bold text-amber bg-white border border-line/50 px-2 py-0.5 rounded-md shadow-sm">{model}</span>
-                      )) : <span className="text-xs text-slate-custom">Various Brands</span>}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Traits */}
-            <div className="w-full bg-amber text-ink rounded-2xl p-6 text-ink grid grid-cols-4 gap-4 text-center mt-4">
-              <div className="flex flex-col items-center gap-2">
-                <Shield className="w-6 h-6 text-white/80" />
-                <span className="text-[9px] font-black tracking-widest uppercase leading-tight">FULLY<br/>INSURED</span>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <Settings className="w-6 h-6 text-white/80" />
-                <span className="text-[9px] font-black tracking-widest uppercase leading-tight">QUALITY<br/>WORKMANSHIP</span>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <CheckCircle2 className="w-6 h-6 text-white/80" />
-                <span className="text-[9px] font-black tracking-widest uppercase leading-tight">PROFESSIONAL<br/>SERVICE</span>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <Headset className="w-6 h-6 text-white/80" />
-                <span className="text-[9px] font-black tracking-widest uppercase leading-tight">AFTER SALES<br/>SUPPORT</span>
-              </div>
-            </div>
-
-            {/* Contact CTA */}
-            <div className="w-full pt-4">
-               <EpcContactButtons
-                  epcId={installer.id}
-                  companyName={installer.companyName}
-                  userId={installer.userId}
-                  website={installer.website}
-                  whatsappNumber={whatsappNumber}
-                />
-            </div>
-
-          </aside>
-
-          {/* ── RIGHT CONTENT (2/3) ── */}
-          <section className="lg:col-span-2 space-y-12">
-            
-            {/* About Section */}
-            <div>
-              <h2 className="text-2xl font-black text-amber mb-4 uppercase tracking-tight">ABOUT {installer.companyName}</h2>
-              <div className="flex gap-4 items-start">
-                <div className="w-12 h-12 rounded-full bg-amber text-ink flex items-center justify-center shrink-0">
-                  <ShieldCheck className="w-6 h-6 text-ink" />
-                </div>
-                <div className="text-lg text-graphite/80 leading-relaxed font-medium">
-                  {installer.about ? (
-                    <p>{installer.about}</p>
-                  ) : (
-                    <p>
-                      We are a professional solar installation company committed to delivering high-quality, reliable and affordable solar energy solutions for homes and businesses. Our goal is to help you save on energy bills while contributing to a cleaner and greener future.
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Operating Cities */}
-            {offices.length > 0 && (
-              <div>
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-amber text-ink flex items-center justify-center shrink-0">
-                    <MapPin className="w-5 h-5 text-ink ml-0.5" />
-                  </div>
-                  <h2 className="text-xl font-black text-amber uppercase tracking-widest flex-1">OPERATING CITIES</h2>
-                  <div className="h-px bg-border flex-1 max-w-[100px] hidden md:block"></div>
-                </div>
-                <div className="flex flex-wrap gap-2 pl-0 md:pl-14">
-                  {Array.from(new Set(offices.map(o => o.city))).filter(Boolean).map(city => (
-                    <span key={city} className="bg-paper/10 text-slate-custom px-4 py-2 rounded-full text-sm font-bold border border-line/50 shadow-sm">
-                      {city}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Installer Projects Videos */}
-            <div>
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-10 h-10 rounded-full bg-amber text-ink flex items-center justify-center shrink-0">
-                  <Play className="w-5 h-5 text-ink ml-0.5" />
-                </div>
-                <h2 className="text-xl font-black text-amber uppercase tracking-widest flex-1">INSTALLER PROJECTS VIDEOS</h2>
-                <div className="h-px bg-border flex-1 max-w-[100px] hidden md:block"></div>
-              </div>
-
-              {youtubeProjects.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {youtubeProjects.slice(0, 3).map((project, i) => {
-                    const videoId = getYouTubeId((project as any).youtubeUrl);
-                    return (
-                      <div key={project.id} className="rounded-2xl overflow-hidden aspect-video bg-black relative group shadow-sm border border-line">
-                        {videoId ? (
-                          <>
-                            <img src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`} alt={project.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                            <a href={(project as any).youtubeUrl} target="_blank" rel="noopener noreferrer" className="absolute inset-0 flex items-center justify-center">
-                              <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                                <Play className="w-5 h-5 text-amber ml-1" />
-                              </div>
-                            </a>
-                            <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded">
-                              {project.name}
-                            </div>
-                          </>
-                        ) : (
-                          <div className="flex items-center justify-center w-full h-full text-white/50 text-xs">Invalid URL</div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+      {/* Profile Header */}
+      <header className="py-[32px] pb-[48px] border-b border-line">
+        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
+          
+          <div className="grid grid-cols-1 md:grid-cols-[120px_1fr_auto] gap-[28px] items-start">
+            {/* Avatar LG */}
+            <div className="w-[120px] h-[120px] rounded-[10px] bg-ink text-amber flex items-center justify-center font-space-grotesk font-bold text-[2.4rem] shrink-0 overflow-hidden">
+              {installer.logoUrl ? (
+                <Image src={installer.logoUrl} alt={installer.companyName} width={120} height={120} className="object-cover w-full h-full" />
               ) : (
-                <div className="text-sm text-slate-custom italic bg-paper/10 p-6 rounded-2xl text-center border border-line border-dashed">
-                  No video projects uploaded yet.
-                </div>
+                installer.companyName.substring(0, 2).toUpperCase()
               )}
             </div>
 
-            {/* Testimonials */}
+            {/* Profile Name & Meta */}
             <div>
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-10 h-10 rounded-full bg-amber text-ink flex items-center justify-center shrink-0">
-                  <MessageSquare className="w-5 h-5 text-ink" />
+              <h1 className="font-space-grotesk font-semibold text-[1.9rem] text-ink mb-1">
+                {installer.ceoName || installer.companyName}
+              </h1>
+              <div className="text-[1.05rem] text-slate-custom mb-3">
+                {installer.companyName}
+              </div>
+              <div className="flex items-center gap-1.5 text-slate-custom text-[0.92rem] mb-[10px]">
+                📍 {primaryCity}
+              </div>
+              <div className="flex items-center gap-2 flex-wrap mb-4">
+                <span className="font-ibm-plex-mono text-[0.68rem] tracking-[0.05em] uppercase text-slate-custom mr-0.5">
+                  Certified By
+                </span>
+                {certBrands.map((brand, i) => (
+                  <span key={i} className="h-[26px] px-[10px] rounded-[5px] bg-ink text-amber font-space-grotesk font-bold text-[0.66rem] tracking-[0.03em] flex items-center justify-center uppercase">
+                    {brand}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Profile CTA */}
+            <div className="flex flex-col gap-2.5 min-w-[180px]">
+              <a
+                href="#quote"
+                className="bg-amber text-ink rounded-[3px] px-[22px] py-[13px] text-[0.9rem] font-semibold text-center hover:bg-[#f2b458] transition-colors inline-block"
+              >
+                Request a Quote
+              </a>
+            </div>
+          </div>
+
+          {/* Rating Cards */}
+          <div className="flex gap-[24px] mt-[24px] flex-wrap">
+            <div className="bg-white border border-line rounded-[6px] p-[20px_24px] flex items-center gap-[16px] flex-1 min-w-[240px]">
+              <div className="font-ibm-plex-mono text-[1.8rem] text-ink">
+                {rating ? rating.toFixed(1) : "5.0"}
+              </div>
+              <div>
+                <div className="text-amber text-[0.95rem]">
+                  {renderStars(rating || 5.0)}
                 </div>
-                <h2 className="text-xl font-black text-amber uppercase tracking-widest flex-1">TESTIMONIALS</h2>
-                <div className="h-px bg-border flex-1 max-w-[100px] hidden md:block"></div>
+                <div className="font-ibm-plex-mono text-[0.78rem] text-slate-custom uppercase tracking-[0.05em] mt-1">
+                  Customer Rating · {count} {count === 1 ? "Review" : "Reviews"}
+                </div>
               </div>
-
-              <div className="mb-6">
-                <ReviewForm targetId={id} targetType="epc" />
-              </div>
-              <ReviewList targetId={id} />
             </div>
 
-            {/* Hire Me Banner */}
-            <div className="bg-amber text-ink rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-8 text-ink shadow-xl relative overflow-hidden">
-               {/* Decorative background circle */}
-               <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
-               
-               <div className="flex items-center gap-6 relative z-10">
-                 <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shrink-0">
-                   <ShieldCheck className="w-10 h-10 text-amber" />
-                 </div>
-                 <div>
-                   <h2 className="text-4xl font-black text-yellow-400 tracking-tight mb-2">HIRE ME</h2>
-                   <p className="text-white/90 font-medium">Let&apos;s talk about your solar needs.</p>
-                   <p className="text-white/70 text-sm">Get a free consultation and quote today!</p>
-                 </div>
-               </div>
-
-               <div className="space-y-3 relative z-10">
-                 <div className="flex items-center gap-3">
-                   <CheckCircle2 className="w-5 h-5 text-yellow-400 shrink-0" />
-                   <span className="font-bold text-sm tracking-wide">FREE SITE SURVEY</span>
-                 </div>
-                 <div className="flex items-center gap-3">
-                   <CheckCircle2 className="w-5 h-5 text-yellow-400 shrink-0" />
-                   <span className="font-bold text-sm tracking-wide">BEST PRICE GUARANTEE</span>
-                 </div>
-                 <div className="flex items-center gap-3">
-                   <CheckCircle2 className="w-5 h-5 text-yellow-400 shrink-0" />
-                   <span className="font-bold text-sm tracking-wide">CUSTOM SOLUTIONS</span>
-                 </div>
-                 <div className="flex items-center gap-3">
-                   <CheckCircle2 className="w-5 h-5 text-yellow-400 shrink-0" />
-                   <span className="font-bold text-sm tracking-wide">100% CUSTOMER SATISFACTION</span>
-                 </div>
-               </div>
+            <div className="bg-[rgba(232,163,61,0.05)] border border-amber rounded-[6px] p-[20px_24px] flex items-center gap-[16px] flex-1 min-w-[240px]">
+              <div className="font-ibm-plex-mono text-[1.8rem] text-amber">
+                {teamRating ? teamRating.toFixed(1) : "5.0"}
+              </div>
+              <div>
+                <div className="text-amber text-[0.95rem]">
+                  {renderStars(teamRating || 5.0)}
+                </div>
+                <div className="font-ibm-plex-mono text-[0.78rem] text-slate-custom uppercase tracking-[0.05em] mt-1">
+                  EnergyGurus Team Rating {teamCount > 0 ? `· ${teamCount} ${teamCount === 1 ? "Review" : "Reviews"}` : ""}
+                </div>
+              </div>
             </div>
+          </div>
 
-          </section>
         </div>
-      </div>
+      </header>
+
+      {/* Portfolio — Project Videos */}
+      <section className="py-[56px]">
+        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
+          <div className="mb-8">
+            <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-2">
+              <span className="w-5 h-[1px] bg-amber"></span>
+              Portfolio
+            </p>
+            <h2 className="font-space-grotesk font-semibold text-[1.4rem] text-ink">
+              Project Videos
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+            {projects.length > 0 ? (
+              projects.slice(0, 3).map((project) => {
+                const videoId = (project as any).youtubeUrl ? getYouTubeId((project as any).youtubeUrl) : null;
+                return (
+                  <div key={project.id} className="bg-white border border-line rounded-[4px] overflow-hidden">
+                    <div className="aspect-video bg-gradient-to-br from-ink to-[#1b3157] relative flex items-center justify-center overflow-hidden group">
+                      {videoId ? (
+                        <img
+                          src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
+                          alt={project.name}
+                          className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                        />
+                      ) : null}
+                      <a
+                        href={(project as any).youtubeUrl || "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem] shadow-md group-hover:scale-110 transition-transform absolute"
+                      >
+                        ▶
+                      </a>
+                    </div>
+                    <div className="p-[16px_18px]">
+                      <h3 className="font-space-grotesk font-semibold text-[0.98rem] text-ink mb-1">
+                        {project.name}
+                      </h3>
+                      <p className="text-[0.85rem] text-slate-custom">
+                        {project.systemSize || project.systemType || "Solar project installation"}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <>
+                <div className="bg-white border border-line rounded-[4px] overflow-hidden">
+                  <div className="aspect-video bg-gradient-to-br from-ink to-[#1b3157] relative flex items-center justify-center">
+                    <div className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem]">▶</div>
+                  </div>
+                  <div className="p-[16px_18px]">
+                    <h3 className="font-space-grotesk font-semibold text-[0.98rem] text-ink mb-1">15 kW Rooftop Install</h3>
+                    <p className="text-[0.85rem] text-slate-custom">Residential install, completed in 3 days.</p>
+                  </div>
+                </div>
+                <div className="bg-white border border-line rounded-[4px] overflow-hidden">
+                  <div className="aspect-video bg-gradient-to-br from-ink to-[#1b3157] relative flex items-center justify-center">
+                    <div className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem]">▶</div>
+                  </div>
+                  <div className="p-[16px_18px]">
+                    <h3 className="font-space-grotesk font-semibold text-[0.98rem] text-ink mb-1">80 kW Commercial Plaza System</h3>
+                    <p className="text-[0.85rem] text-slate-custom">Commercial rooftop installation.</p>
+                  </div>
+                </div>
+                <div className="bg-white border border-line rounded-[4px] overflow-hidden">
+                  <div className="aspect-video bg-gradient-to-br from-ink to-[#1b3157] relative flex items-center justify-center">
+                    <div className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem]">▶</div>
+                  </div>
+                  <div className="p-[16px_18px]">
+                    <h3 className="font-space-grotesk font-semibold text-[0.98rem] text-ink mb-1">200 kW Unit Install</h3>
+                    <p className="text-[0.85rem] text-slate-custom">Industrial ground-mount system.</p>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Customer Video Testimonials */}
+      <section className="bg-white border-y border-line py-[56px]">
+        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
+          <div className="mb-8">
+            <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-teal flex items-center gap-2.5 mb-2">
+              <span className="w-5 h-[1px] bg-teal"></span>
+              In Their Words
+            </p>
+            <h2 className="font-space-grotesk font-semibold text-[1.4rem] text-ink">
+              Customer Video Testimonials
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 mb-12">
+            <div className="bg-white border border-line rounded-[4px] overflow-hidden">
+              <div className="aspect-video bg-gradient-to-br from-teal to-[#1c4a41] relative flex items-center justify-center">
+                <div className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem]">▶</div>
+              </div>
+              <div className="p-[16px_18px]">
+                <div className="font-semibold text-[0.92rem] text-ink">Sana Malik</div>
+                <div className="text-[0.8rem] text-slate-custom mt-0.5">Model Town, Lahore</div>
+              </div>
+            </div>
+
+            <div className="bg-white border border-line rounded-[4px] overflow-hidden">
+              <div className="aspect-video bg-gradient-to-br from-teal to-[#1c4a41] relative flex items-center justify-center">
+                <div className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem]">▶</div>
+              </div>
+              <div className="p-[16px_18px]">
+                <div className="font-semibold text-[0.92rem] text-ink">Farooq Textiles</div>
+                <div className="text-[0.8rem] text-slate-custom mt-0.5">Sundar Estate, Lahore</div>
+              </div>
+            </div>
+
+            <div className="bg-white border border-line rounded-[4px] overflow-hidden">
+              <div className="aspect-video bg-gradient-to-br from-teal to-[#1c4a41] relative flex items-center justify-center">
+                <div className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem]">▶</div>
+              </div>
+              <div className="p-[16px_18px]">
+                <div className="font-semibold text-[0.92rem] text-ink">Bilal Farms</div>
+                <div className="text-[0.8rem] text-slate-custom mt-0.5">Sheikhupura</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Written Reviews & Submission */}
+          <div className="mt-8">
+            <h3 className="font-space-grotesk font-semibold text-[1.2rem] text-ink mb-6">
+              Customer Reviews & Ratings
+            </h3>
+            <div className="mb-6">
+              <ReviewForm targetId={id} targetType="epc" />
+            </div>
+            <ReviewList targetId={id} />
+          </div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section className="py-[56px]">
+        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
+          <div className="mb-8">
+            <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-2">
+              <span className="w-5 h-[1px] bg-amber"></span>
+              About
+            </p>
+            <h2 className="font-space-grotesk font-semibold text-[1.4rem] text-ink">
+              {installer.companyName}
+            </h2>
+          </div>
+
+          <div className="bg-white border border-line rounded-[6px] p-8">
+            <p className="text-slate-custom text-[0.98rem] mb-5 leading-relaxed">
+              {installer.about || `${installer.companyName} has been designing and installing solar systems across Pakistan, serving homeowners, businesses, and agricultural clients. The team specializes in rooftop residential systems and commercial solar installations.`}
+            </p>
+
+            <div className="flex gap-2 flex-wrap mb-6">
+              {sectorsList.map((sector, i) => (
+                <span key={i} className="font-ibm-plex-mono text-[0.7rem] tracking-[0.05em] uppercase text-teal bg-[rgba(47,110,98,0.1)] px-[11px] py-[5px] rounded-[20px]">
+                  {sector}
+                </span>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 border-t border-line pt-6 mt-6">
+              <div>
+                <div className="font-ibm-plex-mono text-[1.4rem] text-ink">{yearsInBusiness} yrs</div>
+                <div className="text-[0.78rem] text-slate-custom uppercase tracking-[0.05em] mt-1">In Business</div>
+              </div>
+              <div>
+                <div className="font-ibm-plex-mono text-[1.4rem] text-ink">
+                  {projects.length > 0 ? `${projects.length}+` : "340+"}
+                </div>
+                <div className="text-[0.78rem] text-slate-custom uppercase tracking-[0.05em] mt-1">Systems Installed</div>
+              </div>
+              <div>
+                <div className="font-ibm-plex-mono text-[1.4rem] text-ink">NABCEP</div>
+                <div className="text-[0.78rem] text-slate-custom uppercase tracking-[0.05em] mt-1">Certified Team</div>
+              </div>
+            </div>
+
+            <div className="flex gap-2.5 flex-wrap pt-6 border-t border-line mt-[28px]">
+              {websiteUrl !== "#" && (
+                <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="w-[38px] h-[38px] rounded-full border border-line text-ink flex items-center justify-center hover:border-teal hover:text-teal transition-colors" title="Website" aria-label="Website">
+                  <Globe className="w-4 h-4" />
+                </a>
+              )}
+              {facebookUrl !== "#" && (
+                <a href={facebookUrl} target="_blank" rel="noopener noreferrer" className="w-[38px] h-[38px] rounded-full border border-line text-ink flex items-center justify-center hover:border-teal hover:text-teal transition-colors" title="Facebook" aria-label="Facebook">
+                  <Facebook className="w-4 h-4" />
+                </a>
+              )}
+              {instagramUrl !== "#" && (
+                <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="w-[38px] h-[38px] rounded-full border border-line text-ink flex items-center justify-center hover:border-teal hover:text-teal transition-colors" title="Instagram" aria-label="Instagram">
+                  <Instagram className="w-4 h-4" />
+                </a>
+              )}
+              {linkedinUrl !== "#" && (
+                <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" className="w-[38px] h-[38px] rounded-full border border-line text-ink flex items-center justify-center hover:border-teal hover:text-teal transition-colors" title="LinkedIn" aria-label="LinkedIn">
+                  <Linkedin className="w-4 h-4" />
+                </a>
+              )}
+              {youtubeUrl !== "#" && (
+                <a href={youtubeUrl} target="_blank" rel="noopener noreferrer" className="w-[38px] h-[38px] rounded-full border border-line text-ink flex items-center justify-center hover:border-teal hover:text-teal transition-colors" title="YouTube" aria-label="YouTube">
+                  <Youtube className="w-4 h-4" />
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Request a Quote Section */}
+      <section className="bg-white border-y border-line py-[56px]" id="quote">
+        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
+          <div className="text-center max-w-[560px] mx-auto mb-2">
+            <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center justify-center gap-2.5 mb-2">
+              <span className="w-5 h-[1px] bg-amber"></span>
+              Request a Quote
+            </p>
+            <h2 className="font-space-grotesk font-semibold text-[1.4rem] text-ink">
+              Get a quote from {installer.ceoName || installer.companyName}
+            </h2>
+            <p className="text-slate-custom mt-2.5 text-[0.95rem]">
+              Share a few details and {installer.companyName} will follow up directly.
+            </p>
+          </div>
+
+          <InstallerQuoteForm
+            receiverId={installer.userId}
+            receiverName={installer.companyName}
+          />
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="bg-ink text-white py-[56px] text-center">
+        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
+          <h2 className="font-space-grotesk font-semibold text-[1.6rem] text-white mb-5">
+            Ready to work with {installer.companyName}?
+          </h2>
+          <a
+            href="#quote"
+            className="bg-amber text-ink rounded-[3px] px-7 py-[15px] text-[0.9rem] font-semibold inline-block hover:bg-[#f2b458] transition-colors"
+          >
+            Request a Quote From {installer.ceoName || installer.companyName}
+          </a>
+        </div>
+      </section>
+
     </div>
   );
 }

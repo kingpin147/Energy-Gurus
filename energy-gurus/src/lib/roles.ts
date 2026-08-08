@@ -27,11 +27,18 @@ export const getUserRole = cache(async (): Promise<UserRole> => {
       }
     }
 
-    // 2. Fallback to session claims
+    // 2. Fallback to Clerk primary email directly
+    const user = await getCurrentUser();
+    const primaryEmail = user?.emailAddresses?.find(e => e.id === user.primaryEmailAddressId)?.emailAddress || user?.emailAddresses?.[0]?.emailAddress;
+    if (primaryEmail && whitelist.includes(primaryEmail.toLowerCase())) {
+      return "super-admin";
+    }
+
+    // 3. Fallback to session claims
     const claimRole = (sessionClaims?.metadata as { role?: UserRole })?.role;
     if (claimRole) return claimRole;
 
-    // 3. Last resort fallback
+    // 4. Last resort fallback
     return "epc";
   } catch (error) {
     console.error("Error in getUserRole:", error);

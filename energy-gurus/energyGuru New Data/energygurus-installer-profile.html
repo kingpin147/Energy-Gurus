@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrightRoot Solar — Installer Profile — EnergyGurus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12213A; --paper:#F5F6F3; --amber:#E8A33D;
+    --teal:#2F6E62; --slate:#4A5A73; --graphite:#1B1F24;
+    --line: rgba(18,33,58,0.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Inter', sans-serif; color:var(--graphite); background:var(--paper); line-height:1.5;}
+  h1,h2,h3{font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:-0.01em;}
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 32px;}
+  :focus-visible{outline:2px solid var(--amber); outline-offset:3px;}
+  button{cursor:pointer; border:none; font-family:'Inter'; font-weight:600;}
+
+  nav{position:sticky; top:0; z-index:50; background:rgba(245,246,243,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line);}
+  nav .wrap{display:flex; align-items:center; justify-content:space-between; height:72px;}
+  .logo{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:1.02rem; display:flex; align-items:center; gap:10px;}
+  .nav-links{display:flex; gap:32px; font-size:0.92rem; font-weight:500; color:var(--slate);}
+  .nav-links a.active{color:var(--ink); font-weight:600;}
+  .nav-links a:hover{color:var(--ink);}
+  .nav-cta{background:var(--ink); color:var(--paper); padding:11px 20px; border-radius:3px; font-size:0.88rem;}
+  @media(max-width:860px){ .nav-links{display:none;} }
+
+  .eyebrow{font-family:'IBM Plex Mono', monospace; font-size:0.76rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--amber); display:flex; align-items:center; gap:10px; margin-bottom:14px;}
+  .eyebrow::before{content:""; width:20px; height:1px; background:var(--amber);}
+
+  /* breadcrumb */
+  .breadcrumb{padding:20px 0 0; font-size:0.84rem; color:var(--slate);}
+  .breadcrumb a{color:var(--teal);}
+
+  /* profile header */
+  .profile-header{padding:32px 0 48px; border-bottom:1px solid var(--line);}
+  .profile-top{display:grid; grid-template-columns:120px 1fr auto; gap:28px; align-items:start;}
+  .avatar-lg{
+    width:120px; height:120px; border-radius:10px;
+    background:var(--ink); color:var(--amber);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk'; font-weight:700; font-size:2.4rem;
+    flex-shrink:0;
+  }
+  .profile-name h1{font-size:1.9rem; color:var(--ink); margin-bottom:4px;}
+  .profile-name .company{font-size:1.05rem; color:var(--slate); margin-bottom:12px;}
+  .location-line{display:flex; align-items:center; gap:6px; color:var(--slate); font-size:0.92rem; margin-bottom:10px;}
+  .cert-brands{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+  .cert-label{font-family:'IBM Plex Mono', monospace; font-size:0.68rem; letter-spacing:0.05em; text-transform:uppercase; color:var(--slate); margin-right:2px;}
+  .cert-logo{
+    height:26px; padding:0 10px; border-radius:5px;
+    background:var(--ink); color:var(--amber);
+    font-family:'Space Grotesk'; font-weight:700; font-size:0.66rem; letter-spacing:0.03em;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .type-tags{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+  .type-tag{
+    font-family:'IBM Plex Mono', monospace; font-size:0.7rem; letter-spacing:0.05em; text-transform:uppercase;
+    color:var(--teal); background:rgba(47,110,98,0.1); padding:5px 11px; border-radius:20px;
+  }
+  .social-row{display:flex; gap:10px; flex-wrap:wrap;}
+  .social-btn{
+    width:38px; height:38px; border-radius:50%;
+    border:1px solid var(--line) !important; color:var(--ink);
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .social-btn svg{width:17px; height:17px;}
+  .social-btn:hover{border-color:var(--teal) !important; color:var(--teal);}
+  .profile-actions{display:flex; flex-direction:column; gap:10px; min-width:180px;}
+  .btn-primary{background:var(--amber); color:var(--ink); padding:13px 22px; border-radius:3px; font-size:0.9rem; text-align:center;}
+  .btn-primary:hover{background:#f2b458;}
+  .btn-outline{background:transparent; color:var(--ink); border:1px solid var(--line) !important; padding:13px 22px; border-radius:3px; font-size:0.9rem; text-align:center;}
+  .btn-outline:hover{border-color:var(--ink) !important;}
+  @media(max-width:760px){ .profile-top{grid-template-columns:80px 1fr; } .avatar-lg{width:80px; height:80px; font-size:1.6rem;} .profile-actions{grid-column:1 / -1; flex-direction:row; margin-top:16px;} }
+
+  /* rating block */
+  .rating-block{display:flex; gap:24px; margin-top:24px; flex-wrap:wrap;}
+  .rating-card{
+    background:#fff; border:1px solid var(--line); border-radius:6px; padding:20px 24px;
+    display:flex; align-items:center; gap:16px; flex:1; min-width:240px;
+  }
+  .rating-card.team{border-color:var(--amber); background:rgba(232,163,61,0.05);}
+  .rating-num{font-family:'IBM Plex Mono', monospace; font-size:1.8rem; color:var(--ink);}
+  .rating-card.team .rating-num{color:var(--amber);}
+  .rating-meta .stars{color:var(--amber); font-size:0.95rem;}
+  .rating-meta .rating-label{font-size:0.78rem; color:var(--slate); text-transform:uppercase; letter-spacing:0.05em; font-family:'IBM Plex Mono', monospace; margin-top:4px;}
+
+  section{padding:56px 0;}
+  .section-head{margin-bottom:32px;}
+  .section-head h2{font-size:1.4rem; color:var(--ink);}
+
+  /* video grids */
+  .video-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  .video-card{background:#fff; border:1px solid var(--line); border-radius:4px; overflow:hidden;}
+  .video-thumb{
+    aspect-ratio:16/9; position:relative;
+    background:linear-gradient(135deg, var(--ink), #1b3157);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .video-thumb .play{width:44px; height:44px; border-radius:50%; background:var(--amber); display:flex; align-items:center; justify-content:center; color:var(--ink); font-size:0.95rem;}
+  .video-body{padding:16px 18px;}
+  .video-body h3{font-size:0.98rem; color:var(--ink); margin-bottom:4px;}
+  .video-body p{font-size:0.85rem; color:var(--slate);}
+  @media(max-width:900px){ .video-grid{grid-template-columns:repeat(2,1fr);} }
+  @media(max-width:640px){ .video-grid{grid-template-columns:1fr;} }
+
+  /* testimonial cards variant */
+  .testimonial-card .video-thumb{background:linear-gradient(135deg, var(--teal), #1c4a41);}
+  .testimonial-body{padding:16px 18px;}
+  .testimonial-body .cust-name{font-size:0.92rem; color:var(--ink); font-weight:600;}
+  .testimonial-body .cust-loc{font-size:0.8rem; color:var(--slate); margin-top:2px;}
+
+  /* about */
+  .about-box{background:#fff; border:1px solid var(--line); border-radius:6px; padding:32px;}
+  .about-box p{color:var(--slate); font-size:0.98rem; margin-bottom:20px;}
+  .cred-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  .cred-item .cred-val{font-family:'IBM Plex Mono', monospace; font-size:1.4rem; color:var(--ink);}
+  .cred-item .cred-label{font-size:0.78rem; color:var(--slate); text-transform:uppercase; letter-spacing:0.05em; margin-top:4px;}
+  @media(max-width:640px){ .cred-grid{grid-template-columns:1fr;} }
+
+  /* final cta */
+  .final-cta{background:var(--ink); color:#fff; text-align:center;}
+  .final-cta h2{color:#fff; font-size:1.6rem; margin-bottom:20px;}
+  .final-cta .btn-primary{display:inline-block; padding:15px 28px;}
+
+  /* request a quote form */
+  .quote-section{background:#fff; border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+  .form-section{background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:40px; max-width:640px; margin:0 auto;}
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  .form-grid .full{grid-column:1 / -1;}
+  .field label{
+    display:block; font-family:'IBM Plex Mono', monospace; font-size:0.72rem;
+    letter-spacing:0.06em; text-transform:uppercase; color:var(--slate); margin-bottom:8px;
+  }
+  .field input, .field select{
+    width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:3px;
+    font-family:'Inter'; font-size:0.92rem; color:var(--graphite); background:#fff;
+  }
+  .form-submit{margin-top:24px; width:100%; padding:15px; border-radius:3px; font-size:0.95rem;}
+  .form-note{font-size:0.8rem; color:var(--slate); margin-top:14px; text-align:center;}
+  .form-success{display:none; text-align:center; padding:20px 0;}
+  .form-success h3{color:var(--teal); font-size:1.2rem; margin-bottom:8px;}
+  .form-success p{color:var(--slate); font-size:0.92rem;}
+  @media(max-width:640px){ .form-grid{grid-template-columns:1fr;} .form-section{padding:26px 20px;} }
+
+  footer{background:var(--ink); color:rgba(245,246,243,0.55); padding:32px 0; text-align:center; font-size:0.82rem;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="energygurus-homepage.html" class="logo">EnergyGurus.Online</a>
+    <div class="nav-links">
+      <a href="energygurus-brands-page.html">Solar Brands</a>
+      <a href="energygurus-installer-page.html" class="active">Find an Installer</a>
+      <a href="energygurus-monitoring-page.html">Monitoring &amp; O&amp;M</a>
+      <a href="energygurus-podcast-page.html">Podcast</a>
+    </div>
+    <a href="#" class="nav-cta">Get Started</a>
+  </div>
+</nav>
+
+<div class="breadcrumb">
+  <div class="wrap"><a href="energygurus-installer-page.html">Find an Installer</a> / BrightRoot Solar</div>
+</div>
+
+<header class="profile-header">
+  <div class="wrap">
+    <div class="profile-top">
+      <div class="avatar-lg">BR</div>
+      <div class="profile-name">
+        <h1>Ahmed Raza</h1>
+        <div class="company">BrightRoot Solar Pvt. Ltd.</div>
+        <div class="location-line">📍 Gulberg, Lahore</div>
+        <div class="cert-brands">
+          <span class="cert-label">Certified By</span>
+          <span class="cert-logo" title="LONGi">LONGI</span>
+          <span class="cert-logo" title="Jinko Solar">JINKO</span>
+          <span class="cert-logo" title="JA Solar">JA</span>
+          <span class="cert-logo" title="Trina Solar">TRINA</span>
+          <span class="cert-logo" title="Huawei">HUAWEI</span>
+        </div>
+      </div>
+      <div class="profile-actions">
+        <a href="#quote" class="btn-primary">Request a Quote</a>
+      </div>
+    </div>
+
+    <div class="rating-block">
+      <div class="rating-card">
+        <div class="rating-num">4.8</div>
+        <div class="rating-meta">
+          <div class="stars">★★★★★</div>
+          <div class="rating-label">Customer Rating · 212 Reviews</div>
+        </div>
+      </div>
+      <div class="rating-card team">
+        <div class="rating-num">4.6</div>
+        <div class="rating-meta">
+          <div class="stars">★★★★★</div>
+          <div class="rating-label">EnergyGurus Team Rating</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Portfolio</p>
+      <h2>Project Videos</h2>
+    </div>
+    <div class="video-grid">
+      <div class="video-card">
+        <div class="video-thumb"><div class="play">▶</div></div>
+        <div class="video-body">
+          <h3>15 kW Rooftop Install — DHA Phase 6</h3>
+          <p>Residential install, completed in 3 days.</p>
+        </div>
+      </div>
+      <div class="video-card">
+        <div class="video-thumb"><div class="play">▶</div></div>
+        <div class="video-body">
+          <h3>80 kW Commercial Plaza System</h3>
+          <p>Commercial rooftop, Gulberg III.</p>
+        </div>
+      </div>
+      <div class="video-card">
+        <div class="video-thumb"><div class="play">▶</div></div>
+        <div class="video-body">
+          <h3>200 kW Textile Unit Install</h3>
+          <p>Industrial ground-mount, Sundar Estate.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background:#fff; border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow" style="color:var(--teal);"><span style="display:inline-block;width:20px;height:1px;background:var(--teal);"></span>In Their Words</p>
+      <h2>Customer Video Testimonials</h2>
+    </div>
+    <div class="video-grid">
+      <div class="video-card testimonial-card">
+        <div class="video-thumb"><div class="play">▶</div></div>
+        <div class="testimonial-body">
+          <div class="cust-name">Sana Malik</div>
+          <div class="cust-loc">Model Town, Lahore</div>
+        </div>
+      </div>
+      <div class="video-card testimonial-card">
+        <div class="video-thumb"><div class="play">▶</div></div>
+        <div class="testimonial-body">
+          <div class="cust-name">Farooq Textiles</div>
+          <div class="cust-loc">Sundar Estate, Lahore</div>
+        </div>
+      </div>
+      <div class="video-card testimonial-card">
+        <div class="video-thumb"><div class="play">▶</div></div>
+        <div class="testimonial-body">
+          <div class="cust-name">Bilal Farms</div>
+          <div class="cust-loc">Sheikhupura</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">About</p>
+      <h2>BrightRoot Solar Pvt. Ltd.</h2>
+    </div>
+    <div class="about-box">
+      <p>BrightRoot Solar has been designing and installing solar systems across Lahore and the surrounding districts for over a decade, serving homeowners, businesses, and agricultural clients alike. The team specializes in rooftop residential systems and mid-size commercial installations.</p>
+      <div class="type-tags">
+        <span class="type-tag">Residential</span>
+        <span class="type-tag">Commercial</span>
+        <span class="type-tag">Industrial</span>
+        <span class="type-tag">Agriculture</span>
+      </div>
+      <div class="cred-grid">
+        <div class="cred-item"><div class="cred-val">12 yrs</div><div class="cred-label">In Business</div></div>
+        <div class="cred-item"><div class="cred-val">340+</div><div class="cred-label">Systems Installed</div></div>
+        <div class="cred-item"><div class="cred-val">NABCEP</div><div class="cred-label">Certified Team</div></div>
+      </div>
+      <div class="social-row" style="margin-top:28px; padding-top:24px; border-top:1px solid var(--line);">
+        <a href="#" class="social-btn" aria-label="Website" title="Website">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg>
+        </a>
+        <a href="#" class="social-btn" aria-label="Facebook" title="Facebook">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 10-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0022 12z"/></svg>
+        </a>
+        <a href="#" class="social-btn" aria-label="Instagram" title="Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.2" cy="6.8" r="1"/></svg>
+        </a>
+        <a href="#" class="social-btn" aria-label="LinkedIn" title="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5 2.5 2.5 0 01.02-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.7c0-1.36-.02-3.1-1.89-3.1-1.9 0-2.19 1.48-2.19 3v5.8H9z"/></svg>
+        </a>
+        <a href="#" class="social-btn" aria-label="YouTube" title="YouTube">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.4 3.5 12 3.5 12 3.5s-7.4 0-9.4.6a3 3 0 00-2.1 2.1A31 31 0 000 12a31 31 0 00.5 5.8 3 3 0 002.1 2.1c2 .6 9.4.6 9.4.6s7.4 0 9.4-.6a3 3 0 002.1-2.1A31 31 0 0024 12a31 31 0 00-.5-5.8zM9.6 15.5V8.5L15.8 12z"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="quote-section" id="quote">
+  <div class="wrap">
+    <div class="section-head" style="text-align:center; margin:0 auto 8px; max-width:560px;">
+      <p class="eyebrow" style="justify-content:center;">Request a Quote</p>
+      <h2>Get a quote from Ahmed Raza</h2>
+      <p style="color:var(--slate); margin-top:10px;">Share a few details and BrightRoot Solar will follow up directly.</p>
+    </div>
+
+    <form class="form-section" id="quoteForm" onsubmit="return handleQuoteSubmit(event)" style="margin-top:32px;">
+      <div class="form-grid">
+        <div class="field full">
+          <label for="qName">Name</label>
+          <input type="text" id="qName" required>
+        </div>
+        <div class="field">
+          <label for="qSystemType">System Type</label>
+          <select id="qSystemType" required>
+            <option value="">Select...</option>
+            <option>Residential</option>
+            <option>Commercial</option>
+            <option>Industrial</option>
+            <option>Agriculture</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label for="qAddress">Address</label>
+          <input type="text" id="qAddress" required>
+        </div>
+        <div class="field">
+          <label for="qArea">Area/Society</label>
+          <input type="text" id="qArea" required>
+        </div>
+        <div class="field">
+          <label for="qCity">City</label>
+          <input type="text" id="qCity" required>
+        </div>
+        <div class="field">
+          <label for="qCountry">Country</label>
+          <input type="text" id="qCountry" required>
+        </div>
+        <div class="field">
+          <label for="qContact">Contact No.</label>
+          <input type="tel" id="qContact" required>
+        </div>
+        <div class="field">
+          <label for="qEmail">Email Address</label>
+          <input type="email" id="qEmail" required>
+        </div>
+      </div>
+      <button type="submit" class="btn-primary form-submit">Submit Request</button>
+      <p class="form-note">BrightRoot Solar will contact you to discuss your quote.</p>
+
+      <div class="form-success" id="quoteSuccess">
+        <h3>Request sent</h3>
+        <p>Thanks — BrightRoot Solar will reach out to you shortly.</p>
+      </div>
+    </form>
+  </div>
+</section>
+
+<script>
+function handleQuoteSubmit(e) {
+  e.preventDefault();
+  document.getElementById('quoteForm').querySelector('.form-grid').style.display = 'none';
+  document.querySelector('#quoteForm .form-submit').style.display = 'none';
+  document.querySelector('#quoteForm .form-note').style.display = 'none';
+  document.getElementById('quoteSuccess').style.display = 'block';
+  return false;
+}
+</script>
+
+<section class="final-cta">
+  <div class="wrap">
+    <h2>Ready to work with BrightRoot Solar?</h2>
+    <a href="#quote" class="btn-primary">Request a Quote From Ahmed Raza</a>
+  </div>
+</section>
+
+<footer>© 2026 EnergyGurus.online — All rights reserved.</footer>
+
+</body>
+</html>

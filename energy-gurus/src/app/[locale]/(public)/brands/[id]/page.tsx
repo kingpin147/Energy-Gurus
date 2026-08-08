@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ReviewForm } from "@/components/forms/review-form";
 import { ReviewList } from "@/components/reviews/review-list";
-import { getProfileRating } from "@/lib/actions/reviews";
+import { getProfileRating, getTeamRating } from "@/lib/actions/reviews";
 import { SocialLinkTracker } from "@/components/brands/SocialLinkTracker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductVerification } from "@/components/brands/ProductVerification";
@@ -106,6 +106,8 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
     notFound();
   }
 
+  const { rating: teamRating, count: teamCount } = await getTeamRating(brand.id, "brand");
+
   // Enforce 50% completeness score threshold
   const { score } = getBrandCompleteness(brand, brandProducts.length);
   if (score < 50) {
@@ -185,6 +187,19 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
                 </h1>
 
                 <div className="flex flex-wrap items-center justify-center gap-6 pt-4">
+                  {teamRating ? (
+                    <div className="flex items-center gap-4 px-6 py-3 bg-amber/10 rounded-2xl border border-amber/30 shadow-sm">
+                      <div className="flex items-center text-yellow-600">
+                        <Star className="w-6 h-6 fill-current" />
+                        <span className="ml-2 text-3xl font-black text-graphite">{teamRating.toFixed(1)}</span>
+                      </div>
+                      <div className="h-10 w-[1px] bg-amber/20" />
+                      <span className="text-[11px] font-black text-amber uppercase tracking-[0.2em]">
+                        EnergyGurus Team Rating ({teamCount} Admin {teamCount === 1 ? "Review" : "Reviews"})
+                      </span>
+                    </div>
+                  ) : null}
+
                   {count > 0 ? (
                     <div className="flex items-center gap-4 px-6 py-3 bg-white/50 rounded-2xl border border-line/50 shadow-sm">
                       <div className="flex items-center text-yellow-500">
