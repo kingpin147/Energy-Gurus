@@ -6,6 +6,8 @@ import type { Metadata } from "next";
 import { Inter, Noto_Sans_Arabic, Outfit, Space_Grotesk, IBM_Plex_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { CSPostHogProvider } from '@/components/providers/PostHogProvider';
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Analytics } from '@vercel/analytics/next';
 import { Toaster } from 'sonner';
 import { CompareProvider } from '@/components/shared/compare-context';
 import "../globals.css";
@@ -178,6 +180,8 @@ export default async function RootLayout({
         <CompareProvider>
           {children}
           <Toaster position="top-right" expand={true} richColors />
+          <SpeedInsights />
+          <Analytics />
         </CompareProvider>
       </NextIntlClientProvider>
     </CSPostHogProvider>
