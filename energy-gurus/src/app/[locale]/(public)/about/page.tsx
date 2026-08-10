@@ -3,6 +3,42 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Users, Handshake, Newspaper, ArrowRight, ShieldCheck, Mail, Globe, MapPin, Zap, Award, Target, TrendingUp } from "lucide-react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const baseUrl = "https://www.energygurus.online";
+  const title = "About EnergyGurus | Pakistan's Independent Energy Platform";
+  const description = "Learn about EnergyGurus' mission to bring transparency, engineering standards, verified installer directories, and data analytics to Pakistan's solar industry.";
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${baseUrl}/${locale}/about`,
+      languages: {
+        en: `${baseUrl}/en/about`,
+        ur: `${baseUrl}/ur/about`,
+        "x-default": `${baseUrl}/en/about`,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/${locale}/about`,
+      siteName: "EnergyGurus",
+      locale: locale === "ur" ? "ur_PK" : "en_US",
+      type: "website",
+      images: [{ url: `${baseUrl}/new_hero_banner_2.jpg`, width: 1200, height: 630, alt: "About EnergyGurus" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [`${baseUrl}/new_hero_banner_2.jpg`],
+    },
+  };
+}
 
 export default function AboutPage() {
     return (

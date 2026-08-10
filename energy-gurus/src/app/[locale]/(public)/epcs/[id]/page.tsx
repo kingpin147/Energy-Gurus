@@ -38,9 +38,10 @@ interface EpcProfileData {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; locale?: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
+  const { id, locale = "en" } = await params;
+  const baseUrl = "https://www.energygurus.online";
   const installer = await db.query.epcInstallers.findFirst({
     where: eq(epcInstallers.id, id),
   });
@@ -49,21 +50,32 @@ export async function generateMetadata({
 
   const title = `${installer.companyName} | Verified Solar EPC | EnergyGurus`;
   const description = installer.about?.slice(0, 160) || `Learn more about ${installer.companyName}, a certified solar installer providing high-quality energy solutions.`;
+  const url = `${baseUrl}/${locale}/epcs/${id}`;
 
   return {
     title,
     description,
+    alternates: {
+      canonical: url,
+      languages: {
+        en: `${baseUrl}/en/epcs/${id}`,
+        ur: `${baseUrl}/ur/epcs/${id}`,
+        "x-default": `${baseUrl}/en/epcs/${id}`,
+      },
+    },
     openGraph: {
       title,
       description,
+      url,
+      siteName: "EnergyGurus",
       type: "website",
-      images: installer.logoUrl ? [{ url: installer.logoUrl, width: 800, height: 800, alt: installer.companyName }] : [],
+      images: installer.logoUrl ? [{ url: installer.logoUrl, width: 800, height: 800, alt: installer.companyName }] : [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: installer.companyName }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: installer.logoUrl ? [installer.logoUrl] : [],
+      images: installer.logoUrl ? [installer.logoUrl] : [`${baseUrl}/new_hero_banner.jpg`],
     }
   };
 }

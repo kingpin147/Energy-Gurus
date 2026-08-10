@@ -10,6 +10,42 @@ import { podcasts } from "@/db/schema";
 import { desc, asc } from "drizzle-orm";
 import { ListSort } from "@/components/shared/list-sort";
 import { unstable_cache } from "next/cache";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const baseUrl = "https://www.energygurus.online";
+  const title = "EnergyGurus Podcast | Industry Insights & Expert Discussions";
+  const description = "Listen to weekly technical podcasts with energy leaders, policy experts, engineers, and executives shaping Pakistan's solar transition.";
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${baseUrl}/${locale}/podcast`,
+      languages: {
+        en: `${baseUrl}/en/podcast`,
+        ur: `${baseUrl}/ur/podcast`,
+        "x-default": `${baseUrl}/en/podcast`,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/${locale}/podcast`,
+      siteName: "EnergyGurus",
+      locale: locale === "ur" ? "ur_PK" : "en_US",
+      type: "website",
+      images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "EnergyGurus Podcast" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [`${baseUrl}/new_hero_banner.jpg`],
+    },
+  };
+}
 
 const getPodcasts = unstable_cache(
     async (sortOrder: "asc" | "desc") => {

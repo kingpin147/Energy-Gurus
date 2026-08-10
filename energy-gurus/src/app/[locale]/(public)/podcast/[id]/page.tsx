@@ -9,8 +9,9 @@ import { eq } from "drizzle-orm";
 import { Metadata } from "next";
 import { PodcastShare } from "@/components/podcast/podcast-share";
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-    const { id } = await params;
+export async function generateMetadata({ params }: { params: Promise<{ id: string; locale?: string }> }): Promise<Metadata> {
+    const { id, locale = "en" } = await params;
+    const baseUrl = "https://www.energygurus.online";
     const podcast = await db.query.podcasts.findFirst({
         where: eq(podcasts.id, id),
     });
@@ -19,18 +20,30 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
     const title = `${podcast.title} | EnergyGurus Podcast`;
     const description = podcast.description?.slice(0, 160) || `Listen to this expert energy insight episode: ${podcast.title} on Energy Gurus.`;
+    const url = `${baseUrl}/${locale}/podcast/${id}`;
+    const videoId = podcast.youtubeUrl.split("v=")[1]?.split("&")[0] || podcast.youtubeUrl.split("/").pop();
+    const imageUrl = videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : `${baseUrl}/new_hero_banner.jpg`;
 
     return {
         title,
         description,
+        alternates: {
+            canonical: url,
+            languages: {
+                en: `${baseUrl}/en/podcast/${id}`,
+                ur: `${baseUrl}/ur/podcast/${id}`,
+                "x-default": `${baseUrl}/en/podcast/${id}`,
+            },
+        },
         openGraph: {
             title,
             description,
             type: "video.other",
-            url: `https://energygurus.pk/podcast/${id}`,
+            url,
+            siteName: "EnergyGurus",
             images: [
                 {
-                    url: `https://img.youtube.com/vi/${podcast.youtubeUrl.split("v=")[1]?.split("&")[0] || podcast.youtubeUrl.split("/").pop()}/maxresdefault.jpg`,
+                    url: imageUrl,
                     width: 1280,
                     height: 720,
                     alt: podcast.title,
@@ -41,7 +54,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
             card: "summary_large_image",
             title,
             description,
-            images: [`https://img.youtube.com/vi/${podcast.youtubeUrl.split("v=")[1]?.split("&")[0] || podcast.youtubeUrl.split("/").pop()}/maxresdefault.jpg`],
+            images: [imageUrl],
         }
     };
 }

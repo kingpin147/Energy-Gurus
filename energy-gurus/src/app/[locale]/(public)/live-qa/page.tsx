@@ -5,8 +5,43 @@ import { Youtube, Calendar, Users, PlayCircle, ArrowRight, Share2, FileText, Bel
 import { Button } from "@/components/ui/button";
 import { submitLiveQuestion } from "@/lib/actions/live-qa";
 import { CountdownTimer } from "./countdown-timer";
-
 import { getFeaturedLiveQASession } from "@/lib/utils/live-qa";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const baseUrl = "https://www.energygurus.online";
+  const title = "Live Energy Q&A Sessions | Ask Solar Engineers | EnergyGurus";
+  const description = "Participate in live Q&A sessions with renewable energy engineers and industry specialists. Ask questions and review previous recordings.";
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${baseUrl}/${locale}/live-qa`,
+      languages: {
+        en: `${baseUrl}/en/live-qa`,
+        ur: `${baseUrl}/ur/live-qa`,
+        "x-default": `${baseUrl}/en/live-qa`,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/${locale}/live-qa`,
+      siteName: "EnergyGurus",
+      locale: locale === "ur" ? "ur_PK" : "en_US",
+      type: "website",
+      images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "Live Q&A Sessions" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [`${baseUrl}/new_hero_banner.jpg`],
+    },
+  };
+}
 
 export default async function LiveQAPage() {
     const sessions = await db.select().from(liveQA).orderBy(desc(liveQA.createdAt));

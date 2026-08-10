@@ -3,6 +3,42 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { FileText, BookOpen, Calculator, Download, ArrowRight, Search, Tag } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { Input } from "@/components/ui/input";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const baseUrl = "https://www.energygurus.online";
+  const title = "Energy Knowledge Hub & Solar Resources | EnergyGurus";
+  const description = "Independent solar guides, net-metering regulations, payback calculators, and technical whitepapers for Pakistan's energy transition.";
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${baseUrl}/${locale}/resources`,
+      languages: {
+        en: `${baseUrl}/en/resources`,
+        ur: `${baseUrl}/ur/resources`,
+        "x-default": `${baseUrl}/en/resources`,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/${locale}/resources`,
+      siteName: "EnergyGurus",
+      locale: locale === "ur" ? "ur_PK" : "en_US",
+      type: "website",
+      images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "Energy Knowledge Hub" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [`${baseUrl}/new_hero_banner.jpg`],
+    },
+  };
+}
 
 export default function ResourcesPage() {
     return (

@@ -1,4 +1,38 @@
 import { useTranslations } from "next-intl";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const baseUrl = "https://www.energygurus.online";
+  const title = "Privacy Policy | EnergyGurus";
+  const description = "Learn about EnergyGurus privacy policy, data protection practices, and how your personal data is handled securely.";
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${baseUrl}/${locale}/privacy`,
+      languages: {
+        en: `${baseUrl}/en/privacy`,
+        ur: `${baseUrl}/ur/privacy`,
+        "x-default": `${baseUrl}/en/privacy`,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/${locale}/privacy`,
+      siteName: "EnergyGurus",
+      locale: locale === "ur" ? "ur_PK" : "en_US",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+}
 
 export default function PrivacyPolicyPage() {
     return (

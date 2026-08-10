@@ -5,6 +5,42 @@ import { Star, ShieldCheck, ArrowLeft, MapPin, Briefcase, Zap, Award } from "luc
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const baseUrl = "https://www.energygurus.online";
+  const title = "Compare Solar Installers Side-by-Side | EnergyGurus";
+  const description = "Compare ratings, project counts, sector specializations, and office footprints of solar EPC companies in Pakistan.";
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${baseUrl}/${locale}/epcs/compare`,
+      languages: {
+        en: `${baseUrl}/en/epcs/compare`,
+        ur: `${baseUrl}/ur/epcs/compare`,
+        "x-default": `${baseUrl}/en/epcs/compare`,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/${locale}/epcs/compare`,
+      siteName: "EnergyGurus",
+      locale: locale === "ur" ? "ur_PK" : "en_US",
+      type: "website",
+      images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "Compare Solar Installers" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [`${baseUrl}/new_hero_banner.jpg`],
+    },
+  };
+}
 
 export default async function EpcComparePage({
   searchParams,

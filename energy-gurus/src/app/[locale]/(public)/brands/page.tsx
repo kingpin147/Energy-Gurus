@@ -12,6 +12,42 @@ import { unstable_cache } from "next/cache";
 import { getBrandCompleteness } from "@/lib/utils/completeness";
 import { AdBanner } from "@/components/shared/AdBanner";
 import { CompareToggle } from "@/components/shared/compare-toggle";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const baseUrl = "https://www.energygurus.online";
+  const title = "Solar Manufacturers & Energy Brands in Pakistan | EnergyGurus";
+  const description = "Discover Tier-1 solar panel and inverter brands in Pakistan. View technical datasheets, warranty links, country representatives, and certified products.";
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${baseUrl}/${locale}/brands`,
+      languages: {
+        en: `${baseUrl}/en/brands`,
+        ur: `${baseUrl}/ur/brands`,
+        "x-default": `${baseUrl}/en/brands`,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/${locale}/brands`,
+      siteName: "EnergyGurus",
+      locale: locale === "ur" ? "ur_PK" : "en_US",
+      type: "website",
+      images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "Solar Brands Pakistan" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [`${baseUrl}/new_hero_banner.jpg`],
+    },
+  };
+}
 
 const getBrandsData = unstable_cache(
     async (sort: string, q?: string) => {

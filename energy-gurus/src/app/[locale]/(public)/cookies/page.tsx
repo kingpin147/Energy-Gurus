@@ -1,3 +1,38 @@
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const baseUrl = "https://www.energygurus.online";
+  const title = "Cookie Policy | EnergyGurus";
+  const description = "Learn how EnergyGurus uses cookies and technical telemetry tracking to improve user experience and site performance.";
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${baseUrl}/${locale}/cookies`,
+      languages: {
+        en: `${baseUrl}/en/cookies`,
+        ur: `${baseUrl}/ur/cookies`,
+        "x-default": `${baseUrl}/en/cookies`,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/${locale}/cookies`,
+      siteName: "EnergyGurus",
+      locale: locale === "ur" ? "ur_PK" : "en_US",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+}
+
 export default function CookiePolicyPage() {
     return (
         <div className="container mx-auto px-4 py-16 max-w-4xl">

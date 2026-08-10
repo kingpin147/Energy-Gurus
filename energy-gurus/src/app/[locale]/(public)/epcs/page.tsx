@@ -7,6 +7,42 @@ import { getEpcCompleteness } from "@/lib/utils/completeness";
 import { AdBanner } from "@/components/shared/AdBanner";
 import { TrackedLink } from "@/components/shared/AnalyticsTracker";
 import { InstallerFilters } from "@/components/shared/installer-filters";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const baseUrl = "https://www.energygurus.online";
+  const title = "Certified Solar EPC Installers in Pakistan | Verified Directory";
+  const description = "Directory of pre-verified solar EPC companies in Pakistan. Compare ratings, completed projects, office locations, and technical certifications.";
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${baseUrl}/${locale}/epcs`,
+      languages: {
+        en: `${baseUrl}/en/epcs`,
+        ur: `${baseUrl}/ur/epcs`,
+        "x-default": `${baseUrl}/en/epcs`,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/${locale}/epcs`,
+      siteName: "EnergyGurus",
+      locale: locale === "ur" ? "ur_PK" : "en_US",
+      type: "website",
+      images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "Solar Installers Pakistan" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [`${baseUrl}/new_hero_banner.jpg`],
+    },
+  };
+}
 
 const getInstallers = unstable_cache(
   async (sort: string, q?: string, cert?: string, spec?: string) => {

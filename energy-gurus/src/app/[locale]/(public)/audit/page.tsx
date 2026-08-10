@@ -4,6 +4,42 @@ import { CheckCircle2, FileText, BarChart, Search, Zap, PieChart, ShieldCheck, H
 import { Link } from "@/i18n/routing";
 import { Input } from "@/components/ui/input";
 import { AuditRequestForm } from "@/components/forms/audit-request-form";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const baseUrl = "https://www.energygurus.online";
+  const title = "Professional Solar Energy Audits in Pakistan | EnergyGurus";
+  const description = "Request comprehensive physical and electrical load audits, solar system feasibility, and energy efficiency inspections across Pakistan.";
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${baseUrl}/${locale}/audit`,
+      languages: {
+        en: `${baseUrl}/en/audit`,
+        ur: `${baseUrl}/ur/audit`,
+        "x-default": `${baseUrl}/en/audit`,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/${locale}/audit`,
+      siteName: "EnergyGurus",
+      locale: locale === "ur" ? "ur_PK" : "en_US",
+      type: "website",
+      images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "Energy Audits Pakistan" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [`${baseUrl}/new_hero_banner.jpg`],
+    },
+  };
+}
 
 export default function AuditPage() {
     return (

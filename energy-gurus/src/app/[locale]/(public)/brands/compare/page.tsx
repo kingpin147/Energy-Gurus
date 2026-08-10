@@ -5,6 +5,42 @@ import { Star, ShieldCheck, ArrowLeft, Package, User, Phone, Globe, ExternalLink
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const baseUrl = "https://www.energygurus.online";
+  const title = "Compare Solar Brands & Tier-1 Manufacturers | EnergyGurus";
+  const description = "Compare solar panel and inverter brands side-by-side. View product counts, country head contacts, warranty details, and customer ratings.";
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${baseUrl}/${locale}/brands/compare`,
+      languages: {
+        en: `${baseUrl}/en/brands/compare`,
+        ur: `${baseUrl}/ur/brands/compare`,
+        "x-default": `${baseUrl}/en/brands/compare`,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/${locale}/brands/compare`,
+      siteName: "EnergyGurus",
+      locale: locale === "ur" ? "ur_PK" : "en_US",
+      type: "website",
+      images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "Compare Solar Brands" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [`${baseUrl}/new_hero_banner.jpg`],
+    },
+  };
+}
 
 export default async function BrandsComparePage({
   searchParams,

@@ -7,6 +7,42 @@ import { podcasts, epcInstallers, reviews, users, brands, liveQA, epcOffices, ep
 import { desc, count, eq, sql, asc, and } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import { getEpcCompleteness } from "@/lib/utils/completeness";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+    const { locale } = await params;
+    const baseUrl = "https://www.energygurus.online";
+    const title = "EnergyGurus - Verified Solar EPCs & Tier-1 Brands in Pakistan";
+    const description = "Find certified solar EPC installers, compare verified solar brands, request expert load audits, and monitor solar systems in Pakistan.";
+
+    return {
+        title,
+        description,
+        alternates: {
+            canonical: `${baseUrl}/${locale}`,
+            languages: {
+                en: `${baseUrl}/en`,
+                ur: `${baseUrl}/ur`,
+                "x-default": `${baseUrl}/en`,
+            },
+        },
+        openGraph: {
+            title,
+            description,
+            url: `${baseUrl}/${locale}`,
+            siteName: "EnergyGurus",
+            locale: locale === "ur" ? "ur_PK" : "en_US",
+            type: "website",
+            images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "EnergyGurus" }],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: [`${baseUrl}/new_hero_banner.jpg`],
+        },
+    };
+}
 
 const getHomepageData = unstable_cache(
     async () => {

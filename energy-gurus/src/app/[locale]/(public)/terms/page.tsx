@@ -1,3 +1,38 @@
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const baseUrl = "https://www.energygurus.online";
+  const title = "Terms of Use | EnergyGurus";
+  const description = "Read the terms and conditions governing the use of EnergyGurus platform, installer directory, and energy services.";
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${baseUrl}/${locale}/terms`,
+      languages: {
+        en: `${baseUrl}/en/terms`,
+        ur: `${baseUrl}/ur/terms`,
+        "x-default": `${baseUrl}/en/terms`,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/${locale}/terms`,
+      siteName: "EnergyGurus",
+      locale: locale === "ur" ? "ur_PK" : "en_US",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+}
+
 export default function TermsOfUsePage() {
     return (
         <div className="container mx-auto px-4 py-16 max-w-4xl">

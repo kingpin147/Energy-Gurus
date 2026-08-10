@@ -44,11 +44,79 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'Metadata' });
+  const baseUrl = "https://www.energygurus.online";
 
   return {
-    title: "EnergyGurus - Energy Insights for Pakistan",
-    description: "Weekly podcast, expert audits, real‑time monitoring and O&M services for smarter energy decisions in Pakistan.",
+    metadataBase: new URL(baseUrl),
+    title: {
+      default: "EnergyGurus - Certified Solar EPCs & Energy Brands in Pakistan",
+      template: "%s | EnergyGurus",
+    },
+    description: "Pakistan's premier platform for verified solar EPC installers, tier-1 brand discovery, expert energy audits, real-time telemetry, and technical energy podcasts.",
+    keywords: [
+      "EnergyGurus",
+      "Solar Pakistan",
+      "EPC Installers Pakistan",
+      "Solar Brands",
+      "Solar Panel Verification",
+      "Energy Audit Pakistan",
+      "Solar Monitoring",
+      "Solar Podcast Pakistan",
+    ],
+    authors: [{ name: "EnergyGurus Team", url: baseUrl }],
+    creator: "EnergyGurus",
+    publisher: "EnergyGurus",
+    icons: {
+      icon: [
+        { url: "/icon.svg", type: "image/svg+xml" },
+        { url: "/logo-icon.svg", type: "image/svg+xml" },
+        { url: "/favicon.ico", sizes: "any" },
+      ],
+      apple: [
+        { url: "/logo-icon.svg", type: "image/svg+xml" },
+      ],
+    },
+    openGraph: {
+      type: "website",
+      locale: locale === "ur" ? "ur_PK" : "en_US",
+      url: `${baseUrl}/${locale}`,
+      siteName: "EnergyGurus",
+      title: "EnergyGurus - Certified Solar EPCs & Energy Brands in Pakistan",
+      description: "Discover verified solar installers, compare top energy brands, request technical audits, and stream expert podcasts.",
+      images: [
+        {
+          url: `${baseUrl}/new_hero_banner.jpg`,
+          width: 1200,
+          height: 630,
+          alt: "EnergyGurus Pakistan",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "EnergyGurus - Certified Solar EPCs & Energy Brands in Pakistan",
+      description: "Discover verified solar installers, compare top energy brands, request technical audits, and stream expert podcasts.",
+      images: [`${baseUrl}/new_hero_banner.jpg`],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+    alternates: {
+      canonical: `${baseUrl}/${locale}`,
+      languages: {
+        en: `${baseUrl}/en`,
+        ur: `${baseUrl}/ur`,
+        "x-default": `${baseUrl}/en`,
+      },
+    },
   };
 }
 
@@ -74,6 +142,36 @@ export default async function RootLayout({
   const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   const isClerkConfigured = clerkKey && clerkKey.startsWith('pk_') && !clerkKey.includes('your_') && clerkKey !== 'pk_test_...';
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://www.energygurus.online/#organization",
+        "name": "EnergyGurus",
+        "url": "https://www.energygurus.online",
+        "logo": "https://www.energygurus.online/logo-icon.svg",
+        "sameAs": [
+          "https://www.tiktok.com/@energygurus.online",
+          "https://www.linkedin.com/company/energygurusonline",
+          "https://x.com/energyguruspk",
+          "https://www.youtube.com/@energygurus.online",
+          "https://www.facebook.com/energygurus.online"
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://www.energygurus.online/#website",
+        "url": "https://www.energygurus.online",
+        "name": "EnergyGurus",
+        "publisher": {
+          "@id": "https://www.energygurus.online/#organization"
+        },
+        "inLanguage": ["en", "ur"]
+      }
+    ]
+  };
+
   const content = (
     <CSPostHogProvider>
       <NextIntlClientProvider messages={messages}>
@@ -87,6 +185,12 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} className="scroll-smooth" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body
         className={`${inter.variable} ${outfit.variable} ${notoArabic.variable} ${spaceGrotesk.variable} ${ibmPlexMono.variable} font-sans antialiased`}
         suppressHydrationWarning

@@ -34,9 +34,10 @@ interface BrandProfileData {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; locale?: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
+  const { id, locale = "en" } = await params;
+  const baseUrl = "https://www.energygurus.online";
   const brand = await db.query.brands.findFirst({
     where: eq(brands.id, id),
   });
@@ -45,21 +46,32 @@ export async function generateMetadata({
 
   const title = `${brand.brandName} | Solar Manufacturer | Energy Gurus`;
   const description = brand.about?.slice(0, 160) || `Explore ${brand.brandName}'s high-efficiency solar products and technical specifications on Energy Gurus.`;
+  const url = `${baseUrl}/${locale}/brands/${id}`;
 
   return {
     title,
     description,
+    alternates: {
+      canonical: url,
+      languages: {
+        en: `${baseUrl}/en/brands/${id}`,
+        ur: `${baseUrl}/ur/brands/${id}`,
+        "x-default": `${baseUrl}/en/brands/${id}`,
+      },
+    },
     openGraph: {
       title,
       description,
+      url,
+      siteName: "EnergyGurus",
       type: "website",
-      images: brand.logoUrl ? [{ url: brand.logoUrl, width: 800, height: 800, alt: brand.brandName }] : [],
+      images: brand.logoUrl ? [{ url: brand.logoUrl, width: 800, height: 800, alt: brand.brandName }] : [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: brand.brandName }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: brand.logoUrl ? [brand.logoUrl] : [],
+      images: brand.logoUrl ? [brand.logoUrl] : [`${baseUrl}/new_hero_banner.jpg`],
     }
   };
 }

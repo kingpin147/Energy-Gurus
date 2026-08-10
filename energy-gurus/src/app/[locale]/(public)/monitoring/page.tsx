@@ -13,6 +13,42 @@ import {
     ArrowRight
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const baseUrl = "https://www.energygurus.online";
+  const title = "Real-Time Solar System Monitoring & Telemetry | EnergyGurus";
+  const description = "Monitor live solar generation, battery storage, fault alerts, and grid export metrics with EnergyGurus solar telemetry platform.";
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${baseUrl}/${locale}/monitoring`,
+      languages: {
+        en: `${baseUrl}/en/monitoring`,
+        ur: `${baseUrl}/ur/monitoring`,
+        "x-default": `${baseUrl}/en/monitoring`,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/${locale}/monitoring`,
+      siteName: "EnergyGurus",
+      locale: locale === "ur" ? "ur_PK" : "en_US",
+      type: "website",
+      images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "Solar Telemetry Monitoring" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [`${baseUrl}/new_hero_banner.jpg`],
+    },
+  };
+}
 import PricingSection from "@/components/monitoring/PricingSection";
 import RequestForm from "@/components/monitoring/RequestForm";
 
