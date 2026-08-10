@@ -17,6 +17,12 @@ export default function middleware(req: any) {
     const ip = req.ip ?? "127.0.0.1";
     const pathname = req.nextUrl.pathname;
     
+    // Skip i18n and Clerk middleware for static root files like sitemap.xml and robots.txt
+    const isPublicRootFile = pathname === '/sitemap.xml' || pathname === '/robots.txt' || pathname.endsWith('.xml') || pathname.endsWith('.txt');
+    if (isPublicRootFile) {
+        return;
+    }
+
     // Only rate-limit actual API routes, NOT page navigation
     // Page navigation caused false 429s due to Next.js prefetching
     const isApiRoute = pathname.startsWith('/api');
@@ -51,8 +57,8 @@ export default function middleware(req: any) {
 
 export const config = {
     matcher: [
-        // Skip Next.js internals and all static files
-        '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+        // Skip Next.js internals and all static files (including .xml and .txt)
+        '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|xml|txt)).*)',
         // Always run for API routes
         '/(api|trpc)(.*)',
     ],

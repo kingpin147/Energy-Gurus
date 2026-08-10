@@ -70,13 +70,12 @@ export async function generateMetadata({
     publisher: "EnergyGurus",
     icons: {
       icon: [
+        { url: "/logo-icon.svg", type: "image/svg+xml" },
         { url: "/icon.svg", type: "image/svg+xml" },
-        { url: "/logo-icon.svg", type: "image/svg+xml" },
-        { url: "/favicon.ico", sizes: "any" },
+        { url: "/favicon.ico", sizes: "32x32" },
       ],
-      apple: [
-        { url: "/logo-icon.svg", type: "image/svg+xml" },
-      ],
+      shortcut: "/favicon.ico",
+      apple: "/logo-icon.svg",
     },
     openGraph: {
       type: "website",
