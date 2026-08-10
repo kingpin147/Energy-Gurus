@@ -18,17 +18,29 @@ export async function sendInvitationEmail(toEmail: string, role: string): Promis
   }
 
   const roleLabels: Record<string, string> = {
-    admin: "Administrator",
+    admin: "Platform Administrator",
     epc: "EPC Installer",
     brand: "Solar Brand"
   };
 
+  const roleDescriptions: Record<string, string> = {
+    epc: "You have been formally invited to join the <strong>EnergyGurus</strong> ecosystem as a verified <strong>EPC Installer</strong> partner. By claiming this invitation, your business profile will be automatically verified and indexed into our public directory, enabling clients and homeowners to connect with you directly.",
+    brand: "You have been formally invited to join the <strong>EnergyGurus</strong> ecosystem as an official <strong>Solar Brand</strong> partner. By claiming this invitation, your equipment portfolio will be verified and indexed in our brand directory to connect with certified installers and consumers.",
+    admin: "You have been granted administrative privileges on the <strong>EnergyGurus</strong> platform to oversee analytics, moderation, and verified business onboarding."
+  };
+
+  const badgeStyles: Record<string, { bg: string; color: string; border: string }> = {
+    epc: { bg: "#EBF5F3", color: "#2F6E62", border: "#BFE3DC" },
+    brand: { bg: "#FEF7EC", color: "#B4690E", border: "#FCD34D" },
+    admin: { bg: "#EEF2FF", color: "#3730A3", border: "#C7D2FE" }
+  };
+
   const roleLabel = roleLabels[role] || role;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-  if (!appUrl) {
-    console.warn("NEXT_PUBLIC_APP_URL is not set — email links will use localhost fallback.");
-  }
-  const signUpUrl = `${appUrl || "http://localhost:3000"}/sign-up?email=${encodeURIComponent(toEmail)}`;
+  const description = roleDescriptions[role] || `You have been formally invited to join the <strong>EnergyGurus</strong> platform as a <strong>${roleLabel}</strong> partner.`;
+  const badge = badgeStyles[role] || { bg: "#F5F6F3", color: "#12213A", border: "#E2E8F0" };
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.energygurus.online";
+  const signUpUrl = `${appUrl}/sign-up?email=${encodeURIComponent(toEmail)}`;
 
   try {
     const response = await fetchWithRetry("https://api.brevo.com/v3/smtp/email", {
@@ -40,7 +52,7 @@ export async function sendInvitationEmail(toEmail: string, role: string): Promis
       },
       body: JSON.stringify({
         sender: {
-          name: "Energy Gurus",
+          name: "EnergyGurus",
           email: "energygurusonline@gmail.com"
         },
         to: [
@@ -48,121 +60,74 @@ export async function sendInvitationEmail(toEmail: string, role: string): Promis
             email: toEmail
           }
         ],
-        subject: "⚡ Exclusive Invitation to Join Energy Gurus",
+        subject: `⚡ Invitation to Join EnergyGurus as a Verified ${roleLabel}`,
         htmlContent: `
           <!DOCTYPE html>
           <html>
           <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Energy Gurus Invitation</title>
-            <style>
-              body {
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-                background-color: #f9fafb;
-                margin: 0;
-                padding: 40px 10px;
-              }
-              .container {
-                max-width: 600px;
-                margin: 0 auto;
-                background: #ffffff;
-                border-radius: 24px;
-                overflow: hidden;
-                box-shadow: 0 8px 30px rgba(0,0,0,0.03);
-                border: 1px solid #f1f5f9;
-              }
-              .header {
-                background: linear-gradient(135deg, #006d6d, #005353);
-                padding: 50px 30px;
-                text-align: center;
-                color: #ffffff;
-              }
-              .logo {
-                font-size: 30px;
-                font-weight: 900;
-                letter-spacing: -1.5px;
-                margin: 0;
-                text-transform: uppercase;
-              }
-              .content {
-                padding: 40px 35px;
-                color: #334155;
-                line-height: 1.7;
-              }
-              .title {
-                font-size: 24px;
-                font-weight: 800;
-                margin-top: 0;
-                margin-bottom: 20px;
-                color: #0f172a;
-                letter-spacing: -0.5px;
-              }
-              .badge {
-                display: inline-block;
-                background: #e6f5f5;
-                color: #006d6d;
-                padding: 6px 16px;
-                border-radius: 9999px;
-                font-size: 11px;
-                font-weight: 850;
-                text-transform: uppercase;
-                letter-spacing: 1.2px;
-                margin-bottom: 25px;
-                border: 1px solid #b8e8e8;
-              }
-              .btn-container {
-                text-align: center;
-                margin: 35px 0;
-              }
-              .btn {
-                display: inline-block;
-                background: #006d6d;
-                color: #ffffff !important;
-                text-decoration: none;
-                padding: 18px 40px;
-                border-radius: 16px;
-                font-weight: 800;
-                font-size: 16px;
-                box-shadow: 0 10px 20px rgba(0, 109, 109, 0.15);
-                transition: transform 0.2s ease;
-              }
-              .footer {
-                padding: 35px;
-                text-align: center;
-                font-size: 12px;
-                color: #94a3b8;
-                background-color: #f8fafc;
-                border-top: 1px solid #f1f5f9;
-                line-height: 1.5;
-              }
-            </style>
+            <title>EnergyGurus Partner Invitation</title>
           </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <h1 class="logo">⚡ ENERGY GURUS</h1>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F5F6F3; margin: 0; padding: 40px 15px; color: #1B1F24;">
+            <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 12px 36px rgba(18, 33, 58, 0.08); border: 1px solid rgba(18, 33, 58, 0.08);">
+              
+              <!-- Header with Dark Ink Navy & Amber Gold Accent -->
+              <div style="background-color: #12213A; padding: 36px 30px; text-align: center; border-bottom: 4px solid #E8A33D;">
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                  <tr>
+                    <td style="vertical-align: middle; padding-right: 12px;">
+                      <img src="https://www.energygurus.online/logo-icon.svg" width="40" height="40" alt="EnergyGurus" style="display: block; border: 0;" />
+                    </td>
+                    <td style="vertical-align: middle;">
+                      <span style="font-size: 24px; font-weight: 900; color: #FFFFFF; letter-spacing: -0.5px; text-transform: uppercase;">ENERGY <span style="color: #E8A33D;">GURUS</span></span>
+                    </td>
+                  </tr>
+                </table>
               </div>
-              <div class="content">
-                <div class="badge">${roleLabel} Partner</div>
-                <h2 class="title">Exclusive Platform Access</h2>
-                <p>Hello,</p>
-                <p>You have been formally invited to join the <strong>Energy Gurus</strong> solar ecosystem as a verified <strong>${roleLabel}</strong> partner.</p>
-                <p>Energy Gurus operates strictly on an <strong>invite-only basis</strong> to guarantee high trust. By claiming this invitation, your business profile will be automatically verified and indexed immediately into our public directory, enabling solar search clients to contact you directly.</p>
-                
-                <div class="btn-container">
-                  <a href="${signUpUrl}" class="btn">Claim Listing & Register</a>
+
+              <!-- Content Body -->
+              <div style="padding: 40px 35px;">
+                <div style="margin-bottom: 20px;">
+                  <span style="display: inline-block; background-color: ${badge.bg}; color: ${badge.color}; padding: 6px 16px; border-radius: 9999px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; border: 1px solid ${badge.border};">
+                    ${roleLabel} Partner
+                  </span>
                 </div>
+
+                <h2 style="font-size: 24px; font-weight: 800; margin: 0 0 16px 0; color: #12213A; letter-spacing: -0.5px;">
+                  Exclusive Platform Invitation
+                </h2>
+
+                <p style="font-size: 15px; color: #4A5A73; line-height: 1.7; margin: 0 0 16px 0;">Hello,</p>
+
+                <p style="font-size: 15px; color: #4A5A73; line-height: 1.7; margin: 0 0 24px 0;">
+                  ${description}
+                </p>
                 
-                <p style="margin-top: 30px; font-size: 13px; color: #64748b;">
+                <div style="background-color: #F8FAFC; border-left: 4px solid #E8A33D; border-radius: 0 8px 8px 0; padding: 16px 20px; margin-bottom: 32px;">
+                  <p style="font-size: 13px; color: #12213A; font-weight: 600; margin: 0; line-height: 1.5;">
+                    🔒 <strong>Invite-Only Network:</strong> EnergyGurus maintains strict verification standards. Claiming this invitation instantly grants your business verified partner status.
+                  </p>
+                </div>
+
+                <div style="text-align: center; margin: 35px 0 30px 0;">
+                  <a href="${signUpUrl}" style="display: inline-block; background-color: #E8A33D; color: #12213A !important; text-decoration: none; padding: 16px 38px; border-radius: 12px; font-weight: 800; font-size: 16px; box-shadow: 0 8px 24px rgba(232, 163, 61, 0.35); text-transform: none;">
+                    Claim Listing & Register →
+                  </a>
+                </div>
+
+                <p style="font-size: 13px; color: #64748B; line-height: 1.6; margin: 30px 0 0 0; border-top: 1px dashed #E2E8F0; padding-top: 20px;">
                   If the button doesn't work, copy and paste this link in your browser:<br>
-                  <a href="${signUpUrl}" style="color: #006d6d; word-break: break-all;">${signUpUrl}</a>
+                  <a href="${signUpUrl}" style="color: #2F6E62; word-break: break-all; text-decoration: underline;">${signUpUrl}</a>
                 </p>
               </div>
-              <div class="footer">
-                &copy; ${new Date().getFullYear()} Energy Gurus. All rights reserved.<br>
-                This is a secure transactional email intended strictly for the invited business. Please do not forward.
+
+              <!-- Footer -->
+              <div style="padding: 24px 35px; text-align: center; font-size: 12px; color: #94A3B8; background-color: #F8FAFC; border-top: 1px solid #F1F5F9; line-height: 1.6;">
+                &copy; ${new Date().getFullYear()} EnergyGurus. All rights reserved.<br>
+                This is a secure transactional email intended strictly for the invited partner. Please do not forward.
               </div>
+
             </div>
           </body>
           </html>
@@ -205,12 +170,12 @@ export async function sendAdminNotificationEmail(subject: string, messageHtml: s
       },
       body: JSON.stringify({
         sender: {
-          name: "Energy Gurus System",
+          name: "EnergyGurus System",
           email: "energygurusonline@gmail.com"
         },
         to: [
           {
-            email: "energygurusonline@gmail.com" // Sending to the admin email
+            email: "energygurusonline@gmail.com"
           }
         ],
         subject: `[Admin Alert] ${subject}`,
@@ -220,16 +185,16 @@ export async function sendAdminNotificationEmail(subject: string, messageHtml: s
           <head>
             <meta charset="utf-8">
             <style>
-              body { font-family: sans-serif; line-height: 1.6; color: #333; }
-              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: #006d6d; color: white; padding: 20px; border-radius: 8px 8px 0 0; }
-              .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; border: 1px solid #eee; border-top: none; }
+              body { font-family: sans-serif; line-height: 1.6; color: #1B1F24; background-color: #F5F6F3; margin: 0; padding: 20px; }
+              .container { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #E2E8F0; }
+              .header { background: #12213A; color: white; padding: 20px; border-bottom: 3px solid #E8A33D; text-align: center; }
+              .content { padding: 25px; }
             </style>
           </head>
           <body>
             <div class="container">
               <div class="header">
-                <h2 style="margin: 0;">⚡ Energy Gurus Notification</h2>
+                <h2 style="margin: 0; font-size: 20px;">⚡ ENERGY <span style="color: #E8A33D;">GURUS</span></h2>
               </div>
               <div class="content">
                 ${messageHtml}
