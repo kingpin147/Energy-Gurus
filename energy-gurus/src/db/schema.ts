@@ -15,11 +15,11 @@ export const users = pgTable('users', {
   role: text('role').$type<UserRole>().default('epc').notNull(),
   isActive: boolean('is_active').default(true).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, (table) => ({
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+    }, (table) => ({
   isActiveIdx: index('users_is_active_idx').on(table.isActive),
-  createdAtIdx: index('users_created_at_idx').on(table.createdAt),
-}));
+  createdAtIdx: index('users_created_at_idx').on(table.createdAt)
+    }));
 
 export const epcInstallers = pgTable('epc_installers', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -35,11 +35,11 @@ export const epcInstallers = pgTable('epc_installers', {
   website: text('website'),
   isVerified: boolean('is_verified').default(false),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, (table) => ({
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+    }, (table) => ({
   userIdIdx: index('epc_installers_user_id_idx').on(table.userId),
-  createdAtIdx: index('epc_installers_created_at_idx').on(table.createdAt),
-}));
+  createdAtIdx: index('epc_installers_created_at_idx').on(table.createdAt)
+    }));
 
 export const epcOffices = pgTable('epc_offices', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -48,10 +48,10 @@ export const epcOffices = pgTable('epc_offices', {
   block: text('block'),
   area: text('area'),
   city: text('city').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-}, (table) => ({
-  epcIdIdx: index('epc_offices_epc_id_idx').on(table.epcId),
-}));
+  createdAt: timestamp('created_at').defaultNow().notNull()
+    }, (table) => ({
+  epcIdIdx: index('epc_offices_epc_id_idx').on(table.epcId)
+    }));
 
 export const epcProjects = pgTable('epc_projects', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -68,10 +68,10 @@ export const epcProjects = pgTable('epc_projects', {
   videos: jsonb('videos').$type<string[]>().default([]),
   youtubeUrl: text('youtube_url'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, (table) => ({
-  epcIdIdx: index('epc_projects_epc_id_idx').on(table.epcId),
-}));
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+    }, (table) => ({
+  epcIdIdx: index('epc_projects_epc_id_idx').on(table.epcId)
+    }));
 
 export const brands = pgTable('brands', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -90,11 +90,11 @@ export const brands = pgTable('brands', {
   socialLinks: jsonb('social_links').$type<{ platform: string; url: string }[]>().default([]),
   isVerified: boolean('is_verified').default(false),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, (table) => ({
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+    }, (table) => ({
   userIdIdx: index('brands_user_id_idx').on(table.userId),
-  createdAtIdx: index('brands_created_at_idx').on(table.createdAt),
-}));
+  createdAtIdx: index('brands_created_at_idx').on(table.createdAt)
+    }));
 
 export const products = pgTable('products', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -108,10 +108,10 @@ export const products = pgTable('products', {
   imageUrl: text('image_url'),
   series: text('series'), // e.g. "Hi-MO 6", "N-Type"
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, (table) => ({
-  brandIdIdx: index('products_brand_id_idx').on(table.brandId),
-}));
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+    }, (table) => ({
+  brandIdIdx: index('products_brand_id_idx').on(table.brandId)
+    }));
 
 export const podcasts = pgTable('podcasts', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -121,10 +121,10 @@ export const podcasts = pgTable('podcasts', {
   thumbnailUrl: text('thumbnail_url'),
   guestName: text('guest_name'),
   guestDesignation: text('guest_designation'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-}, (table) => ({
-  createdAtIdx: index('podcasts_created_at_idx').on(table.createdAt),
-}));
+  createdAt: timestamp('created_at').defaultNow().notNull()
+    }, (table) => ({
+  createdAtIdx: index('podcasts_created_at_idx').on(table.createdAt)
+    }));
 
 export const liveQA = pgTable('live_qa', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -137,10 +137,10 @@ export const liveQA = pgTable('live_qa', {
   expertPhotoUrl: text('expert_photo_url'),
   status: text('status').$type<'upcoming' | 'live' | 'archived'>().default('upcoming').notNull(),
   sessionDate: timestamp('session_date'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-}, (table) => ({
-  createdAtIdx: index('live_qa_created_at_idx').on(table.createdAt),
-}));
+  createdAt: timestamp('created_at').defaultNow().notNull()
+    }, (table) => ({
+  createdAtIdx: index('live_qa_created_at_idx').on(table.createdAt)
+    }));
 
 export const inquiries = pgTable('inquiries', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -157,13 +157,13 @@ export const inquiries = pgTable('inquiries', {
   inquiryType: text('inquiry_type').$type<'client' | 'support' | 'public'>().default('client').notNull(),
   metadata: jsonb('metadata'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, (table) => ({
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+    }, (table) => ({
   receiverIdIdx: index('inquiries_receiver_id_idx').on(table.receiverId),
   senderIdIdx: index('inquiries_sender_id_idx').on(table.senderId),
   createdAtIdx: index('inquiries_created_at_idx').on(table.createdAt),
-  receiverReadIdx: index('inquiries_receiver_read_idx').on(table.receiverId, table.isRead),
-}));
+  receiverReadIdx: index('inquiries_receiver_read_idx').on(table.receiverId, table.isRead)
+    }));
 
 export const reviews = pgTable('reviews', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -173,11 +173,11 @@ export const reviews = pgTable('reviews', {
   rating: integer('rating').notNull(),
   comment: text('comment'),
   reply: text('reply'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-}, (table) => ({
+  createdAt: timestamp('created_at').defaultNow().notNull()
+    }, (table) => ({
   targetIdx: index('reviews_target_idx').on(table.targetId, table.targetType),
-  authorIdIdx: index('reviews_author_id_idx').on(table.authorId),
-}));
+  authorIdIdx: index('reviews_author_id_idx').on(table.authorId)
+    }));
 
 export const productSerials = pgTable('product_serials', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -185,17 +185,17 @@ export const productSerials = pgTable('product_serials', {
   serialNumber: text('serial_number').notNull().unique(),
   status: text('status').$type<'genuine' | 'stolen' | 'expired'>().default('genuine').notNull(),
   warrantyExpiry: timestamp('warranty_expiry'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-}, (table) => ({
-  productIdIdx: index('product_serials_product_id_idx').on(table.productId),
-}));
+  createdAt: timestamp('created_at').defaultNow().notNull()
+    }, (table) => ({
+  productIdIdx: index('product_serials_product_id_idx').on(table.productId)
+    }));
 
 export const invitations = pgTable('invitations', {
   id: uuid('id').defaultRandom().primaryKey(),
   email: text('email').notNull().unique(),
   role: text('role').$type<UserRole>().notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+  createdAt: timestamp('created_at').defaultNow().notNull()
+    });
 
 export const liveQaQuestions = pgTable('live_qa_questions', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -204,11 +204,11 @@ export const liveQaQuestions = pgTable('live_qa_questions', {
   question: text('question').notNull(),
   isAnswered: boolean('is_answered').default(false).notNull(),
   isHighlighted: boolean('is_highlighted').default(false).notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-}, (table) => ({
+  createdAt: timestamp('created_at').defaultNow().notNull()
+    }, (table) => ({
   sessionIdIdx: index('live_qa_questions_session_id_idx').on(table.sessionId),
-  sessionAnsweredIdx: index('live_qa_questions_session_answered_idx').on(table.sessionId, table.isAnswered),
-}));
+  sessionAnsweredIdx: index('live_qa_questions_session_answered_idx').on(table.sessionId, table.isAnswered)
+    }));
 
 export const monitoringStats = pgTable('monitoring_stats', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -225,8 +225,8 @@ export const monitoringStats = pgTable('monitoring_stats', {
     message: string;
     timestamp: string;
   }[]>().default([]).notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+    });
 
 export const brandCertifications = pgTable('brand_certifications', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -234,10 +234,10 @@ export const brandCertifications = pgTable('brand_certifications', {
   name: text('name').notNull(),
   issuingBody: text('issuing_body'),
   expiryDate: timestamp('expiry_date'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-}, (table) => ({
-  brandIdIdx: index('brand_certifications_brand_id_idx').on(table.brandId),
-}));
+  createdAt: timestamp('created_at').defaultNow().notNull()
+    }, (table) => ({
+  brandIdIdx: index('brand_certifications_brand_id_idx').on(table.brandId)
+    }));
 
 export const notifications = pgTable('notifications', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -248,44 +248,44 @@ export const notifications = pgTable('notifications', {
   link: text('link'),
   senderLogoUrl: text('sender_logo_url'),
   isRead: boolean('is_read').default(false).notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-}, (table) => ({
+  createdAt: timestamp('created_at').defaultNow().notNull()
+    }, (table) => ({
   userIdIdx: index('notifications_user_id_idx').on(table.userId),
-  userReadIdx: index('notifications_user_read_idx').on(table.userId, table.isRead),
-}));
+  userReadIdx: index('notifications_user_read_idx').on(table.userId, table.isRead)
+    }));
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   epcInstaller: one(epcInstallers, {
     fields: [users.id],
-    references: [epcInstallers.userId],
-  }),
+    references: [epcInstallers.userId]
+    }),
   brand: one(brands, {
     fields: [users.id],
-    references: [brands.userId],
-  }),
-  notifications: many(notifications),
-}));
+    references: [brands.userId]
+    }),
+  notifications: many(notifications)
+    }));
 
 export const notificationsRelations = relations(notifications, ({ one }) => ({
   user: one(users, {
     fields: [notifications.userId],
-    references: [users.id],
-  }),
-}));
+    references: [users.id]
+    })
+    }));
 
 export const epcInstallersRelations = relations(epcInstallers, ({ one }) => ({
   user: one(users, {
     fields: [epcInstallers.userId],
-    references: [users.id],
-  }),
-}));
+    references: [users.id]
+    })
+    }));
 
 export const brandsRelations = relations(brands, ({ one }) => ({
   user: one(users, {
     fields: [brands.userId],
-    references: [users.id],
-  }),
-}));
+    references: [users.id]
+    })
+    }));
 
 export const monitoringRequests = pgTable('monitoring_requests', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -302,6 +302,6 @@ export const monitoringRequests = pgTable('monitoring_requests', {
   amountPayable: text('amount_payable'),
   status: text('status').$type<'pending' | 'contacted' | 'active'>().default('pending').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+    });
 

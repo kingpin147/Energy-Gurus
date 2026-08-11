@@ -58,8 +58,8 @@ export async function POST(req: Request) {
                     Bucket: bucketName,
                     Key: key,
                     Body: Buffer.from(arrayBuffer),
-                    ContentType: fileType,
-                })
+                    ContentType: fileType
+    })
             );
 
             return NextResponse.json({ key, publicUrl: getPublicUrl(key) });

@@ -27,8 +27,8 @@ const IMG = {
     prod8:    "https://picsum.photos/seed/prod8/600/400",
     thumb1:   "https://picsum.photos/seed/thumb1/800/450",
     thumb2:   "https://picsum.photos/seed/thumb2/800/450",
-    thumb3:   "https://picsum.photos/seed/thumb3/800/450",
-};
+    thumb3:   "https://picsum.photos/seed/thumb3/800/450"
+    };
 
 export async function seedDummyData() {
     console.log("🌱 Starting full seed...");
@@ -65,8 +65,8 @@ export async function seedDummyData() {
                 { platform: "LinkedIn", url: "https://linkedin.com/company/alphaenergy" },
                 { platform: "WhatsApp", url: "+923001234567" },
             ],
-            isVerified: true,
-        },
+            isVerified: true
+    },
         {
             userId: epcUsers[1].id,
             companyName: "Solar Peak Solutions",
@@ -81,8 +81,8 @@ export async function seedDummyData() {
                 { platform: "YouTube", url: "https://youtube.com/@solarpeak" },
                 { platform: "WhatsApp", url: "+923009876543" },
             ],
-            isVerified: true,
-        },
+            isVerified: true
+    },
         {
             userId: epcUsers[2].id,
             companyName: "GreenVolt Engineering",
@@ -97,8 +97,8 @@ export async function seedDummyData() {
                 { platform: "Twitter", url: "https://twitter.com/greenvolt" },
                 { platform: "WhatsApp", url: "+923331234567" },
             ],
-            isVerified: true,
-        },
+            isVerified: true
+    },
         {
             userId: epcUsers[3].id,
             companyName: "SunCraft Installations",
@@ -113,8 +113,8 @@ export async function seedDummyData() {
                 { platform: "Instagram", url: "https://instagram.com/suncraft" },
                 { platform: "WhatsApp", url: "+923451234567" },
             ],
-            isVerified: false,
-        },
+            isVerified: false
+    },
     ]).returning();
 
     // ── EPC Offices ───────────────────────────────────────────────────────────
@@ -138,8 +138,8 @@ export async function seedDummyData() {
             systemType: "Hybrid",
             inverterModel: "Huawei SUN2000-25KTL",
             solarPanelModel: "Longi Hi-MO 6 580W",
-            images: [IMG.solar1, IMG.solar2],
-        },
+            images: [IMG.solar1, IMG.solar2]
+    },
         {
             epcId: epcProfiles[0].id,
             name: "Korangi Industrial Unit",
@@ -149,8 +149,8 @@ export async function seedDummyData() {
             systemType: "Grid Tied",
             inverterModel: "Sungrow SG250HX",
             solarPanelModel: "Canadian Solar 550W",
-            images: [IMG.solar3],
-        },
+            images: [IMG.solar3]
+    },
         {
             epcId: epcProfiles[1].id,
             name: "Bahria Town Villa Project",
@@ -160,8 +160,8 @@ export async function seedDummyData() {
             systemType: "Hybrid",
             inverterModel: "Growatt SPH10000TL3",
             solarPanelModel: "Jinko Tiger Neo 580W",
-            images: [IMG.solar4],
-        },
+            images: [IMG.solar4]
+    },
         {
             epcId: epcProfiles[1].id,
             name: "Chakwal Agri Farm",
@@ -171,8 +171,8 @@ export async function seedDummyData() {
             systemType: "Off Grid",
             inverterModel: "Huawei SUN2000-50KTL",
             solarPanelModel: "Longi Hi-MO 5 540W",
-            images: [IMG.solar5],
-        },
+            images: [IMG.solar5]
+    },
         {
             epcId: epcProfiles[2].id,
             name: "Faisalabad Textile Mill",
@@ -182,8 +182,8 @@ export async function seedDummyData() {
             systemType: "Grid Tied",
             inverterModel: "Sungrow SG350HX",
             solarPanelModel: "Longi Hi-MO 6 580W",
-            images: [IMG.solar6],
-        },
+            images: [IMG.solar6]
+    },
         {
             epcId: epcProfiles[3].id,
             name: "Gulshan Residence",
@@ -193,8 +193,8 @@ export async function seedDummyData() {
             systemType: "Hybrid",
             inverterModel: "Growatt MIN 8000TL-X",
             solarPanelModel: "Canadian Solar 450W",
-            images: [IMG.solar1],
-        },
+            images: [IMG.solar1]
+    },
     ]);
 
     // ── Brand Profiles ────────────────────────────────────────────────────────
@@ -219,8 +219,8 @@ export async function seedDummyData() {
                 { name: "Bilal Ahmed", designation: "Regional Sales Manager - Pakistan" },
                 { name: "Sana Mirza", designation: "Technical Support Lead" },
             ],
-            isVerified: true,
-        },
+            isVerified: true
+    },
         {
             userId: brandUsers[1].id,
             brandName: "Huawei FusionSolar",
@@ -241,8 +241,8 @@ export async function seedDummyData() {
                 { name: "Kamran Iqbal", designation: "Country Manager - Pakistan" },
                 { name: "Ayesha Noor", designation: "Pre-Sales Engineer" },
             ],
-            isVerified: true,
-        },
+            isVerified: true
+    },
         {
             userId: brandUsers[2].id,
             brandName: "Growatt Technologies",
@@ -262,8 +262,8 @@ export async function seedDummyData() {
             reps: [
                 { name: "Hassan Raza", designation: "Technical Sales Engineer" },
             ],
-            isVerified: true,
-        },
+            isVerified: true
+    },
         {
             userId: brandUsers[3].id,
             brandName: "Sungrow Power",
@@ -284,8 +284,8 @@ export async function seedDummyData() {
                 { name: "Nadia Hussain", designation: "Regional Business Development" },
                 { name: "Faisal Qureshi", designation: "After-Sales Support Manager" },
             ],
-            isVerified: true,
-        },
+            isVerified: true
+    },
     ]).returning();
 
     // ── Brand Products ────────────────────────────────────────────────────────

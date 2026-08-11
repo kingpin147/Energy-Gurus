@@ -6,8 +6,8 @@ if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN
 
 export const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
-});
+  token: process.env.UPSTASH_REDIS_REST_TOKEN
+    });
 
 /**
  * Helper to generate cache keys
@@ -20,5 +20,5 @@ export const CACHE_KEYS = {
   PODCASTS_LIST: "podcasts:all",
   LIVE_QA_LIST: "liveqa:all",
   USER_ROLE: (userId: string) => `user:role:${userId}`,
-  RATE_LIMIT: (ip: string) => `ratelimit:${ip}`,
-};
+  RATE_LIMIT: (ip: string) => `ratelimit:${ip}`
+    };

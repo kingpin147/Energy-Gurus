@@ -24,9 +24,9 @@ export async function submitLiveQuestion(formData: FormData) {
         await db.insert(liveQaQuestions).values({
             sessionId,
             userName,
-            question,
-        });
-        revalidatePath("/[locale]/live-qa", "page");
+            question
+    });
+        revalidatePath("/live-qa", "page");
     } catch (error) {
         console.error("Failed to submit question:", error);
     }
@@ -45,8 +45,8 @@ export async function highlightQuestion(questionId: string, sessionId: string) {
         .set({ isHighlighted: true })
         .where(eq(liveQaQuestions.id, questionId));
 
-    revalidatePath("/[locale]/live-qa", "page");
-    revalidatePath("/[locale]/dashboard/content/live-qa/[id]/questions", "page");
+    revalidatePath("/live-qa", "page");
+    revalidatePath("/dashboard/content/live-qa/[id]/questions", "page");
 }
 
 export async function markQuestionAnswered(questionId: string) {
@@ -55,7 +55,7 @@ export async function markQuestionAnswered(questionId: string) {
         .set({ isAnswered: true })
         .where(eq(liveQaQuestions.id, questionId));
 
-    revalidatePath("/[locale]/dashboard/content/live-qa/[id]/questions", "page");
+    revalidatePath("/dashboard/content/live-qa/[id]/questions", "page");
 }
 
 export async function deleteQuestion(questionId: string) {
@@ -63,5 +63,5 @@ export async function deleteQuestion(questionId: string) {
     await db.delete(liveQaQuestions)
         .where(eq(liveQaQuestions.id, questionId));
 
-    revalidatePath("/[locale]/dashboard/content/live-qa/[id]/questions", "page");
+    revalidatePath("/dashboard/content/live-qa/[id]/questions", "page");
 }

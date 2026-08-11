@@ -33,7 +33,7 @@ export async function markNotificationAsRead(id: string) {
             .set({ isRead: true })
             .where(eq(notifications.id, id));
 
-        revalidatePath("/[locale]/dashboard", "layout");
+        revalidatePath("/dashboard", "layout");
         return { success: true, message: "Notification read" };
     } catch (error) {
         console.error("markNotificationAsRead error:", error);
@@ -53,7 +53,7 @@ export async function markAllNotificationsAsRead() {
             .set({ isRead: true })
             .where(eq(notifications.userId, user.id));
 
-        revalidatePath("/[locale]/dashboard", "layout");
+        revalidatePath("/dashboard", "layout");
         return { success: true, message: "All notifications read" };
     } catch (error) {
         console.error("markAllNotificationsAsRead error:", error);
@@ -68,7 +68,7 @@ export async function deleteNotification(id: string) {
 
         await db.delete(notifications).where(eq(notifications.id, id));
 
-        revalidatePath("/[locale]/dashboard", "layout");
+        revalidatePath("/dashboard", "layout");
         return { success: true, message: "Notification deleted" };
     } catch (error) {
         console.error("deleteNotification error:", error);

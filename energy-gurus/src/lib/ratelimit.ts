@@ -10,8 +10,8 @@ export const ratelimit = new Ratelimit({
   redis: redis,
   limiter: Ratelimit.slidingWindow(200, "60 s"),
   analytics: true,
-  prefix: "@upstash/ratelimit-pages",
-});
+  prefix: "@upstash/ratelimit-pages"
+    });
 
 /**
  * API / Mutation Rate Limiter
@@ -21,8 +21,8 @@ export const apiRatelimit = new Ratelimit({
   redis: redis,
   limiter: Ratelimit.slidingWindow(30, "60 s"),
   analytics: true,
-  prefix: "@upstash/ratelimit-api",
-});
+  prefix: "@upstash/ratelimit-api"
+    });
 
 /**
  * Strict Rate Limiter (for sensitive actions like auth or invitations)
@@ -32,5 +32,5 @@ export const strictRatelimit = new Ratelimit({
   redis: redis,
   limiter: Ratelimit.slidingWindow(10, "1 m"),
   analytics: true,
-  prefix: "@upstash/ratelimit-strict",
-});
+  prefix: "@upstash/ratelimit-strict"
+    });

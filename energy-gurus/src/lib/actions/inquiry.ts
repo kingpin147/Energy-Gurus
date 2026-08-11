@@ -40,8 +40,8 @@ export async function sendInquiry(formData: FormData) {
             inquiryType: inquiryType as "client" | "support",
             status: "new",
             isRead: false,
-            metadata,
-        });
+            metadata
+    });
 
         // Fetch sender logo if registered
         let senderLogoUrl = null;
@@ -58,10 +58,10 @@ export async function sendInquiry(formData: FormData) {
             message: `You have received a new inquiry from ${guestName || "Anonymous"}.`,
             type: "inquiry",
             link: "/dashboard/inquiries",
-            senderLogoUrl,
-        });
+            senderLogoUrl
+    });
 
-        revalidatePath("/[locale]/dashboard/inquiries", "layout");
+        revalidatePath("/dashboard/inquiries", "layout");
         return { success: true, message: "Inquiry sent successfully" };
     } catch (error) {
         console.error("sendInquiry error:", error);
@@ -112,8 +112,8 @@ export async function sendSupportMessage(formData: FormData) {
             message,
             inquiryType: "support",
             status: "new",
-            isRead: false,
-        });
+            isRead: false
+    });
 
         // Create notification for admin
         await db.insert(notifications).values({
@@ -137,7 +137,7 @@ export async function sendSupportMessage(formData: FormData) {
         `;
         sendAdminNotificationEmail(`Support Request: ${subject || "No Subject"}`, emailHtml).catch(console.error);
 
-        revalidatePath("/[locale]/dashboard/support", "layout");
+        revalidatePath("/dashboard/support", "layout");
         return { success: true, message: "Support message sent" };
     } catch (error) {
         console.error("sendSupportMessage error:", error);
@@ -170,8 +170,8 @@ export async function markInquiryAsRead(id: string) {
             .set({ isRead: true, updatedAt: new Date() })
             .where(eq(inquiries.id, id));
 
-        revalidatePath("/[locale]/dashboard/inquiries", "layout");
-        revalidatePath("/[locale]/dashboard/inbox", "layout");
+        revalidatePath("/dashboard/inquiries", "layout");
+        revalidatePath("/dashboard/inbox", "layout");
         return { success: true, message: "Marked as read" };
     } catch (error) {
         console.error("markInquiryAsRead error:", error);
@@ -186,8 +186,8 @@ export async function deleteInquiry(id: string) {
 
         await db.delete(inquiries).where(eq(inquiries.id, id));
 
-        revalidatePath("/[locale]/dashboard/inquiries", "layout");
-        revalidatePath("/[locale]/dashboard/inbox", "layout");
+        revalidatePath("/dashboard/inquiries", "layout");
+        revalidatePath("/dashboard/inbox", "layout");
         return { success: true, message: "Inquiry deleted" };
     } catch (error) {
         console.error("deleteInquiry error:", error);
@@ -204,7 +204,7 @@ export async function updateInquiryStatus(id: string, status: "pending" | "repli
             .set({ status, updatedAt: new Date() })
             .where(eq(inquiries.id, id));
 
-        revalidatePath("/[locale]/dashboard", "layout");
+        revalidatePath("/dashboard", "layout");
         return { success: true, message: "Status updated" };
     } catch (error) {
         console.error("updateInquiryStatus error:", error);
@@ -244,11 +244,11 @@ export async function replyToInquiry(id: string, replyText: string) {
                 message: `You have received a reply to your inquiry: "${inquiry.subject || "No Subject"}"`,
                 type: "reply",
                 link: "/dashboard/inbox",
-                senderLogoUrl: replierLogoUrl,
-            });
+                senderLogoUrl: replierLogoUrl
+    });
         }
 
-        revalidatePath("/[locale]/dashboard/support", "layout");
+        revalidatePath("/dashboard/support", "layout");
         return { success: true, message: "Reply sent" };
     } catch (error) {
         console.error("replyToInquiry error:", error);
@@ -265,8 +265,8 @@ export async function bulkDeleteInquiries(ids: string[]) {
 
         await db.delete(inquiries).where(inArray(inquiries.id, ids));
 
-        revalidatePath("/[locale]/dashboard/inquiries", "layout");
-        revalidatePath("/[locale]/dashboard/inbox", "layout");
+        revalidatePath("/dashboard/inquiries", "layout");
+        revalidatePath("/dashboard/inbox", "layout");
         return { success: true, message: `${ids.length} inquiries deleted` };
     } catch (error) {
         console.error("bulkDeleteInquiries error:", error);
@@ -285,8 +285,8 @@ export async function bulkMarkInquiriesAsRead(ids: string[]) {
             .set({ isRead: true, updatedAt: new Date() })
             .where(inArray(inquiries.id, ids));
 
-        revalidatePath("/[locale]/dashboard/inquiries", "layout");
-        revalidatePath("/[locale]/dashboard/inbox", "layout");
+        revalidatePath("/dashboard/inquiries", "layout");
+        revalidatePath("/dashboard/inbox", "layout");
         return { success: true, message: `Marked ${ids.length} as read` };
     } catch (error) {
         console.error("bulkMarkInquiriesAsRead error:", error);
@@ -318,8 +318,8 @@ export async function submitPublicContact(formData: FormData) {
             guestPhone,
             subject,
             message,
-            inquiryType: "public",
-        });
+            inquiryType: "public"
+    });
 
         // Send email alert to admin
         const emailHtml = `

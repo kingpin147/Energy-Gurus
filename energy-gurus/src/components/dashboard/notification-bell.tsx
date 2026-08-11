@@ -14,11 +14,11 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-    DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+    DropdownMenuSeparator
+    } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "../ui/scroll-area";
 import { Badge } from "../ui/badge";
-import { Link } from "@/i18n/routing";
+import Link from "next/link";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 

@@ -17,9 +17,9 @@ export default function robots(): MetadataRoute.Robots {
           '/(auth)/',
           '/*/sign-in',
           '/*/sign-up',
-        ],
-      },
+        ]
+    },
     ],
-    sitemap: 'https://www.energygurus.online/sitemap.xml',
-  };
+    sitemap: 'https://www.energygurus.online/sitemap.xml'
+    };
 }

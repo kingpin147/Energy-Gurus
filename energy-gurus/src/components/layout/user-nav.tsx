@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser, useClerk } from "@clerk/nextjs";
-import { Link } from "@/i18n/routing";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,8 +10,8 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  DropdownMenuTrigger
+    } from "@/components/ui/dropdown-menu";
 import { LogOut, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 

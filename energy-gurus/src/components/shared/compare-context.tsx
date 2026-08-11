@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { X, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "next/navigation";
 
 interface CompareItem {
     id: string;

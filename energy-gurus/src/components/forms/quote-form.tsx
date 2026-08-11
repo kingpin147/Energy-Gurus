@@ -38,14 +38,14 @@ export function QuoteForm({ receiverId, receiverName }: { receiverId: string, re
 
             await sendInquiry(formData);
             toast.success("Quote Request Sent!", {
-                description: `Your request has been delivered to ${receiverName}.`,
-            });
+                description: `Your request has been delivered to ${receiverName}.`
+    });
             setIsSubmitted(true);
         } catch (error) {
             console.error(error);
             toast.error("Failed to send request", {
-                description: "Something went wrong. Please try again.",
-            });
+                description: "Something went wrong. Please try again."
+    });
         } finally {
             setLoading(false);
         }

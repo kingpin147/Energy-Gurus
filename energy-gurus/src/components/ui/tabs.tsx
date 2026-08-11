@@ -31,13 +31,13 @@ const tabsListVariants = cva(
     variants: {
       variant: {
         default: "bg-paper",
-        line: "gap-1 bg-transparent",
-      },
+        line: "gap-1 bg-transparent"
+    }
     },
     defaultVariants: {
-      variant: "default",
-    },
-  }
+      variant: "default"
+    }
+    }
 )
 
 function TabsList({

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Link } from "@/i18n/routing";
+import Link from "next/link";
 import { Logo } from "@/components/ui/logo";
 import { Menu, X, Mic, ArrowLeft } from "lucide-react";
-import Sidebar from "@/app/[locale]/dashboard/Sidebar";
+import Sidebar from "@/app/dashboard/Sidebar";
 import { UserNav } from "@/components/layout/user-nav";
 import { UserRole } from "@/db/schema";
 import { NotificationBell } from "@/components/dashboard/notification-bell";

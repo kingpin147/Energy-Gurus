@@ -6,16 +6,16 @@ import {
     Dialog,
     DialogContent,
     DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+    DialogTitle
+    } from "@/components/ui/dialog";
 import {
     Command,
     CommandEmpty,
     CommandGroup,
     CommandInput,
     CommandItem,
-    CommandList,
-} from "cmdk";
+    CommandList
+    } from "cmdk";
 import {
     Search,
     LayoutDashboard,

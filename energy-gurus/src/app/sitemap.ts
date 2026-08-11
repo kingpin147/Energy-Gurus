@@ -5,7 +5,6 @@ import { eq, sql, desc } from 'drizzle-orm';
 import { getEpcCompleteness, getBrandCompleteness } from '@/lib/utils/completeness';
 
 const BASE_URL = 'https://www.energygurus.online';
-const LOCALES = ['en', 'ur'];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fetch active EPC installers
@@ -20,7 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       website: epcInstallers.website,
       socialLinks: epcInstallers.socialLinks,
       officesCount: sql<number>`(SELECT COUNT(*) FROM ${epcOffices} WHERE ${epcOffices.epcId} = ${epcInstallers.id})`.mapWith(Number),
-      projectsCount: sql<number>`(SELECT COUNT(*) FROM ${epcProjects} WHERE ${epcProjects.epcId} = ${epcInstallers.id})`.mapWith(Number),
+      projectsCount: sql<number>`(SELECT COUNT(*) FROM ${epcProjects} WHERE ${epcProjects.epcId} = ${epcInstallers.id})`.mapWith(Number)
     })
     .from(epcInstallers)
     .innerJoin(users, eq(users.id, epcInstallers.userId))
@@ -44,7 +43,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       website: brands.website,
       socialLinks: brands.socialLinks,
       warrantyUrl: brands.warrantyUrl,
-      productsCount: sql<number>`(SELECT COUNT(*) FROM ${products} WHERE ${products.brandId} = ${brands.id})`.mapWith(Number),
+      productsCount: sql<number>`(SELECT COUNT(*) FROM ${products} WHERE ${products.brandId} = ${brands.id})`.mapWith(Number)
     })
     .from(brands)
     .innerJoin(users, eq(users.id, brands.userId))
@@ -59,7 +58,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const activePodcasts = await db
     .select({
       id: podcasts.id,
-      createdAt: podcasts.createdAt,
+      createdAt: podcasts.createdAt
     })
     .from(podcasts)
     .orderBy(desc(podcasts.createdAt));
@@ -86,82 +85,46 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/cookies',
   ];
 
-  for (const locale of LOCALES) {
-    for (const path of staticPaths) {
-      sitemapEntries.push({
-        url: `${BASE_URL}/${locale}${path}`,
-        lastModified: new Date(),
-        changeFrequency: path === '' ? 'daily' : 'weekly',
-        priority: path === '' ? 1.0 : path === '/epcs' || path === '/brands' ? 0.9 : 0.8,
-        alternates: {
-          languages: {
-            en: `${BASE_URL}/en${path}`,
-            ur: `${BASE_URL}/ur${path}`,
-            'x-default': `${BASE_URL}/en${path}`,
-          },
-        },
-      });
-    }
+  for (const path of staticPaths) {
+    sitemapEntries.push({
+      url: `${BASE_URL}${path}`,
+      lastModified: new Date(),
+      changeFrequency: path === '' ? 'daily' : 'weekly',
+      priority: path === '' ? 1.0 : path === '/epcs' || path === '/brands' ? 0.9 : 0.8
+    });
   }
 
   // 2. Dynamic EPC profile pages
   for (const installer of validInstallers) {
-    for (const locale of LOCALES) {
-      const path = `/epcs/${installer.id}`;
-      sitemapEntries.push({
-        url: `${BASE_URL}/${locale}${path}`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly',
-        priority: 0.7,
-        alternates: {
-          languages: {
-            en: `${BASE_URL}/en${path}`,
-            ur: `${BASE_URL}/ur${path}`,
-            'x-default': `${BASE_URL}/en${path}`,
-          },
-        },
-      });
-    }
+    const path = `/epcs/${installer.id}`;
+    sitemapEntries.push({
+      url: `${BASE_URL}${path}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7
+    });
   }
 
   // 3. Dynamic Brand profile pages
   for (const brand of validBrands) {
-    for (const locale of LOCALES) {
-      const path = `/brands/${brand.id}`;
-      sitemapEntries.push({
-        url: `${BASE_URL}/${locale}${path}`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly',
-        priority: 0.7,
-        alternates: {
-          languages: {
-            en: `${BASE_URL}/en${path}`,
-            ur: `${BASE_URL}/ur${path}`,
-            'x-default': `${BASE_URL}/en${path}`,
-          },
-        },
-      });
-    }
+    const path = `/brands/${brand.id}`;
+    sitemapEntries.push({
+      url: `${BASE_URL}${path}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7
+    });
   }
 
   // 4. Dynamic Podcast episode pages
   for (const episode of activePodcasts) {
-    for (const locale of LOCALES) {
-      const path = `/podcast/${episode.id}`;
-      sitemapEntries.push({
-        url: `${BASE_URL}/${locale}${path}`,
-        lastModified: episode.createdAt ? new Date(episode.createdAt) : new Date(),
-        changeFrequency: 'monthly',
-        priority: 0.6,
-        alternates: {
-          languages: {
-            en: `${BASE_URL}/en${path}`,
-            ur: `${BASE_URL}/ur${path}`,
-            'x-default': `${BASE_URL}/en${path}`,
-          },
-        },
-      });
-    }
+    const path = `/podcast/${episode.id}`;
+    sitemapEntries.push({
+      url: `${BASE_URL}${path}`,
+      lastModified: episode.createdAt ? new Date(episode.createdAt) : new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6
+    });
   }
 
   return sitemapEntries;

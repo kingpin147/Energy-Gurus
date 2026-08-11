@@ -27,8 +27,8 @@ export async function updateEpcProfile(data: FormData | Partial<typeof epcInstal
     sectors: data.get("sectors") ? JSON.parse(data.get("sectors") as string) : [],
     certifications: data.get("certifications") ? JSON.parse(data.get("certifications") as string) : [],
     about: data.get("about") as string,
-    website: data.get("website") as string,
-  } : data;
+    website: data.get("website") as string
+    } : data;
 
   let targetUserId = user.id;
   if (!isFormData && (data as any).userId && isAdmin) {
@@ -53,8 +53,8 @@ export async function updateEpcProfile(data: FormData | Partial<typeof epcInstal
 export async function addEpcOffice(epcId: string, data: Omit<typeof epcOffices.$inferInsert, "epcId" | "id" | "createdAt">) {
   await db.insert(epcOffices).values({
     ...data,
-    epcId,
-  });
+    epcId
+    });
   await redis.del(CACHE_KEYS.EPC_DETAILS(epcId));
   revalidatePath("/", "layout");
 }
@@ -81,8 +81,8 @@ export async function deleteEpcOffice(officeId: string) {
 export async function addEpcProject(epcId: string, data: Omit<typeof epcProjects.$inferInsert, "epcId" | "id" | "createdAt" | "updatedAt">) {
   await db.insert(epcProjects).values({
     ...data,
-    epcId,
-  });
+    epcId
+    });
   await redis.del(CACHE_KEYS.EPC_DETAILS(epcId));
   revalidatePath("/", "layout");
 }

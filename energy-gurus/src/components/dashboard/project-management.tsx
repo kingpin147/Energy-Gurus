@@ -104,8 +104,8 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
                 solarPanelModel: formData.get("solarPanelModel") as string,
                 images: uploadedImages,
                 videos: uploadedVideos,
-                youtubeUrl: formData.get("youtubeUrl") as string,
-            };
+                youtubeUrl: formData.get("youtubeUrl") as string
+    };
 
             if (editingProject) {
                 await updateEpcProject(editingProject.id, projectData);

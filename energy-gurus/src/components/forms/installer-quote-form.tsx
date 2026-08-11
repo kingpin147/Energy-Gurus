@@ -35,8 +35,8 @@ export function InstallerQuoteForm({ receiverId, receiverName }: InstallerQuoteF
         address,
         area,
         city,
-        country,
-      }));
+        country
+    }));
 
       formData.set(
         "message",
@@ -47,8 +47,8 @@ export function InstallerQuoteForm({ receiverId, receiverName }: InstallerQuoteF
       if (res.success) {
         setIsSubmitted(true);
         toast.success("Quote Request Sent!", {
-          description: `Thanks — ${receiverName} will reach out to you shortly.`,
-        });
+          description: `Thanks — ${receiverName} will reach out to you shortly.`
+    });
       } else {
         toast.error(res.message || "Failed to send request.");
       }

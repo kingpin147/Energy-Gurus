@@ -1,7 +1,7 @@
 'use client'
 
 import posthog from 'posthog-js'
-import { Link } from '@/i18n/routing'
+import Link from "next/link";
 import React, { ReactNode } from 'react'
 
 /**

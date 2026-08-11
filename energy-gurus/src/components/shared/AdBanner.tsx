@@ -18,25 +18,25 @@ const ADS: Record<
     sub: "Reach thousands of verified EPC installers and solar buyers every month.",
     cta: "Get in Touch",
     href: "/contact",
-    bg: "from-primary/10 to-accent/10",
-  },
+    bg: "from-primary/10 to-accent/10"
+    },
   2: {
     label: "Promoted",
     headline: "List Your EPC Company",
     sub: "Join Pakistan's fastest-growing solar professional network.",
     cta: "Apply Now",
     href: "/contact",
-    bg: "from-accent/10 to-primary/5",
-  },
+    bg: "from-accent/10 to-primary/5"
+    },
   3: {
     label: "Sponsored",
     headline: "Solar Product Verification",
     sub: "Authenticate your panels and inverters with our serial number database.",
     cta: "Verify Now",
     href: "/brands",
-    bg: "from-emerald-500/10 to-primary/5",
-  },
-};
+    bg: "from-emerald-500/10 to-primary/5"
+    }
+    };
 
 export function AdBanner({ variant = "horizontal", slot = 1 }: AdBannerProps) {
   const ad = ADS[slot] ?? ADS[1];

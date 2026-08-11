@@ -19,8 +19,8 @@ export function ShareButton({ companyName, className }: ShareButtonProps) {
         await navigator.share({
           title: companyName,
           text: `Check out ${companyName} on Energy Gurus`,
-          url,
-        });
+          url
+    });
       } catch {
         // user cancelled — no-op
       }

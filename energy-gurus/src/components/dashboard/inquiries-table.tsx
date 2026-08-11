@@ -9,8 +9,8 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+    DropdownMenuTrigger
+    } from "@/components/ui/dropdown-menu";
 
 type Inquiry = {
     id: string;
@@ -134,8 +134,8 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
                                 border: "none",
                                 background: filter === f ? "hsl(var(--primary))" : "hsl(var(--secondary))",
                                 color: filter === f ? "hsl(var(--primary-foreground))" : "hsl(var(--muted-foreground))",
-                                transition: "all 0.15s",
-                            }}
+                                transition: "all 0.15s"
+    }}
                         >
                             {f === "all" ? `All (${inquiries.length})` :
                                 f === "unread" ? `Unread (${unreadCount})` :

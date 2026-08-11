@@ -22,7 +22,7 @@ async function main() {
       package: '1800',
       monitoringHours: '1',
       paymentPlan: '0.2',
-      amountPayable: 'PKR 4,320 per quarter (billed every 3 months) — approx. PKR 1,440/mo equivalent',
+      amountPayable: 'PKR 4,320 per quarter (billed every 3 months) — approx. PKR 1,440/mo equivalent'
     };
 
     const inserted = await db.insert(monitoringRequests).values(rawData).returning();

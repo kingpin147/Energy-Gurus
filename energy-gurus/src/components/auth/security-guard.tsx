@@ -2,7 +2,7 @@ import { getCurrentUser } from "@/lib/user";
 import { isUserAllowed } from "@/lib/actions/invitations";
 import { redirect } from "next/navigation";
 
-export async function SecurityGuard({ locale }: { locale: string }) {
+export async function SecurityGuard() {
     const user = await getCurrentUser();
     
     if (user) {
@@ -10,7 +10,7 @@ export async function SecurityGuard({ locale }: { locale: string }) {
         try {
             const allowed = await isUserAllowed(email, user.id, user.fullName || user.firstName || "");
             if (!allowed) {
-                redirect(`/${locale}/reject-access?error=not_invited`);
+                redirect(`/reject-access?error=not_invited`);
             }
         } catch (error) {
             console.error("Security Guard Check Failed:", error);

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { submitMonitoringRequest } from '@/app/[locale]/(public)/monitoring/actions';
+import { submitMonitoringRequest } from '@/app/(public)/monitoring/actions';
 
 export default function RequestForm() {
     const [size, setSize] = useState<string>('');

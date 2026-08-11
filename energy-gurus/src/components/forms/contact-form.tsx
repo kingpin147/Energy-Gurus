@@ -19,14 +19,14 @@ export function ContactForm({ receiverId, receiverName, initialMessage }: { rece
             const formData = new FormData(e.currentTarget);
             await sendInquiry(formData);
             toast.success("Inquiry Sent!", {
-                description: `Your message has been delivered to ${receiverName}.`,
-            });
+                description: `Your message has been delivered to ${receiverName}.`
+    });
             setIsSubmitted(true);
         } catch (error) {
             console.error(error);
             toast.error("Failed to send inquiry", {
-                description: "Something went wrong. Please try again.",
-            });
+                description: "Something went wrong. Please try again."
+    });
         } finally {
             setLoading(false);
         }

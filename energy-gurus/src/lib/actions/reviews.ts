@@ -36,8 +36,8 @@ export async function submitReview(formData: FormData) {
             targetId,
             targetType,
             rating,
-            comment,
-        });
+            comment
+    });
 
         // Invalidate Redis cache for specific profiles and list cache keys
         try {
@@ -60,21 +60,21 @@ export async function submitReview(formData: FormData) {
 export async function getProfileRating(targetId: string) {
     const result = await db.select({
         average: avg(reviews.rating),
-        total: count(reviews.id),
+        total: count(reviews.id)
     })
         .from(reviews)
         .where(eq(reviews.targetId, targetId));
 
     return {
         rating: result[0]?.average ? parseFloat(result[0].average) : null,
-        count: result[0]?.total || 0,
+        count: result[0]?.total || 0
     };
 }
 
 export async function getTeamRating(targetId: string, targetType: "epc" | "brand") {
     const result = await db.select({
         average: avg(reviews.rating),
-        total: count(reviews.id),
+        total: count(reviews.id)
     })
         .from(reviews)
         .innerJoin(users, eq(reviews.authorId, users.id))
@@ -88,7 +88,7 @@ export async function getTeamRating(targetId: string, targetType: "epc" | "brand
 
     return {
         rating: result[0]?.average ? parseFloat(result[0].average) : null,
-        count: result[0]?.total || 0,
+        count: result[0]?.total || 0
     };
 }
 
@@ -120,8 +120,8 @@ export async function submitAdminReview(formData: FormData) {
             targetId,
             targetType,
             rating,
-            comment: comment || "Official EnergyGurus Team Rating.",
-        });
+            comment: comment || "Official EnergyGurus Team Rating."
+    });
 
         // Invalidate Redis cache
         try {

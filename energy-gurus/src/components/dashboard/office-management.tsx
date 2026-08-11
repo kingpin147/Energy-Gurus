@@ -44,8 +44,8 @@ export function OfficeManagement({ epcId, initialOffices }: OfficeManagementProp
                 officeNumber: formData.get("officeNumber") as string,
                 block: formData.get("block") as string,
                 area: formData.get("area") as string,
-                city: formData.get("city") as string,
-            };
+                city: formData.get("city") as string
+    };
 
             if (editingOffice) {
                 await updateEpcOffice(editingOffice.id, officeData);

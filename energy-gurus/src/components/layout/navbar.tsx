@@ -1,12 +1,11 @@
 "use client";
 
-import { Link, usePathname, useRouter } from "@/i18n/routing";
-import { useLocale } from "next-intl";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { UserNav } from "@/components/layout/user-nav";
 import { Menu, X, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
-
 import { Logo } from "@/components/ui/logo";
 
 const navLinks = [
@@ -17,13 +16,10 @@ const navLinks = [
 ];
 
 export function Navbar() {
-    const locale = useLocale();
     const pathname = usePathname();
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const { isSignedIn } = useAuth();
-
-    const toggleLocale = (l: string) => router.replace(pathname, { locale: l });
 
     const goToDashboard = () => {
         setIsOpen(false);
@@ -90,21 +86,6 @@ export function Navbar() {
                         >
                             <LayoutDashboard className="w-4 h-4" />
                             Dashboard
-                        </button>
-                    </div>
-
-                    <div className="flex gap-2 mt-4 pt-4 border-t border-line">
-                        <button
-                            onClick={() => toggleLocale("en")}
-                            className={`flex-1 py-2 rounded-[3px] text-sm font-medium transition-colors ${locale === "en" ? "bg-ink text-paper" : "bg-white text-slate-custom"}`}
-                        >
-                            English
-                        </button>
-                        <button
-                            onClick={() => toggleLocale("ur")}
-                            className={`flex-1 py-2 rounded-[3px] text-sm font-medium transition-colors ${locale === "ur" ? "bg-ink text-paper" : "bg-white text-slate-custom"}`}
-                        >
-                            اردو
                         </button>
                     </div>
                 </div>

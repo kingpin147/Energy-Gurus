@@ -31,12 +31,12 @@ export async function addPodcast(formData: FormData) {
             description,
             youtubeUrl,
             thumbnailUrl,
-            guestName,
-        });
+            guestName
+    });
 
         revalidateTag('podcasts', {});
         revalidateTag('homepage', {});
-        revalidatePath("/[locale]/dashboard/content", "page");
+        revalidatePath("/dashboard/content", "page");
         revalidatePath("/podcast", "page");
         return { success: true, message: "Podcast added successfully" };
     } catch (error) {
@@ -53,7 +53,7 @@ export async function deletePodcast(id: string) {
         await db.delete(podcasts).where(eq(podcasts.id, id));
         revalidateTag('podcasts', {});
         revalidateTag('homepage', {});
-        revalidatePath("/[locale]/dashboard/content", "page");
+        revalidatePath("/dashboard/content", "page");
         revalidatePath("/podcast", "page");
         return { success: true, message: "Podcast deleted" };
     } catch (error) {
@@ -102,7 +102,7 @@ export async function addLiveQA(formData: FormData) {
 
         revalidateTag('live-qa', {});
         revalidateTag('homepage', {});
-        revalidatePath("/[locale]/dashboard/content", "page");
+        revalidatePath("/dashboard/content", "page");
         revalidatePath("/live-qa", "page");
         return { success: true, message: "Live QA scheduled successfully" };
     } catch (error) {
@@ -119,7 +119,7 @@ export async function deleteLiveQA(id: string) {
         await db.delete(liveQA).where(eq(liveQA.id, id));
         revalidateTag('live-qa', {});
         revalidateTag('homepage', {});
-        revalidatePath("/[locale]/dashboard/content", "page");
+        revalidatePath("/dashboard/content", "page");
         revalidatePath("/live-qa", "page");
         return { success: true, message: "Session deleted" };
     } catch (error) {
@@ -138,7 +138,7 @@ export async function updateLiveQAStatus(id: string, status: 'upcoming' | 'live'
 
         revalidateTag('live-qa', {});
         revalidateTag('homepage', {});
-        revalidatePath("/[locale]/dashboard/content", "page");
+        revalidatePath("/dashboard/content", "page");
         revalidatePath("/live-qa", "page");
 
         return { success: true, message: `Status updated to ${status}` };

@@ -19,15 +19,15 @@ export const r2Client = new S3Client({
     endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
     credentials: {
         accessKeyId: accessKeyId!,
-        secretAccessKey: secretAccessKey!,
-    },
-});
+        secretAccessKey: secretAccessKey!
+    }
+    });
 
 export async function getPresignedUploadUrl(key: string, contentType: string) {
     const command = new PutObjectCommand({
         Bucket: bucketName,
         Key: key,
-        ContentType: contentType,
+        ContentType: contentType
     });
 
     return await getSignedUrl(r2Client, command, { expiresIn: 3600 });
@@ -37,7 +37,7 @@ export async function deleteFile(key: string) {
     const { DeleteObjectCommand } = await import("@aws-sdk/client-s3");
     const command = new DeleteObjectCommand({
         Bucket: bucketName,
-        Key: key,
+        Key: key
     });
     return await r2Client.send(command);
 }

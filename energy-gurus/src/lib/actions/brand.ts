@@ -46,8 +46,8 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
     headOffice: data.get("headOffice") as string,
     website: data.get("website") as string,
     warrantyUrl: data.get("warrantyUrl") as string,
-    reps: repsData,
-  } : data;
+    reps: repsData
+    } : data;
 
   let targetUserId = user.id;
   let targetClerkId = clerkId;

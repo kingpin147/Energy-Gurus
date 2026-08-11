@@ -32,7 +32,7 @@ const MOCK_EPISODES: PodBeanEpisode[] = [
         media_url: "https://mcdn.podbean.com/mf/web/mock-audio-2.mp3",
         permalink: "https://www.podbean.com/media/share/mock-2",
         publish_time: "2026-02-22T10:00:00Z",
-        duration: 3150,
+        duration: 3150
     }
 ];
 
