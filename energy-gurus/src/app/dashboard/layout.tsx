@@ -12,6 +12,8 @@ import { MobileDashboardNav } from "@/components/dashboard/mobile-nav";
 import { CommandPalette } from "@/components/dashboard/command-palette";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardLayout({
     children
     }: {
