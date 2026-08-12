@@ -11,6 +11,9 @@ import { PodcastShare } from "@/components/podcast/podcast-share";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string; locale?: string }> }): Promise<Metadata> {
     const { id, locale = "en" } = await params;
+    const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+    if (!uuidRegex.test(id)) return {};
+
     const baseUrl = "https://www.energygurus.online";
     const podcast = await db.query.podcasts.findFirst({
         where: eq(podcasts.id, id)
@@ -29,7 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         description,
         alternates: {
             canonical: url
-    },
+        },
         openGraph: {
             title,
             description,
@@ -42,20 +45,23 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
                     width: 1280,
                     height: 720,
                     alt: podcast.title
-    }
+                }
             ]
-    },
+        },
         twitter: {
             card: "summary_large_image",
             title,
             description,
             images: [imageUrl]
-    }
+        }
     };
 }
 
 export default async function EpisodePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
+
+    const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+    if (!uuidRegex.test(id)) return notFound();
 
     let episode;
     try {
@@ -173,5 +179,3 @@ function VideoEmbed({ url }: { url: string }) {
         />
     );
 }
-
-

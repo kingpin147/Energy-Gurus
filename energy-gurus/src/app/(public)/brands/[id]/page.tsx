@@ -13,6 +13,7 @@ import { ReviewList } from "@/components/reviews/review-list";
 import { getProfileRating, getTeamRating } from "@/lib/actions/reviews";
 import { SocialLinkTracker } from "@/components/brands/SocialLinkTracker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { ProductVerification } from "@/components/brands/ProductVerification";
 import { redis, CACHE_KEYS } from "@/lib/redis";
 import { InferSelectModel } from "drizzle-orm";
@@ -37,6 +38,9 @@ export async function generateMetadata({
   params: Promise<{ id: string; locale?: string }>;
 }): Promise<Metadata> {
   const { id, locale = "en" } = await params;
+  const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  if (!uuidRegex.test(id)) return {};
+
   const baseUrl = "https://www.energygurus.online";
   const brand = await db.query.brands.findFirst({
     where: eq(brands.id, id)
@@ -73,6 +77,9 @@ export async function generateMetadata({
 
 export default async function BrandProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+
+  const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  if (!uuidRegex.test(id)) return notFound();
 
   const cacheKey = CACHE_KEYS.BRAND_DETAILS(id);
   let profileData: BrandProfileData | null = await redis.get<BrandProfileData>(cacheKey);

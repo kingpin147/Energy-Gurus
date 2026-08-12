@@ -29,6 +29,37 @@ type EpcProject = InferSelectModel<typeof epcProjects>;
 interface EpcProfileData {
   installer: EpcInstaller;
   offices: EpcOffice[];
+import { db } from "@/db";
+import { epcInstallers, epcOffices, epcProjects } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { notFound } from "next/navigation";
+import { Metadata } from "next";
+import { getEpcCompleteness } from "@/lib/utils/completeness";
+import {
+  Globe,
+  Facebook,
+  Instagram,
+  Linkedin,
+  Youtube,
+  Play,
+  Star
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { ReviewForm } from "@/components/forms/review-form";
+import { ReviewList } from "@/components/reviews/review-list";
+import { getProfileRating, getTeamRating } from "@/lib/actions/reviews";
+import { redis, CACHE_KEYS } from "@/lib/redis";
+import { InferSelectModel } from "drizzle-orm";
+import { InstallerQuoteForm } from "@/components/forms/installer-quote-form";
+
+type EpcInstaller = InferSelectModel<typeof epcInstallers>;
+type EpcOffice = InferSelectModel<typeof epcOffices>;
+type EpcProject = InferSelectModel<typeof epcProjects>;
+
+interface EpcProfileData {
+  installer: EpcInstaller;
+  offices: EpcOffice[];
   projects: EpcProject[];
   rating: number | null;
   count: number;
@@ -41,6 +72,9 @@ export async function generateMetadata({
   params: Promise<{ id: string; locale?: string }>;
 }): Promise<Metadata> {
   const { id, locale = "en" } = await params;
+  const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  if (!uuidRegex.test(id)) return {};
+
   const baseUrl = "https://www.energygurus.online";
   const installer = await db.query.epcInstallers.findFirst({
     where: eq(epcInstallers.id, id)
@@ -71,31 +105,6 @@ export async function generateMetadata({
       title,
       description,
       images: installer.logoUrl ? [installer.logoUrl] : [`${baseUrl}/new_hero_banner.jpg`]
-    }
-  };
-}
-
-function renderStars(rating: number) {
-  const fullStars = Math.floor(rating);
-  return "★".repeat(Math.min(5, fullStars)) + "☆".repeat(Math.max(0, 5 - fullStars));
-}
-
-function getYouTubeId(url: string) {
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&]{11})/);
-  return match ? match[1] : null;
-}
-
-export default async function EpcProfilePage({
-  params
-    }: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const cacheKey = CACHE_KEYS.EPC_DETAILS(id);
-
-  let profileData: EpcProfileData | null = await redis.get<EpcProfileData>(cacheKey);
-
-  if (!profileData) {
     const installer = await db.query.epcInstallers.findFirst({
       where: eq(epcInstallers.id, id),
       with: { user: true }
