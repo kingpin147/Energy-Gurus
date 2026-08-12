@@ -19,6 +19,14 @@ export default function middleware(req: any) {
         return NextResponse.next();
     }
 
+    const userAgent = req.headers.get('user-agent') || '';
+    const isBot = /googlebot|bingbot|yandexbot|duckduckbot|slurp|baiduspider|facebookexternalhit|twitterbot|rogerbot|linkedinbot|embedly|quora\ link\ preview|showyoubot|outbrain|pinterest\/0\.|pinterestbot|slackbot|vkShare|W3C_Validator|whatsapp/i.test(userAgent);
+    
+    // Skip Clerk for bots to prevent infinite redirect loops on test keys (Google Search Console error fix)
+    if (isBot) {
+        return NextResponse.next();
+    }
+
     // Only rate-limit actual API routes, NOT page navigation
     const isApiRoute = pathname.startsWith('/api');
 
