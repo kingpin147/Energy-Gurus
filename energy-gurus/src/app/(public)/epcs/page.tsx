@@ -12,12 +12,19 @@ import type { Metadata } from "next";
 export async function generateMetadata({ params }: { params: Promise<{ }> }): Promise<Metadata> {
   
   const baseUrl = "https://www.energygurus.online";
-  const title = "Certified Solar EPC Installers in Pakistan | Verified Directory";
-  const description = "Directory of pre-verified solar EPC companies in Pakistan. Compare ratings, completed projects, office locations, and technical certifications.";
+  const title = "Best & Top Solar Installers in Pakistan | Verified Directory";
+  const description = "Find the best and top solar installers in Pakistan. Our verified directory lets you compare ratings, completed projects, and consult with the top gurus of solar.";
 
   return {
     title,
     description,
+    keywords: [
+      "best solar installers in Pakistan",
+      "top solar installers in Pakistan",
+      "top gurus of solar",
+      "verified solar EPC installers",
+      "solar directory Pakistan"
+    ],
     alternates: {
       canonical: `${baseUrl}/epcs`,
       
@@ -29,7 +36,7 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
       siteName: "EnergyGurus",
       locale: "en_US",
       type: "website",
-      images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "Solar Installers Pakistan" }]
+      images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "Best Solar Installers Pakistan" }]
     },
     twitter: {
       card: "summary_large_image",
@@ -37,7 +44,7 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
       description,
       images: [`${baseUrl}/new_hero_banner.jpg`]
     }
-    };
+  };
 }
 
 const getInstallers = unstable_cache(

@@ -1,5 +1,4 @@
 import Link from "next/link";
-
 import { ArrowRight, Play, Star, ShieldCheck, Zap, Video, Calendar, ArrowUpRight, Phone, Info, Users } from "lucide-react";
 import Image from "next/image";
 import { db } from "@/db";
@@ -11,15 +10,25 @@ import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
     const baseUrl = "https://www.energygurus.online";
-    const title = "EnergyGurus - Verified Solar EPCs & Tier-1 Brands in Pakistan";
-    const description = "Find certified solar EPC installers, compare verified solar brands, request expert load audits, and monitor solar systems in Pakistan.";
+    const title = "EnergyGurus - Find Best & Top Solar Installers in Pakistan";
+    const description = "Discover the best and top solar installers in Pakistan. Get expert ideas on solar energy, compare verified brands, and consult with the top gurus of solar.";
 
     return {
         title,
         description,
+        keywords: [
+            "best solar installers in Pakistan",
+            "top solar installers in Pakistan",
+            "top gurus of solar from Pakistan",
+            "best ideas on solar",
+            "EnergyGurus",
+            "verified solar EPC installers",
+            "tier-1 solar brands",
+            "solar directory Pakistan"
+        ],
         alternates: {
             canonical: baseUrl
-    },
+        },
         openGraph: {
             title,
             description,
@@ -28,13 +37,13 @@ export async function generateMetadata(): Promise<Metadata> {
             locale: "en_US",
             type: "website",
             images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "EnergyGurus" }]
-    },
+        },
         twitter: {
             card: "summary_large_image",
             title,
             description,
             images: [`${baseUrl}/new_hero_banner.jpg`]
-    }
+        }
     };
 }
 

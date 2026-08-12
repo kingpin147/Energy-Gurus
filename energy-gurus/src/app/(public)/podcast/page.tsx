@@ -15,12 +15,19 @@ import type { Metadata } from "next";
 export async function generateMetadata({ params }: { params: Promise<{ }> }): Promise<Metadata> {
   
   const baseUrl = "https://www.energygurus.online";
-  const title = "EnergyGurus Podcast | Industry Insights & Expert Discussions";
-  const description = "Listen to weekly technical podcasts with energy leaders, policy experts, engineers, and executives shaping Pakistan's solar transition.";
+  const title = "Top Gurus of Solar in Pakistan Podcast | Best Ideas on Solar";
+  const description = "Get the best ideas on solar directly from the top gurus of solar in Pakistan. Listen to our podcast for expert insights, industry trends, and technical discussions.";
 
   return {
     title,
     description,
+    keywords: [
+      "top gurus of solar from Pakistan",
+      "best ideas on solar",
+      "solar podcast Pakistan",
+      "solar energy experts Pakistan",
+      "solar industry insights"
+    ],
     alternates: {
       canonical: `${baseUrl}/podcast`,
       
@@ -32,7 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
       siteName: "EnergyGurus",
       locale: "en_US",
       type: "website",
-      images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "EnergyGurus Podcast" }]
+      images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "Top Gurus of Solar Podcast Pakistan" }]
     },
     twitter: {
       card: "summary_large_image",
@@ -40,7 +47,7 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
       description,
       images: [`${baseUrl}/new_hero_banner.jpg`]
     }
-    };
+  };
 }
 
 const getPodcasts = unstable_cache(

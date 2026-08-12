@@ -33,6 +33,7 @@ const spaceGrotesk = Space_Grotesk({
   weight: ["400", "500", "600", "700"]
     });
 
+
 const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-ibm-plex-mono",
   subsets: ["latin"],
@@ -42,19 +43,23 @@ const ibmPlexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.energygurus.online"),
   title: {
-    default: "EnergyGurus - Certified Solar EPCs & Energy Brands in Pakistan",
+    default: "EnergyGurus - Find Best & Top Solar Installers in Pakistan",
     template: "%s | EnergyGurus"
     },
-  description: "Pakistan's premier platform for verified solar EPC installers, tier-1 brand discovery, expert energy audits, real-time telemetry, and technical energy podcasts.",
+  description: "Discover the best and top solar installers in Pakistan with EnergyGurus. Get expert ideas on solar energy, compare tier-1 brands, and consult with the top gurus of solar.",
   keywords: [
+    "best solar installers in Pakistan",
+    "top solar installers in Pakistan",
+    "top gurus of solar from Pakistan",
+    "best ideas on solar",
     "EnergyGurus",
-    "Solar Pakistan",
-    "EPC Installers Pakistan",
-    "Solar Brands",
-    "Solar Panel Verification",
-    "Energy Audit Pakistan",
-    "Solar Monitoring",
-    "Solar Podcast Pakistan",
+    "verified solar EPC installers Pakistan",
+    "tier-1 solar brands",
+    "solar panel verification",
+    "solar energy audit Pakistan",
+    "solar monitoring Pakistan",
+    "commercial solar solutions Pakistan",
+    "residential solar installation Pakistan",
   ],
   authors: [{ name: "EnergyGurus Team", url: "https://www.energygurus.online" }],
   creator: "EnergyGurus",
@@ -73,8 +78,8 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://www.energygurus.online",
     siteName: "EnergyGurus",
-    title: "EnergyGurus - Certified Solar EPCs & Energy Brands in Pakistan",
-    description: "Discover verified solar installers, compare top energy brands, request technical audits, and stream expert podcasts.",
+    title: "EnergyGurus - Find Best & Top Solar Installers in Pakistan",
+    description: "Discover the best and top solar installers in Pakistan with EnergyGurus. Get expert ideas on solar energy, compare tier-1 brands, and consult with the top gurus of solar.",
     images: [
       {
         url: "https://www.energygurus.online/new_hero_banner.jpg",
@@ -86,8 +91,8 @@ export const metadata: Metadata = {
     },
   twitter: {
     card: "summary_large_image",
-    title: "EnergyGurus - Certified Solar EPCs & Energy Brands in Pakistan",
-    description: "Discover verified solar installers, compare top energy brands, request technical audits, and stream expert podcasts.",
+    title: "EnergyGurus - Find Best & Top Solar Installers in Pakistan",
+    description: "Discover the best and top solar installers in Pakistan with EnergyGurus. Get expert ideas on solar energy, compare tier-1 brands, and consult with the top gurus of solar.",
     images: ["https://www.energygurus.online/new_hero_banner.jpg"]
     },
   robots: {
