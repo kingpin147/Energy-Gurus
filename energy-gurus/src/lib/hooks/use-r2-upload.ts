@@ -17,7 +17,7 @@ export function useR2Upload() {
             "product-images", "product-datasheets",
             "podcast-thumbnails", "uploads",
             "project-images", "project-videos",
-            "live-qa-thumbnails", "expert-photos"
+            "live-qa-thumbnails", "expert-photos", "epc-reviews"
         ];
 
         if (!ALLOWED_FOLDERS.includes(folder)) {
@@ -26,9 +26,9 @@ export function useR2Upload() {
             throw err;
         }
 
-        const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB limit
+        const MAX_SIZE_BYTES = 50 * 1024 * 1024; // 50 MB limit
         if (file.size > MAX_SIZE_BYTES) {
-            const err = new Error(`File "${file.name}" is too large (max 10 MB).`);
+            const err = new Error(`File "${file.name}" is too large (max 50 MB).`);
             toast.error(err.message);
             throw err;
         }

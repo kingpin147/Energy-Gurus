@@ -32,6 +32,7 @@ export const epcInstallers = pgTable('epc_installers', {
   about: text('about'),
   portfolio: jsonb('portfolio').$type<string[]>().default([]),
   socialLinks: jsonb('social_links').$type<{ platform: string; url: string }[]>().default([]),
+  reviewVideos: jsonb('review_videos').$type<string[]>().default([]),
   website: text('website'),
   isVerified: boolean('is_verified').default(false),
   createdAt: timestamp('created_at').defaultNow().notNull(),

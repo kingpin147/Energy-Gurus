@@ -59,7 +59,20 @@ export async function sendInquiry(formData: FormData) {
             type: "inquiry",
             link: "/dashboard/inquiries",
             senderLogoUrl
-    });
+        });
+
+        // Send email alert to admin
+        const emailHtml = `
+            <h3>New Lead Generated (Platform)</h3>
+            <p><strong>From:</strong> ${guestName || "Anonymous"} (${guestEmail || "N/A"})</p>
+            <p><strong>Phone:</strong> ${guestPhone || "N/A"}</p>
+            <p><strong>Inquiry Type:</strong> ${inquiryType}</p>
+            <p><strong>Message:</strong></p>
+            <blockquote style="border-left: 4px solid #eee; padding-left: 10px;">${message.replace(/\n/g, '<br/>')}</blockquote>
+            <br/>
+            <p><a href="https://energygurus.net/dashboard/inbox">View in Admin Inbox</a></p>
+        `;
+        sendAdminNotificationEmail(`New Platform Lead: ${guestName || "Anonymous"}`, emailHtml).catch(console.error);
 
         revalidatePath("/dashboard/inquiries", "layout");
         return { success: true, message: "Inquiry sent successfully" };

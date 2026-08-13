@@ -47,6 +47,8 @@ export async function seedDummyData() {
         { clerkId: "dummy_brand_002", email: "huawei@energygurus.demo", name: "Huawei FusionSolar", role: "brand" as const, isActive: true },
         { clerkId: "dummy_brand_003", email: "growatt@energygurus.demo", name: "Growatt Technologies", role: "brand" as const, isActive: true },
         { clerkId: "dummy_brand_004", email: "sungrow@energygurus.demo", name: "Sungrow Power", role: "brand" as const, isActive: true },
+        { clerkId: "dummy_brand_005", email: "sunridge@energygurus.demo", name: "SunRidge Panels", role: "brand" as const, isActive: true },
+        { clerkId: "dummy_brand_006", email: "jinko@energygurus.demo", name: "Jinko Solar", role: "brand" as const, isActive: true },
     ]).returning();
 
     // ── EPC Profiles ──────────────────────────────────────────────────────────
@@ -210,6 +212,7 @@ export async function seedDummyData() {
             website: "https://www.longi.com",
             warrantyUrl: "https://www.longi.com/en/warranty",
             logoUrl: IMG.brand1,
+            categories: ["Panels"],
             socialLinks: [
                 { platform: "LinkedIn", url: "https://linkedin.com/company/longi-solar" },
                 { platform: "YouTube", url: "https://youtube.com/@longisolar" },
@@ -232,6 +235,7 @@ export async function seedDummyData() {
             website: "https://solar.huawei.com",
             warrantyUrl: "https://solar.huawei.com/en/warranty",
             logoUrl: IMG.brand2,
+            categories: ["Inverters", "Batteries"],
             socialLinks: [
                 { platform: "LinkedIn", url: "https://linkedin.com/company/huawei" },
                 { platform: "YouTube", url: "https://youtube.com/@huaweifusionsolar" },
@@ -254,6 +258,7 @@ export async function seedDummyData() {
             website: "https://www.ginverter.com",
             warrantyUrl: "https://www.ginverter.com/warranty",
             logoUrl: IMG.brand3,
+            categories: ["Inverters", "Batteries"],
             socialLinks: [
                 { platform: "Facebook", url: "https://facebook.com/growatt" },
                 { platform: "Instagram", url: "https://instagram.com/growatt_official" },
@@ -275,6 +280,7 @@ export async function seedDummyData() {
             website: "https://www.sungrowpower.com",
             warrantyUrl: "https://www.sungrowpower.com/warranty",
             logoUrl: IMG.brand4,
+            categories: ["Inverters", "Batteries"],
             socialLinks: [
                 { platform: "LinkedIn", url: "https://linkedin.com/company/sungrow" },
                 { platform: "YouTube", url: "https://youtube.com/@sungrow" },
@@ -286,18 +292,60 @@ export async function seedDummyData() {
             ],
             isVerified: true
     },
+        {
+            userId: brandUsers[4].id,
+            brandName: "SunRidge Panels",
+            countryHead: "Aamir Khan",
+            customerCareHead: "Zara Malik",
+            customerCare: "+92-300-000000",
+            headOffice: "Lahore, Pakistan",
+            about: "SunRidge builds rugged, high-efficiency solar panels tailored for harsh climates.",
+            website: "https://www.sunridge.example",
+            warrantyUrl: "https://www.sunridge.example/warranty",
+            logoUrl: IMG.brand2,
+            categories: ["Panels"],
+            socialLinks: [
+                { platform: "Facebook", url: "https://facebook.com/sunridge" },
+            ],
+            reps: [
+                { name: "Bilal Khan", designation: "Sales Manager" },
+            ],
+            isVerified: false
+    },
+        {
+            userId: brandUsers[5].id,
+            brandName: "Jinko Solar",
+            countryHead: "Chen Li",
+            customerCareHead: "Sara Ahmed",
+            customerCare: "+92-300-111111",
+            headOffice: "Shanghai, China",
+            about: "Jinko Solar produces high-volume, reliable PV modules used worldwide.",
+            website: "https://www.jinkosolar.example",
+            warrantyUrl: "https://www.jinkosolar.example/warranty",
+            logoUrl: IMG.brand3,
+            categories: ["Panels"],
+            socialLinks: [
+                { platform: "LinkedIn", url: "https://linkedin.com/company/jinko" },
+            ],
+            reps: [
+                { name: "Adeel Khan", designation: "Regional Rep" },
+            ],
+            isVerified: true
+    },
     ]).returning();
 
     // ── Brand Products ────────────────────────────────────────────────────────
     await db.insert(products).values([
-        { brandId: brandProfiles[0].id, name: "Hi-MO 6 580W", category: "Solar Panels", series: "Hi-MO 6", description: "LONGi Hi-MO 6 580W monocrystalline PERC module with 22.8% efficiency. Features anti-LID technology and 30-year linear power warranty.", imageUrl: IMG.prod1, datasheetUrl: "https://www.longi.com/en/products/modules/hi-mo6/" },
-        { brandId: brandProfiles[0].id, name: "Hi-MO X6 610W", category: "Solar Panels", series: "Hi-MO X6", description: "Next-generation N-type TOPCon module with 23.2% efficiency. Ideal for space-constrained rooftops requiring maximum power density.", imageUrl: IMG.prod2, datasheetUrl: "https://www.longi.com/en/products/modules/hi-mo-x6/" },
+        { brandId: brandProfiles[0].id, name: "Hi-MO 6 580W", category: "Panels", series: "Hi-MO 6", description: "LONGi Hi-MO 6 580W monocrystalline PERC module with 22.8% efficiency. Features anti-LID technology and 30-year linear power warranty.", imageUrl: IMG.prod1, datasheetUrl: "https://www.longi.com/en/products/modules/hi-mo6/" },
+        { brandId: brandProfiles[0].id, name: "Hi-MO X6 610W", category: "Panels", series: "Hi-MO X6", description: "Next-generation N-type TOPCon module with 23.2% efficiency. Ideal for space-constrained rooftops requiring maximum power density.", imageUrl: IMG.prod2, datasheetUrl: "https://www.longi.com/en/products/modules/hi-mo-x6/" },
         { brandId: brandProfiles[1].id, name: "SUN2000-25KTL-M3", category: "Inverters", series: "SUN2000", description: "25kW smart string inverter with AI-powered MPPT. Features built-in arc fault detection, 10-year warranty, and FusionSolar cloud monitoring.", imageUrl: IMG.prod3, datasheetUrl: "https://solar.huawei.com/en/products/inverters" },
         { brandId: brandProfiles[1].id, name: "LUNA2000-10KWH", category: "Batteries", series: "LUNA2000", description: "10kWh modular lithium iron phosphate battery storage system. Stackable up to 30kWh, 6000+ cycle life.", imageUrl: IMG.prod4, datasheetUrl: "https://solar.huawei.com/en/products/batteries" },
         { brandId: brandProfiles[2].id, name: "SPH10000TL3-BH", category: "Inverters", series: "SPH", description: "10kW hybrid inverter with built-in EPS function. Supports up to 30kWh battery storage, 3-phase output.", imageUrl: IMG.prod5, datasheetUrl: "https://www.ginverter.com/products/hybrid-inverter" },
         { brandId: brandProfiles[2].id, name: "ARK 2.5H-A1", category: "Batteries", series: "ARK", description: "2.5kWh stackable LFP battery module. Up to 10 units in parallel for 25kWh total capacity. IP65 rated.", imageUrl: IMG.prod6, datasheetUrl: "https://www.ginverter.com/products/battery" },
         { brandId: brandProfiles[3].id, name: "SG10RT", category: "Inverters", series: "SG-RT", description: "10kW residential string inverter with 98.4% peak efficiency. Features DC switch, built-in PID recovery.", imageUrl: IMG.prod7, datasheetUrl: "https://www.sungrowpower.com/products/inverter" },
         { brandId: brandProfiles[3].id, name: "SBR096 Battery", category: "Batteries", series: "SBR", description: "9.6kWh high-voltage LFP battery with 100% DoD. Modular design supports 9.6–100kWh capacity.", imageUrl: IMG.prod8, datasheetUrl: "https://www.sungrowpower.com/products/battery" },
+        { brandId: brandProfiles[4].id, name: "SR-580W", category: "Panels", series: "SR Series", description: "High-density 580W module for commercial rooftops.", imageUrl: IMG.prod1, datasheetUrl: "https://www.sunridge.example/datasheet" },
+        { brandId: brandProfiles[5].id, name: "Jinko Tiger Neo 580W", category: "Panels", series: "Tiger Neo", description: "High-efficiency module in the Tiger Neo family.", imageUrl: IMG.prod2, datasheetUrl: "https://www.jinkosolar.example/datasheet" },
     ]);
 
     // ── Brand Certifications ──────────────────────────────────────────────────

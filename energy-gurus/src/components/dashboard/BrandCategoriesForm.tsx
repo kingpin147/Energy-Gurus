@@ -10,7 +10,8 @@ const BRAND_CATEGORIES = [
   "Breakers",
   "Mounting Structure",
   "Cables",
-  "Accessories"
+  "Accessories",
+  "Other"
 ];
 
 export function BrandCategoriesForm({ initialCategories = [] }: { initialCategories?: string[] }) {

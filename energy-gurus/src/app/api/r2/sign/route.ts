@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 
-const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+const MAX_SIZE_BYTES = 50 * 1024 * 1024; // 50 MB
 
 export async function POST(req: Request) {
     try {
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
             "product-images", "product-datasheets",
             "podcast-thumbnails", "uploads",
             "project-images", "project-videos",
-            "live-qa-thumbnails", "expert-photos"
+            "live-qa-thumbnails", "expert-photos", "epc-reviews"
         ];
 
         // ── Multipart / binary upload (new proxy path) ──────────────────────
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
             const arrayBuffer = await req.arrayBuffer();
 
             if (arrayBuffer.byteLength > MAX_SIZE_BYTES) {
-                return new NextResponse("File too large (max 10 MB)", { status: 413 });
+                return new NextResponse("File too large (max 50 MB)", { status: 413 });
             }
 
             const bucketName = process.env.R2_BUCKET_NAME!;

@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Briefcase, MessageSquare, Star, Settings, MapPin, LayoutGrid, AlertTriangle } from "lucide-react";
 import { PortfolioUpload } from "@/components/dashboard/portfolio-upload";
 import { DashboardReviewList } from "@/components/dashboard/dashboard-review-list";
+import { ReviewVideosUpload } from "@/components/dashboard/review-videos-upload";
 import { EpcProfileForm } from "@/components/dashboard/epc-profile-form";
 import { OfficeManagement } from "@/components/dashboard/office-management";
 import { ProjectManagement } from "@/components/dashboard/project-management";
@@ -187,6 +188,9 @@ export default async function EpcDashboard() {
                 <h3 className="text-xl font-bold">Ratings & Feedback</h3>
                 <p className="text-slate-custom text-sm">Monitor what customers are saying about your installations.</p>
               </div>
+            </div>
+            <div className="bg-white/50 backdrop-blur-xl border border-line/50 p-6 rounded-[2rem] shadow-sm">
+              <ReviewVideosUpload initialVideos={epc.reviewVideos} />
             </div>
             <DashboardReviewList targetId={epc.id} targetType="epc" />
           </div>

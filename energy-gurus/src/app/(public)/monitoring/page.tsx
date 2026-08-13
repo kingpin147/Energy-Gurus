@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
+import PricingSection from "@/components/monitoring/PricingSection";
+import RequestForm from "@/components/monitoring/RequestForm";
 
 export async function generateMetadata({ params }: { params: Promise<{ }> }): Promise<Metadata> {
   
@@ -43,15 +45,28 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
       description,
       images: [`${baseUrl}/new_hero_banner.jpg`]
     }
-    };
+  };
 }
-import PricingSection from "@/components/monitoring/PricingSection";
-import RequestForm from "@/components/monitoring/RequestForm";
+
+
 
 export default function MonitoringOverviewPage() {
     return (
         <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 overflow-x-hidden min-h-screen">
             
+            {/* Skyscraper Ads */}
+            <div className="hidden [@media(min-width:1560px)]:block fixed top-1/2 -translate-y-1/2 w-[120px] z-40 left-3">
+                <div className="border border-dashed border-line rounded-[6px] bg-[rgba(18,33,58,0.02)] flex flex-col items-center justify-center text-center py-4 px-2.5 min-h-[400px] gap-2">
+                    <span className="font-ibm-plex-mono text-[0.6rem] tracking-[0.08em] uppercase text-slate-custom/60 [writing-mode:vertical-rl]">Ad</span>
+                    <span className="font-space-grotesk text-[0.8rem] text-slate-custom/75">160×600</span>
+                </div>
+            </div>
+            <div className="hidden [@media(min-width:1560px)]:block fixed top-1/2 -translate-y-1/2 w-[120px] z-40 right-3">
+                <div className="border border-dashed border-line rounded-[6px] bg-[rgba(18,33,58,0.02)] flex flex-col items-center justify-center text-center py-4 px-2.5 min-h-[400px] gap-2">
+                    <span className="font-ibm-plex-mono text-[0.6rem] tracking-[0.08em] uppercase text-slate-custom/60 [writing-mode:vertical-rl]">Ad</span>
+                    <span className="font-space-grotesk text-[0.8rem] text-slate-custom/75">160×600</span>
+                </div>
+            </div>
             <header className="bg-ink text-white pt-[88px] pb-[60px] relative overflow-hidden">
                 <div 
                     className="absolute inset-0 pointer-events-none z-0" 
@@ -92,6 +107,14 @@ export default function MonitoringOverviewPage() {
                     </div>
                 </div>
             </header>
+
+            {/* Top Ad Banner */}
+            <div className="max-w-[1180px] mx-auto my-7 px-8">
+                <div className="border border-dashed border-line rounded-[6px] bg-[rgba(18,33,58,0.02)] flex flex-col items-center justify-center text-center py-7 px-5 min-h-[110px]">
+                    <span className="font-ibm-plex-mono text-[0.66rem] tracking-[0.1em] uppercase text-slate-custom/60 mb-1.5">Advertisement</span>
+                    <span className="font-space-grotesk text-[0.95rem] text-slate-custom/80">Your ad here — 728×90 leaderboard</span>
+                </div>
+            </div>
 
             <section className="py-[80px]">
                 <div className="max-w-[1180px] mx-auto px-5 md:px-8 grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-14 items-center">
@@ -173,6 +196,14 @@ export default function MonitoringOverviewPage() {
             </section>
 
             <RequestForm />
+
+            {/* Bottom Ad Banner */}
+            <div className="max-w-[1180px] mx-auto my-7 px-8">
+                <div className="border border-dashed border-line rounded-[6px] bg-[rgba(18,33,58,0.02)] flex flex-col items-center justify-center text-center py-7 px-5 min-h-[110px]">
+                    <span className="font-ibm-plex-mono text-[0.66rem] tracking-[0.1em] uppercase text-slate-custom/60 mb-1.5">Advertisement</span>
+                    <span className="font-space-grotesk text-[0.95rem] text-slate-custom/80">Your ad here — 728×90 leaderboard</span>
+                </div>
+            </div>
 
         </div>
     );
