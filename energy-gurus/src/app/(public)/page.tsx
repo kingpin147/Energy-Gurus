@@ -7,6 +7,7 @@ import { desc, count, eq, sql, asc, and } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import { getEpcCompleteness } from "@/lib/utils/completeness";
 import type { Metadata } from "next";
+import { AdBanner } from "@/components/shared/AdBanner";
 
 export async function generateMetadata(): Promise<Metadata> {
     const baseUrl = "https://www.energygurus.online";
@@ -101,6 +102,9 @@ export default async function Homepage() {
 
     return (
         <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 overflow-x-hidden">
+            <AdBanner placement="skyscraper_left" targetPage="home" />
+            <AdBanner placement="skyscraper_right" targetPage="home" />
+
             {/* ---- HERO ---- */}
             <header className="relative bg-ink text-paper overflow-hidden pt-24">
                 {/* Background effects */}
@@ -136,24 +140,24 @@ export default async function Homepage() {
                 </div>
 
                 <div className="relative z-10 border-t border-paper/15 grid grid-cols-1 md:grid-cols-3">
-                    <div className="px-5 md:px-8 py-7 md:border-r border-b md:border-b-0 border-paper/15">
-                        <div className="font-ibm-plex-mono text-[1.9rem] text-amber flex items-baseline gap-1.5">
+                    <div className="px-5 md:px-8 py-7 md:border-r border-b md:border-b-0 border-paper/15 flex flex-col items-center text-center">
+                        <div className="font-ibm-plex-mono text-[1.9rem] text-amber flex items-baseline justify-center gap-1.5">
                             250<span className="text-[0.95rem] text-paper/50">+</span>
                         </div>
                         <div className="text-[0.78rem] text-paper/55 uppercase tracking-[0.08em] mt-1.5">
                             Certified Installers
                         </div>
                     </div>
-                    <div className="px-5 md:px-8 py-7 md:border-r border-b md:border-b-0 border-paper/15">
-                        <div className="font-ibm-plex-mono text-[1.9rem] text-amber flex items-baseline gap-1.5">
+                    <div className="px-5 md:px-8 py-7 md:border-r border-b md:border-b-0 border-paper/15 flex flex-col items-center text-center">
+                        <div className="font-ibm-plex-mono text-[1.9rem] text-amber flex items-baseline justify-center gap-1.5">
                             40<span className="text-[0.95rem] text-paper/50">+</span>
                         </div>
                         <div className="text-[0.78rem] text-paper/55 uppercase tracking-[0.08em] mt-1.5">
                             Brands Reviewed
                         </div>
                     </div>
-                    <div className="px-5 md:px-8 py-7">
-                        <div className="font-ibm-plex-mono text-[1.9rem] text-amber flex items-baseline gap-1.5">
+                    <div className="px-5 md:px-8 py-7 flex flex-col items-center text-center">
+                        <div className="font-ibm-plex-mono text-[1.9rem] text-amber flex items-baseline justify-center gap-1.5">
                             120<span className="text-[0.95rem] text-paper/50">eps</span>
                         </div>
                         <div className="text-[0.78rem] text-paper/55 uppercase tracking-[0.08em] mt-1.5">
@@ -337,6 +341,8 @@ export default async function Homepage() {
                     </div>
                 </div>
             </section>
+
+            <AdBanner placement="leaderboard_bottom" targetPage="home" />
         </div>
     );
 }

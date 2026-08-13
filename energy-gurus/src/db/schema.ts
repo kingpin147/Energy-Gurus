@@ -77,6 +77,7 @@ export const brands = pgTable('brands', {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
   brandName: text('brand_name').notNull(),
+  categories: jsonb('categories').$type<string[]>().default([]),
   countryHead: text('country_head'),
   customerCareHead: text('customer_care_head'),
   logoUrl: text('logo_url'),
@@ -107,6 +108,7 @@ export const products = pgTable('products', {
   warrantyLink: text('warranty_link'),
   imageUrl: text('image_url'),
   series: text('series'), // e.g. "Hi-MO 6", "N-Type"
+  specifications: jsonb('specifications').$type<Record<string, any>>().default({}),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
     }, (table) => ({
@@ -305,3 +307,37 @@ export const monitoringRequests = pgTable('monitoring_requests', {
   updatedAt: timestamp('updated_at').defaultNow().notNull()
     });
 
+export const news = pgTable('news', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  title: text('title').notNull(),
+  content: text('content').notNull(),
+  category: text('category').notNull(),
+  imageUrl: text('image_url'),
+  authorId: uuid('author_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  isPublished: boolean('is_published').default(false).notNull(),
+  publishedAt: timestamp('published_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+}, (table) => ({
+  authorIdIdx: index('news_author_id_idx').on(table.authorId),
+  createdAtIdx: index('news_created_at_idx').on(table.createdAt)
+}));
+
+export const newsRelations = relations(news, ({ one }) => ({
+  author: one(users, {
+    fields: [news.authorId],
+    references: [users.id]
+  })
+}));
+
+export const ads = pgTable('ads', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  title: text('title').notNull(),
+  imageUrl: text('image_url').notNull(),
+  linkUrl: text('link_url'),
+  placement: text('placement').notNull(),
+  targetPage: text('target_page').notNull(),
+  isActive: boolean('is_active').default(true).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+});

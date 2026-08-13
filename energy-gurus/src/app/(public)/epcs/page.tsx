@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { epcInstallers, reviews, users, epcOffices, epcProjects } from "@/db/schema";
-import { desc, asc, eq, sql, ilike, and } from "drizzle-orm";
+import { desc, asc, eq, sql, ilike, and, or } from "drizzle-orm";
 import Image from "next/image";
 import { unstable_cache } from "next/cache";
 import { getEpcCompleteness } from "@/lib/utils/completeness";
@@ -48,24 +48,27 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
 }
 
 const getInstallers = unstable_cache(
-  async (sort: string, q?: string, cert?: string, spec?: string) => {
+  async (sort: string, q?: string, minRating?: number, maxRating?: number, certs?: string) => {
     let conditions = [
       eq(users.isActive, true),
       eq(users.role, 'epc'),
     ];
 
     if (q) {
-      conditions.push(
-        sql`(${epcInstallers.companyName} ILIKE ${`%${q}%`} OR ${epcOffices.city} ILIKE ${`%${q}%`})`
+      const searchCondition = or(
+        ilike(epcInstallers.companyName, `%${q}%`),
+        ilike(epcOffices.city, `%${q}%`),
+        ilike(epcProjects.city, `%${q}%`)
       );
+      if (searchCondition) conditions.push(searchCondition);
     }
-
-    if (spec && spec !== "All") {
-      conditions.push(sql`${epcInstallers.sectors} ? ${spec}`);
-    }
-
-    if (cert && cert !== "All") {
-      conditions.push(sql`${epcInstallers.certifications} ? ${cert}`);
+    
+    // Add logic for certs
+    if (certs) {
+        const certArray = certs.split(',');
+        for (const c of certArray) {
+            conditions.push(sql`${epcInstallers.certifications} ? ${c}`);
+        }
     }
 
     const rawInstallers = await db
@@ -105,9 +108,14 @@ const getInstallers = unstable_cache(
       return { ...inst, score };
     });
 
-    return mapped.filter(inst => inst.score >= 40);
+    let filtered = mapped.filter(inst => inst.score >= 40);
+    
+    if (minRating) filtered = filtered.filter(i => (i.avgRating || 0) >= minRating);
+    if (maxRating) filtered = filtered.filter(i => (i.avgRating || 0) <= maxRating);
+    
+    return filtered;
   },
-  ['epc-installers-list-v4'],
+  ['epc-installers-list-v5'],
   { revalidate: 3600, tags: ['epcs'] }
 );
 
@@ -119,15 +127,23 @@ function renderStars(rating: number) {
 
 export default async function EpcListingPage({
   searchParams
-    }: {
-  searchParams: Promise<{ sort?: string; q?: string; cert?: string; spec?: string }>;
+}: {
+  searchParams: Promise<{ sort?: string; q?: string; minRating?: string; maxRating?: string; certs?: string }>;
 }) {
-  const { sort = "top-rated", q = "", cert = "All", spec = "All" } = await searchParams;
+  const { sort = "top-rated", q = "", minRating, maxRating, certs } = await searchParams;
 
-  const installers = await getInstallers(sort, q, cert, spec);
+  const installers = await getInstallers(
+      sort, 
+      q, 
+      minRating ? parseFloat(minRating) : undefined, 
+      maxRating ? parseFloat(maxRating) : undefined, 
+      certs
+  );
 
   return (
     <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 min-h-screen">
+      <AdBanner placement="skyscraper_left" targetPage="epcs" />
+      <AdBanner placement="skyscraper_right" targetPage="epcs" />
       
       {/* Header */}
       <header className="bg-ink text-white pt-[64px] pb-[44px]">
@@ -145,13 +161,8 @@ export default async function EpcListingPage({
         </div>
       </header>
 
-      {/* Filters Bar */}
-      <InstallerFilters totalCount={installers.length} />
-
-      {/* Installer List */}
-      <section className="py-[48px] pb-[96px]">
-        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
-          
+      {/* Filters & List Wrapper */}
+      <InstallerFilters totalCount={installers.length}>
           <div className="flex flex-col gap-4">
             {installers.map((installer) => {
               const yearsInBusiness = Math.max(1, new Date().getFullYear() - new Date(installer.createdAt).getFullYear());
@@ -230,12 +241,13 @@ export default async function EpcListingPage({
           {/* Ad Banner */}
           {installers.length >= 3 && (
             <div className="mt-12 w-full flex justify-center">
-              <AdBanner variant="horizontal" slot={1} />
+              <AdBanner placement="in_list" targetPage="epcs" />
             </div>
           )}
 
-        </div>
-      </section>
+      </InstallerFilters>
+
+      <AdBanner placement="leaderboard_bottom" targetPage="epcs" />
     </div>
   );
 }

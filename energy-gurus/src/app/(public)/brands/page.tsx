@@ -218,7 +218,7 @@ export default async function BrandsListingPage({
                     {/* Mid-listing ad */}
                     {(brandList?.length ?? 0) >= 6 && (
                         <div className="mt-12 w-full flex justify-center">
-                            <AdBanner variant="horizontal" slot={3} />
+                            <AdBanner placement="in_list" targetPage="brands" />
                         </div>
                     )}
                     

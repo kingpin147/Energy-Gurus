@@ -13,6 +13,7 @@ const navLinks = [
     { label: "Find an Installer", href: "/epcs" },
     { label: "Monitoring & O&M", href: "/monitoring" },
     { label: "Podcast", href: "/podcast" },
+    { label: "News", href: "/news" },
 ];
 
 export function Navbar() {

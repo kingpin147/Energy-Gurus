@@ -18,6 +18,7 @@ import { getBrandCompleteness } from "@/lib/utils/completeness";
 import { SocialLinksForm } from "@/components/dashboard/social-links-form";
 import { AddProductDialog } from "@/components/dashboard/AddProductDialog";
 import { BrandRepsForm } from "@/components/dashboard/BrandRepsForm";
+import { BrandCategoriesForm } from "@/components/dashboard/BrandCategoriesForm";
 import { BrandLogoUpload } from "@/components/dashboard/BrandLogoUpload";
 import { DeleteProductButton } from "@/components/dashboard/DeleteProductButton";
 import { ToastMessageListener } from "@/components/dashboard/toast-message-listener";
@@ -170,6 +171,7 @@ export default async function BrandDashboard() {
                                             <input name="website" defaultValue={myBrand.website || ""} className="w-full border rounded-xl p-3 bg-paper/5 outline-none" />
                                         </div>
                                     </div>
+                                    <BrandCategoriesForm initialCategories={(myBrand.categories as string[]) || []} />
                                     <BrandRepsForm initialReps={(myBrand.reps as any[]) || []} />
                                     <div className="grid grid-cols-1 gap-4">
                                         <div>

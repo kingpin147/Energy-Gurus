@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brands — EnergyGurus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12213A; --paper:#F5F6F3; --amber:#E8A33D;
+    --teal:#2F6E62; --slate:#4A5A73; --graphite:#1B1F24;
+    --line: rgba(18,33,58,0.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Inter', sans-serif; color:var(--graphite); background:var(--paper); line-height:1.5;}
+  h1,h2,h3{font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:-0.01em;}
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 32px;}
+  :focus-visible{outline:2px solid var(--amber); outline-offset:3px;}
+
+  nav{position:sticky; top:0; z-index:50; background:rgba(245,246,243,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line);}
+  nav .wrap{display:flex; align-items:center; justify-content:space-between; height:72px;}
+  .logo{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:1.02rem; display:flex; align-items:center; gap:10px;}
+  .nav-links{display:flex; gap:32px; font-size:0.92rem; font-weight:500; color:var(--slate);}
+  .nav-links a.active{color:var(--ink); font-weight:600;}
+  .nav-links a:hover{color:var(--ink);}
+  .nav-cta{background:var(--ink); color:var(--paper); padding:11px 20px; border-radius:3px; font-size:0.88rem;}
+  @media(max-width:860px){ .nav-links{display:none;} }
+
+  .page-head{background:var(--ink); color:#fff; padding:64px 0 44px;}
+  .eyebrow{font-family:'IBM Plex Mono', monospace; font-size:0.76rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--amber); display:flex; align-items:center; gap:10px; margin-bottom:18px;}
+  .eyebrow::before{content:""; width:20px; height:1px; background:var(--amber);}
+  .page-head h1{font-size:clamp(2rem,4vw,2.8rem);}
+  .page-head p{color:rgba(245,246,243,0.7); max-width:560px; margin-top:14px; font-size:1.02rem;}
+
+  /* filter bar */
+  .filters{background:#fff; border-bottom:1px solid var(--line); position:sticky; top:72px; z-index:40;}
+  .filters .wrap{display:flex; gap:28px; padding:18px 32px; flex-wrap:wrap; align-items:center;}
+  .filter-group{display:flex; align-items:center; gap:10px;}
+  .filter-group label{font-family:'IBM Plex Mono', monospace; font-size:0.72rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--slate);}
+  .filter-group select{
+    border:1px solid var(--line); border-radius:3px; padding:8px 12px;
+    font-family:'Inter'; font-size:0.88rem; background:var(--paper); color:var(--graphite);
+  }
+  .result-count{margin-left:auto; font-family:'IBM Plex Mono', monospace; font-size:0.82rem; color:var(--slate);}
+
+  /* grid */
+  .grid-section{padding:40px 0 96px;}
+
+  /* top-level category tabs */
+  .cat-tabs{display:flex; gap:6px; flex-wrap:wrap; border-bottom:1px solid var(--line); margin-bottom:8px;}
+  .cat-tab-btn{
+    background:none; border:none; padding:14px 20px; font-size:0.95rem; font-weight:600; color:var(--slate);
+    border-bottom:2px solid transparent; margin-bottom:-1px;
+  }
+  .cat-tab-btn.active{color:var(--ink); border-bottom-color:var(--amber);}
+  .cat-tab-btn:hover{color:var(--ink);}
+  .cat-tab-panel{padding-top:32px;}
+
+  /* sidebar filter layout (shared across category tabs) */
+  .panels-layout{display:grid; grid-template-columns:240px 1fr; gap:36px; align-items:start;}
+  .filter-sidebar{background:#fff; border:1px solid var(--line); border-radius:6px; padding:24px; position:sticky; top:88px;}
+  .filter-block{margin-bottom:24px; padding-bottom:20px; border-bottom:1px solid var(--line);}
+  .filter-block:last-of-type{border-bottom:none; margin-bottom:16px;}
+  .filter-title{font-family:'IBM Plex Mono', monospace; font-size:0.7rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink); font-weight:600; margin-bottom:12px;}
+  .check-row{display:flex; align-items:center; gap:8px; font-size:0.88rem; color:var(--slate); padding:5px 0; cursor:pointer;}
+  .check-row input{accent-color:var(--teal); width:15px; height:15px;}
+  .check-scroll{max-height:220px; overflow-y:auto; padding-right:6px;}
+  .range-row{display:flex; flex-direction:column; gap:6px;}
+  .range-row input[type="range"]{accent-color:var(--amber); width:100%; margin:0;}
+  .range-val{font-family:'IBM Plex Mono', monospace; font-size:0.8rem; color:var(--teal);}
+  .num-range-row{display:flex; align-items:center; gap:8px;}
+  .num-range-row input[type="number"]{
+    width:64px; padding:8px 8px; border:1px solid var(--line); border-radius:3px;
+    font-family:'IBM Plex Mono', monospace; font-size:0.82rem; color:var(--ink); background:var(--paper);
+  }
+  .num-range-row span.to{font-size:0.8rem; color:var(--slate);}
+  .num-range-row span.unit{font-size:0.78rem; color:var(--slate);}
+  .btn-apply{width:100%; background:var(--ink); color:#fff; padding:12px; border-radius:3px; font-size:0.88rem; margin-bottom:8px;}
+  .btn-apply:hover{background:var(--teal);}
+  .btn-clear{width:100%; background:transparent; color:var(--slate); padding:10px; border-radius:3px; font-size:0.84rem; border:1px solid var(--line) !important;}
+  .btn-clear:hover{border-color:var(--ink) !important; color:var(--ink);}
+  .results-bar{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;}
+  .sort-select{border:1px solid var(--line); border-radius:3px; padding:9px 12px; font-family:'Inter'; font-size:0.86rem; background:#fff; color:var(--ink);}
+  @media(max-width:900px){ .panels-layout{grid-template-columns:1fr;} .filter-sidebar{position:static;} }
+  .brand-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:20px;
+  }
+  .brand-card{
+    background:#fff; border:1px solid var(--line); border-radius:4px;
+    padding:26px; display:flex; flex-direction:column; gap:14px;
+    transition:border-color .15s;
+  }
+  .brand-card:hover{border-color:var(--teal);}
+  .brand-top{display:flex; justify-content:space-between; align-items:flex-start;}
+  .brand-mark{
+    width:44px; height:44px; border-radius:4px;
+    background:var(--ink); color:var(--amber);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk'; font-weight:700; font-size:1.1rem;
+  }
+  .cat-tag{
+    font-family:'IBM Plex Mono', monospace; font-size:0.68rem;
+    letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--teal); background:rgba(47,110,98,0.1);
+    padding:4px 9px; border-radius:20px; height:fit-content;
+  }
+  .brand-card h3{font-size:1.15rem; color:var(--ink);}
+  .spec-line{font-family:'IBM Plex Mono', monospace; font-size:0.82rem; color:var(--slate);}
+  .brand-card .cta{
+    margin-top:auto; padding-top:10px; font-size:0.86rem; font-weight:600; color:var(--ink);
+    display:inline-flex; align-items:center; gap:6px; border-top:1px solid var(--line);
+  }
+  .brand-card .cta::after{content:"→"; transition:transform .15s;}
+  .brand-card:hover .cta::after{transform:translateX(3px);}
+
+  @media(max-width:900px){ .brand-grid{grid-template-columns:repeat(2,1fr);} }
+  @media(max-width:640px){ .brand-grid{grid-template-columns:1fr;} .filters .wrap{gap:16px;} }
+
+  footer{background:var(--ink); color:rgba(245,246,243,0.55); padding:32px 0; text-align:center; font-size:0.82rem; margin-top:40px;}
+
+  /* ad banner */
+  .ad-banner{
+    max-width:1180px; margin:28px auto; padding:0 32px;
+  }
+  .ad-banner-inner{
+    border:1px dashed var(--line); border-radius:6px;
+    background:rgba(18,33,58,0.02);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:28px 20px; min-height:110px;
+  }
+  .ad-banner-inner .ad-tag{
+    font-family:'IBM Plex Mono', monospace; font-size:0.66rem; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--slate); opacity:0.6; margin-bottom:6px;
+  }
+  .ad-banner-inner .ad-copy{
+    font-family:'Space Grotesk', sans-serif; font-size:0.95rem; color:var(--slate); opacity:0.8;
+  }
+
+  /* skyscraper ad banners (left/right) */
+  .ad-sky{
+    position:fixed; top:50%; transform:translateY(-50%);
+    width:120px; z-index:40;
+  }
+  .ad-sky.left{left:12px;}
+  .ad-sky.right{right:12px;}
+  .ad-sky .ad-sky-inner{
+    border:1px dashed var(--line); border-radius:6px;
+    background:rgba(18,33,58,0.02);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:16px 10px; min-height:400px; gap:8px;
+  }
+  .ad-sky .ad-tag{
+    font-family:'IBM Plex Mono', monospace; font-size:0.6rem; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--slate); opacity:0.6; writing-mode:vertical-rl;
+  }
+  .ad-sky .ad-copy{
+    font-family:'Space Grotesk', sans-serif; font-size:0.8rem; color:var(--slate); opacity:0.75;
+  }
+  @media(max-width:1560px){ .ad-sky{display:none;} }
+
+  /* nav dropdown */
+  .nav-dropdown{position:relative;}
+  .nav-dropdown > a{display:flex; align-items:center; gap:4px;}
+  .nav-dropdown > a::after{content:"▾"; font-size:0.7em; opacity:0.6;}
+  .nav-dropdown-menu{
+    display:none; position:absolute; top:100%; left:0; margin-top:12px;
+    background:#fff; border:1px solid var(--line); border-radius:6px;
+    box-shadow:0 12px 28px rgba(18,33,58,0.12); min-width:170px; padding:8px; z-index:60;
+  }
+  .nav-dropdown:hover .nav-dropdown-menu, .nav-dropdown:focus-within .nav-dropdown-menu{display:block;}
+  .nav-dropdown-menu a{
+    display:block; padding:9px 12px; border-radius:4px; font-size:0.88rem; color:var(--slate); font-weight:500;
+  }
+  .nav-dropdown-menu a:hover{background:var(--paper); color:var(--ink);}
+
+  .card-actions{display:flex; gap:0; margin-top:16px; padding-top:14px; border-top:1px solid var(--line);}
+  .card-actions .cta{border-top:none; padding-top:0; margin-top:0; flex:1;}
+  .price-cta{
+    flex:1; text-align:right; font-size:0.84rem; font-weight:600; color:var(--amber);
+  }
+  .price-cta:hover{color:#c9862c;}
+
+  .datasheet-row{margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);}
+  .datasheet-cta{font-size:0.82rem; font-weight:600; color:var(--teal); display:inline-flex; align-items:center; gap:6px;}
+  .datasheet-cta:hover{color:#1f4d44;}
+
+  /* in-listing ad banner (every 5th item) */
+  .inlist-ad{grid-column:1 / -1; margin:4px 0;}
+  .inlist-ad-inner{
+    border:1px dashed var(--line); border-radius:6px; background:rgba(18,33,58,0.02);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:22px 16px; min-height:80px;
+  }
+  .inlist-ad-inner .ad-tag{font-family:'IBM Plex Mono', monospace; font-size:0.64rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--slate); opacity:0.6; margin-bottom:4px;}
+  .inlist-ad-inner .ad-copy{font-family:'Space Grotesk', sans-serif; font-size:0.88rem; color:var(--slate); opacity:0.8;}
+</style>
+</head>
+<body>
+
+<div class="ad-sky left"><div class="ad-sky-inner"><span class="ad-tag">Ad</span><span class="ad-copy">160×600</span></div></div>
+<div class="ad-sky right"><div class="ad-sky-inner"><span class="ad-tag">Ad</span><span class="ad-copy">160×600</span></div></div>
+
+<nav>
+  <div class="wrap">
+    <a href="energygurus-homepage.html" class="logo"><img src="data:image/png;base64,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" alt="EnergyGurus.Online" style="height:34px; width:auto; display:block;"></a>
+    <div class="nav-links">
+      <a href="energygurus-brands-page.html" class="active">Brands</a>
+      <a href="#">Find an Installer</a>
+      <a href="#">Monitoring &amp; O&amp;M</a>
+      <a href="energygurus-podcast-page.html">Podcast</a>
+      <a href="energygurus-news-page.html">News</a>
+    </div>
+    <a href="#" class="nav-cta">Get Started</a>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <p class="eyebrow">Brand Directory</p>
+    <h1>Compare solar equipment, side by side.</h1>
+    <p>Solar panels, inverters, batteries, and breakers — reviewed on specs, warranty, and real-world performance. No sponsored rankings, just the facts.</p>
+  </div>
+</header>
+
+<div class="ad-banner">
+  <div class="ad-banner-inner">
+    <span class="ad-tag">Advertisement</span>
+    <span class="ad-copy">Your ad here — 728×90 leaderboard</span>
+  </div>
+</div>
+
+<section class="grid-section">
+  <div class="wrap">
+    <div class="cat-tabs">
+      <button type="button" class="cat-tab-btn active" onclick="showCatTab('panels', this)">Solar Panels</button>
+      <button type="button" class="cat-tab-btn" onclick="showCatTab('inverters', this)">Inverters</button>
+      <button type="button" class="cat-tab-btn" onclick="showCatTab('batteries', this)">Batteries</button>
+      <button type="button" class="cat-tab-btn" onclick="showCatTab('breakers', this)">Breakers</button>
+    </div>
+
+    <!-- SOLAR PANELS TAB -->
+    <div class="cat-tab-panel" id="cattab-panels">
+      <div class="panels-layout">
+        <aside class="filter-sidebar">
+          <div class="filter-block">
+            <div class="filter-title">Technology</div>
+            <label class="check-row"><input type="checkbox"> TOPCon</label>
+            <label class="check-row"><input type="checkbox"> Back Contact</label>
+            <label class="check-row"><input type="checkbox"> HJT</label>
+            <label class="check-row"><input type="checkbox"> Other</label>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Brand</div>
+            <div class="check-scroll">
+              <label class="check-row"><input type="checkbox"> LONGi</label>
+              <label class="check-row"><input type="checkbox"> Jinko</label>
+              <label class="check-row"><input type="checkbox"> JA</label>
+              <label class="check-row"><input type="checkbox"> Trina</label>
+              <label class="check-row"><input type="checkbox"> Canadian</label>
+              <label class="check-row"><input type="checkbox"> Yingli</label>
+              <label class="check-row"><input type="checkbox"> Risen</label>
+              <label class="check-row"><input type="checkbox"> Astro</label>
+              <label class="check-row"><input type="checkbox"> AIKO</label>
+              <label class="check-row"><input type="checkbox"> TCL</label>
+              <label class="check-row"><input type="checkbox"> GCL</label>
+              <label class="check-row"><input type="checkbox"> OSDA</label>
+              <label class="check-row"><input type="checkbox"> Jollywood</label>
+              <label class="check-row"><input type="checkbox"> Huasun</label>
+              <label class="check-row"><input type="checkbox"> TW</label>
+              <label class="check-row"><input type="checkbox"> Znshine</label>
+            </div>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Wattage</div>
+            <div class="range-row">
+              <input type="range" min="585" max="900" value="585" step="5" oninput="this.nextElementSibling.querySelector('.wmin').textContent=this.value">
+              <input type="range" min="585" max="900" value="900" step="5" oninput="this.nextElementSibling.querySelector('.wmax').textContent=this.value">
+              <span class="range-val"><span class="wmin">585</span>W – <span class="wmax">900</span>W</span>
+            </div>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Type</div>
+            <label class="check-row"><input type="checkbox"> Bifacial</label>
+            <label class="check-row"><input type="checkbox"> Monofacial</label>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Frame Type</div>
+            <label class="check-row"><input type="checkbox"> Aluminium</label>
+            <label class="check-row"><input type="checkbox"> Steel</label>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Module Size (mm)</div>
+            <div class="range-row" style="margin-bottom:14px;">
+              <span class="range-val" style="margin-bottom:2px;">Width</span>
+              <input type="range" min="1000" max="1400" value="1000" step="5">
+              <input type="range" min="1000" max="1400" value="1400" step="5">
+              <span class="range-val">1000 – 1400 mm</span>
+            </div>
+            <div class="range-row">
+              <span class="range-val" style="margin-bottom:2px;">Height</span>
+              <input type="range" min="1600" max="2400" value="1600" step="5">
+              <input type="range" min="1600" max="2400" value="2400" step="5">
+              <span class="range-val">1600 – 2400 mm</span>
+            </div>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Yearly Degradation</div>
+            <div class="range-row">
+              <input type="range" min="0" max="3" value="0" step="0.05">
+              <input type="range" min="0" max="3" value="3" step="0.05">
+              <span class="range-val">0% – 3% / yr</span>
+            </div>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Performance Warranty</div>
+            <div class="range-row">
+              <input type="range" min="10" max="30" value="10" step="1">
+              <input type="range" min="10" max="30" value="30" step="1">
+              <span class="range-val">10 – 30 Years</span>
+            </div>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Product Warranty</div>
+            <div class="range-row">
+              <input type="range" min="10" max="30" value="10" step="1">
+              <input type="range" min="10" max="30" value="30" step="1">
+              <span class="range-val">10 – 30 Years</span>
+            </div>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Efficiency</div>
+            <div class="range-row">
+              <input type="range" min="18" max="38" value="18" step="0.1">
+              <input type="range" min="18" max="38" value="38" step="0.1">
+              <span class="range-val">18% – 38%</span>
+            </div>
+          </div>
+          <button type="button" class="btn-apply">Apply Filters</button>
+          <button type="button" class="btn-clear">Clear All</button>
+        </aside>
+        <div class="panels-main">
+          <div class="results-bar">
+            <span class="result-count">5 panels</span>
+            <select class="sort-select"><option>Efficiency: High to Low</option><option>Warranty: Longest First</option></select>
+          </div>
+          <div class="brand-grid">
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">SR</div><span class="cat-tag">Panels</span></div>
+              <h3>SunRidge Panels</h3>
+              <div class="spec-line">22.1% efficiency · 25-yr warranty</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-panels.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20SunRidge%20Panels." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">HL</div><span class="cat-tag">Panels</span></div>
+              <h3>Helion Panels</h3>
+              <div class="spec-line">20.8% efficiency · 20-yr warranty</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-panels.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20Helion%20Panels." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">LG</div><span class="cat-tag">Panels</span></div>
+              <h3>LONGi Solar</h3>
+              <div class="spec-line">Hi-MO series · 25-yr warranty</div>
+              <div class="card-actions">
+            <a href="energygurus-brand-profile.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20LONGi%20Solar." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">JK</div><span class="cat-tag">Panels</span></div>
+              <h3>Jinko Solar</h3>
+              <div class="spec-line">Tiger Neo series · 25-yr warranty</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-panels.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20Jinko%20Solar." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">TR</div><span class="cat-tag">Panels</span></div>
+              <h3>Trina Solar</h3>
+              <div class="spec-line">Vertex series · 25-yr warranty</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-panels.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20Trina%20Solar." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+
+            <div class="inlist-ad"><div class="inlist-ad-inner"><span class="ad-tag">Advertisement</span><span class="ad-copy">Your ad here</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVERTERS TAB -->
+    <div class="cat-tab-panel" id="cattab-inverters" style="display:none;">
+      <div class="panels-layout">
+        <aside class="filter-sidebar">
+          <div class="filter-block">
+            <div class="filter-title">Inverter Type</div>
+            <label class="check-row"><input type="checkbox"> High Voltage</label>
+            <label class="check-row"><input type="checkbox"> Low Voltage</label>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Inverter Size</div>
+            <div class="num-range-row">
+              <input type="number" min="1" max="100" value="1">
+              <span class="to">to</span>
+              <input type="number" min="1" max="100" value="100">
+              <span class="unit">kW</span>
+            </div>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Phase</div>
+            <label class="check-row"><input type="checkbox"> Single Phase</label>
+            <label class="check-row"><input type="checkbox"> Three Phase</label>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Warranty Replacement</div>
+            <div class="num-range-row">
+              <input type="number" min="1" max="10" value="1">
+              <span class="to">to</span>
+              <input type="number" min="1" max="10" value="10">
+              <span class="unit">Years</span>
+            </div>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Warranty Repair</div>
+            <div class="num-range-row">
+              <input type="number" min="1" max="10" value="1">
+              <span class="to">to</span>
+              <input type="number" min="1" max="10" value="10">
+              <span class="unit">Years</span>
+            </div>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Brand</div>
+            <div class="check-scroll">
+              <label class="check-row"><input type="checkbox"> Solis</label>
+              <label class="check-row"><input type="checkbox"> GoodWe</label>
+              <label class="check-row"><input type="checkbox"> Growatt</label>
+              <label class="check-row"><input type="checkbox"> SolarMax</label>
+              <label class="check-row"><input type="checkbox"> MaxPower</label>
+              <label class="check-row"><input type="checkbox"> Yienergy</label>
+              <label class="check-row"><input type="checkbox"> Inverex</label>
+              <label class="check-row"><input type="checkbox"> HoyMiles</label>
+              <label class="check-row"><input type="checkbox"> FOX</label>
+              <label class="check-row"><input type="checkbox"> Huawei</label>
+              <label class="check-row"><input type="checkbox"> Sungrow</label>
+              <label class="check-row"><input type="checkbox"> Knox</label>
+              <label class="check-row"><input type="checkbox"> Itel</label>
+              <label class="check-row"><input type="checkbox"> Tesla</label>
+              <label class="check-row"><input type="checkbox"> Ziewnic</label>
+              <label class="check-row"><input type="checkbox"> Solingten</label>
+              <label class="check-row"><input type="checkbox"> SAJ</label>
+              <label class="check-row"><input type="checkbox"> SOLAX</label>
+              <label class="check-row"><input type="checkbox"> Crown Micro</label>
+              <label class="check-row"><input type="checkbox"> Epever</label>
+              <label class="check-row"><input type="checkbox"> Sofar</label>
+              <label class="check-row"><input type="checkbox"> Fronus</label>
+            </div>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Protection (IP)</div>
+            <label class="check-row"><input type="checkbox"> IP20</label>
+            <label class="check-row"><input type="checkbox"> IP21</label>
+            <label class="check-row"><input type="checkbox"> IP54</label>
+            <label class="check-row"><input type="checkbox"> IP65</label>
+            <label class="check-row"><input type="checkbox"> IP66</label>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Service Centres</div>
+            <div class="check-scroll">
+              <label class="check-row"><input type="checkbox"> Lahore</label>
+              <label class="check-row"><input type="checkbox"> Karachi</label>
+              <label class="check-row"><input type="checkbox"> Islamabad</label>
+              <label class="check-row"><input type="checkbox"> Rawalpindi</label>
+              <label class="check-row"><input type="checkbox"> Multan</label>
+              <label class="check-row"><input type="checkbox"> Faisalabad</label>
+              <label class="check-row"><input type="checkbox"> Kasur</label>
+              <label class="check-row"><input type="checkbox"> Sialkot</label>
+              <label class="check-row"><input type="checkbox"> Gujranwala</label>
+              <label class="check-row"><input type="checkbox"> Gujrat</label>
+              <label class="check-row"><input type="checkbox"> Jhelum</label>
+              <label class="check-row"><input type="checkbox"> Peshawar</label>
+            </div>
+          </div>
+          <button type="button" class="btn-apply">Apply Filters</button>
+          <button type="button" class="btn-clear">Clear All</button>
+        </aside>
+        <div class="panels-main">
+          <div class="results-bar">
+            <span class="result-count">5 inverters</span>
+            <select class="sort-select"><option>Efficiency: High to Low</option><option>Warranty: Longest First</option></select>
+          </div>
+          <div class="brand-grid">
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">VT</div><span class="cat-tag">Inverters</span></div>
+              <h3>VoltTide Inverters</h3>
+              <div class="spec-line">98.6% peak efficiency · 12-yr warranty</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-inverters.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20VoltTide%20Inverters." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">AX</div><span class="cat-tag">Inverters</span></div>
+              <h3>Axiom Grid</h3>
+              <div class="spec-line">97.9% peak efficiency · 15-yr warranty</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-inverters.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20Axiom%20Grid." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">HW</div><span class="cat-tag">Inverters</span></div>
+              <h3>Huawei Inverters</h3>
+              <div class="spec-line">98.8% peak efficiency · 10-yr warranty</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-inverters.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20Huawei%20Inverters." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">GW</div><span class="cat-tag">Inverters</span></div>
+              <h3>GoodWe Inverters</h3>
+              <div class="spec-line">98.4% peak efficiency · 10-yr warranty</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-inverters.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20GoodWe%20Inverters." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">GT</div><span class="cat-tag">Inverters</span></div>
+              <h3>Growatt Inverters</h3>
+              <div class="spec-line">98.2% peak efficiency · 10-yr warranty</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-inverters.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20Growatt%20Inverters." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+
+            <div class="inlist-ad"><div class="inlist-ad-inner"><span class="ad-tag">Advertisement</span><span class="ad-copy">Your ad here</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BATTERIES TAB -->
+    <div class="cat-tab-panel" id="cattab-batteries" style="display:none;">
+      <div class="panels-layout">
+        <aside class="filter-sidebar">
+          <div class="filter-block">
+            <div class="filter-title">Type</div>
+            <label class="check-row"><input type="checkbox"> High Voltage</label>
+            <label class="check-row"><input type="checkbox"> Low Voltage</label>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Size</div>
+            <label class="check-row"><input type="checkbox"> 1.2 kWh</label>
+            <label class="check-row"><input type="checkbox"> 2.4 kWh</label>
+            <label class="check-row"><input type="checkbox"> 5 kWh</label>
+            <label class="check-row"><input type="checkbox"> 10 kWh</label>
+            <label class="check-row"><input type="checkbox"> 16 kWh</label>
+            <label class="check-row"><input type="checkbox"> 32 kWh</label>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Warranty Replacement</div>
+            <div class="num-range-row">
+              <input type="number" min="1" max="15" value="1">
+              <span class="to">to</span>
+              <input type="number" min="1" max="15" value="15">
+              <span class="unit">Years</span>
+            </div>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Warranty Repair</div>
+            <div class="num-range-row">
+              <input type="number" min="1" max="15" value="1">
+              <span class="to">to</span>
+              <input type="number" min="1" max="15" value="15">
+              <span class="unit">Years</span>
+            </div>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Protection</div>
+            <label class="check-row"><input type="checkbox"> IP20</label>
+            <label class="check-row"><input type="checkbox"> IP21</label>
+            <label class="check-row"><input type="checkbox"> IP34</label>
+            <label class="check-row"><input type="checkbox"> IP40</label>
+            <label class="check-row"><input type="checkbox"> IP54</label>
+            <label class="check-row"><input type="checkbox"> IP65</label>
+            <label class="check-row"><input type="checkbox"> IP66</label>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Service Centres</div>
+            <div class="check-scroll">
+              <label class="check-row"><input type="checkbox"> Lahore</label>
+              <label class="check-row"><input type="checkbox"> Karachi</label>
+              <label class="check-row"><input type="checkbox"> Islamabad</label>
+              <label class="check-row"><input type="checkbox"> Rawalpindi</label>
+              <label class="check-row"><input type="checkbox"> Multan</label>
+              <label class="check-row"><input type="checkbox"> Faisalabad</label>
+              <label class="check-row"><input type="checkbox"> Kasur</label>
+              <label class="check-row"><input type="checkbox"> Sialkot</label>
+              <label class="check-row"><input type="checkbox"> Gujranwala</label>
+              <label class="check-row"><input type="checkbox"> Gujrat</label>
+              <label class="check-row"><input type="checkbox"> Jhelum</label>
+              <label class="check-row"><input type="checkbox"> Peshawar</label>
+            </div>
+          </div>
+          <button type="button" class="btn-apply">Apply Filters</button>
+          <button type="button" class="btn-clear">Clear All</button>
+        </aside>
+        <div class="panels-main">
+          <div class="results-bar">
+            <span class="result-count">5 batteries</span>
+            <select class="sort-select"><option>Efficiency: High to Low</option><option>Warranty: Longest First</option></select>
+          </div>
+          <div class="brand-grid">
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">CE</div><span class="cat-tag">Batteries</span></div>
+              <h3>CoreCell Energy</h3>
+              <div class="spec-line">13.5 kWh capacity · 10-yr warranty</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-batteries.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20CoreCell%20Energy." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">TR</div><span class="cat-tag">Batteries</span></div>
+              <h3>Terra Reserve</h3>
+              <div class="spec-line">10.2 kWh capacity · 12-yr warranty</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-batteries.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20Terra%20Reserve." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">PV</div><span class="cat-tag">Batteries</span></div>
+              <h3>PowerVault</h3>
+              <div class="spec-line">15.0 kWh capacity · 10-yr warranty</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-batteries.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20PowerVault." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">DC</div><span class="cat-tag">Batteries</span></div>
+              <h3>DynaCell Storage</h3>
+              <div class="spec-line">12.8 kWh capacity · 10-yr warranty</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-batteries.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20DynaCell%20Storage." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">VG</div><span class="cat-tag">Batteries</span></div>
+              <h3>VoltGuard Energy</h3>
+              <div class="spec-line">10.0 kWh capacity · 12-yr warranty</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-batteries.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20VoltGuard%20Energy." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+
+            <div class="inlist-ad"><div class="inlist-ad-inner"><span class="ad-tag">Advertisement</span><span class="ad-copy">Your ad here</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BREAKERS TAB -->
+    <div class="cat-tab-panel" id="cattab-breakers" style="display:none;">
+      <div class="panels-layout">
+        <aside class="filter-sidebar">
+          <div class="filter-block">
+            <div class="filter-title">Type</div>
+            <label class="check-row"><input type="checkbox"> AC</label>
+            <label class="check-row"><input type="checkbox"> DC</label>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Phase</div>
+            <label class="check-row"><input type="checkbox"> Single Phase</label>
+            <label class="check-row"><input type="checkbox"> Three Phase</label>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Items</div>
+            <div class="check-scroll">
+              <label class="check-row"><input type="checkbox"> SPDs</label>
+              <label class="check-row"><input type="checkbox"> Breakers</label>
+              <label class="check-row"><input type="checkbox"> Change Overs</label>
+              <label class="check-row"><input type="checkbox"> VA Protection Device</label>
+              <label class="check-row"><input type="checkbox"> VA Protection Device KWH</label>
+              <label class="check-row"><input type="checkbox"> VA Protection Device KWH with WiFi 10 in 1</label>
+              <label class="check-row"><input type="checkbox"> MC4 Connectors with Fuse</label>
+              <label class="check-row"><input type="checkbox"> Y Connectors</label>
+            </div>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Breaker Categories</div>
+            <label class="check-row"><input type="checkbox"> MCCB</label>
+            <label class="check-row"><input type="checkbox"> MCB</label>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Pole</div>
+            <label class="check-row"><input type="checkbox"> 2</label>
+            <label class="check-row"><input type="checkbox"> 3</label>
+            <label class="check-row"><input type="checkbox"> 4</label>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">In</div>
+            <label class="check-row"><input type="checkbox"> 20kA</label>
+            <label class="check-row"><input type="checkbox"> 40kA</label>
+            <label class="check-row"><input type="checkbox"> 60kA</label>
+            <label class="check-row"><input type="checkbox"> 100kA</label>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Imax</div>
+            <label class="check-row"><input type="checkbox"> 40kA</label>
+            <label class="check-row"><input type="checkbox"> 60kA</label>
+            <label class="check-row"><input type="checkbox"> 80kA</label>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Voltage</div>
+            <div class="check-scroll">
+              <label class="check-row"><input type="checkbox"> 120–300V</label>
+              <label class="check-row"><input type="checkbox"> 1000–1500V</label>
+              <label class="check-row"><input type="checkbox"> 275V</label>
+              <label class="check-row"><input type="checkbox"> 385V</label>
+              <label class="check-row"><input type="checkbox"> 440V</label>
+              <label class="check-row"><input type="checkbox"> 600V</label>
+              <label class="check-row"><input type="checkbox"> 750V</label>
+              <label class="check-row"><input type="checkbox"> 1000V</label>
+              <label class="check-row"><input type="checkbox"> 1500V</label>
+            </div>
+          </div>
+          <div class="filter-block">
+            <div class="filter-title">Amp</div>
+            <div class="check-scroll">
+              <label class="check-row"><input type="checkbox"> 10A</label>
+              <label class="check-row"><input type="checkbox"> 15A</label>
+              <label class="check-row"><input type="checkbox"> 16A</label>
+              <label class="check-row"><input type="checkbox"> 17A</label>
+              <label class="check-row"><input type="checkbox"> 20A</label>
+              <label class="check-row"><input type="checkbox"> 30A</label>
+              <label class="check-row"><input type="checkbox"> 40A</label>
+              <label class="check-row"><input type="checkbox"> 63A</label>
+              <label class="check-row"><input type="checkbox"> 75A</label>
+              <label class="check-row"><input type="checkbox"> 80A</label>
+              <label class="check-row"><input type="checkbox"> 100A</label>
+              <label class="check-row"><input type="checkbox"> 125A</label>
+              <label class="check-row"><input type="checkbox"> 150A</label>
+            </div>
+          </div>
+          <button type="button" class="btn-apply">Apply Filters</button>
+          <button type="button" class="btn-clear">Clear All</button>
+        </aside>
+        <div class="panels-main">
+          <div class="results-bar">
+            <span class="result-count">5 breakers</span>
+            <select class="sort-select"><option>Rating: High to Low</option></select>
+          </div>
+          <div class="brand-grid">
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">CG</div><span class="cat-tag">Breakers</span></div>
+              <h3>CircuitGuard</h3>
+              <div class="spec-line">63A DC-rated · IEC certified</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-breakers.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20CircuitGuard." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">BS</div><span class="cat-tag">Breakers</span></div>
+              <h3>BreakSafe</h3>
+              <div class="spec-line">100A AC-rated · UL certified</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-breakers.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20BreakSafe." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">AS</div><span class="cat-tag">Breakers</span></div>
+              <h3>AmpShield</h3>
+              <div class="spec-line">80A DC-rated · IEC certified</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-breakers.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20AmpShield." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">SL</div><span class="cat-tag">Breakers</span></div>
+              <h3>SafeLine Breakers</h3>
+              <div class="spec-line">100A AC-rated · IEC certified</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-breakers.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20SafeLine%20Breakers." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+
+            <div class="brand-card">
+              <div class="brand-top"><div class="brand-mark">PG</div><span class="cat-tag">Breakers</span></div>
+              <h3>PowerGate Devices</h3>
+              <div class="spec-line">63A DC-rated · UL certified</div>
+              <div class="card-actions">
+            <a href="energygurus-brands-breakers.html" class="cta">View Brand</a>
+            <a href="https://wa.me/923000000000?text=Hi%2C%20I%27m%20interested%20in%20pricing%20for%20PowerGate%20Devices." target="_blank" rel="noopener" class="price-cta">Click for Price</a>
+        </div>
+        <div class="datasheet-row">
+          <a href="#" class="datasheet-cta">📄 Click for Datasheet</a>
+        </div>
+            </div>
+
+            <div class="inlist-ad"><div class="inlist-ad-inner"><span class="ad-tag">Advertisement</span><span class="ad-copy">Your ad here</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="ad-banner">
+  <div class="ad-banner-inner">
+    <span class="ad-tag">Advertisement</span>
+    <span class="ad-copy">Your ad here — 728×90 leaderboard</span>
+  </div>
+</div>
+<footer>© 2026 EnergyGurus.online — All rights reserved.</footer>
+
+<script>
+function showCatTab(name, btn) {
+  document.querySelectorAll('.cat-tab-panel').forEach(p => p.style.display = 'none');
+  document.getElementById('cattab-' + name).style.display = 'block';
+  document.querySelectorAll('.cat-tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>

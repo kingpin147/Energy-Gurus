@@ -27,14 +27,19 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
   const isFormData = data instanceof FormData;
 
   let repsData = [];
+  let categoriesData = [];
   if (isFormData) {
     try {
       const repsRaw = data.get("reps") as string;
       if (repsRaw) {
         repsData = JSON.parse(repsRaw);
       }
+      const categoriesRaw = data.get("categories") as string;
+      if (categoriesRaw) {
+        categoriesData = JSON.parse(categoriesRaw);
+      }
     } catch (e) {
-      console.error("Failed to parse reps JSON", e);
+      console.error("Failed to parse JSON fields", e);
     }
   }
 
@@ -46,7 +51,8 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
     headOffice: data.get("headOffice") as string,
     website: data.get("website") as string,
     warrantyUrl: data.get("warrantyUrl") as string,
-    reps: repsData
+    reps: repsData,
+    categories: categoriesData.length > 0 ? categoriesData : undefined
     } : data;
 
   let targetUserId = user.id;
