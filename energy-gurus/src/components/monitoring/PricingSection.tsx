@@ -67,7 +67,19 @@ export default function PricingSection() {
                             <option value="2">24 Hours</option>
                         </select>
                     </div>
-
+                    <div className="flex flex-col gap-1">
+                        <label className="font-ibm-plex-mono text-[0.78rem] tracking-[0.06em] uppercase text-slate-custom">Payment Plan</label>
+                        <select 
+                            className="border border-line rounded-[3px] py-[9px] px-[14px] font-sans text-[0.9rem] bg-white text-ink outline-none focus-visible:ring-2 focus-visible:ring-amber"
+                            value={discount} 
+                            onChange={(e) => setDiscount(parseFloat(e.target.value))}
+                        >
+                            <option value="0">Monthly</option>
+                            <option value="0.1">Quarterly Advance (10% off)</option>
+                            <option value="0.2">Bi-Annual Advance (20% off)</option>
+                            <option value="0.4">Annual Advance (40% off)</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto border border-line rounded-[6px] bg-white">
@@ -174,24 +186,24 @@ export default function PricingSection() {
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
-                    <div className={`bg-white border rounded-[6px] p-[24px_20px] text-center cursor-pointer transition-colors ${getPrepayClass(0.6)}`} onClick={() => setDiscount(0.6)}>
-                        <div className="font-ibm-plex-mono text-[2.1rem] text-teal">60%</div>
+                    <div className={`bg-white border rounded-[6px] p-[24px_20px] text-center cursor-pointer transition-colors ${getPrepayClass(0.4)}`} onClick={() => setDiscount(0.4)}>
+                        <div className="font-ibm-plex-mono text-[2.1rem] text-teal">40%</div>
                         <div className="text-[0.88rem] text-ink font-semibold mt-2">Off — Pay Annually</div>
                         <div className="text-[0.78rem] text-slate-custom mt-1">Best savings, one payment/year</div>
                     </div>
-                    <div className={`bg-white border rounded-[6px] p-[24px_20px] text-center cursor-pointer transition-colors ${getPrepayClass(0.4)}`} onClick={() => setDiscount(0.4)}>
-                        <div className={`font-ibm-plex-mono text-[2.1rem] ${getPrepayTextClass(0.4)}`}>40%</div>
+                    <div className={`bg-white border rounded-[6px] p-[24px_20px] text-center cursor-pointer transition-colors ${getPrepayClass(0.2)}`} onClick={() => setDiscount(0.2)}>
+                        <div className={`font-ibm-plex-mono text-[2.1rem] ${getPrepayTextClass(0.2)}`}>20%</div>
                         <div className="text-[0.88rem] text-ink font-semibold mt-2">Off — Pay Bi-Annually</div>
                         <div className="text-[0.78rem] text-slate-custom mt-1">Two payments/year</div>
                     </div>
-                    <div className={`bg-white border rounded-[6px] p-[24px_20px] text-center cursor-pointer transition-colors ${getPrepayClass(0.2)}`} onClick={() => setDiscount(0.2)}>
-                        <div className={`font-ibm-plex-mono text-[2.1rem] ${getPrepayTextClass(0.2)}`}>20%</div>
+                    <div className={`bg-white border rounded-[6px] p-[24px_20px] text-center cursor-pointer transition-colors ${getPrepayClass(0.1)}`} onClick={() => setDiscount(0.1)}>
+                        <div className={`font-ibm-plex-mono text-[2.1rem] ${getPrepayTextClass(0.1)}`}>10%</div>
                         <div className="text-[0.88rem] text-ink font-semibold mt-2">Off — Pay Quarterly</div>
                         <div className="text-[0.78rem] text-slate-custom mt-1">Four payments/year</div>
                     </div>
                     <div className={`bg-white border rounded-[6px] p-[24px_20px] text-center cursor-pointer transition-colors ${getPrepayClass(0)}`} onClick={() => setDiscount(0)}>
                         <div className={`font-ibm-plex-mono text-[2.1rem] ${getPrepayTextClass(0)}`}>0%</div>
-                        <div className="text-[0.88rem] text-ink font-semibold mt-2">Monthly, No Advance</div>
+                        <div className="text-[0.88rem] text-ink font-semibold mt-2">Monthly</div>
                         <div className="text-[0.78rem] text-slate-custom mt-1">Full listed price</div>
                     </div>
                 </div>

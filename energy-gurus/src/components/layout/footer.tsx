@@ -30,12 +30,11 @@ export function Footer() {
                 
                 <div className="flex gap-14 flex-wrap">
                     <div className="flex flex-col gap-2.5">
-                        <Link href="/brands" className="text-paper/60 hover:text-white transition-colors">Solar Brands</Link>
-                        <Link href="/epcs" className="text-paper/60 hover:text-white transition-colors">Find an Installer</Link>
+                        <Link href="/about" className="text-paper/60 hover:text-white transition-colors">About Us</Link>
+                        <Link href="/installers" className="text-paper/60 hover:text-white transition-colors">Find an Installer</Link>
                         <Link href="/monitoring" className="text-paper/60 hover:text-white transition-colors">Monitoring & O&M</Link>
                     </div>
                     <div className="flex flex-col gap-2.5">
-                        <Link href="/podcast" className="text-paper/60 hover:text-white transition-colors">Podcast</Link>
                         <Link href="/privacy" className="text-paper/60 hover:text-white transition-colors">Privacy Policy</Link>
                         <Link href="/terms" className="text-paper/60 hover:text-white transition-colors">Terms of Use</Link>
                     </div>

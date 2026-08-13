@@ -9,11 +9,9 @@ import { useState } from "react";
 import { Logo } from "@/components/ui/logo";
 
 const navLinks = [
-    { label: "Solar Brands", href: "/brands" },
-    { label: "Find an Installer", href: "/epcs" },
+    { label: "About Us", href: "/about" },
     { label: "Monitoring & O&M", href: "/monitoring" },
-    { label: "Podcast", href: "/podcast" },
-    { label: "News", href: "/news" },
+    { label: "Find an Installer", href: "/installers" },
 ];
 
 export function Navbar() {

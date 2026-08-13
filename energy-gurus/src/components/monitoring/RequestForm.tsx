@@ -69,9 +69,9 @@ export default function RequestForm() {
         
         let periodLabel = 'per month';
         let payableNow = monthly;
-        if (discount === 0.2) { periodLabel = 'per quarter (billed every 3 months)'; payableNow = monthly * 3; }
-        else if (discount === 0.4) { periodLabel = 'per half-year (billed every 6 months)'; payableNow = monthly * 6; }
-        else if (discount === 0.6) { periodLabel = 'per year (billed annually)'; payableNow = monthly * 12; }
+        if (discount === 0.1) { periodLabel = 'per quarter (billed every 3 months)'; payableNow = monthly * 3; }
+        else if (discount === 0.2) { periodLabel = 'per half-year (billed every 6 months)'; payableNow = monthly * 6; }
+        else if (discount === 0.4) { periodLabel = 'per year (billed annually)'; payableNow = monthly * 12; }
         
         return { 
             text: `PKR ${payableNow.toLocaleString('en-US')} ${periodLabel} — approx. PKR ${monthly.toLocaleString('en-US')}/mo equivalent`, 
@@ -106,8 +106,6 @@ export default function RequestForm() {
     const submitLargeSystem = () => {
         const form = document.getElementById('monitoringForm') as HTMLFormElement;
         if (form) {
-             // For large systems, we just require the top fields.
-             // Native form validation check
              if (form.reportValidity()) {
                  form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
              }
@@ -194,10 +192,10 @@ export default function RequestForm() {
                                     <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">Advance Payment Plan</label>
                                     <select name="paymentPlan" required value={plan} onChange={(e) => setPlan(e.target.value)} className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber">
                                         <option value="">Select...</option>
-                                        <option value="0">Monthly (No Advance)</option>
-                                        <option value="0.2">Quarterly Advance (20% off)</option>
-                                        <option value="0.4">Bi-Annual Advance (40% off)</option>
-                                        <option value="0.6">Annual Advance (60% off)</option>
+                                        <option value="0">Monthly</option>
+                                        <option value="0.1">Quarterly Advance (10% off)</option>
+                                        <option value="0.2">Bi-Annual Advance (20% off)</option>
+                                        <option value="0.4">Annual Advance (40% off)</option>
                                     </select>
                                 </div>
                             </div>
