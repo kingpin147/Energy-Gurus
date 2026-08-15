@@ -46,6 +46,8 @@ export async function deleteUser(userId: string) {
     if (epc) {
         if (epc.logoUrl) fileUrlsToDelete.push(epc.logoUrl);
         if (epc.portfolio) fileUrlsToDelete.push(...epc.portfolio);
+        if (epc.reviewVideos) fileUrlsToDelete.push(...epc.reviewVideos);
+        if (epc.licenceDocuments) fileUrlsToDelete.push(...epc.licenceDocuments);
 
         const projects = await db.select().from(epcProjects).where(eq(epcProjects.epcId, epc.id));
         for (const p of projects) {

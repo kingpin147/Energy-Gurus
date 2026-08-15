@@ -83,13 +83,6 @@ export async function AdBanner({ placement, targetPage = "global", className = "
         );
     }
 
-    // Placeholder rendering if no active ad
-    return (
-        <div className={wrapperClass}>
-            <div className={innerClass}>
-                <span className="ad-tag">{isSkyscraper ? 'Ad' : 'Advertisement'}</span>
-                <span className="ad-copy">{isSkyscraper ? '160×600' : isLeaderboard ? 'Your ad here — 728×90 leaderboard' : 'Ad Space'}</span>
-            </div>
-        </div>
-    );
+    // Placeholder rendering if no active ad (currently hidden)
+    return null;
 }

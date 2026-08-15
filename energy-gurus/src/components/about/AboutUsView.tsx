@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, ShieldCheck, Award, Eye, CheckCircle2 } from "lucide-react";
 import { AdBanner } from "@/components/shared/AdBanner";
 
@@ -90,8 +91,13 @@ export function AboutUsView() {
                 <div className="max-w-[1180px] mx-auto px-5 md:px-8">
                     <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-12 items-start">
                         <div>
-                            <div className="w-[200px] h-[200px] md:w-full md:h-[280px] rounded-[8px] overflow-hidden bg-gradient-to-br from-ink to-[#1b3157] flex items-center justify-center text-amber font-space-grotesk font-bold text-[3rem]">
-                                AK
+                            <div className="w-[200px] h-[200px] md:w-full md:h-[280px] rounded-[8px] overflow-hidden relative">
+                                <Image 
+                                    src="/Aaffaq Ali Khan.jpeg" 
+                                    alt="Aafaaq Ali Khan, Founder & CEO" 
+                                    fill
+                                    className="object-cover object-top"
+                                />
                             </div>
                             <div className="font-space-grotesk font-semibold text-[1.3rem] text-ink mt-4">
                                 <a href="https://www.linkedin.com/in/aafaaq/" target="_blank" rel="noopener noreferrer" className="hover:text-teal transition-colors">
@@ -138,9 +144,6 @@ export function AboutUsView() {
                     <div className="flex flex-wrap gap-3.5 justify-center">
                         <Link href="/monitoring#request-form" className="bg-amber text-ink px-6 py-3.5 rounded-[3px] font-semibold text-[0.95rem] hover:bg-[#f2b458] transition-colors">
                             Get a Monitoring &amp; O&amp;M Quote
-                        </Link>
-                        <Link href="/" className="bg-transparent text-ink border border-line px-6 py-3.5 rounded-[3px] font-semibold text-[0.95rem] hover:border-ink transition-colors">
-                            Are You an Installer? Apply Here
                         </Link>
                     </div>
                 </div>

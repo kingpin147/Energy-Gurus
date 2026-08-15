@@ -12,7 +12,7 @@ export function useR2Upload() {
     ): Promise<{ publicUrl: string; key: string }> => {
         // 1. Pre-flight Client-Side Validations
         const ALLOWED_FOLDERS = [
-            "epc-logos", "epc-projects", "epc-portfolios", "epc-portfolio",
+            "epc-logos", "epc-projects", "epc-portfolios", "epc-portfolio", "epc-documents",
             "brand-logos", "brand-gallery",
             "product-images", "product-datasheets",
             "podcast-thumbnails", "uploads",

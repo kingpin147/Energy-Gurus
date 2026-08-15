@@ -16,7 +16,7 @@ export async function POST(req: Request) {
         const contentType = req.headers.get("content-type") || "";
 
         const ALLOWED_FOLDERS = [
-            "epc-logos", "epc-projects", "epc-portfolios", "epc-portfolio",
+            "epc-logos", "epc-projects", "epc-portfolios", "epc-portfolio", "epc-documents",
             "brand-logos", "brand-gallery",
             "product-images", "product-datasheets",
             "podcast-thumbnails", "uploads",

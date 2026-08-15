@@ -1,6 +1,7 @@
 import { EpcOnboardingForm } from "@/components/forms/epc-onboarding-form";
 import { getUserRole } from "@/lib/roles";
 import { redirect } from "next/navigation";
+import { Briefcase } from "lucide-react";
 
 export default async function OnboardEpcPage() {
     const role = await getUserRole();
@@ -9,16 +10,17 @@ export default async function OnboardEpcPage() {
     }
 
     return (
-        <div className="space-y-6">
-            <div className="mb-8 bg-ink text-white p-8 rounded-2xl">
-                <p className="font-ibm-plex-mono text-xs tracking-widest uppercase text-amber flex items-center gap-2.5 mb-4">
-                    <span className="w-5 h-px bg-amber"></span>
-                    Admin Action
-                </p>
-                <h1 className="text-3xl font-space-grotesk font-semibold mb-2">Onboard EPC Installer</h1>
-                <p className="text-white/70 max-w-2xl">
-                    Create a new EPC installer profile and account. A secure temporary password will be generated for their first login.
-                </p>
+        <div className="p-8 space-y-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-amber text-ink rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
+                        <Briefcase className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">Onboard EPC Installer</h1>
+                        <p className="text-slate-custom text-sm">Create a new EPC installer profile and generate their temporary password.</p>
+                    </div>
+                </div>
             </div>
             
             <EpcOnboardingForm />

@@ -4,12 +4,11 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { onboardEpcInstaller } from '@/lib/actions/epc-onboarding';
 import { UploadZone } from '@/components/ui/upload-zone';
-import { useR2Upload } from '@/hooks/use-r2-upload';
+import { useR2Upload } from '@/lib/hooks/use-r2-upload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { CheckCircle2 } from 'lucide-react';
 
@@ -34,8 +33,8 @@ export function EpcOnboardingForm() {
 
     const handleLogoUpload = async (file: File) => {
         try {
-            const url = await uploadFile(file);
-            setLogoUrl(url);
+            const { publicUrl } = await uploadFile(file, "epc-logos");
+            setLogoUrl(publicUrl);
             toast.success("Logo uploaded successfully");
         } catch (error) {
             toast.error("Failed to upload logo");
@@ -44,8 +43,8 @@ export function EpcOnboardingForm() {
 
     const handleDocUpload = async (file: File) => {
         try {
-            const url = await uploadFile(file);
-            setLicenceUrls(prev => [...prev, url]);
+            const { publicUrl } = await uploadFile(file, "epc-documents");
+            setLicenceUrls(prev => [...prev, publicUrl]);
             toast.success("Document uploaded successfully");
         } catch (error) {
             toast.error("Failed to upload document");
@@ -109,7 +108,7 @@ export function EpcOnboardingForm() {
     }
 
     return (
-        <form action={onSubmit} className="max-w-[840px] mx-auto space-y-6 pb-20">
+        <form action={onSubmit} className="w-full max-w-5xl space-y-6 pb-20">
             
             {/* Basic Information */}
             <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
@@ -219,7 +218,7 @@ export function EpcOnboardingForm() {
                         <div className="flex flex-wrap gap-2">
                             {SECTORS.map(s => (
                                 <div key={s} className="flex items-center space-x-2 border border-line rounded-full px-3 py-1.5 cursor-pointer hover:bg-slate-50" onClick={() => toggleArray(s, selectedSectors, setSelectedSectors)}>
-                                    <Checkbox checked={selectedSectors.includes(s)} className="rounded-full data-[state=checked]:bg-teal" />
+                                    <input type="checkbox" checked={selectedSectors.includes(s)} className="w-4 h-4 text-teal rounded border-line focus:ring-teal" readOnly />
                                     <label className="text-sm cursor-pointer">{s}</label>
                                 </div>
                             ))}
@@ -230,7 +229,7 @@ export function EpcOnboardingForm() {
                         <div className="flex flex-wrap gap-2">
                             {BRANDS.map(b => (
                                 <div key={b} className="flex items-center space-x-2 border border-line rounded-full px-3 py-1.5 cursor-pointer hover:bg-slate-50" onClick={() => toggleArray(b, selectedBrands, setSelectedBrands)}>
-                                    <Checkbox checked={selectedBrands.includes(b)} className="rounded-full data-[state=checked]:bg-teal" />
+                                    <input type="checkbox" checked={selectedBrands.includes(b)} className="w-4 h-4 text-teal rounded border-line focus:ring-teal" readOnly />
                                     <label className="text-sm cursor-pointer">{b}</label>
                                 </div>
                             ))}
@@ -254,7 +253,7 @@ export function EpcOnboardingForm() {
                         <div className="flex flex-wrap gap-2">
                             {CERTIFICATIONS.map(c => (
                                 <div key={c} className="flex items-center space-x-2 border border-line rounded-full px-3 py-1.5 cursor-pointer hover:bg-slate-50" onClick={() => toggleArray(c, selectedCerts, setSelectedCerts)}>
-                                    <Checkbox checked={selectedCerts.includes(c)} className="rounded-full data-[state=checked]:bg-teal" />
+                                    <input type="checkbox" checked={selectedCerts.includes(c)} className="w-4 h-4 text-teal rounded border-line focus:ring-teal" readOnly />
                                     <label className="text-sm cursor-pointer">{c}</label>
                                 </div>
                             ))}
