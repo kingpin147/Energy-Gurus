@@ -10,11 +10,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, X, Plus } from 'lucide-react';
 
 const SECTORS = ['Residential', 'Commercial', 'Industrial', 'Agriculture'];
-const BRANDS = ['LONGi', 'Jinko', 'Trina', 'JA Solar', 'Huawei', 'Growatt', 'Other'];
 const CERTIFICATIONS = ['AEDB Licence', 'PEC Licence', 'Manufacturer Certified', 'PSA - Energy Nexus Certified'];
+
+type TeamMember = { name: string; designation: string; linkedIn: string; imageUrl: string; };
+type ProjectData = { youtubeUrl: string; installationDate: string; customerName: string; companyName: string; city: string; country: string; description: string; };
 
 export function EpcOnboardingForm() {
     const router = useRouter();
@@ -27,9 +29,22 @@ export function EpcOnboardingForm() {
     
     // Checkbox states
     const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
-    const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
     const [selectedCerts, setSelectedCerts] = useState<string[]>([]);
     const [selectedTier, setSelectedTier] = useState<'bronze'|'silver'|'gold'>('bronze');
+
+    // Brand states
+    const [solarBrands, setSolarBrands] = useState<string[]>([]);
+    const [inverterBrands, setInverterBrands] = useState<string[]>([]);
+    const [batteryBrands, setBatteryBrands] = useState<string[]>([]);
+    const [tempSolarBrand, setTempSolarBrand] = useState("");
+    const [tempInverterBrand, setTempInverterBrand] = useState("");
+    const [tempBatteryBrand, setTempBatteryBrand] = useState("");
+
+    // Team state
+    const [team, setTeam] = useState<TeamMember[]>([{ name: '', designation: '', linkedIn: '', imageUrl: '' }]);
+
+    // Projects state
+    const [projects, setProjects] = useState<ProjectData[]>([{ youtubeUrl: '', installationDate: '', customerName: '', companyName: '', city: '', country: '', description: '' }]);
 
     const handleLogoUpload = async (file: File) => {
         try {
@@ -67,8 +82,13 @@ export function EpcOnboardingForm() {
         formData.append("licenceDocuments", JSON.stringify(licenceUrls));
         formData.append("tier", selectedTier);
         selectedSectors.forEach(s => formData.append("sectors", s));
-        selectedBrands.forEach(b => formData.append("brandsCertified", b));
         selectedCerts.forEach(c => formData.append("certifications", c));
+        solarBrands.forEach(b => formData.append("solarBrands", b));
+        inverterBrands.forEach(b => formData.append("inverterBrands", b));
+        batteryBrands.forEach(b => formData.append("batteryBrands", b));
+        
+        formData.append("team", JSON.stringify(team.filter(t => t.name || t.designation)));
+        formData.append("projects", JSON.stringify(projects.filter(p => p.youtubeUrl || p.customerName || p.companyName)));
 
         const result = await onboardEpcInstaller(formData);
         
@@ -209,7 +229,7 @@ export function EpcOnboardingForm() {
                     <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">4</span>
                     <div>
                         <h2 className="text-lg font-space-grotesk font-semibold text-ink">Specialties</h2>
-                        <p className="text-sm text-slate-custom">System types and brands.</p>
+                        <p className="text-sm text-slate-custom">What systems do you install, and which brands are you certified for?</p>
                     </div>
                 </div>
                 <div className="space-y-6">
@@ -224,24 +244,241 @@ export function EpcOnboardingForm() {
                             ))}
                         </div>
                     </div>
-                    <div className="space-y-3">
-                        <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Brands Certified</Label>
-                        <div className="flex flex-wrap gap-2">
-                            {BRANDS.map(b => (
-                                <div key={b} className="flex items-center space-x-2 border border-line rounded-full px-3 py-1.5 cursor-pointer hover:bg-slate-50" onClick={() => toggleArray(b, selectedBrands, setSelectedBrands)}>
-                                    <input type="checkbox" checked={selectedBrands.includes(b)} className="w-4 h-4 text-teal rounded border-line focus:ring-teal" readOnly />
-                                    <label className="text-sm cursor-pointer">{b}</label>
+                    
+                    <div className="pt-4 border-t border-line space-y-6">
+                        <div>
+                            <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom mb-1 block">Brands You Are Certified To Install</Label>
+                            <p className="text-sm text-slate-custom mb-4">Type a brand name and click Add. You can add multiple entries per category.</p>
+                            
+                            {/* Solar Panels */}
+                            <div className="space-y-3 mb-5">
+                                <Label className="text-xs font-bold uppercase tracking-widest text-ink">Solar Panels</Label>
+                                <div className="flex gap-2">
+                                    <Input 
+                                        value={tempSolarBrand} 
+                                        onChange={(e) => setTempSolarBrand(e.target.value)} 
+                                        placeholder="e.g. LONGI Solar" 
+                                        className="bg-slate-50 border-line"
+                                        onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempSolarBrand) { setSolarBrands([...solarBrands, tempSolarBrand]); setTempSolarBrand(""); }}}}
+                                    />
+                                    <Button type="button" variant="outline" onClick={() => { if (tempSolarBrand) { setSolarBrands([...solarBrands, tempSolarBrand]); setTempSolarBrand(""); } }}>+ Add</Button>
                                 </div>
-                            ))}
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                    {solarBrands.map((b, i) => (
+                                        <span key={i} className="flex items-center bg-teal/10 text-teal text-sm px-3 py-1 rounded-full">
+                                            {b} <X className="w-3 h-3 ml-2 cursor-pointer" onClick={() => setSolarBrands(solarBrands.filter((_, idx) => idx !== i))} />
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            {/* Inverters */}
+                            <div className="space-y-3 mb-5">
+                                <Label className="text-xs font-bold uppercase tracking-widest text-ink">Inverters</Label>
+                                <div className="flex gap-2">
+                                    <Input 
+                                        value={tempInverterBrand} 
+                                        onChange={(e) => setTempInverterBrand(e.target.value)} 
+                                        placeholder="e.g. Huawei" 
+                                        className="bg-slate-50 border-line"
+                                        onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempInverterBrand) { setInverterBrands([...inverterBrands, tempInverterBrand]); setTempInverterBrand(""); }}}}
+                                    />
+                                    <Button type="button" variant="outline" onClick={() => { if (tempInverterBrand) { setInverterBrands([...inverterBrands, tempInverterBrand]); setTempInverterBrand(""); } }}>+ Add</Button>
+                                </div>
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                    {inverterBrands.map((b, i) => (
+                                        <span key={i} className="flex items-center bg-teal/10 text-teal text-sm px-3 py-1 rounded-full">
+                                            {b} <X className="w-3 h-3 ml-2 cursor-pointer" onClick={() => setInverterBrands(inverterBrands.filter((_, idx) => idx !== i))} />
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Batteries */}
+                            <div className="space-y-3">
+                                <Label className="text-xs font-bold uppercase tracking-widest text-ink">Batteries</Label>
+                                <div className="flex gap-2">
+                                    <Input 
+                                        value={tempBatteryBrand} 
+                                        onChange={(e) => setTempBatteryBrand(e.target.value)} 
+                                        placeholder="e.g. CoreCell Energy" 
+                                        className="bg-slate-50 border-line"
+                                        onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempBatteryBrand) { setBatteryBrands([...batteryBrands, tempBatteryBrand]); setTempBatteryBrand(""); }}}}
+                                    />
+                                    <Button type="button" variant="outline" onClick={() => { if (tempBatteryBrand) { setBatteryBrands([...batteryBrands, tempBatteryBrand]); setTempBatteryBrand(""); } }}>+ Add</Button>
+                                </div>
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                    {batteryBrands.map((b, i) => (
+                                        <span key={i} className="flex items-center bg-teal/10 text-teal text-sm px-3 py-1 rounded-full">
+                                            {b} <X className="w-3 h-3 ml-2 cursor-pointer" onClick={() => setBatteryBrands(batteryBrands.filter((_, idx) => idx !== i))} />
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            {/* Meet The Team */}
+            <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                    <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">5</span>
+                    <div>
+                        <h2 className="text-lg font-space-grotesk font-semibold text-ink">Meet The Team</h2>
+                        <p className="text-sm text-slate-custom">Add the people customers will meet — owners, sales, technical, or after-sales staff.</p>
+                    </div>
+                </div>
+                
+                <div className="space-y-4">
+                    {team.map((member, index) => (
+                        <div key={index} className="p-4 border border-line rounded-xl flex gap-4 relative bg-slate-50/50">
+                            {team.length > 1 && (
+                                <button type="button" onClick={() => setTeam(team.filter((_, i) => i !== index))} className="absolute top-4 right-4 text-slate-400 hover:text-red-500">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            )}
+                            <div className="w-20 shrink-0">
+                                <UploadZone 
+                                    onUpload={async (f) => {
+                                        try {
+                                            const { publicUrl } = await uploadFile(f, "team");
+                                            const newTeam = [...team];
+                                            newTeam[index].imageUrl = publicUrl;
+                                            setTeam(newTeam);
+                                            toast.success("Image uploaded");
+                                        } catch (e) {
+                                            toast.error("Upload failed");
+                                        }
+                                    }} 
+                                    isUploading={isUploading}
+                                    value={member.imageUrl}
+                                    accept="image/*"
+                                    title="Photo"
+                                />
+                            </div>
+                            <div className="flex-1 space-y-3">
+                                <div className="grid grid-cols-2 gap-3 pr-8">
+                                    <Input 
+                                        placeholder="Name" 
+                                        value={member.name}
+                                        onChange={(e) => { const nt = [...team]; nt[index].name = e.target.value; setTeam(nt); }}
+                                        className="bg-white"
+                                    />
+                                    <Input 
+                                        placeholder="Designation" 
+                                        value={member.designation}
+                                        onChange={(e) => { const nt = [...team]; nt[index].designation = e.target.value; setTeam(nt); }}
+                                        className="bg-white"
+                                    />
+                                </div>
+                                <Input 
+                                    placeholder="LinkedIn Profile URL" 
+                                    value={member.linkedIn}
+                                    onChange={(e) => { const nt = [...team]; nt[index].linkedIn = e.target.value; setTeam(nt); }}
+                                    className="bg-white w-full"
+                                />
+                            </div>
+                        </div>
+                    ))}
+                    <Button type="button" variant="outline" className="w-full border-dashed" onClick={() => setTeam([...team, { name: '', designation: '', linkedIn: '', imageUrl: '' }])}>
+                        <Plus className="w-4 h-4 mr-2" /> Add Team Member
+                    </Button>
+                </div>
+            </div>
+
+            {/* Projects */}
+            <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                    <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">6</span>
+                    <div>
+                        <h2 className="text-lg font-space-grotesk font-semibold text-ink">Projects</h2>
+                        <p className="text-sm text-slate-custom">Show off completed work. Add as many projects as you like.</p>
+                    </div>
+                </div>
+                
+                <div className="space-y-4">
+                    {projects.map((project, index) => (
+                        <div key={index} className="p-5 border border-line rounded-xl relative bg-slate-50/50 space-y-4">
+                            {projects.length > 1 && (
+                                <button type="button" onClick={() => setProjects(projects.filter((_, i) => i !== index))} className="absolute top-4 right-4 text-slate-400 hover:text-red-500">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            )}
+                            
+                            <div className="space-y-2 pr-8">
+                                <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">YouTube Link</Label>
+                                <Input 
+                                    placeholder="https://youtube.com/watch?v=..." 
+                                    value={project.youtubeUrl}
+                                    onChange={(e) => { const np = [...projects]; np[index].youtubeUrl = e.target.value; setProjects(np); }}
+                                    className="bg-white"
+                                />
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Date of Installation</Label>
+                                    <Input 
+                                        type="date"
+                                        value={project.installationDate}
+                                        onChange={(e) => { const np = [...projects]; np[index].installationDate = e.target.value; setProjects(np); }}
+                                        className="bg-white"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Customer Name</Label>
+                                    <Input 
+                                        value={project.customerName}
+                                        onChange={(e) => { const np = [...projects]; np[index].customerName = e.target.value; setProjects(np); }}
+                                        className="bg-white"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Company Name</Label>
+                                    <Input 
+                                        value={project.companyName}
+                                        onChange={(e) => { const np = [...projects]; np[index].companyName = e.target.value; setProjects(np); }}
+                                        className="bg-white"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">City</Label>
+                                    <Input 
+                                        value={project.city}
+                                        onChange={(e) => { const np = [...projects]; np[index].city = e.target.value; setProjects(np); }}
+                                        className="bg-white"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Country</Label>
+                                    <Input 
+                                        value={project.country}
+                                        onChange={(e) => { const np = [...projects]; np[index].country = e.target.value; setProjects(np); }}
+                                        className="bg-white"
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Short Description</Label>
+                                <Textarea 
+                                    value={project.description}
+                                    onChange={(e) => { const np = [...projects]; np[index].description = e.target.value; setProjects(np); }}
+                                    className="bg-white"
+                                />
+                            </div>
+                        </div>
+                    ))}
+                    <Button type="button" variant="outline" className="w-full border-dashed" onClick={() => setProjects([...projects, { youtubeUrl: '', installationDate: '', customerName: '', companyName: '', city: '', country: '', description: '' }])}>
+                        <Plus className="w-4 h-4 mr-2" /> Add Project
+                    </Button>
                 </div>
             </div>
 
             {/* Certifications & Documents */}
             <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
-                    <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">5</span>
+                    <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">7</span>
                     <div>
                         <h2 className="text-lg font-space-grotesk font-semibold text-ink">Certifications & Documents</h2>
                         <p className="text-sm text-slate-custom">Licences and proof.</p>
@@ -281,7 +518,7 @@ export function EpcOnboardingForm() {
             {/* Tier */}
             <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
-                    <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">6</span>
+                    <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">8</span>
                     <div>
                         <h2 className="text-lg font-space-grotesk font-semibold text-ink">Verification Tier</h2>
                     </div>

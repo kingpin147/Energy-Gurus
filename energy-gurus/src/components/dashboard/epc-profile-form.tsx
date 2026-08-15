@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { updateEpcProfile } from "@/lib/actions/epc";
-import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, AlertCircle, Loader2, X, Plus } from "lucide-react";
+import { useR2Upload } from "@/lib/hooks/use-r2-upload";
+import { UploadZone } from "@/components/ui/upload-zone";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 interface EpcProfileFormProps {
     epcId: string;
@@ -10,15 +14,42 @@ interface EpcProfileFormProps {
     defaultCeoName?: string;
     defaultSectors?: string[];
     defaultCertifications?: string[];
+    defaultSolarBrands?: string[];
+    defaultInverterBrands?: string[];
+    defaultBatteryBrands?: string[];
+    defaultTeam?: any[];
     defaultAbout: string;
     defaultWebsite: string;
 }
 
-export function EpcProfileForm({ epcId, defaultCompanyName, defaultCeoName, defaultSectors = [], defaultCertifications = [], defaultAbout, defaultWebsite }: EpcProfileFormProps) {
+export function EpcProfileForm({ 
+    epcId, 
+    defaultCompanyName, 
+    defaultCeoName, 
+    defaultSectors = [], 
+    defaultCertifications = [], 
+    defaultSolarBrands = [],
+    defaultInverterBrands = [],
+    defaultBatteryBrands = [],
+    defaultTeam = [],
+    defaultAbout, 
+    defaultWebsite 
+}: EpcProfileFormProps) {
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
     const [errorMsg, setErrorMsg] = useState("");
     const [selectedSectors, setSelectedSectors] = useState<string[]>(defaultSectors);
     const [selectedCertifications, setSelectedCertifications] = useState<string[]>(defaultCertifications);
+
+    const [solarBrands, setSolarBrands] = useState<string[]>(defaultSolarBrands);
+    const [inverterBrands, setInverterBrands] = useState<string[]>(defaultInverterBrands);
+    const [batteryBrands, setBatteryBrands] = useState<string[]>(defaultBatteryBrands);
+    const [tempSolarBrand, setTempSolarBrand] = useState("");
+    const [tempInverterBrand, setTempInverterBrand] = useState("");
+    const [tempBatteryBrand, setTempBatteryBrand] = useState("");
+
+    const [team, setTeam] = useState<{name: string, designation: string, linkedIn: string, imageUrl: string}[]>(defaultTeam);
+    
+    const { uploadFile, isUploading } = useR2Upload();
 
     const sectors = ["Residential", "Commercial", "Industrial", "Agriculture"];
     const certificationsList = [
@@ -45,6 +76,11 @@ export function EpcProfileForm({ epcId, defaultCompanyName, defaultCeoName, defa
         try {
             formData.set("sectors", JSON.stringify(selectedSectors));
             formData.set("certifications", JSON.stringify(selectedCertifications));
+            formData.set("solarBrands", JSON.stringify(solarBrands));
+            formData.set("inverterBrands", JSON.stringify(inverterBrands));
+            formData.set("batteryBrands", JSON.stringify(batteryBrands));
+            formData.set("team", JSON.stringify(team.filter(t => t.name || t.designation)));
+            
             await updateEpcProfile(formData);
             setStatus("success");
             setTimeout(() => setStatus("idle"), 4000);
@@ -123,6 +159,129 @@ export function EpcProfileForm({ epcId, defaultCompanyName, defaultCeoName, defa
                             </label>
                         );
                     })}
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Brands Certified To Install</label>
+                <div className="bg-paper/5 border rounded-2xl p-6 space-y-6">
+                    {/* Solar Panels */}
+                    <div className="space-y-3">
+                        <label className="block text-xs font-bold uppercase tracking-widest text-ink">Solar Panels</label>
+                        <div className="flex gap-2">
+                            <Input 
+                                value={tempSolarBrand} 
+                                onChange={(e) => setTempSolarBrand(e.target.value)} 
+                                placeholder="e.g. LONGI Solar" 
+                                onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempSolarBrand) { setSolarBrands([...solarBrands, tempSolarBrand]); setTempSolarBrand(""); }}}}
+                            />
+                            <button type="button" className="px-4 border rounded-xl hover:bg-slate-50 font-semibold" onClick={() => { if (tempSolarBrand) { setSolarBrands([...solarBrands, tempSolarBrand]); setTempSolarBrand(""); } }}>+ Add</button>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                            {solarBrands.map((b, i) => (
+                                <span key={i} className="flex items-center bg-teal/10 text-teal text-sm px-3 py-1 rounded-full">
+                                    {b} <X className="w-3 h-3 ml-2 cursor-pointer" onClick={() => setSolarBrands(solarBrands.filter((_, idx) => idx !== i))} />
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                    
+                    {/* Inverters */}
+                    <div className="space-y-3">
+                        <label className="block text-xs font-bold uppercase tracking-widest text-ink">Inverters</label>
+                        <div className="flex gap-2">
+                            <Input 
+                                value={tempInverterBrand} 
+                                onChange={(e) => setTempInverterBrand(e.target.value)} 
+                                placeholder="e.g. Huawei" 
+                                onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempInverterBrand) { setInverterBrands([...inverterBrands, tempInverterBrand]); setTempInverterBrand(""); }}}}
+                            />
+                            <button type="button" className="px-4 border rounded-xl hover:bg-slate-50 font-semibold" onClick={() => { if (tempInverterBrand) { setInverterBrands([...inverterBrands, tempInverterBrand]); setTempInverterBrand(""); } }}>+ Add</button>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                            {inverterBrands.map((b, i) => (
+                                <span key={i} className="flex items-center bg-teal/10 text-teal text-sm px-3 py-1 rounded-full">
+                                    {b} <X className="w-3 h-3 ml-2 cursor-pointer" onClick={() => setInverterBrands(inverterBrands.filter((_, idx) => idx !== i))} />
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Batteries */}
+                    <div className="space-y-3">
+                        <label className="block text-xs font-bold uppercase tracking-widest text-ink">Batteries</label>
+                        <div className="flex gap-2">
+                            <Input 
+                                value={tempBatteryBrand} 
+                                onChange={(e) => setTempBatteryBrand(e.target.value)} 
+                                placeholder="e.g. CoreCell Energy" 
+                                onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempBatteryBrand) { setBatteryBrands([...batteryBrands, tempBatteryBrand]); setTempBatteryBrand(""); }}}}
+                            />
+                            <button type="button" className="px-4 border rounded-xl hover:bg-slate-50 font-semibold" onClick={() => { if (tempBatteryBrand) { setBatteryBrands([...batteryBrands, tempBatteryBrand]); setTempBatteryBrand(""); } }}>+ Add</button>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                            {batteryBrands.map((b, i) => (
+                                <span key={i} className="flex items-center bg-teal/10 text-teal text-sm px-3 py-1 rounded-full">
+                                    {b} <X className="w-3 h-3 ml-2 cursor-pointer" onClick={() => setBatteryBrands(batteryBrands.filter((_, idx) => idx !== i))} />
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Meet The Team</label>
+                <div className="space-y-4">
+                    {team.map((member, index) => (
+                        <div key={index} className="p-4 border rounded-xl flex gap-4 relative bg-paper/5">
+                            <button type="button" onClick={() => setTeam(team.filter((_, i) => i !== index))} className="absolute top-4 right-4 text-slate-400 hover:text-red-500">
+                                <X className="w-5 h-5" />
+                            </button>
+                            <div className="w-20 shrink-0">
+                                <UploadZone 
+                                    onUpload={async (f) => {
+                                        try {
+                                            const { publicUrl } = await uploadFile(f, "team");
+                                            const newTeam = [...team];
+                                            newTeam[index].imageUrl = publicUrl;
+                                            setTeam(newTeam);
+                                            toast.success("Image uploaded");
+                                        } catch (e) {
+                                            toast.error("Upload failed");
+                                        }
+                                    }} 
+                                    isUploading={isUploading}
+                                    value={member.imageUrl}
+                                    accept="image/*"
+                                    title="Photo"
+                                />
+                            </div>
+                            <div className="flex-1 space-y-3">
+                                <div className="grid grid-cols-2 gap-3 pr-8">
+                                    <Input 
+                                        placeholder="Name" 
+                                        value={member.name}
+                                        onChange={(e) => { const nt = [...team]; nt[index].name = e.target.value; setTeam(nt); }}
+                                    />
+                                    <Input 
+                                        placeholder="Designation" 
+                                        value={member.designation}
+                                        onChange={(e) => { const nt = [...team]; nt[index].designation = e.target.value; setTeam(nt); }}
+                                    />
+                                </div>
+                                <Input 
+                                    placeholder="LinkedIn Profile URL" 
+                                    value={member.linkedIn}
+                                    onChange={(e) => { const nt = [...team]; nt[index].linkedIn = e.target.value; setTeam(nt); }}
+                                    className="w-full"
+                                />
+                            </div>
+                        </div>
+                    ))}
+                    <button type="button" className="w-full border-2 border-dashed rounded-xl p-3 flex items-center justify-center gap-2 hover:bg-slate-50 font-semibold" onClick={() => setTeam([...team, { name: '', designation: '', linkedIn: '', imageUrl: '' }])}>
+                        <Plus className="w-4 h-4" /> Add Team Member
+                    </button>
                 </div>
             </div>
 

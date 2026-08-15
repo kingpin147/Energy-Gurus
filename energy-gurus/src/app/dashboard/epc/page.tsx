@@ -139,6 +139,10 @@ export default async function EpcDashboard() {
                   defaultCeoName={epc.ceoName || ""}
                   defaultSectors={epc.sectors || []}
                   defaultCertifications={(epc as any).certifications || []}
+                  defaultSolarBrands={(epc as any).solarBrands || []}
+                  defaultInverterBrands={(epc as any).inverterBrands || []}
+                  defaultBatteryBrands={(epc as any).batteryBrands || []}
+                  defaultTeam={(epc as any).team || []}
                   defaultAbout={epc.about || ""}
                   defaultWebsite={epc.website || ""}
                 />

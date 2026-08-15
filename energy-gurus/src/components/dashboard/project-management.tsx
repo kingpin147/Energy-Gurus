@@ -22,6 +22,11 @@ interface Project {
     images: string[] | null;
     videos: string[] | null;
     youtubeUrl: string | null;
+    installationDate: string | null;
+    customerName: string | null;
+    companyName: string | null;
+    country: string | null;
+    description: string | null;
 }
 
 interface ProjectManagementProps {
@@ -104,7 +109,12 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
                 solarPanelModel: formData.get("solarPanelModel") as string,
                 images: uploadedImages,
                 videos: uploadedVideos,
-                youtubeUrl: formData.get("youtubeUrl") as string
+                youtubeUrl: formData.get("youtubeUrl") as string,
+                installationDate: formData.get("installationDate") as string,
+                customerName: formData.get("customerName") as string,
+                companyName: formData.get("companyName") as string,
+                country: formData.get("country") as string,
+                description: formData.get("description") as string
     };
 
             if (editingProject) {
@@ -179,9 +189,15 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
                                         <input name="name" defaultValue={editingProject?.name || ""} placeholder="e.g. 10kW Residential Installation" className="w-full border rounded-2xl p-4 bg-paper outline-none" required />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="col-span-2 sm:col-span-1">
-                                            <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">City</label>
-                                            <input name="city" defaultValue={editingProject?.city || ""} placeholder="Islamabad" className="w-full border rounded-2xl p-4 bg-paper outline-none" />
+                                        <div className="col-span-2 sm:col-span-1 space-y-4">
+                                            <div>
+                                                <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">City</label>
+                                                <input name="city" defaultValue={editingProject?.city || ""} placeholder="Islamabad" className="w-full border rounded-2xl p-4 bg-paper outline-none" />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">Country</label>
+                                                <input name="country" defaultValue={editingProject?.country || "Pakistan"} className="w-full border rounded-2xl p-4 bg-paper outline-none" />
+                                            </div>
                                         </div>
                                         <div className="col-span-2">
                                             <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">Segment (Tick Options)</label>
@@ -244,6 +260,31 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
                                     <div className="pt-2">
                                         <label className="text-[10px] font-black uppercase tracking-widest mb-2 block flex items-center gap-1"><Zap className="w-3 h-3 text-red-500 fill-current" /> YouTube Video URL</label>
                                         <input name="youtubeUrl" defaultValue={editingProject?.youtubeUrl || ""} placeholder="https://youtube.com/watch?v=..." className="w-full border rounded-xl p-3 bg-paper outline-none text-sm" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-amber/10">
+                                <div className="space-y-4">
+                                    <h4 className="text-sm font-bold uppercase tracking-widest opacity-40">Client Details</h4>
+                                    <div>
+                                        <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">Customer Name</label>
+                                        <input name="customerName" defaultValue={editingProject?.customerName || ""} placeholder="John Doe" className="w-full border rounded-2xl p-4 bg-paper outline-none" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">Company Name (If Commercial)</label>
+                                        <input name="companyName" defaultValue={editingProject?.companyName || ""} placeholder="ABC Corp" className="w-full border rounded-2xl p-4 bg-paper outline-none" />
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    <h4 className="text-sm font-bold uppercase tracking-widest opacity-40">Additional Info</h4>
+                                    <div>
+                                        <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">Date of Installation</label>
+                                        <input type="date" name="installationDate" defaultValue={editingProject?.installationDate || ""} className="w-full border rounded-2xl p-4 bg-paper outline-none" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">Description</label>
+                                        <textarea name="description" defaultValue={editingProject?.description || ""} rows={3} placeholder="Project notes..." className="w-full border rounded-2xl p-4 bg-paper outline-none resize-none" />
                                     </div>
                                 </div>
                             </div>

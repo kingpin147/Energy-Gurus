@@ -135,6 +135,12 @@ export default async function EpcProfilePage({
     ? (installer.brandsCertified as string[]) 
     : ["LONGI", "JINKO", "JA", "TRINA", "HUAWEI"];
 
+  const solarBrands = (installer.solarBrands as string[]) || [];
+  const inverterBrands = (installer.inverterBrands as string[]) || [];
+  const batteryBrands = (installer.batteryBrands as string[]) || [];
+
+  const team = (installer.team as { name: string; designation: string; linkedIn: string; imageUrl: string }[]) || [];
+
   const sectorsList = (installer.sectors as string[])?.length > 0
     ? (installer.sectors as string[])
     : ["Residential", "Commercial", "Industrial", "Agriculture"];
@@ -185,15 +191,44 @@ export default async function EpcProfilePage({
                 {installer.tier === 'silver' && <span className="ml-2 bg-slate-200 text-slate-700 px-2 py-0.5 rounded text-xs font-bold uppercase">Silver</span>}
                 {installer.tier === 'gold' && <span className="ml-2 bg-amber/20 text-amber-600 px-2 py-0.5 rounded text-xs font-bold uppercase">Gold</span>}
               </div>
-              <div className="flex items-center gap-2 flex-wrap mb-4">
-                <span className="font-ibm-plex-mono text-[0.68rem] tracking-[0.05em] uppercase text-slate-custom mr-0.5">
-                  Certified By
-                </span>
-                {certBrands.map((brand, i) => (
-                  <span key={i} className="h-[26px] px-[10px] rounded-[5px] bg-ink text-amber font-space-grotesk font-bold text-[0.66rem] tracking-[0.03em] flex items-center justify-center uppercase">
-                    {brand}
-                  </span>
-                ))}
+              <div className="flex flex-col gap-2 mb-4">
+                {(solarBrands.length > 0 || inverterBrands.length > 0 || batteryBrands.length > 0) ? (
+                  <>
+                    {solarBrands.length > 0 && (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-ibm-plex-mono text-[0.68rem] tracking-[0.05em] uppercase text-slate-custom w-[80px]">Solar</span>
+                        {solarBrands.map((brand, i) => (
+                          <span key={i} className="h-[26px] px-[10px] rounded-[5px] bg-ink text-amber font-space-grotesk font-bold text-[0.66rem] tracking-[0.03em] flex items-center justify-center uppercase">{brand}</span>
+                        ))}
+                      </div>
+                    )}
+                    {inverterBrands.length > 0 && (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-ibm-plex-mono text-[0.68rem] tracking-[0.05em] uppercase text-slate-custom w-[80px]">Inverters</span>
+                        {inverterBrands.map((brand, i) => (
+                          <span key={i} className="h-[26px] px-[10px] rounded-[5px] bg-ink text-amber font-space-grotesk font-bold text-[0.66rem] tracking-[0.03em] flex items-center justify-center uppercase">{brand}</span>
+                        ))}
+                      </div>
+                    )}
+                    {batteryBrands.length > 0 && (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-ibm-plex-mono text-[0.68rem] tracking-[0.05em] uppercase text-slate-custom w-[80px]">Batteries</span>
+                        {batteryBrands.map((brand, i) => (
+                          <span key={i} className="h-[26px] px-[10px] rounded-[5px] bg-ink text-amber font-space-grotesk font-bold text-[0.66rem] tracking-[0.03em] flex items-center justify-center uppercase">{brand}</span>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-ibm-plex-mono text-[0.68rem] tracking-[0.05em] uppercase text-slate-custom mr-0.5">Certified By</span>
+                    {certBrands.map((brand, i) => (
+                      <span key={i} className="h-[26px] px-[10px] rounded-[5px] bg-ink text-amber font-space-grotesk font-bold text-[0.66rem] tracking-[0.03em] flex items-center justify-center uppercase">
+                        {brand}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -285,6 +320,16 @@ export default async function EpcProfilePage({
                       <p className="text-[0.85rem] text-slate-custom">
                         {project.systemSize || project.systemType || "Solar project installation"}
                       </p>
+                      {project.customerName && (
+                        <p className="text-[0.75rem] text-slate-500 mt-2">
+                          Client: {project.companyName || project.customerName}
+                        </p>
+                      )}
+                      {project.description && (
+                        <p className="text-[0.8rem] text-slate-600 mt-2 line-clamp-2">
+                          {project.description}
+                        </p>
+                      )}
                     </div>
                   </div>
                 );
@@ -460,6 +505,41 @@ export default async function EpcProfilePage({
           </div>
         </div>
       </section>
+
+      {/* Team Section */}
+      {team.length > 0 && (
+        <section className="py-[56px] border-t border-line bg-white/50">
+          <div className="max-w-[1180px] mx-auto px-5 md:px-8">
+            <div className="mb-8 text-center max-w-[560px] mx-auto">
+              <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center justify-center gap-2.5 mb-2">
+                <span className="w-5 h-[1px] bg-amber"></span>
+                Meet The Team
+              </p>
+              <h2 className="font-space-grotesk font-semibold text-[1.4rem] text-ink">
+                The Experts Behind {installer.companyName}
+              </h2>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {team.map((member, i) => (
+                <div key={i} className="text-center group">
+                  <div className="w-[120px] h-[120px] mx-auto rounded-full overflow-hidden border-2 border-line group-hover:border-amber transition-colors mb-4">
+                    {member.imageUrl ? (
+                      <img src={member.imageUrl} alt={member.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-paper flex items-center justify-center text-slate-custom font-space-grotesk text-2xl font-bold">
+                        {member.name.substring(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <h4 className="font-space-grotesk font-semibold text-[1.1rem] text-ink">{member.name}</h4>
+                  <p className="text-slate-custom text-[0.85rem] mt-1">{member.designation}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Request a Quote Section */}
       <section className="bg-white border-y border-line py-[56px]" id="quote">

@@ -26,6 +26,10 @@ export async function updateEpcProfile(data: FormData | Partial<typeof epcInstal
     ceoName: data.get("ceoName") as string,
     sectors: data.get("sectors") ? JSON.parse(data.get("sectors") as string) : [],
     certifications: data.get("certifications") ? JSON.parse(data.get("certifications") as string) : [],
+    solarBrands: data.get("solarBrands") ? JSON.parse(data.get("solarBrands") as string) : [],
+    inverterBrands: data.get("inverterBrands") ? JSON.parse(data.get("inverterBrands") as string) : [],
+    batteryBrands: data.get("batteryBrands") ? JSON.parse(data.get("batteryBrands") as string) : [],
+    team: data.get("team") ? JSON.parse(data.get("team") as string) : [],
     about: data.get("about") as string,
     website: data.get("website") as string
     } : data;

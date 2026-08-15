@@ -43,6 +43,10 @@ export const epcInstallers = pgTable('epc_installers', {
   contactNo: text('contact_no'),
   email: text('email'),
   brandsCertified: jsonb('brands_certified').$type<string[]>().default([]),
+  solarBrands: jsonb('solar_brands').$type<string[]>().default([]),
+  inverterBrands: jsonb('inverter_brands').$type<string[]>().default([]),
+  batteryBrands: jsonb('battery_brands').$type<string[]>().default([]),
+  team: jsonb('team').$type<{ name: string; designation: string; linkedIn: string; imageUrl: string }[]>().default([]),
   regNumber: text('reg_number'),
   licenceDocuments: jsonb('licence_documents').$type<string[]>().default([]),
   tier: text('tier').$type<'bronze' | 'silver' | 'gold'>().default('bronze'),
@@ -69,6 +73,11 @@ export const epcProjects = pgTable('epc_projects', {
   id: uuid('id').defaultRandom().primaryKey(),
   epcId: uuid('epc_id').references(() => epcInstallers.id, { onDelete: 'cascade' }).notNull(),
   name: text('name').notNull(),
+  customerName: text('customer_name'),
+  companyName: text('company_name'),
+  installationDate: text('installation_date'),
+  country: text('country'),
+  description: text('description'),
   city: text('city'),
   segmentType: jsonb('segment_type').$type<string[]>().default([]), // Residential, Commercial, etc. (Multi-select)
   systemSize: text('system_size'), // e.g. "10kW"

@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { users, epcInstallers, UserRole } from "@/db/schema";
+import { users, epcInstallers, epcProjects, UserRole } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { createClerkClient } from "@clerk/nextjs/server";
 import { getUserRole } from "@/lib/roles";
@@ -45,10 +45,20 @@ export async function onboardEpcInstaller(formData: FormData) {
         // 3. Process array fields (Sectors, Certifications, Brands)
         const sectors = formData.getAll("sectors") as string[];
         const certifications = formData.getAll("certifications") as string[];
-        const brandsCertified = formData.getAll("brandsCertified") as string[];
+        const brandsCertified = formData.getAll("brandsCertified") as string[]; // legacy
+        const solarBrands = formData.getAll("solarBrands") as string[];
+        const inverterBrands = formData.getAll("inverterBrands") as string[];
+        const batteryBrands = formData.getAll("batteryBrands") as string[];
         
+        // Process JSON fields
+        const teamStr = formData.get("team") as string;
+        const team = teamStr ? JSON.parse(teamStr) : [];
+        
+        const projectsStr = formData.get("projects") as string;
+        const projects = projectsStr ? JSON.parse(projectsStr) : [];
+
         // 4. Insert into epcInstallers table
-        await db.insert(epcInstallers).values({
+        const [newEpc] = await db.insert(epcInstallers).values({
             userId: newUser.id,
             companyName: companyName,
             ceoName: formData.get("ceoName") as string || null,
@@ -66,10 +76,30 @@ export async function onboardEpcInstaller(formData: FormData) {
             sectors: sectors.length > 0 ? sectors : [],
             certifications: certifications.length > 0 ? certifications : [],
             brandsCertified: brandsCertified.length > 0 ? brandsCertified : [],
+            solarBrands: solarBrands.length > 0 ? solarBrands : [],
+            inverterBrands: inverterBrands.length > 0 ? inverterBrands : [],
+            batteryBrands: batteryBrands.length > 0 ? batteryBrands : [],
+            team: team,
             logoUrl: formData.get("logoUrl") as string || null,
             licenceDocuments: formData.get("licenceDocuments") ? JSON.parse(formData.get("licenceDocuments") as string) : [],
             isVerified: true, // Auto verify since admin is onboarding
-        });
+        }).returning();
+
+        // 5. Insert projects if any
+        if (projects && projects.length > 0) {
+            const projectRecords = projects.map((p: any) => ({
+                epcId: newEpc.id,
+                name: p.name || p.companyName || p.customerName || "Project",
+                youtubeUrl: p.youtubeUrl || null,
+                installationDate: p.installationDate || null,
+                customerName: p.customerName || null,
+                companyName: p.companyName || null,
+                city: p.city || null,
+                country: p.country || null,
+                description: p.description || null
+            }));
+            await db.insert(epcProjects).values(projectRecords);
+        }
 
         revalidatePath("/dashboard/users", "layout");
         
