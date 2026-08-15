@@ -35,6 +35,17 @@ export const epcInstallers = pgTable('epc_installers', {
   reviewVideos: jsonb('review_videos').$type<string[]>().default([]),
   website: text('website'),
   isVerified: boolean('is_verified').default(false),
+  yearsInBusiness: integer('years_in_business'),
+  address: text('address'),
+  area: text('area'),
+  city: text('city'),
+  country: text('country').default('Pakistan'),
+  contactNo: text('contact_no'),
+  email: text('email'),
+  brandsCertified: jsonb('brands_certified').$type<string[]>().default([]),
+  regNumber: text('reg_number'),
+  licenceDocuments: jsonb('licence_documents').$type<string[]>().default([]),
+  tier: text('tier').$type<'bronze' | 'silver' | 'gold'>().default('bronze'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
     }, (table) => ({

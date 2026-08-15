@@ -11,7 +11,8 @@ import { Logo } from "@/components/ui/logo";
 const navLinks = [
     { label: "About Us", href: "/about" },
     { label: "Monitoring & O&M", href: "/monitoring" },
-    { label: "Find an Installer", href: "/installers" },
+    { label: "News", href: "/news" },
+    { label: "Podcasts", href: "/podcast" },
 ];
 
 export function Navbar() {

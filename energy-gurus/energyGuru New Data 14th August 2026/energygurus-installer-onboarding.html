@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Installer Onboarding — EnergyGurus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12213A; --paper:#F5F6F3; --amber:#E8A33D;
+    --teal:#2F6E62; --slate:#4A5A73; --graphite:#1B1F24;
+    --line: rgba(18,33,58,0.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Inter', sans-serif; color:var(--graphite); background:var(--paper); line-height:1.5;}
+  h1,h2,h3{font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:-0.01em;}
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:840px; margin:0 auto; padding:0 32px;}
+  :focus-visible{outline:2px solid var(--amber); outline-offset:3px;}
+  button{cursor:pointer; border:none; font-family:'Inter'; font-weight:600;}
+
+  nav{position:sticky; top:0; z-index:50; background:rgba(245,246,243,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line);}
+  nav .wrap{max-width:1180px; display:flex; align-items:center; justify-content:space-between; height:72px;}
+  .nav-links{display:flex; gap:28px; font-size:0.9rem; font-weight:500; color:var(--slate);}
+  .nav-links a:hover{color:var(--ink);}
+  .nav-cta{background:var(--ink); color:var(--paper); padding:11px 20px; border-radius:3px; font-size:0.88rem;}
+  @media(max-width:900px){ .nav-links{display:none;} }
+
+  .eyebrow{font-family:'IBM Plex Mono', monospace; font-size:0.76rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--amber); display:flex; align-items:center; gap:10px; margin-bottom:14px;}
+  .eyebrow::before{content:""; width:20px; height:1px; background:var(--amber);}
+  .eyebrow.teal{color:var(--teal);}
+  .eyebrow.teal::before{background:var(--teal);}
+
+  .page-head{background:var(--ink); color:#fff; padding:56px 0 40px;}
+  .page-head h1{font-size:clamp(1.8rem,4vw,2.4rem);}
+  .page-head p{color:rgba(245,246,243,0.7); max-width:600px; margin-top:14px; font-size:1rem;}
+
+  section{padding:48px 0;}
+
+  .form-progress{display:flex; gap:6px; margin-bottom:40px;}
+  .form-progress .step-dot{flex:1; height:3px; background:var(--line); border-radius:2px;}
+  .form-progress .step-dot.done{background:var(--teal);}
+
+  .form-card{background:#fff; border:1px solid var(--line); border-radius:6px; padding:36px; margin-bottom:24px;}
+  .form-card h2{font-size:1.15rem; color:var(--ink); margin-bottom:4px;}
+  .form-card .section-sub{color:var(--slate); font-size:0.86rem; margin-bottom:24px;}
+  .form-card .section-num{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:26px; height:26px; border-radius:50%; background:var(--paper); border:1px solid var(--line);
+    font-family:'IBM Plex Mono', monospace; font-size:0.78rem; color:var(--teal); margin-right:10px;
+  }
+
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  .form-grid .full{grid-column:1 / -1;}
+  .field label{
+    display:block; font-family:'IBM Plex Mono', monospace; font-size:0.72rem;
+    letter-spacing:0.06em; text-transform:uppercase; color:var(--slate); margin-bottom:8px;
+  }
+  .field .hint{font-size:0.78rem; color:var(--slate); margin-top:6px;}
+  .field input, .field select, .field textarea{
+    width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:3px;
+    font-family:'Inter'; font-size:0.92rem; color:var(--graphite); background:var(--paper);
+  }
+  .field textarea{resize:vertical; min-height:90px;}
+
+  /* upload dropzone */
+  .upload-zone{
+    border:1px dashed var(--line); border-radius:4px; padding:28px 20px;
+    text-align:center; background:var(--paper); cursor:pointer;
+  }
+  .upload-zone:hover{border-color:var(--teal);}
+  .upload-zone .upload-icon{font-size:1.4rem; margin-bottom:8px;}
+  .upload-zone .upload-text{font-size:0.88rem; color:var(--ink); font-weight:600;}
+  .upload-zone .upload-sub{font-size:0.78rem; color:var(--slate); margin-top:4px;}
+  .upload-zone input[type="file"]{display:none;}
+
+  /* checkbox / chip groups */
+  .chip-group{display:flex; flex-wrap:wrap; gap:10px;}
+  .chip-check{
+    display:flex; align-items:center; gap:7px;
+    border:1px solid var(--line); border-radius:20px; padding:8px 14px;
+    font-size:0.86rem; color:var(--slate); cursor:pointer;
+  }
+  .chip-check input{accent-color:var(--teal);}
+  .chip-check:has(input:checked){border-color:var(--teal); background:rgba(47,110,98,0.06); color:var(--ink);}
+
+  .radio-tier{display:flex; flex-direction:column; gap:10px;}
+  .tier-option{
+    display:flex; align-items:flex-start; gap:12px; border:1px solid var(--line); border-radius:4px; padding:14px 16px; cursor:pointer;
+  }
+  .tier-option:has(input:checked){border-color:var(--amber); background:rgba(232,163,61,0.05);}
+  .tier-option input{margin-top:3px; accent-color:var(--amber);}
+  .tier-option .tier-name{font-weight:600; color:var(--ink); font-size:0.92rem;}
+  .tier-option .tier-desc{font-size:0.82rem; color:var(--slate); margin-top:2px;}
+
+  .btn-primary{background:var(--amber); color:var(--ink); padding:15px 28px; border-radius:3px; font-size:0.95rem; width:100%;}
+  .btn-primary:hover{background:#f2b458;}
+  .form-note{font-size:0.8rem; color:var(--slate); margin-top:14px; text-align:center;}
+
+  .form-success{display:none; text-align:center; padding:60px 20px;}
+  .form-success .check-circle{
+    width:56px; height:56px; border-radius:50%; background:rgba(47,110,98,0.1); color:var(--teal);
+    display:flex; align-items:center; justify-content:center; font-size:1.6rem; margin:0 auto 20px;
+  }
+  .form-success h2{color:var(--ink); font-size:1.3rem; margin-bottom:10px;}
+  .form-success p{color:var(--slate); font-size:0.94rem;}
+
+  @media(max-width:700px){ .form-grid{grid-template-columns:1fr;} .form-card{padding:24px 20px;} }
+
+  footer{background:var(--ink); color:rgba(245,246,243,0.55); padding:32px 0; text-align:center; font-size:0.82rem;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="energygurus-homepage.html" style="font-family:'Space Grotesk'; font-weight:700; color:var(--ink);">EnergyGurus.Online</a>
+    <div class="nav-links">
+      <a href="energygurus-installer-page.html">Find an Installer</a>
+      <a href="energygurus-brands-page.html">Brands</a>
+    </div>
+    <a href="energygurus-installer-page.html" class="nav-cta">Back to Directory</a>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <p class="eyebrow">Join the Network</p>
+    <h1>Get listed as a certified installer.</h1>
+    <p>Reach homeowners and businesses actively searching for solar installers. Fill out your profile below — our team reviews every application before it goes live.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+
+    <form id="onboardForm" onsubmit="return handleOnboardSubmit(event)">
+
+      <div class="form-progress">
+        <div class="step-dot done"></div>
+        <div class="step-dot done"></div>
+        <div class="step-dot done"></div>
+        <div class="step-dot done"></div>
+        <div class="step-dot done"></div>
+        <div class="step-dot done"></div>
+      </div>
+
+      <!-- 1. Basic Information -->
+      <div class="form-card">
+        <h2><span class="section-num">1</span>Basic Information</h2>
+        <p class="section-sub">Tell us about you and your company.</p>
+        <div class="form-grid">
+          <div class="field">
+            <label for="contactName">Installer / Contact Name</label>
+            <input type="text" id="contactName" required>
+          </div>
+          <div class="field">
+            <label for="companyName">Company Name</label>
+            <input type="text" id="companyName" required>
+          </div>
+          <div class="field">
+            <label for="yearsBusiness">Years in Business</label>
+            <input type="number" id="yearsBusiness" min="0" required>
+          </div>
+          <div class="field">
+            <label>Company Logo / Photo</label>
+            <label class="upload-zone" for="logoUpload">
+              <div class="upload-icon">📷</div>
+              <div class="upload-text">Click to upload</div>
+              <div class="upload-sub">PNG or JPG, up to 5MB</div>
+              <input type="file" id="logoUpload" accept="image/*">
+            </label>
+          </div>
+          <div class="field full">
+            <label for="bio">Short Bio</label>
+            <textarea id="bio" placeholder="Tell homeowners what makes your company a good fit — specialties, experience, service philosophy." required></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Location -->
+      <div class="form-card">
+        <h2><span class="section-num">2</span>Location</h2>
+        <p class="section-sub">Where do you operate?</p>
+        <div class="form-grid">
+          <div class="field full">
+            <label for="address">Full Address</label>
+            <input type="text" id="address" required>
+          </div>
+          <div class="field">
+            <label for="area">Area / Society</label>
+            <input type="text" id="area" required>
+          </div>
+          <div class="field">
+            <label for="city">City</label>
+            <input type="text" id="city" required>
+          </div>
+          <div class="field">
+            <label for="country">Country</label>
+            <input type="text" id="country" value="Pakistan" required>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Contact Details -->
+      <div class="form-card">
+        <h2><span class="section-num">3</span>Contact Details</h2>
+        <p class="section-sub">How customers and our team will reach you.</p>
+        <div class="form-grid">
+          <div class="field">
+            <label for="contactNo">Contact No.</label>
+            <input type="tel" id="contactNo" required>
+          </div>
+          <div class="field">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" required>
+          </div>
+          <div class="field">
+            <label for="website">Website</label>
+            <input type="text" id="website" placeholder="www.yourcompany.com">
+          </div>
+          <div class="field">
+            <label for="facebook">Facebook</label>
+            <input type="text" id="facebook" placeholder="Profile URL">
+          </div>
+          <div class="field">
+            <label for="instagram">Instagram</label>
+            <input type="text" id="instagram" placeholder="Profile URL">
+          </div>
+          <div class="field">
+            <label for="linkedin">LinkedIn</label>
+            <input type="text" id="linkedin" placeholder="Profile URL">
+          </div>
+          <div class="field full">
+            <label for="youtube">YouTube</label>
+            <input type="text" id="youtube" placeholder="Channel URL">
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Specialties -->
+      <div class="form-card">
+        <h2><span class="section-num">4</span>Specialties</h2>
+        <p class="section-sub">What systems do you install, and which brands are you certified for?</p>
+        <div class="field full" style="margin-bottom:24px;">
+          <label>System Type</label>
+          <div class="chip-group">
+            <label class="chip-check"><input type="checkbox"> Residential</label>
+            <label class="chip-check"><input type="checkbox"> Commercial</label>
+            <label class="chip-check"><input type="checkbox"> Industrial</label>
+            <label class="chip-check"><input type="checkbox"> Agriculture</label>
+          </div>
+        </div>
+        <div class="field full">
+          <label>Brands You're Certified to Install</label>
+          <div class="chip-group">
+            <label class="chip-check"><input type="checkbox"> LONGi</label>
+            <label class="chip-check"><input type="checkbox"> Jinko</label>
+            <label class="chip-check"><input type="checkbox"> Trina</label>
+            <label class="chip-check"><input type="checkbox"> JA Solar</label>
+            <label class="chip-check"><input type="checkbox"> Huawei</label>
+            <label class="chip-check"><input type="checkbox"> Growatt</label>
+            <label class="chip-check"><input type="checkbox"> Other</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Certifications & Documents -->
+      <div class="form-card">
+        <h2><span class="section-num">5</span>Certifications &amp; Documents</h2>
+        <p class="section-sub">Upload proof — this speeds up verification.</p>
+        <div class="form-grid">
+          <div class="field full">
+            <label>Certifications Held</label>
+            <div class="chip-group">
+              <label class="chip-check"><input type="checkbox"> AEDB Licence</label>
+              <label class="chip-check"><input type="checkbox"> PEC Licence</label>
+              <label class="chip-check"><input type="checkbox"> Manufacturer Certified</label>
+              <label class="chip-check"><input type="checkbox"> PSA - Energy Nexus Certified</label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="regNumber">Business Registration / CNIC Number</label>
+            <input type="text" id="regNumber" required>
+          </div>
+          <div class="field">
+            <label>Upload Licence / Certification Documents</label>
+            <label class="upload-zone" for="docUpload">
+              <div class="upload-icon">📄</div>
+              <div class="upload-text">Click to upload</div>
+              <div class="upload-sub">PDF or image, up to 10MB each</div>
+              <input type="file" id="docUpload" accept=".pdf,image/*" multiple>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Verification Tier -->
+      <div class="form-card">
+        <h2><span class="section-num">6</span>Verification Tier</h2>
+        <p class="section-sub">Optional — you can always upgrade later.</p>
+        <div class="radio-tier">
+          <label class="tier-option">
+            <input type="radio" name="tier" value="bronze" checked>
+            <div>
+              <div class="tier-name">Bronze — Free Listing</div>
+              <div class="tier-desc">Basic profile in the directory. No verification badge.</div>
+            </div>
+          </label>
+          <label class="tier-option">
+            <input type="radio" name="tier" value="silver">
+            <div>
+              <div class="tier-name">Silver — Verified</div>
+              <div class="tier-desc">Licence check + site visit audit. "Verified" badge on your profile.</div>
+            </div>
+          </label>
+          <label class="tier-option">
+            <input type="radio" name="tier" value="gold">
+            <div>
+              <div class="tier-name">Gold — Verified + Featured</div>
+              <div class="tier-desc">Everything in Silver, plus featured placement and priority lead routing.</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary">Submit Application</button>
+      <p class="form-note">Our team typically reviews applications within 3–5 business days.</p>
+
+      <div class="form-success" id="onboardSuccess">
+        <div class="check-circle">✓</div>
+        <h2>Application received</h2>
+        <p>Thanks for applying to join EnergyGurus.Online. Our team will review your profile and reach out within 3–5 business days.</p>
+      </div>
+
+    </form>
+
+  </div>
+</section>
+
+<footer>© 2026 EnergyGurus.online — All rights reserved.</footer>
+
+<script>
+function handleOnboardSubmit(e) {
+  e.preventDefault();
+  document.getElementById('onboardForm').querySelectorAll('.form-progress, .form-card, .btn-primary, .form-note').forEach(el => el.style.display = 'none');
+  document.getElementById('onboardSuccess').style.display = 'block';
+  return false;
+}
+</script>
+
+</body>
+</html>

@@ -20,6 +20,14 @@ export async function createNews(formData: FormData) {
         const category = formData.get("category") as string;
         const imageUrl = formData.get("imageUrl") as string;
         const isPublished = formData.get("isPublished") === "true";
+        const publishedAtStr = formData.get("publishedAt") as string;
+        
+        let finalPublishedAt = null;
+        if (isPublished) {
+            finalPublishedAt = new Date();
+        } else if (publishedAtStr) {
+            finalPublishedAt = new Date(publishedAtStr);
+        }
 
         if (!title || !content || !category) {
             return { success: false, message: "Missing required fields" };
@@ -31,8 +39,8 @@ export async function createNews(formData: FormData) {
             category,
             imageUrl: imageUrl || null,
             authorId: user.id,
-            isPublished,
-            publishedAt: isPublished ? new Date() : null,
+            isPublished: isPublished || (finalPublishedAt && finalPublishedAt <= new Date()) ? true : false,
+            publishedAt: finalPublishedAt,
         });
 
         revalidatePath("/dashboard/news");

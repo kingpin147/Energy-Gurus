@@ -24,6 +24,7 @@ export function NewsForm() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [imageUrl, setImageUrl] = useState("");
+    const [isPublished, setIsPublished] = useState(true);
     const { uploadFile, isUploading } = useR2Upload();
 
     async function onSubmit(formData: FormData) {
@@ -74,11 +75,18 @@ export function NewsForm() {
 
                     <div className="space-y-2 flex flex-col justify-end pb-2">
                         <div className="flex items-center space-x-3 bg-slate-50 p-3 rounded-xl border border-transparent">
-                            <Switch id="isPublished" name="isPublished" value="true" defaultChecked={true} className="data-[state=checked]:bg-teal" />
+                            <Switch id="isPublished" name="isPublished" value="true" checked={isPublished} onCheckedChange={setIsPublished} className="data-[state=checked]:bg-teal" />
                             <Label htmlFor="isPublished" className="text-sm font-bold cursor-pointer">Publish immediately</Label>
                         </div>
                     </div>
                 </div>
+
+                {!isPublished && (
+                    <div className="space-y-2">
+                        <Label htmlFor="publishedAt" className="text-sm font-bold text-ink">Publish Date & Time <span className="text-red-500">*</span></Label>
+                        <Input type="datetime-local" id="publishedAt" name="publishedAt" required={!isPublished} className="h-11 rounded-xl bg-slate-50 border-transparent focus-visible:bg-white focus-visible:ring-amber" />
+                    </div>
+                )}
 
                 <div className="space-y-2">
                     <Label className="text-sm font-bold text-ink">Cover Image</Label>

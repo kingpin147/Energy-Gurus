@@ -174,6 +174,79 @@ export default function MonitoringOverviewPage() {
                 </div>
             </section>
 
+            <section className="py-[80px]">
+                <div className="max-w-[1180px] mx-auto px-5 md:px-8">
+                    <div className="max-w-[640px] mb-12">
+                        <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-teal flex items-center gap-2.5 mb-[18px]">
+                            <span className="w-5 h-[1px] bg-teal"></span>
+                            How It Works
+                        </p>
+                        <h2 className="font-space-grotesk font-semibold text-[clamp(1.5rem,3vw,2.1rem)] text-ink tracking-[-0.01em]">
+                            From sign-up to a system that watches itself.
+                        </h2>
+                        <p className="text-slate-custom text-[1.02rem] mt-4">
+                            Once you're onboarded, you never need to call us about a problem — we call you.
+                        </p>
+                    </div>
+
+                    <div className="relative max-w-[720px] mx-auto before:content-[''] before:absolute before:left-[23px] before:top-[8px] before:bottom-[8px] before:w-[1px] before:bg-line">
+                        <div className="relative pl-[64px] mb-[34px]">
+                            <div className="absolute left-0 top-0 w-[48px] h-[48px] rounded-full bg-paper border-[1.5px] border-teal text-teal flex items-center justify-center font-ibm-plex-mono font-semibold text-[0.95rem]">1</div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.05rem] text-ink mb-1.5 tracking-[-0.01em]">Registration & payment</h3>
+                            <p className="text-slate-custom text-[0.94rem]">Our sales representative fills out your customer registration form — contact details, CNIC, address, phone number, email, and the package you've selected — along with the payment slip you deposit at our official bank account.</p>
+                        </div>
+                        <div className="relative pl-[64px] mb-[34px]">
+                            <div className="absolute left-0 top-0 w-[48px] h-[48px] rounded-full bg-paper border-[1.5px] border-teal text-teal flex items-center justify-center font-ibm-plex-mono font-semibold text-[0.95rem]">2</div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.05rem] text-ink mb-1.5 tracking-[-0.01em]">Site survey</h3>
+                            <p className="text-slate-custom text-[0.94rem]">Our technical team visits your premises to document your complete system — panels, inverters, batteries, structure, breakers, cables, earthing, lightning arrestors, installation date, and overall system health.</p>
+                        </div>
+                        <div className="relative pl-[64px] mb-[34px]">
+                            <div className="absolute left-0 top-0 w-[48px] h-[48px] rounded-full bg-paper border-[1.5px] border-teal text-teal flex items-center justify-center font-ibm-plex-mono font-semibold text-[0.95rem]">3</div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.05rem] text-ink mb-1.5 tracking-[-0.01em]">CRM profile created</h3>
+                            <p className="text-slate-custom text-[0.94rem]">Everything collected is entered into our database, creating your permanent customer profile.</p>
+                        </div>
+                        <div className="relative pl-[64px] mb-[34px]">
+                            <div className="absolute left-0 top-0 w-[48px] h-[48px] rounded-full bg-paper border-[1.5px] border-teal text-teal flex items-center justify-center font-ibm-plex-mono font-semibold text-[0.95rem]">4</div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.05rem] text-ink mb-1.5 tracking-[-0.01em]">Customer ID created</h3>
+                            <p className="text-slate-custom text-[0.94rem]">A unique customer ID is generated for your account.</p>
+                        </div>
+                        <div className="relative pl-[64px] mb-[34px]">
+                            <div className="absolute left-0 top-0 w-[48px] h-[48px] rounded-full bg-paper border-[1.5px] border-teal text-teal flex items-center justify-center font-ibm-plex-mono font-semibold text-[0.95rem]">5</div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.05rem] text-ink mb-1.5 tracking-[-0.01em]">Inverter connection</h3>
+                            <p className="text-slate-custom text-[0.94rem]">Your inverter is connected to our Network Operations Monitoring System using the credentials collected on-site.</p>
+                        </div>
+                        <div className="relative pl-[64px] mb-[34px]">
+                            <div className="absolute left-0 top-0 w-[48px] h-[48px] rounded-full bg-ink border-[1.5px] border-amber text-amber flex items-center justify-center font-ibm-plex-mono font-semibold text-[0.95rem]">6</div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.05rem] text-ink mb-1.5 tracking-[-0.01em]">Live NOC monitoring</h3>
+                            <p className="text-slate-custom text-[0.94rem]">That's it — your system is connected to our Network Operations Centre, which keeps an eye on it and dispatches the team the moment it spots a discrepancy.</p>
+                        </div>
+                        <div className="relative pl-[64px] mb-[34px]">
+                            <div className="absolute left-0 top-0 w-[48px] h-[48px] rounded-full bg-ink border-[1.5px] border-amber text-amber flex items-center justify-center font-ibm-plex-mono font-semibold text-[0.95rem]">7</div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.05rem] text-ink mb-1.5 tracking-[-0.01em]">Proactive resolution</h3>
+                            <p className="text-slate-custom text-[0.94rem]">Now you don't need to call anyone. We proactively manage it — routing the right resource for diagnosis and rectification.</p>
+                        </div>
+                        <div className="relative pl-[64px] mb-[34px]">
+                            <div className="absolute left-0 top-0 w-[48px] h-[48px] rounded-full bg-ink border-[1.5px] border-amber text-amber flex items-center justify-center font-ibm-plex-mono font-semibold text-[0.95rem]">8</div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.05rem] text-ink mb-1.5 tracking-[-0.01em]">Remote coordination</h3>
+                            <p className="text-slate-custom text-[0.94rem]">For most issues, we coordinate directly with the manufacturer to sort it out remotely.</p>
+                        </div>
+                        <div className="relative pl-[64px]">
+                            <div className="absolute left-0 top-0 w-[48px] h-[48px] rounded-full bg-ink border-[1.5px] border-amber text-amber flex items-center justify-center font-ibm-plex-mono font-semibold text-[0.95rem]">9</div>
+                            <h3 className="font-space-grotesk font-semibold text-[1.05rem] text-ink mb-1.5 tracking-[-0.01em]">Priority repair</h3>
+                            <p className="text-slate-custom text-[0.94rem]">For major issues, equipment is sent to the manufacturer's repair centre and handled on a priority basis. You don't need to follow it up — our team keeps you updated on every step, and gets it reinstalled once the repair is complete.</p>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 p-[24px_26px] bg-ink rounded-[8px] flex gap-[18px] items-start max-w-[720px] mx-auto">
+                        <div className="shrink-0 w-[40px] h-[40px] rounded-full bg-[rgba(232,163,61,0.15)] flex items-center justify-center text-amber text-[1.1rem]">✉</div>
+                        <div>
+                            <h4 className="text-white font-space-grotesk font-semibold text-[0.98rem] mb-1.5 tracking-[-0.01em]">Every step is tracked — nothing falls through the cracks.</h4>
+                            <p className="text-[rgba(245,246,243,0.72)] text-[0.9rem]">Our complaint management system logs every activity through a ticketing system, from the moment an issue is raised to the moment it's resolved. If a ticket runs into delay, it automatically escalates to higher management — so resolution never stalls.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <PricingSection />
 
             <section className="bg-ink text-white py-0">

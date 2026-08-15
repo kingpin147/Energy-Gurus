@@ -131,13 +131,17 @@ export default async function EpcProfilePage({
   const primaryCity = offices[0]?.city || "Lahore";
   const yearsInBusiness = Math.max(1, new Date().getFullYear() - new Date(installer.createdAt).getFullYear());
 
-  const certBrands = (installer.certifications as string[])?.length > 0 
-    ? (installer.certifications as string[]) 
+  const certBrands = (installer.brandsCertified as string[])?.length > 0 
+    ? (installer.brandsCertified as string[]) 
     : ["LONGI", "JINKO", "JA", "TRINA", "HUAWEI"];
 
   const sectorsList = (installer.sectors as string[])?.length > 0
     ? (installer.sectors as string[])
     : ["Residential", "Commercial", "Industrial", "Agriculture"];
+
+  const certificationsList = (installer.certifications as string[])?.length > 0
+    ? (installer.certifications as string[])
+    : [];
 
   const socialLinks = (installer.socialLinks as { platform: string; url: string }[] | null) || [];
   const websiteUrl = installer.website || socialLinks.find(l => l.platform.toLowerCase() === "website")?.url || "#";
@@ -177,7 +181,9 @@ export default async function EpcProfilePage({
                 {installer.companyName}
               </div>
               <div className="flex items-center gap-1.5 text-slate-custom text-[0.92rem] mb-[10px]">
-                📍 {primaryCity}
+                📍 {primaryCity} {installer.isVerified && <span className="flex items-center text-teal ml-2" title="Verified Installer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Verified</span>}
+                {installer.tier === 'silver' && <span className="ml-2 bg-slate-200 text-slate-700 px-2 py-0.5 rounded text-xs font-bold uppercase">Silver</span>}
+                {installer.tier === 'gold' && <span className="ml-2 bg-amber/20 text-amber-600 px-2 py-0.5 rounded text-xs font-bold uppercase">Gold</span>}
               </div>
               <div className="flex items-center gap-2 flex-wrap mb-4">
                 <span className="font-ibm-plex-mono text-[0.68rem] tracking-[0.05em] uppercase text-slate-custom mr-0.5">
@@ -398,6 +404,11 @@ export default async function EpcProfilePage({
               {sectorsList.map((sector, i) => (
                 <span key={i} className="font-ibm-plex-mono text-[0.7rem] tracking-[0.05em] uppercase text-teal bg-[rgba(47,110,98,0.1)] px-[11px] py-[5px] rounded-[20px]">
                   {sector}
+                </span>
+              ))}
+              {certificationsList.map((cert, i) => (
+                <span key={`cert-${i}`} className="font-ibm-plex-mono text-[0.7rem] tracking-[0.05em] uppercase text-amber bg-amber/10 px-[11px] py-[5px] rounded-[20px]">
+                  {cert}
                 </span>
               ))}
             </div>

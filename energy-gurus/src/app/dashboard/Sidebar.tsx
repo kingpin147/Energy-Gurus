@@ -32,6 +32,7 @@ export default function Sidebar({ role }: { role: UserRole }) {
         { href: "/dashboard/reviews", icon: <Star className="w-4 h-4" />, label: "Give & Manage Reviews" },
         { href: "/dashboard/inbox", icon: <Inbox className="w-4 h-4" />, label: "Support Inbox" },
         { href: "/dashboard/users", icon: <Users className="w-4 h-4" />, label: "Manage Users" },
+        { href: "/dashboard/admin/onboard-epc", icon: <Briefcase className="w-4 h-4" />, label: "Onboard EPC Installer" },
         { href: "/dashboard/content", icon: <Video className="w-4 h-4" />, label: "Content (Podcast/QA)" },
         { href: "/dashboard/news", icon: <FileText className="w-4 h-4" />, label: "News Management" },
         { href: "/dashboard/ads", icon: <LayoutDashboard className="w-4 h-4" />, label: "Ads Management" },
