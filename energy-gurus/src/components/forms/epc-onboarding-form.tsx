@@ -10,14 +10,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { CheckCircle2, X, Plus } from 'lucide-react';
+import { CheckCircle2, X, Plus, FileText, Trash2 } from 'lucide-react';
 
-const SECTORS = ['Residential', 'Commercial', 'Industrial', 'Agriculture'];
-const CERTIFICATIONS = ['AEDB Licence', 'PEC Licence', 'Manufacturer Certified', 'PSA - Energy Nexus Certified'];
+const DEFAULT_SECTORS = ['Residential', 'Commercial', 'Industrial', 'Agriculture'];
+const DEFAULT_CERTIFICATIONS = ['AEDB Licence', 'PEC Licence'];
 
 type TeamMember = { name: string; designation: string; linkedIn: string; imageUrl: string; };
 type CardEntry = { youtubeUrl: string; installationDate: string; customerName: string; companyName: string; city: string; country: string; description: string; };
 type OfficeEntry = { address: string; area: string; city: string; country: string; };
+type UploadedDoc = { url: string; name: string; };
 
 export function EpcOnboardingForm() {
     const router = useRouter();
@@ -26,12 +27,17 @@ export function EpcOnboardingForm() {
     const [generatedPassword, setGeneratedPassword] = useState<string | null>(null);
     const { uploadFile, isUploading } = useR2Upload();
     const [logoUrl, setLogoUrl] = useState("");
-    const [licenceUrls, setLicenceUrls] = useState<string[]>([]);
+    const [uploadedDocs, setUploadedDocs] = useState<UploadedDoc[]>([]);
     
-    // Checkbox states
-    const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
-    const [selectedCerts, setSelectedCerts] = useState<string[]>([]);
-    const [selectedTier, setSelectedTier] = useState<'bronze'|'silver'|'gold'>('silver');
+    // Checkbox & Custom items states
+    const [selectedSectors, setSelectedSectors] = useState<string[]>(['Residential']);
+    const [tempSector, setTempSector] = useState("");
+
+    const [selectedCerts, setSelectedCerts] = useState<string[]>(['AEDB Licence', 'PEC Licence']);
+    const [tempCert, setTempCert] = useState("");
+
+    // Exactly 2 tiers as per design: Silver and Gold
+    const [selectedTier, setSelectedTier] = useState<'silver'|'gold'>('silver');
 
     // Brand states
     const [solarBrands, setSolarBrands] = useState<string[]>([]);
@@ -66,8 +72,8 @@ export function EpcOnboardingForm() {
     const handleDocUpload = async (file: File) => {
         try {
             const { publicUrl } = await uploadFile(file, "epc-documents");
-            setLicenceUrls(prev => [...prev, publicUrl]);
-            toast.success("Document uploaded successfully");
+            setUploadedDocs(prev => [...prev, { url: publicUrl, name: file.name }]);
+            toast.success(`${file.name} uploaded successfully`);
         } catch (error) {
             toast.error("Failed to upload document");
         }
@@ -81,12 +87,21 @@ export function EpcOnboardingForm() {
         }
     };
 
+    const addCustomItem = (value: string, current: string[], setter: React.Dispatch<React.SetStateAction<string[]>>, clearInput: () => void) => {
+        const trimmed = value.trim();
+        if (!trimmed) return;
+        if (!current.includes(trimmed)) {
+            setter([...current, trimmed]);
+        }
+        clearInput();
+    };
+
     async function onSubmit(formData: FormData) {
         setIsLoading(true);
         
         // Append custom state data
         formData.append("logoUrl", logoUrl);
-        formData.append("licenceDocuments", JSON.stringify(licenceUrls));
+        formData.append("licenceDocuments", JSON.stringify(uploadedDocs.map(d => d.url)));
         formData.append("tier", selectedTier);
         selectedSectors.forEach(s => formData.append("sectors", s));
         selectedCerts.forEach(c => formData.append("certifications", c));
@@ -124,7 +139,7 @@ export function EpcOnboardingForm() {
                 {generatedPassword && (
                     <div className="bg-slate-50 p-4 rounded-xl border border-line mb-6 max-w-md w-full">
                         <p className="text-sm font-bold text-slate-custom mb-2">Temporary Password for EPC:</p>
-                        <code className="text-lg bg-white px-3 py-1 rounded border border-line select-all">{generatedPassword}</code>
+                        <code className="text-lg bg-white px-3 py-1 rounded border border-line select-all font-mono text-ink">{generatedPassword}</code>
                         <p className="text-xs text-slate-custom mt-2">Please share this securely or rely on the welcome email.</p>
                     </div>
                 )}
@@ -173,6 +188,7 @@ export function EpcOnboardingForm() {
                             value={logoUrl}
                             accept="image/*"
                             title="Click to upload logo"
+                            description="PNG or JPG, up to 5MB"
                         />
                     </div>
                     <div className="space-y-2 md:col-span-2">
@@ -329,15 +345,43 @@ export function EpcOnboardingForm() {
                     </div>
                 </div>
                 <div className="space-y-6">
+                    {/* System Types / Sectors with multi-select and Add button */}
                     <div className="space-y-3">
-                        <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">System Type</Label>
+                        <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">System Type / Sectors</Label>
                         <div className="flex flex-wrap gap-2">
-                            {SECTORS.map(s => (
-                                <div key={s} className="flex items-center space-x-2 border border-line rounded-full px-3 py-1.5 cursor-pointer hover:bg-slate-50" onClick={() => toggleArray(s, selectedSectors, setSelectedSectors)}>
-                                    <input type="checkbox" checked={selectedSectors.includes(s)} className="w-4 h-4 text-teal rounded border-line focus:ring-teal" readOnly />
-                                    <label className="text-sm cursor-pointer">{s}</label>
+                            {selectedSectors.map(s => (
+                                <div 
+                                    key={s} 
+                                    className="flex items-center gap-2 border border-teal bg-teal/5 text-ink rounded-full px-3.5 py-1.5 cursor-pointer text-sm font-medium"
+                                    onClick={() => toggleArray(s, selectedSectors, setSelectedSectors)}
+                                >
+                                    <span className="text-teal font-bold">✓</span>
+                                    <span>{s}</span>
+                                    <X className="w-3.5 h-3.5 text-slate-400 hover:text-red-500 ml-1" onClick={(e) => { e.stopPropagation(); toggleArray(s, selectedSectors, setSelectedSectors); }} />
                                 </div>
                             ))}
+                            {DEFAULT_SECTORS.filter(d => !selectedSectors.includes(d)).map(s => (
+                                <div 
+                                    key={s} 
+                                    className="flex items-center gap-2 border border-line bg-white text-slate-custom rounded-full px-3.5 py-1.5 cursor-pointer text-sm hover:border-slate-400"
+                                    onClick={() => toggleArray(s, selectedSectors, setSelectedSectors)}
+                                >
+                                    <span className="text-slate-300">+</span>
+                                    <span>{s}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Add custom specialty input */}
+                        <div className="flex gap-2 max-w-md pt-2">
+                            <Input 
+                                value={tempSector} 
+                                onChange={(e) => setTempSector(e.target.value)} 
+                                placeholder="Add custom specialty (e.g. Microgrids, Off-Grid)" 
+                                className="bg-slate-50 border-line text-sm"
+                                onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); addCustomItem(tempSector, selectedSectors, setSelectedSectors, () => setTempSector("")); }}}
+                            />
+                            <Button type="button" variant="outline" onClick={() => addCustomItem(tempSector, selectedSectors, setSelectedSectors, () => setTempSector(""))}>+ Add</Button>
                         </div>
                     </div>
                     
@@ -353,16 +397,16 @@ export function EpcOnboardingForm() {
                                     <Input 
                                         value={tempSolarBrand} 
                                         onChange={(e) => setTempSolarBrand(e.target.value)} 
-                                        placeholder="e.g. LONGI Solar" 
+                                        placeholder="e.g. LONGi Solar" 
                                         className="bg-slate-50 border-line"
-                                        onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempSolarBrand) { setSolarBrands([...solarBrands, tempSolarBrand]); setTempSolarBrand(""); }}}}
+                                        onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempSolarBrand) { setSolarBrands([...solarBrands, tempSolarBrand.trim()]); setTempSolarBrand(""); }}}}
                                     />
-                                    <Button type="button" variant="outline" onClick={() => { if (tempSolarBrand) { setSolarBrands([...solarBrands, tempSolarBrand]); setTempSolarBrand(""); } }}>+ Add</Button>
+                                    <Button type="button" variant="outline" onClick={() => { if (tempSolarBrand) { setSolarBrands([...solarBrands, tempSolarBrand.trim()]); setTempSolarBrand(""); } }}>+ Add</Button>
                                 </div>
                                 <div className="flex flex-wrap gap-2 mt-2">
                                     {solarBrands.map((b, i) => (
-                                        <span key={i} className="flex items-center bg-teal/10 text-teal text-sm px-3 py-1 rounded-full">
-                                            {b} <X className="w-3 h-3 ml-2 cursor-pointer" onClick={() => setSolarBrands(solarBrands.filter((_, idx) => idx !== i))} />
+                                        <span key={i} className="flex items-center bg-teal/10 text-teal text-sm px-3 py-1 rounded-full font-medium">
+                                            {b} <X className="w-3.5 h-3.5 ml-2 cursor-pointer hover:text-red-500" onClick={() => setSolarBrands(solarBrands.filter((_, idx) => idx !== i))} />
                                         </span>
                                     ))}
                                 </div>
@@ -377,14 +421,14 @@ export function EpcOnboardingForm() {
                                         onChange={(e) => setTempInverterBrand(e.target.value)} 
                                         placeholder="e.g. Huawei" 
                                         className="bg-slate-50 border-line"
-                                        onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempInverterBrand) { setInverterBrands([...inverterBrands, tempInverterBrand]); setTempInverterBrand(""); }}}}
+                                        onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempInverterBrand) { setInverterBrands([...inverterBrands, tempInverterBrand.trim()]); setTempInverterBrand(""); }}}}
                                     />
-                                    <Button type="button" variant="outline" onClick={() => { if (tempInverterBrand) { setInverterBrands([...inverterBrands, tempInverterBrand]); setTempInverterBrand(""); } }}>+ Add</Button>
+                                    <Button type="button" variant="outline" onClick={() => { if (tempInverterBrand) { setInverterBrands([...inverterBrands, tempInverterBrand.trim()]); setTempInverterBrand(""); } }}>+ Add</Button>
                                 </div>
                                 <div className="flex flex-wrap gap-2 mt-2">
                                     {inverterBrands.map((b, i) => (
-                                        <span key={i} className="flex items-center bg-teal/10 text-teal text-sm px-3 py-1 rounded-full">
-                                            {b} <X className="w-3 h-3 ml-2 cursor-pointer" onClick={() => setInverterBrands(inverterBrands.filter((_, idx) => idx !== i))} />
+                                        <span key={i} className="flex items-center bg-teal/10 text-teal text-sm px-3 py-1 rounded-full font-medium">
+                                            {b} <X className="w-3.5 h-3.5 ml-2 cursor-pointer hover:text-red-500" onClick={() => setInverterBrands(inverterBrands.filter((_, idx) => idx !== i))} />
                                         </span>
                                     ))}
                                 </div>
@@ -399,14 +443,14 @@ export function EpcOnboardingForm() {
                                         onChange={(e) => setTempBatteryBrand(e.target.value)} 
                                         placeholder="e.g. CoreCell Energy" 
                                         className="bg-slate-50 border-line"
-                                        onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempBatteryBrand) { setBatteryBrands([...batteryBrands, tempBatteryBrand]); setTempBatteryBrand(""); }}}}
+                                        onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempBatteryBrand) { setBatteryBrands([...batteryBrands, tempBatteryBrand.trim()]); setTempBatteryBrand(""); }}}}
                                     />
-                                    <Button type="button" variant="outline" onClick={() => { if (tempBatteryBrand) { setBatteryBrands([...batteryBrands, tempBatteryBrand]); setTempBatteryBrand(""); } }}>+ Add</Button>
+                                    <Button type="button" variant="outline" onClick={() => { if (tempBatteryBrand) { setBatteryBrands([...batteryBrands, tempBatteryBrand.trim()]); setTempBatteryBrand(""); } }}>+ Add</Button>
                                 </div>
                                 <div className="flex flex-wrap gap-2 mt-2">
                                     {batteryBrands.map((b, i) => (
-                                        <span key={i} className="flex items-center bg-teal/10 text-teal text-sm px-3 py-1 rounded-full">
-                                            {b} <X className="w-3 h-3 ml-2 cursor-pointer" onClick={() => setBatteryBrands(batteryBrands.filter((_, idx) => idx !== i))} />
+                                        <span key={i} className="flex items-center bg-teal/10 text-teal text-sm px-3 py-1 rounded-full font-medium">
+                                            {b} <X className="w-3.5 h-3.5 ml-2 cursor-pointer hover:text-red-500" onClick={() => setBatteryBrands(batteryBrands.filter((_, idx) => idx !== i))} />
                                         </span>
                                     ))}
                                 </div>
@@ -434,7 +478,7 @@ export function EpcOnboardingForm() {
                                     <X className="w-5 h-5" />
                                 </button>
                             )}
-                            <div className="w-20 shrink-0">
+                            <div className="w-24 shrink-0">
                                 <UploadZone 
                                     onUpload={async (f) => {
                                         try {
@@ -442,7 +486,7 @@ export function EpcOnboardingForm() {
                                             const newTeam = [...team];
                                             newTeam[index].imageUrl = publicUrl;
                                             setTeam(newTeam);
-                                            toast.success("Image uploaded");
+                                            toast.success("Photo uploaded");
                                         } catch (e) {
                                             toast.error("Upload failed");
                                         }
@@ -668,52 +712,106 @@ export function EpcOnboardingForm() {
                     <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">8</span>
                     <div>
                         <h2 className="text-lg font-space-grotesk font-semibold text-ink">Certifications & Documents</h2>
-                        <p className="text-sm text-slate-custom">Licences and proof.</p>
+                        <p className="text-sm text-slate-custom">Upload proof — this speeds up verification.</p>
                     </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="space-y-3 md:col-span-2">
+                <div className="space-y-6">
+                    {/* Certifications held */}
+                    <div className="space-y-3">
                         <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Certifications Held</Label>
                         <div className="flex flex-wrap gap-2">
-                            {CERTIFICATIONS.map(c => (
-                                <div key={c} className="flex items-center space-x-2 border border-line rounded-full px-3 py-1.5 cursor-pointer hover:bg-slate-50" onClick={() => toggleArray(c, selectedCerts, setSelectedCerts)}>
-                                    <input type="checkbox" checked={selectedCerts.includes(c)} className="w-4 h-4 text-teal rounded border-line focus:ring-teal" readOnly />
-                                    <label className="text-sm cursor-pointer">{c}</label>
+                            {selectedCerts.map(c => (
+                                <div 
+                                    key={c} 
+                                    className="flex items-center gap-2 border border-teal bg-teal/5 text-ink rounded-full px-3.5 py-1.5 cursor-pointer text-sm font-medium"
+                                    onClick={() => toggleArray(c, selectedCerts, setSelectedCerts)}
+                                >
+                                    <span className="text-teal font-bold">✓</span>
+                                    <span>{c}</span>
+                                    <X className="w-3.5 h-3.5 text-slate-400 hover:text-red-500 ml-1" onClick={(e) => { e.stopPropagation(); toggleArray(c, selectedCerts, setSelectedCerts); }} />
+                                </div>
+                            ))}
+                            {DEFAULT_CERTIFICATIONS.filter(d => !selectedCerts.includes(d)).map(c => (
+                                <div 
+                                    key={c} 
+                                    className="flex items-center gap-2 border border-line bg-white text-slate-custom rounded-full px-3.5 py-1.5 cursor-pointer text-sm hover:border-slate-400"
+                                    onClick={() => toggleArray(c, selectedCerts, setSelectedCerts)}
+                                >
+                                    <span className="text-slate-300">+</span>
+                                    <span>{c}</span>
                                 </div>
                             ))}
                         </div>
+
+                        {/* Add custom certification input */}
+                        <div className="flex gap-2 max-w-md pt-2">
+                            <Input 
+                                value={tempCert} 
+                                onChange={(e) => setTempCert(e.target.value)} 
+                                placeholder="Add certification (e.g. ISO 9001, Tier 1 Certified)" 
+                                className="bg-slate-50 border-line text-sm"
+                                onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); addCustomItem(tempCert, selectedCerts, setSelectedCerts, () => setTempCert("")); }}}
+                            />
+                            <Button type="button" variant="outline" onClick={() => addCustomItem(tempCert, selectedCerts, setSelectedCerts, () => setTempCert(""))}>+ Add</Button>
+                        </div>
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="regNumber" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Business Reg / CNIC</Label>
-                        <Input id="regNumber" name="regNumber" required className="bg-slate-50 border-line" />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+                        <div className="space-y-2">
+                            <Label htmlFor="regNumber" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Business Registration / CNIC Number</Label>
+                            <Input id="regNumber" name="regNumber" required className="bg-slate-50 border-line" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Upload Licence / Certification Documents</Label>
+                            <UploadZone 
+                                onUpload={handleDocUpload} 
+                                isUploading={isUploading}
+                                accept=".pdf,image/*"
+                                title="Click to upload documents"
+                                description="PDF or image, up to 10MB each"
+                            />
+                        </div>
                     </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Upload Documents</Label>
-                        <UploadZone 
-                            onUpload={handleDocUpload} 
-                            isUploading={isUploading}
-                            accept=".pdf,image/*"
-                            title="Upload licence files"
-                        />
-                        {licenceUrls.length > 0 && (
-                            <p className="text-xs text-teal mt-1 font-medium">{licenceUrls.length} file(s) uploaded</p>
-                        )}
-                    </div>
+
+                    {/* Uploaded Documents List */}
+                    {uploadedDocs.length > 0 && (
+                        <div className="space-y-2 pt-2">
+                            <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Uploaded Documents ({uploadedDocs.length})</Label>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {uploadedDocs.map((doc, idx) => (
+                                    <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 border border-line rounded-lg text-sm">
+                                        <div className="flex items-center gap-2.5 truncate mr-2">
+                                            <FileText className="w-4 h-4 text-teal shrink-0" />
+                                            <span className="truncate text-ink font-medium">{doc.name}</span>
+                                        </div>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setUploadedDocs(uploadedDocs.filter((_, i) => i !== idx))}
+                                            className="text-slate-400 hover:text-red-500 p-1 rounded hover:bg-slate-200 shrink-0"
+                                            title="Remove document"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {/* 9. Verification Tier */}
+            {/* 9. Verification Tier (Exactly 2 Tiers from HTML) */}
             <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                     <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">9</span>
                     <div>
                         <h2 className="text-lg font-space-grotesk font-semibold text-ink">Verification Tier</h2>
-                        <p className="text-sm text-slate-custom">Choose the verification tier for this installer profile.</p>
+                        <p className="text-sm text-slate-custom">Choose the tier you're applying for.</p>
                     </div>
                 </div>
                 <div className="space-y-3">
                     <div 
-                        className={`p-4 border rounded-lg cursor-pointer ${selectedTier === 'silver' ? 'border-amber bg-amber/5' : 'border-line hover:bg-slate-50'}`}
+                        className={`p-4 border rounded-lg cursor-pointer transition-colors ${selectedTier === 'silver' ? 'border-amber bg-amber/5' : 'border-line hover:bg-slate-50'}`}
                         onClick={() => setSelectedTier('silver')}
                     >
                         <div className="flex items-center gap-2 mb-1">
@@ -725,7 +823,7 @@ export function EpcOnboardingForm() {
                         <p className="text-sm text-slate-custom ml-6">Licence checks, independent site visit audits, site videos, and customer testimonials.</p>
                     </div>
                     <div 
-                        className={`p-4 border rounded-lg cursor-pointer ${selectedTier === 'gold' ? 'border-amber bg-amber/5' : 'border-line hover:bg-slate-50'}`}
+                        className={`p-4 border rounded-lg cursor-pointer transition-colors ${selectedTier === 'gold' ? 'border-amber bg-amber/5' : 'border-line hover:bg-slate-50'}`}
                         onClick={() => setSelectedTier('gold')}
                     >
                         <div className="flex items-center gap-2 mb-1">
@@ -734,19 +832,7 @@ export function EpcOnboardingForm() {
                             </div>
                             <span className="font-semibold text-ink">Gold — Verified + Featured</span>
                         </div>
-                        <p className="text-sm text-slate-custom ml-6">Everything in Silver, plus featured placement and priority lead routing.</p>
-                    </div>
-                    <div 
-                        className={`p-4 border rounded-lg cursor-pointer ${selectedTier === 'bronze' ? 'border-amber bg-amber/5' : 'border-line hover:bg-slate-50'}`}
-                        onClick={() => setSelectedTier('bronze')}
-                    >
-                        <div className="flex items-center gap-2 mb-1">
-                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${selectedTier === 'bronze' ? 'border-amber' : 'border-slate-300'}`}>
-                                {selectedTier === 'bronze' && <div className="w-2 h-2 rounded-full bg-amber" />}
-                            </div>
-                            <span className="font-semibold text-ink">Bronze — Free Listing</span>
-                        </div>
-                        <p className="text-sm text-slate-custom ml-6">Basic profile in the directory. No verification badge.</p>
+                        <p className="text-sm text-slate-custom ml-6">Everything in Silver, plus featured placement.</p>
                     </div>
                 </div>
             </div>
