@@ -20,6 +20,8 @@ type CardEntry = { youtubeUrl: string; installationDate: string; customerName: s
 type OfficeEntry = { address: string; area: string; city: string; country: string; };
 type UploadedDoc = { url: string; name: string; };
 
+
+
 export function EpcOnboardingForm({ isPublic = false }: { isPublic?: boolean } = {}) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
