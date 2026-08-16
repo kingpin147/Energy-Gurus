@@ -16,7 +16,8 @@ const SECTORS = ['Residential', 'Commercial', 'Industrial', 'Agriculture'];
 const CERTIFICATIONS = ['AEDB Licence', 'PEC Licence', 'Manufacturer Certified', 'PSA - Energy Nexus Certified'];
 
 type TeamMember = { name: string; designation: string; linkedIn: string; imageUrl: string; };
-type ProjectData = { youtubeUrl: string; installationDate: string; customerName: string; companyName: string; city: string; country: string; description: string; };
+type CardEntry = { youtubeUrl: string; installationDate: string; customerName: string; companyName: string; city: string; country: string; description: string; };
+type OfficeEntry = { address: string; area: string; city: string; country: string; };
 
 export function EpcOnboardingForm() {
     const router = useRouter();
@@ -30,7 +31,7 @@ export function EpcOnboardingForm() {
     // Checkbox states
     const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
     const [selectedCerts, setSelectedCerts] = useState<string[]>([]);
-    const [selectedTier, setSelectedTier] = useState<'bronze'|'silver'|'gold'>('bronze');
+    const [selectedTier, setSelectedTier] = useState<'bronze'|'silver'|'gold'>('silver');
 
     // Brand states
     const [solarBrands, setSolarBrands] = useState<string[]>([]);
@@ -40,11 +41,17 @@ export function EpcOnboardingForm() {
     const [tempInverterBrand, setTempInverterBrand] = useState("");
     const [tempBatteryBrand, setTempBatteryBrand] = useState("");
 
+    // Additional Offices state
+    const [offices, setOffices] = useState<OfficeEntry[]>([]);
+
     // Team state
     const [team, setTeam] = useState<TeamMember[]>([{ name: '', designation: '', linkedIn: '', imageUrl: '' }]);
 
     // Projects state
-    const [projects, setProjects] = useState<ProjectData[]>([{ youtubeUrl: '', installationDate: '', customerName: '', companyName: '', city: '', country: '', description: '' }]);
+    const [projects, setProjects] = useState<CardEntry[]>([{ youtubeUrl: '', installationDate: '', customerName: '', companyName: '', city: '', country: '', description: '' }]);
+
+    // Testimonials state
+    const [testimonials, setTestimonials] = useState<CardEntry[]>([{ youtubeUrl: '', installationDate: '', customerName: '', companyName: '', city: '', country: '', description: '' }]);
 
     const handleLogoUpload = async (file: File) => {
         try {
@@ -77,7 +84,7 @@ export function EpcOnboardingForm() {
     async function onSubmit(formData: FormData) {
         setIsLoading(true);
         
-        // Append all the custom state data
+        // Append custom state data
         formData.append("logoUrl", logoUrl);
         formData.append("licenceDocuments", JSON.stringify(licenceUrls));
         formData.append("tier", selectedTier);
@@ -87,8 +94,10 @@ export function EpcOnboardingForm() {
         inverterBrands.forEach(b => formData.append("inverterBrands", b));
         batteryBrands.forEach(b => formData.append("batteryBrands", b));
         
+        formData.append("offices", JSON.stringify(offices.filter(o => o.city || o.address || o.area)));
         formData.append("team", JSON.stringify(team.filter(t => t.name || t.designation)));
-        formData.append("projects", JSON.stringify(projects.filter(p => p.youtubeUrl || p.customerName || p.companyName)));
+        formData.append("projects", JSON.stringify(projects.filter(p => p.youtubeUrl || p.customerName || p.companyName || p.description)));
+        formData.append("testimonials", JSON.stringify(testimonials.filter(t => t.youtubeUrl || t.customerName || t.companyName || t.description)));
 
         const result = await onboardEpcInstaller(formData);
         
@@ -115,7 +124,7 @@ export function EpcOnboardingForm() {
                 {generatedPassword && (
                     <div className="bg-slate-50 p-4 rounded-xl border border-line mb-6 max-w-md w-full">
                         <p className="text-sm font-bold text-slate-custom mb-2">Temporary Password for EPC:</p>
-                        <code className="text-lg bg-white px-3 py-1 rounded border border-line">{generatedPassword}</code>
+                        <code className="text-lg bg-white px-3 py-1 rounded border border-line select-all">{generatedPassword}</code>
                         <p className="text-xs text-slate-custom mt-2">Please share this securely or rely on the welcome email.</p>
                     </div>
                 )}
@@ -130,19 +139,23 @@ export function EpcOnboardingForm() {
     return (
         <form action={onSubmit} className="w-full max-w-5xl space-y-6 pb-20">
             
-            {/* Basic Information */}
+            {/* 1. Basic Information */}
             <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                     <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">1</span>
                     <div>
                         <h2 className="text-lg font-space-grotesk font-semibold text-ink">Basic Information</h2>
-                        <p className="text-sm text-slate-custom">Details about the company.</p>
+                        <p className="text-sm text-slate-custom">Tell us about you and your company.</p>
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
                         <Label htmlFor="ceoName" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Installer / Contact Name</Label>
                         <Input id="ceoName" name="ceoName" required className="bg-slate-50 border-line" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="designation" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Designation</Label>
+                        <Input id="designation" name="designation" placeholder="e.g. Owner, Sales Manager" className="bg-slate-50 border-line" />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="companyName" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Company Name</Label>
@@ -152,8 +165,8 @@ export function EpcOnboardingForm() {
                         <Label htmlFor="yearsInBusiness" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Years in Business</Label>
                         <Input id="yearsInBusiness" name="yearsInBusiness" type="number" min="0" required className="bg-slate-50 border-line" />
                     </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Company Logo</Label>
+                    <div className="space-y-2 md:col-span-2">
+                        <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Company Logo / Photo</Label>
                         <UploadZone 
                             onUpload={handleLogoUpload} 
                             isUploading={isUploading}
@@ -164,18 +177,18 @@ export function EpcOnboardingForm() {
                     </div>
                     <div className="space-y-2 md:col-span-2">
                         <Label htmlFor="about" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Short Bio</Label>
-                        <Textarea id="about" name="about" required placeholder="Specialties, experience, service philosophy..." className="bg-slate-50 border-line min-h-[90px]" />
+                        <Textarea id="about" name="about" required placeholder="Tell homeowners what makes your company a good fit — specialties, experience, service philosophy." className="bg-slate-50 border-line min-h-[90px]" />
                     </div>
                 </div>
             </div>
 
-            {/* Location */}
+            {/* 2. Location */}
             <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                     <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">2</span>
                     <div>
                         <h2 className="text-lg font-space-grotesk font-semibold text-ink">Location</h2>
-                        <p className="text-sm text-slate-custom">Operating region.</p>
+                        <p className="text-sm text-slate-custom">Where do you operate?</p>
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -191,20 +204,87 @@ export function EpcOnboardingForm() {
                         <Label htmlFor="city" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">City</Label>
                         <Input id="city" name="city" required className="bg-slate-50 border-line" />
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-2 md:col-span-2">
                         <Label htmlFor="country" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Country</Label>
                         <Input id="country" name="country" defaultValue="Pakistan" required className="bg-slate-50 border-line" />
                     </div>
                 </div>
+
+                {/* Additional Office Locations */}
+                <div className="mt-8 pt-6 border-t border-line space-y-4">
+                    <div>
+                        <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-ink font-semibold">Additional Office Locations (If Any)</Label>
+                        <p className="text-xs text-slate-custom mt-1">Add another entry for each additional office you operate from.</p>
+                    </div>
+
+                    {offices.map((office, idx) => (
+                        <div key={idx} className="p-5 border border-line rounded-xl relative bg-slate-50/50 space-y-4">
+                            <button 
+                                type="button" 
+                                onClick={() => setOffices(offices.filter((_, i) => i !== idx))} 
+                                className="absolute top-4 right-4 text-slate-400 hover:text-red-500"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-6">
+                                <div className="space-y-2 md:col-span-2">
+                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Full Address</Label>
+                                    <Input 
+                                        value={office.address} 
+                                        onChange={(e) => { const no = [...offices]; no[idx].address = e.target.value; setOffices(no); }}
+                                        className="bg-white" 
+                                        placeholder="Office address" 
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Area / Society</Label>
+                                    <Input 
+                                        value={office.area} 
+                                        onChange={(e) => { const no = [...offices]; no[idx].area = e.target.value; setOffices(no); }}
+                                        className="bg-white" 
+                                        placeholder="Area" 
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">City</Label>
+                                    <Input 
+                                        value={office.city} 
+                                        onChange={(e) => { const no = [...offices]; no[idx].city = e.target.value; setOffices(no); }}
+                                        className="bg-white" 
+                                        placeholder="City" 
+                                    />
+                                </div>
+                                <div className="space-y-2 md:col-span-2">
+                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Country</Label>
+                                    <Input 
+                                        value={office.country} 
+                                        onChange={(e) => { const no = [...offices]; no[idx].country = e.target.value; setOffices(no); }}
+                                        className="bg-white" 
+                                        defaultValue="Pakistan" 
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+
+                    <Button 
+                        type="button" 
+                        variant="outline" 
+                        className="w-full border-dashed"
+                        onClick={() => setOffices([...offices, { address: '', area: '', city: '', country: 'Pakistan' }])}
+                    >
+                        <Plus className="w-4 h-4 mr-2" /> Add Office
+                    </Button>
+                </div>
             </div>
 
-            {/* Contact Details */}
+            {/* 3. Contact Details */}
             <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                     <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">3</span>
                     <div>
                         <h2 className="text-lg font-space-grotesk font-semibold text-ink">Contact Details</h2>
-                        <p className="text-sm text-slate-custom">How customers will reach them.</p>
+                        <p className="text-sm text-slate-custom">How customers and our team will reach you.</p>
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -213,17 +293,33 @@ export function EpcOnboardingForm() {
                         <Input id="contactNo" name="contactNo" required className="bg-slate-50 border-line" />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="email" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Email Address (Used for Login)</Label>
+                        <Label htmlFor="email" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Email Address (Login Account)</Label>
                         <Input id="email" name="email" type="email" required className="bg-slate-50 border-line" />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="website" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Website</Label>
-                        <Input id="website" name="website" placeholder="www.company.com" className="bg-slate-50 border-line" />
+                        <Input id="website" name="website" placeholder="www.yourcompany.com" className="bg-slate-50 border-line" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="facebook" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Facebook</Label>
+                        <Input id="facebook" name="facebook" placeholder="https://facebook.com/profile" className="bg-slate-50 border-line" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="instagram" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Instagram</Label>
+                        <Input id="instagram" name="instagram" placeholder="https://instagram.com/profile" className="bg-slate-50 border-line" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="linkedin" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">LinkedIn</Label>
+                        <Input id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/profile" className="bg-slate-50 border-line" />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="youtube" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">YouTube Channel</Label>
+                        <Input id="youtube" name="youtube" placeholder="https://youtube.com/@channel" className="bg-slate-50 border-line" />
                     </div>
                 </div>
             </div>
 
-            {/* Specialties */}
+            {/* 4. Specialties */}
             <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                     <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">4</span>
@@ -320,7 +416,7 @@ export function EpcOnboardingForm() {
                 </div>
             </div>
 
-            {/* Meet The Team */}
+            {/* 5. Meet The Team */}
             <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                     <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">5</span>
@@ -387,7 +483,7 @@ export function EpcOnboardingForm() {
                 </div>
             </div>
 
-            {/* Projects */}
+            {/* 6. Projects */}
             <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                     <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">6</span>
@@ -450,12 +546,13 @@ export function EpcOnboardingForm() {
                                         className="bg-white"
                                     />
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-2 md:col-span-2">
                                     <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Country</Label>
                                     <Input 
                                         value={project.country}
                                         onChange={(e) => { const np = [...projects]; np[index].country = e.target.value; setProjects(np); }}
                                         className="bg-white"
+                                        placeholder="Pakistan"
                                     />
                                 </div>
                             </div>
@@ -475,10 +572,100 @@ export function EpcOnboardingForm() {
                 </div>
             </div>
 
-            {/* Certifications & Documents */}
+            {/* 7. Customer Testimonials */}
             <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                     <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">7</span>
+                    <div>
+                        <h2 className="text-lg font-space-grotesk font-semibold text-ink">Customer Testimonials</h2>
+                        <p className="text-sm text-slate-custom">Let real customers vouch for your work. Add as many testimonials as you like.</p>
+                    </div>
+                </div>
+                
+                <div className="space-y-4">
+                    {testimonials.map((testimonial, index) => (
+                        <div key={index} className="p-5 border border-line rounded-xl relative bg-slate-50/50 space-y-4">
+                            {testimonials.length > 1 && (
+                                <button type="button" onClick={() => setTestimonials(testimonials.filter((_, i) => i !== index))} className="absolute top-4 right-4 text-slate-400 hover:text-red-500">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            )}
+                            
+                            <div className="space-y-2 pr-8">
+                                <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">YouTube Link</Label>
+                                <Input 
+                                    placeholder="https://youtube.com/watch?v=..." 
+                                    value={testimonial.youtubeUrl}
+                                    onChange={(e) => { const nt = [...testimonials]; nt[index].youtubeUrl = e.target.value; setTestimonials(nt); }}
+                                    className="bg-white"
+                                />
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Date of Installation</Label>
+                                    <Input 
+                                        type="date"
+                                        value={testimonial.installationDate}
+                                        onChange={(e) => { const nt = [...testimonials]; nt[index].installationDate = e.target.value; setTestimonials(nt); }}
+                                        className="bg-white"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Customer Name</Label>
+                                    <Input 
+                                        value={testimonial.customerName}
+                                        onChange={(e) => { const nt = [...testimonials]; nt[index].customerName = e.target.value; setTestimonials(nt); }}
+                                        className="bg-white"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Company Name</Label>
+                                    <Input 
+                                        value={testimonial.companyName}
+                                        onChange={(e) => { const nt = [...testimonials]; nt[index].companyName = e.target.value; setTestimonials(nt); }}
+                                        className="bg-white"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">City</Label>
+                                    <Input 
+                                        value={testimonial.city}
+                                        onChange={(e) => { const nt = [...testimonials]; nt[index].city = e.target.value; setTestimonials(nt); }}
+                                        className="bg-white"
+                                    />
+                                </div>
+                                <div className="space-y-2 md:col-span-2">
+                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Country</Label>
+                                    <Input 
+                                        value={testimonial.country}
+                                        onChange={(e) => { const nt = [...testimonials]; nt[index].country = e.target.value; setTestimonials(nt); }}
+                                        className="bg-white"
+                                        placeholder="Pakistan"
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Short Description</Label>
+                                <Textarea 
+                                    value={testimonial.description}
+                                    onChange={(e) => { const nt = [...testimonials]; nt[index].description = e.target.value; setTestimonials(nt); }}
+                                    className="bg-white"
+                                    placeholder="Customer feedback or details..."
+                                />
+                            </div>
+                        </div>
+                    ))}
+                    <Button type="button" variant="outline" className="w-full border-dashed" onClick={() => setTestimonials([...testimonials, { youtubeUrl: '', installationDate: '', customerName: '', companyName: '', city: '', country: '', description: '' }])}>
+                        <Plus className="w-4 h-4 mr-2" /> Add Testimonial
+                    </Button>
+                </div>
+            </div>
+
+            {/* 8. Certifications & Documents */}
+            <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                    <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">8</span>
                     <div>
                         <h2 className="text-lg font-space-grotesk font-semibold text-ink">Certifications & Documents</h2>
                         <p className="text-sm text-slate-custom">Licences and proof.</p>
@@ -515,27 +702,16 @@ export function EpcOnboardingForm() {
                 </div>
             </div>
 
-            {/* Tier */}
+            {/* 9. Verification Tier */}
             <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
-                    <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">8</span>
+                    <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">9</span>
                     <div>
                         <h2 className="text-lg font-space-grotesk font-semibold text-ink">Verification Tier</h2>
+                        <p className="text-sm text-slate-custom">Choose the verification tier for this installer profile.</p>
                     </div>
                 </div>
                 <div className="space-y-3">
-                    <div 
-                        className={`p-4 border rounded-lg cursor-pointer ${selectedTier === 'bronze' ? 'border-amber bg-amber/5' : 'border-line hover:bg-slate-50'}`}
-                        onClick={() => setSelectedTier('bronze')}
-                    >
-                        <div className="flex items-center gap-2 mb-1">
-                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${selectedTier === 'bronze' ? 'border-amber' : 'border-slate-300'}`}>
-                                {selectedTier === 'bronze' && <div className="w-2 h-2 rounded-full bg-amber" />}
-                            </div>
-                            <span className="font-semibold text-ink">Bronze — Free Listing</span>
-                        </div>
-                        <p className="text-sm text-slate-custom ml-6">Basic profile in the directory. No verification badge.</p>
-                    </div>
                     <div 
                         className={`p-4 border rounded-lg cursor-pointer ${selectedTier === 'silver' ? 'border-amber bg-amber/5' : 'border-line hover:bg-slate-50'}`}
                         onClick={() => setSelectedTier('silver')}
@@ -546,7 +722,7 @@ export function EpcOnboardingForm() {
                             </div>
                             <span className="font-semibold text-ink">Silver — Verified</span>
                         </div>
-                        <p className="text-sm text-slate-custom ml-6">Licence check + site visit audit. "Verified" badge on your profile.</p>
+                        <p className="text-sm text-slate-custom ml-6">Licence checks, independent site visit audits, site videos, and customer testimonials.</p>
                     </div>
                     <div 
                         className={`p-4 border rounded-lg cursor-pointer ${selectedTier === 'gold' ? 'border-amber bg-amber/5' : 'border-line hover:bg-slate-50'}`}
@@ -560,10 +736,22 @@ export function EpcOnboardingForm() {
                         </div>
                         <p className="text-sm text-slate-custom ml-6">Everything in Silver, plus featured placement and priority lead routing.</p>
                     </div>
+                    <div 
+                        className={`p-4 border rounded-lg cursor-pointer ${selectedTier === 'bronze' ? 'border-amber bg-amber/5' : 'border-line hover:bg-slate-50'}`}
+                        onClick={() => setSelectedTier('bronze')}
+                    >
+                        <div className="flex items-center gap-2 mb-1">
+                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${selectedTier === 'bronze' ? 'border-amber' : 'border-slate-300'}`}>
+                                {selectedTier === 'bronze' && <div className="w-2 h-2 rounded-full bg-amber" />}
+                            </div>
+                            <span className="font-semibold text-ink">Bronze — Free Listing</span>
+                        </div>
+                        <p className="text-sm text-slate-custom ml-6">Basic profile in the directory. No verification badge.</p>
+                    </div>
                 </div>
             </div>
 
-            <Button type="submit" disabled={isLoading || isUploading} className="w-full bg-amber hover:bg-[#f2b458] text-ink font-semibold h-12">
+            <Button type="submit" disabled={isLoading || isUploading} className="w-full bg-amber hover:bg-[#f2b458] text-ink font-semibold h-12 text-base">
                 {isLoading ? 'Onboarding...' : 'Onboard EPC Installer'}
             </Button>
             

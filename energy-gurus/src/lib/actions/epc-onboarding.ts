@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { users, epcInstallers, epcProjects, UserRole } from "@/db/schema";
+import { users, epcInstallers, epcOffices, epcProjects, UserRole } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { createClerkClient } from "@clerk/nextjs/server";
 import { getUserRole } from "@/lib/roles";
@@ -57,6 +57,26 @@ export async function onboardEpcInstaller(formData: FormData) {
         const projectsStr = formData.get("projects") as string;
         const projects = projectsStr ? JSON.parse(projectsStr) : [];
 
+        const testimonialsStr = formData.get("testimonials") as string;
+        const testimonials = testimonialsStr ? JSON.parse(testimonialsStr) : [];
+
+        const officesStr = formData.get("offices") as string;
+        const offices = officesStr ? JSON.parse(officesStr) : [];
+
+        // Social Links
+        const socialLinks: { platform: string; url: string }[] = [];
+        const website = formData.get("website") as string;
+        const facebook = formData.get("facebook") as string;
+        const instagram = formData.get("instagram") as string;
+        const linkedin = formData.get("linkedin") as string;
+        const youtube = formData.get("youtube") as string;
+
+        if (website) socialLinks.push({ platform: "Website", url: website });
+        if (facebook) socialLinks.push({ platform: "Facebook", url: facebook });
+        if (instagram) socialLinks.push({ platform: "Instagram", url: instagram });
+        if (linkedin) socialLinks.push({ platform: "LinkedIn", url: linkedin });
+        if (youtube) socialLinks.push({ platform: "YouTube", url: youtube });
+
         // 4. Insert into epcInstallers table
         const [newEpc] = await db.insert(epcInstallers).values({
             userId: newUser.id,
@@ -68,7 +88,8 @@ export async function onboardEpcInstaller(formData: FormData) {
             area: formData.get("area") as string || null,
             city: formData.get("city") as string || null,
             country: formData.get("country") as string || 'Pakistan',
-            website: formData.get("website") as string || null,
+            website: website || null,
+            socialLinks: socialLinks,
             yearsInBusiness: parseInt(formData.get("yearsInBusiness") as string) || null,
             regNumber: formData.get("regNumber") as string || null,
             tier: (formData.get("tier") as 'bronze' | 'silver' | 'gold') || 'bronze',
@@ -85,28 +106,70 @@ export async function onboardEpcInstaller(formData: FormData) {
             isVerified: true, // Auto verify since admin is onboarding
         }).returning();
 
-        // 5. Insert projects if any
+        // 5. Insert additional offices if any
+        if (offices && offices.length > 0) {
+            const officeRecords = offices
+                .filter((o: any) => o.city || o.address || o.area)
+                .map((o: any) => ({
+                    epcId: newEpc.id,
+                    officeNumber: o.address || null,
+                    area: o.area || null,
+                    city: o.city || formData.get("city") as string || "Main",
+                }));
+            if (officeRecords.length > 0) {
+                await db.insert(epcOffices).values(officeRecords);
+            }
+        }
+
+        // 6. Insert projects if any
+        const allProjectRecords = [];
+
         if (projects && projects.length > 0) {
-            const projectRecords = projects.map((p: any) => ({
-                epcId: newEpc.id,
-                name: p.name || p.companyName || p.customerName || "Project",
-                youtubeUrl: p.youtubeUrl || null,
-                installationDate: p.installationDate || null,
-                customerName: p.customerName || null,
-                companyName: p.companyName || null,
-                city: p.city || null,
-                country: p.country || null,
-                description: p.description || null
-            }));
-            await db.insert(epcProjects).values(projectRecords);
+            const projectRecords = projects
+                .filter((p: any) => p.youtubeUrl || p.customerName || p.companyName || p.description)
+                .map((p: any) => ({
+                    epcId: newEpc.id,
+                    name: p.name || p.companyName || p.customerName || "Project",
+                    youtubeUrl: p.youtubeUrl || null,
+                    installationDate: p.installationDate || null,
+                    customerName: p.customerName || null,
+                    companyName: p.companyName || null,
+                    city: p.city || null,
+                    country: p.country || null,
+                    description: p.description || null
+                }));
+            allProjectRecords.push(...projectRecords);
+        }
+
+        // 7. Insert customer testimonials if any
+        if (testimonials && testimonials.length > 0) {
+            const testimonialRecords = testimonials
+                .filter((t: any) => t.youtubeUrl || t.customerName || t.companyName || t.description)
+                .map((t: any) => ({
+                    epcId: newEpc.id,
+                    name: t.customerName ? `Testimonial - ${t.customerName}` : "Customer Testimonial",
+                    youtubeUrl: t.youtubeUrl || null,
+                    installationDate: t.installationDate || null,
+                    customerName: t.customerName || null,
+                    companyName: t.companyName || null,
+                    city: t.city || null,
+                    country: t.country || null,
+                    description: t.description || null
+                }));
+            allProjectRecords.push(...testimonialRecords);
+        }
+
+        if (allProjectRecords.length > 0) {
+            await db.insert(epcProjects).values(allProjectRecords);
         }
 
         revalidatePath("/dashboard/users", "layout");
+        revalidatePath("/epcs", "layout");
         
         return { 
             success: true, 
             message: "EPC Onboarded Successfully.",
-            password: generatedPassword // Return this just so admin can share it, or rely on welcome email
+            password: generatedPassword
         };
         
     } catch (error: any) {
