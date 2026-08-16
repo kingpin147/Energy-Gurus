@@ -12,9 +12,7 @@ const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY 
 export async function onboardEpcInstaller(formData: FormData) {
     try {
         const currentRole = await getUserRole();
-        if (currentRole !== 'super-admin' && currentRole !== 'admin') {
-            return { success: false, message: "Unauthorized" };
-        }
+        const isAdmin = currentRole === 'super-admin' || currentRole === 'admin';
 
         const email = formData.get("email") as string;
         const companyName = formData.get("companyName") as string;
@@ -23,23 +21,43 @@ export async function onboardEpcInstaller(formData: FormData) {
             return { success: false, message: "Email and Company Name are required" };
         }
 
+        // Check if user already exists
+        const [existingUser] = await db.select().from(users).where(eq(users.email, email.toLowerCase()));
+        if (existingUser) {
+            return { success: false, message: "An account with this email address already exists. Please log in or use a different email." };
+        }
+
         // Generate a random secure password
         const generatedPassword = Array(16).fill("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*")
             .map(x => x[Math.floor(Math.random() * x.length)]).join('');
 
         // 1. Create User in Clerk
-        const clerkUser = await clerkClient.users.createUser({
-            emailAddress: [email],
-            password: generatedPassword,
-            publicMetadata: { role: 'epc' },
-        });
+        let clerkUserId: string;
+        try {
+            const clerkUser = await clerkClient.users.createUser({
+                emailAddress: [email],
+                password: generatedPassword,
+                publicMetadata: { role: 'epc' },
+            });
+            clerkUserId = clerkUser.id;
+        } catch (clerkErr: any) {
+            console.error("Clerk user creation error:", clerkErr);
+            // If user already exists in Clerk, search for their id
+            const [existingClerkUser] = await clerkClient.users.getUserList({ emailAddress: [email] }).then(res => res.data);
+            if (existingClerkUser) {
+                clerkUserId = existingClerkUser.id;
+            } else {
+                return { success: false, message: clerkErr?.errors?.[0]?.longMessage || clerkErr?.message || "Failed to create user account." };
+            }
+        }
 
         // 2. Insert into local users table
         const [newUser] = await db.insert(users).values({
-            clerkId: clerkUser.id,
+            clerkId: clerkUserId,
             email: email.toLowerCase(),
             name: companyName,
             role: 'epc',
+            isActive: true,
         }).returning();
 
         // 3. Process array fields (Sectors, Certifications, Brands)
@@ -103,7 +121,7 @@ export async function onboardEpcInstaller(formData: FormData) {
             team: team,
             logoUrl: formData.get("logoUrl") as string || null,
             licenceDocuments: formData.get("licenceDocuments") ? JSON.parse(formData.get("licenceDocuments") as string) : [],
-            isVerified: true, // Auto verify since admin is onboarding
+            isVerified: isAdmin, // Auto verify if admin is onboarding, otherwise pending verification
         }).returning();
 
         // 5. Insert additional offices if any
@@ -163,8 +181,21 @@ export async function onboardEpcInstaller(formData: FormData) {
             await db.insert(epcProjects).values(allProjectRecords);
         }
 
+        // 8. Invalidate Redis Cache & Next.js cache
+        try {
+            const { redis, CACHE_KEYS } = await import("@/lib/redis");
+            await redis.del(CACHE_KEYS.EPCS_LIST);
+            if (newEpc?.id) {
+                await redis.del(CACHE_KEYS.EPC_DETAILS(newEpc.id));
+            }
+        } catch (cacheErr) {
+            console.warn("Redis cache invalidation warning:", cacheErr);
+        }
+
         revalidatePath("/dashboard/users", "layout");
+        revalidatePath("/dashboard/epc", "layout");
         revalidatePath("/epcs", "layout");
+        revalidatePath("/", "layout");
         
         return { 
             success: true, 

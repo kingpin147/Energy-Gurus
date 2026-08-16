@@ -20,7 +20,7 @@ type CardEntry = { youtubeUrl: string; installationDate: string; customerName: s
 type OfficeEntry = { address: string; area: string; city: string; country: string; };
 type UploadedDoc = { url: string; name: string; };
 
-export function EpcOnboardingForm() {
+export function EpcOnboardingForm({ isPublic = false }: { isPublic?: boolean } = {}) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -119,33 +119,42 @@ export function EpcOnboardingForm() {
         setIsLoading(false);
         
         if (result.success) {
-            toast.success("EPC Onboarded successfully");
+            toast.success(isPublic ? "Application submitted successfully" : "EPC Onboarded successfully");
             setGeneratedPassword(result.password || null);
             setIsSubmitted(true);
         } else {
-            toast.error(result.message || "Failed to onboard EPC");
+            toast.error(result.message || "Failed to submit application");
         }
     }
 
     if (isSubmitted) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="w-16 h-16 rounded-full bg-teal/10 text-teal flex items-center justify-center mb-6">
-                    <CheckCircle2 size={32} />
+            <div className="bg-white border border-line rounded-xl p-12 text-center my-8 shadow-sm">
+                <div className="w-16 h-16 rounded-full bg-teal/10 text-teal flex items-center justify-center mb-6 mx-auto">
+                    <CheckCircle2 size={36} />
                 </div>
-                <h2 className="text-2xl font-space-grotesk font-semibold text-ink mb-2">EPC Onboarded Successfully</h2>
-                <p className="text-slate-custom mb-6">The installer's account has been created and profile is live.</p>
+                <h2 className="text-2xl font-space-grotesk font-semibold text-ink mb-2">
+                    {isPublic ? "Application received" : "EPC Onboarded Successfully"}
+                </h2>
+                <p className="text-slate-custom mb-6 max-w-md mx-auto">
+                    {isPublic 
+                        ? "Thanks for applying to join EnergyGurus.Online. Our team will review your profile and reach out within 3–5 business days."
+                        : "The installer's account has been created and profile is live in the directory."}
+                </p>
                 
-                {generatedPassword && (
-                    <div className="bg-slate-50 p-4 rounded-xl border border-line mb-6 max-w-md w-full">
+                {generatedPassword && !isPublic && (
+                    <div className="bg-slate-50 p-4 rounded-xl border border-line mb-6 max-w-md w-full mx-auto">
                         <p className="text-sm font-bold text-slate-custom mb-2">Temporary Password for EPC:</p>
                         <code className="text-lg bg-white px-3 py-1 rounded border border-line select-all font-mono text-ink">{generatedPassword}</code>
                         <p className="text-xs text-slate-custom mt-2">Please share this securely or rely on the welcome email.</p>
                     </div>
                 )}
                 
-                <Button onClick={() => router.push('/dashboard/users')} className="bg-ink text-white hover:bg-ink/90">
-                    Return to Users
+                <Button 
+                    onClick={() => router.push(isPublic ? '/epcs' : '/dashboard/users')} 
+                    className="bg-ink text-white hover:bg-ink/90 px-8 py-3 h-auto"
+                >
+                    {isPublic ? "Back to Directory" : "Return to Users"}
                 </Button>
             </div>
         );
@@ -838,8 +847,13 @@ export function EpcOnboardingForm() {
             </div>
 
             <Button type="submit" disabled={isLoading || isUploading} className="w-full bg-amber hover:bg-[#f2b458] text-ink font-semibold h-12 text-base">
-                {isLoading ? 'Onboarding...' : 'Onboard EPC Installer'}
+                {isLoading ? (isPublic ? 'Submitting Application...' : 'Onboarding...') : (isPublic ? 'Submit Application' : 'Onboard EPC Installer')}
             </Button>
+            {isPublic && (
+                <p className="text-xs text-slate-custom text-center mt-3">
+                    Our team typically reviews applications within 3–5 business days.
+                </p>
+            )}
             
         </form>
     );

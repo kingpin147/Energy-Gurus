@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { epcInstallers, reviews, users, epcOffices, epcProjects } from "@/db/schema";
 import { desc, asc, eq, sql, ilike, and, or } from "drizzle-orm";
 import Image from "next/image";
+import Link from "next/link";
 import { unstable_cache } from "next/cache";
 import { getEpcCompleteness } from "@/lib/utils/completeness";
 import { AdBanner } from "@/components/shared/AdBanner";
@@ -133,17 +134,25 @@ export default async function EpcListingPage({
 
       {/* Header */}
       <header className="bg-ink text-white pt-[64px] pb-[44px]">
-        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
-          <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-[18px]">
-            <span className="w-5 h-[1px] bg-amber" />
-            Installer Directory
-          </p>
-          <h1 className="font-space-grotesk font-semibold text-[clamp(2rem,4vw,2.8rem)] tracking-[-0.01em]">
-            Find a certified installer near you.
-          </h1>
-          <p className="text-paper/70 max-w-[560px] mt-[14px] text-[1.02rem]">
-            Every installer in our network is vetted for certification, licensing, and track record — so you can request a quote with confidence.
-          </p>
+        <div className="max-w-[1180px] mx-auto px-5 md:px-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-[18px]">
+              <span className="w-5 h-[1px] bg-amber" />
+              Installer Directory
+            </p>
+            <h1 className="font-space-grotesk font-semibold text-[clamp(2rem,4vw,2.8rem)] tracking-[-0.01em]">
+              Find a certified installer near you.
+            </h1>
+            <p className="text-paper/70 max-w-[560px] mt-[14px] text-[1.02rem]">
+              Every installer in our network is vetted for certification, licensing, and track record — so you can request a quote with confidence.
+            </p>
+          </div>
+          <Link
+            href="/installers/onboard"
+            className="inline-flex items-center justify-center bg-amber text-ink px-6 py-3.5 rounded-[3px] font-semibold text-sm hover:bg-[#f2b458] transition-colors shrink-0"
+          >
+            + Get Listed as an Installer
+          </Link>
         </div>
       </header>
 
