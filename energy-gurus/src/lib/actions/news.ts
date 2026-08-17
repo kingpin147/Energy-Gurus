@@ -19,11 +19,11 @@ export async function createNews(formData: FormData) {
         const content = formData.get("content") as string;
         const category = formData.get("category") as string;
         const imageUrl = formData.get("imageUrl") as string;
-        const isPublished = formData.get("isPublished") === "true";
+        const isPublishedImmediate = formData.get("isPublished") === "true";
         const publishedAtStr = formData.get("publishedAt") as string;
         
-        let finalPublishedAt = null;
-        if (isPublished) {
+        let finalPublishedAt: Date | null = null;
+        if (isPublishedImmediate) {
             finalPublishedAt = new Date();
         } else if (publishedAtStr) {
             finalPublishedAt = new Date(publishedAtStr);
@@ -33,21 +33,29 @@ export async function createNews(formData: FormData) {
             return { success: false, message: "Missing required fields" };
         }
 
+        const isNowOrPast = finalPublishedAt ? finalPublishedAt <= new Date() : false;
+        const isPublished = isPublishedImmediate || isNowOrPast;
+
         await db.insert(news).values({
             title,
             content,
             category,
             imageUrl: imageUrl || null,
             authorId: user.id,
-            isPublished: isPublished || (finalPublishedAt && finalPublishedAt <= new Date()) ? true : false,
-            publishedAt: finalPublishedAt,
+            isPublished,
+            publishedAt: finalPublishedAt || new Date(),
         });
 
         revalidatePath("/dashboard/news");
         revalidatePath("/news");
         revalidateTag("news", {});
         
-        return { success: true, message: "News created successfully" };
+        return { 
+            success: true, 
+            message: !isPublished && finalPublishedAt && finalPublishedAt > new Date()
+                ? `News scheduled for ${finalPublishedAt.toLocaleString()}`
+                : "News article published successfully" 
+        };
     } catch (error) {
         console.error("Failed to create news:", error);
         return { success: false, message: "Failed to create news" };
@@ -58,6 +66,7 @@ export async function deleteNews(id: string) {
     try {
         await db.delete(news).where(eq(news.id, id));
         revalidatePath("/dashboard/news");
+        revalidatePath("/news");
         revalidateTag("news", {});
         return { success: true, message: "News deleted successfully" };
     } catch (error) {
@@ -68,8 +77,13 @@ export async function deleteNews(id: string) {
 
 export async function toggleNewsStatus(id: string, isPublished: boolean) {
     try {
-        await db.update(news).set({ isPublished }).where(eq(news.id, id));
+        await db.update(news).set({ 
+            isPublished,
+            publishedAt: isPublished ? new Date() : undefined 
+        }).where(eq(news.id, id));
+        
         revalidatePath("/dashboard/news");
+        revalidatePath("/news");
         revalidateTag("news", {});
         return { success: true, message: "News status updated successfully" };
     } catch (error) {

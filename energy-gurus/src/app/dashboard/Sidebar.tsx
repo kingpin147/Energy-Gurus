@@ -27,7 +27,7 @@ export default function Sidebar({ role }: { role: UserRole }) {
     const isAdmin = role === 'super-admin' || role === 'admin';
 
     const adminLinks = [
-        { href: "/dashboard/admin/onboard-epc", icon: <Briefcase className="w-4 h-4" />, label: "Onboard EPC Installer" },
+        { href: "/dashboard/admin/onboard-epc", icon: <Briefcase className="w-4 h-4" />, label: "EPC Installers & Onboarding" },
         { href: "/dashboard", icon: <LayoutDashboard className="w-4 h-4" />, label: "Overview" },
         { href: "/dashboard/analytics", icon: <MousePointerClick className="w-4 h-4" />, label: "Engagement Hub" },
         { href: "/dashboard/reviews", icon: <Star className="w-4 h-4" />, label: "Give & Manage Reviews" },

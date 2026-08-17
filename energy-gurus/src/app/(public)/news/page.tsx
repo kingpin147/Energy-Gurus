@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { news } from "@/db/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, or, isNotNull, lte } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import Link from "next/link";
 import { AdBanner } from "@/components/shared/AdBanner";
@@ -8,9 +8,23 @@ import { format } from "date-fns";
 import { Newspaper } from "lucide-react";
 import { NewsFilters } from "@/components/news/news-filters";
 
+const DEFAULT_CATEGORIES = [
+    "Industry News",
+    "Policy & Incentives",
+    "Product Launches",
+    "Project Sign Off",
+];
+
 const getNews = unstable_cache(
     async (category?: string) => {
-        let conditions = [eq(news.isPublished, true)];
+        const now = new Date();
+        // Post is visible if manually published OR if scheduled publish date/time has arrived
+        let conditions = [
+            or(
+                eq(news.isPublished, true),
+                and(isNotNull(news.publishedAt), lte(news.publishedAt, now))
+            )
+        ];
         
         if (category && category !== "All") {
             conditions.push(eq(news.category, category));
@@ -20,10 +34,17 @@ const getNews = unstable_cache(
             .where(and(...conditions))
             .orderBy(desc(news.publishedAt));
 
-        return articles;
+        // Fetch distinct categories from database to dynamically display custom categories
+        const distinctCats = await db.selectDistinct({ category: news.category }).from(news);
+        const dbCategories = distinctCats.map(c => c.category).filter(Boolean);
+
+        const categorySet = new Set(["All", ...DEFAULT_CATEGORIES, ...dbCategories]);
+        const categoriesList = Array.from(categorySet);
+
+        return { articles, categoriesList };
     },
-    ['news-list-v1'],
-    { revalidate: 3600, tags: ['news'] }
+    ['news-list-v3'],
+    { revalidate: 60, tags: ['news'] }
 );
 
 export default async function NewsPage({
@@ -32,7 +53,7 @@ export default async function NewsPage({
     searchParams: Promise<{ category?: string }>;
 }) {
     const { category = "All" } = await searchParams;
-    const articles = await getNews(category);
+    const { articles, categoriesList } = await getNews(category);
     
     // Featured is the first article if category is "All", otherwise no specific featured unless we want to
     const featured = category === "All" && articles.length > 0 ? articles[0] : null;
@@ -66,8 +87,8 @@ export default async function NewsPage({
             <section className="py-[10px] pb-[96px]">
                 <div className="max-w-[1180px] mx-auto px-5 md:px-8">
                     
-                    {/* Filters */}
-                    <NewsFilters currentCategory={category} />
+                    {/* Dynamic Filters */}
+                    <NewsFilters currentCategory={category} categories={categoriesList} />
 
                     {/* Featured Article */}
                     {featured && (

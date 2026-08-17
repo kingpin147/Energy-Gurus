@@ -5,9 +5,10 @@ import { cn } from "@/lib/utils";
 
 interface NewsFiltersProps {
     currentCategory: string;
+    categories?: string[];
 }
 
-const NEWS_CATEGORIES = [
+const DEFAULT_CATEGORIES = [
     "All",
     "Industry News",
     "Policy & Incentives",
@@ -15,10 +16,12 @@ const NEWS_CATEGORIES = [
     "Project Sign Off",
 ];
 
-export function NewsFilters({ currentCategory }: NewsFiltersProps) {
+export function NewsFilters({ currentCategory, categories }: NewsFiltersProps) {
+    const list = categories && categories.length > 0 ? categories : DEFAULT_CATEGORIES;
+
     return (
         <div className="flex gap-2.5 flex-wrap mb-9">
-            {NEWS_CATEGORIES.map(cat => (
+            {list.map(cat => (
                 <Link
                     key={cat}
                     href={cat === "All" ? "/news" : `/news?category=${encodeURIComponent(cat)}`}

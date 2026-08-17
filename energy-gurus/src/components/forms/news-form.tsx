@@ -10,10 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { createNews } from "@/lib/actions/news";
 import { toast } from "sonner";
-import { Newspaper, Loader2, UploadCloud } from "lucide-react";
+import { Newspaper, Loader2, UploadCloud, Plus } from "lucide-react";
 import { useR2Upload } from "@/lib/hooks/use-r2-upload";
 
-const NEWS_CATEGORIES = [
+const DEFAULT_NEWS_CATEGORIES = [
     "Industry News",
     "Policy & Incentives",
     "Product Launches",
@@ -25,11 +25,24 @@ export function NewsForm() {
     const [isLoading, setIsLoading] = useState(false);
     const [imageUrl, setImageUrl] = useState("");
     const [isPublished, setIsPublished] = useState(true);
+    const [selectedCategory, setSelectedCategory] = useState<string>(DEFAULT_NEWS_CATEGORIES[0]);
+    const [customCategory, setCustomCategory] = useState<string>("");
     const { uploadFile, isUploading } = useR2Upload();
 
     async function onSubmit(formData: FormData) {
         setIsLoading(true);
         try {
+            if (selectedCategory === "custom") {
+                if (!customCategory.trim()) {
+                    toast.error("Please enter a custom category name");
+                    setIsLoading(false);
+                    return;
+                }
+                formData.set("category", customCategory.trim());
+            } else {
+                formData.set("category", selectedCategory);
+            }
+
             if (imageUrl) {
                 formData.append("imageUrl", imageUrl);
             }
@@ -61,19 +74,36 @@ export function NewsForm() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="category" className="text-sm font-bold text-ink">Category <span className="text-red-500">*</span></Label>
-                        <Select name="category" defaultValue={NEWS_CATEGORIES[0]}>
-                            <SelectTrigger id="category" className="h-11 rounded-xl bg-slate-50 border-transparent focus:ring-amber">
+                        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                            <SelectTrigger id="category" className="h-11 rounded-xl bg-slate-50 border-transparent focus:ring-amber font-medium">
                                 <SelectValue placeholder="Select category" />
                             </SelectTrigger>
                             <SelectContent>
-                                {NEWS_CATEGORIES.map(cat => (
+                                {DEFAULT_NEWS_CATEGORIES.map(cat => (
                                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                                 ))}
+                                <SelectItem value="custom" className="text-amber font-bold flex items-center">
+                                    + Add Custom Category...
+                                </SelectItem>
                             </SelectContent>
                         </Select>
+
+                        {selectedCategory === "custom" && (
+                            <div className="pt-2 space-y-1">
+                                <Label htmlFor="customCategoryInput" className="text-xs font-bold text-slate-custom uppercase tracking-wider">Custom Category Name <span className="text-red-500">*</span></Label>
+                                <Input
+                                    id="customCategoryInput"
+                                    value={customCategory}
+                                    onChange={(e) => setCustomCategory(e.target.value)}
+                                    placeholder="Enter custom category (e.g. Battery Storage, Solar Tariffs)"
+                                    required
+                                    className="h-10 rounded-xl bg-slate-50 border-amber/50 text-sm focus-visible:ring-amber"
+                                />
+                            </div>
+                        )}
                     </div>
 
-                    <div className="space-y-2 flex flex-col justify-end pb-2">
+                    <div className="space-y-2 flex flex-col justify-start md:justify-end pb-2">
                         <div className="flex items-center space-x-3 bg-slate-50 p-3 rounded-xl border border-transparent">
                             <Switch id="isPublished" name="isPublished" value="true" checked={isPublished} onCheckedChange={setIsPublished} className="data-[state=checked]:bg-teal" />
                             <Label htmlFor="isPublished" className="text-sm font-bold cursor-pointer">Publish immediately</Label>

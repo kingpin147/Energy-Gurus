@@ -28,15 +28,17 @@ const getNewsArticle = unstable_cache(
         
         return result[0];
     },
-    ['news-article-detail'],
-    { revalidate: 3600, tags: ['news'] }
+    ['news-article-detail-v2'],
+    { revalidate: 60, tags: ['news'] }
 );
 
 export default async function NewsDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const article = await getNewsArticle(id);
 
-    if (!article || !article.isPublished) {
+    const isLive = article && (article.isPublished || (article.publishedAt && new Date(article.publishedAt) <= new Date()));
+
+    if (!article || !isLive) {
         notFound();
     }
 
@@ -70,7 +72,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ id:
                         <div className="flex items-center gap-4 border-t border-b border-line py-4 text-sm text-slate-custom font-ibm-plex-mono">
                             <div className="font-semibold text-ink">By {article.authorName || "Energy Gurus"}</div>
                             <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-                            <div>{article.publishedAt ? format(article.publishedAt, "MMMM d, yyyy") : ""}</div>
+                            <div>{article.publishedAt ? format(article.publishedAt, "MMMM d, yyyy 'at' h:mm a") : ""}</div>
                         </div>
                     </header>
 
