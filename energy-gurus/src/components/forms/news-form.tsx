@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,177 +10,557 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { createNews } from "@/lib/actions/news";
 import { toast } from "sonner";
-import { Newspaper, Loader2, UploadCloud, Plus } from "lucide-react";
+import {
+  Newspaper,
+  Loader2,
+  Bold,
+  Italic,
+  Heading2,
+  Heading3,
+  List,
+  ListOrdered,
+  Quote,
+  Link as LinkIcon,
+  Code,
+  Minus,
+  User,
+  Mail,
+  Linkedin,
+  Building,
+  Briefcase,
+  Calendar,
+  X
+} from "lucide-react";
 import { useR2Upload } from "@/lib/hooks/use-r2-upload";
+import { UploadZone } from "@/components/ui/upload-zone";
 
 const DEFAULT_NEWS_CATEGORIES = [
-    "Industry News",
-    "Policy & Incentives",
-    "Product Launches",
-    "Project Sign Off",
+  "Industry News",
+  "Policy & Incentives",
+  "Product Launches",
+  "Project Sign Off",
 ];
 
 export function NewsForm() {
-    const router = useRouter();
-    const [isLoading, setIsLoading] = useState(false);
-    const [imageUrl, setImageUrl] = useState("");
-    const [isPublished, setIsPublished] = useState(true);
-    const [selectedCategory, setSelectedCategory] = useState<string>(DEFAULT_NEWS_CATEGORIES[0]);
-    const [customCategory, setCustomCategory] = useState<string>("");
-    const { uploadFile, isUploading } = useR2Upload();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+  const [authorPictureUrl, setAuthorPictureUrl] = useState("");
+  const [isPublished, setIsPublished] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<string>(DEFAULT_NEWS_CATEGORIES[0]);
+  const [customCategory, setCustomCategory] = useState<string>("");
+  const [content, setContent] = useState("");
+  const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
 
-    async function onSubmit(formData: FormData) {
-        setIsLoading(true);
-        try {
-            if (selectedCategory === "custom") {
-                if (!customCategory.trim()) {
-                    toast.error("Please enter a custom category name");
-                    setIsLoading(false);
-                    return;
-                }
-                formData.set("category", customCategory.trim());
-            } else {
-                formData.set("category", selectedCategory);
-            }
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { uploadFile, isUploading } = useR2Upload();
 
-            if (imageUrl) {
-                formData.append("imageUrl", imageUrl);
-            }
-            
-            const result = await createNews(formData);
-            
-            if (result.success) {
-                toast.success(result.message);
-                router.push("/dashboard/news");
-                router.refresh();
-            } else {
-                toast.error(result.message);
-            }
-        } catch (error) {
-            toast.error("An unexpected error occurred");
-        } finally {
-            setIsLoading(false);
-        }
+  // Cover image upload
+  const handleCoverUpload = async (file: File) => {
+    try {
+      const { publicUrl } = await uploadFile(file, "news-cover");
+      setImageUrl(publicUrl);
+      toast.success("Cover image uploaded successfully!");
+    } catch (err: any) {
+      toast.error("Failed to upload cover image");
     }
+  };
 
-    return (
-        <form action={onSubmit} className="space-y-6">
-            <div className="space-y-4">
-                <div className="space-y-2">
-                    <Label htmlFor="title" className="text-sm font-bold text-ink">Article Title <span className="text-red-500">*</span></Label>
-                    <Input id="title" name="title" required placeholder="Enter an engaging title..." className="h-11 rounded-xl bg-slate-50 border-transparent focus-visible:bg-white focus-visible:ring-amber" />
-                </div>
+  // Author picture upload
+  const handleAuthorPicUpload = async (file: File) => {
+    try {
+      const { publicUrl } = await uploadFile(file, "news-authors");
+      setAuthorPictureUrl(publicUrl);
+      toast.success("Author picture uploaded successfully!");
+    } catch (err: any) {
+      toast.error("Failed to upload author picture");
+    }
+  };
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="category" className="text-sm font-bold text-ink">Category <span className="text-red-500">*</span></Label>
-                        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                            <SelectTrigger id="category" className="h-11 rounded-xl bg-slate-50 border-transparent focus:ring-amber font-medium">
-                                <SelectValue placeholder="Select category" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {DEFAULT_NEWS_CATEGORIES.map(cat => (
-                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                                ))}
-                                <SelectItem value="custom" className="text-amber font-bold flex items-center">
-                                    + Add Custom Category...
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
+  // Insert markdown helper into textarea
+  const insertFormatting = (before: string, after: string = "", defaultText: string = "") => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
 
-                        {selectedCategory === "custom" && (
-                            <div className="pt-2 space-y-1">
-                                <Label htmlFor="customCategoryInput" className="text-xs font-bold text-slate-custom uppercase tracking-wider">Custom Category Name <span className="text-red-500">*</span></Label>
-                                <Input
-                                    id="customCategoryInput"
-                                    value={customCategory}
-                                    onChange={(e) => setCustomCategory(e.target.value)}
-                                    placeholder="Enter custom category (e.g. Battery Storage, Solar Tariffs)"
-                                    required
-                                    className="h-10 rounded-xl bg-slate-50 border-amber/50 text-sm focus-visible:ring-amber"
-                                />
-                            </div>
-                        )}
-                    </div>
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = content.substring(start, end) || defaultText;
+    const replacement = `${before}${selectedText}${after}`;
 
-                    <div className="space-y-2 flex flex-col justify-start md:justify-end pb-2">
-                        <div className="flex items-center space-x-3 bg-slate-50 p-3 rounded-xl border border-transparent">
-                            <Switch id="isPublished" name="isPublished" value="true" checked={isPublished} onCheckedChange={setIsPublished} className="data-[state=checked]:bg-teal" />
-                            <Label htmlFor="isPublished" className="text-sm font-bold cursor-pointer">Publish immediately</Label>
-                        </div>
-                    </div>
-                </div>
+    const newContent = content.substring(0, start) + replacement + content.substring(end);
+    setContent(newContent);
 
-                {!isPublished && (
-                    <div className="space-y-2">
-                        <Label htmlFor="publishedAt" className="text-sm font-bold text-ink">Publish Date & Time <span className="text-red-500">*</span></Label>
-                        <Input type="datetime-local" id="publishedAt" name="publishedAt" required={!isPublished} className="h-11 rounded-xl bg-slate-50 border-transparent focus-visible:bg-white focus-visible:ring-amber" />
-                    </div>
-                )}
+    // Reposition cursor
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + before.length, start + before.length + selectedText.length);
+    }, 50);
+  };
 
-                <div className="space-y-2">
-                    <Label className="text-sm font-bold text-ink">Cover Image</Label>
-                    <div className="bg-slate-50 p-4 rounded-2xl border border-dashed border-slate-200">
-                        {imageUrl ? (
-                            <div className="relative aspect-video max-h-[300px] w-full rounded-xl overflow-hidden bg-slate-100 flex items-center justify-center group">
-                                <img src={imageUrl} alt="Preview" className="max-w-full max-h-full object-contain" />
-                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <Button type="button" variant="destructive" onClick={() => setImageUrl("")} className="font-bold">
-                                        Remove Image
-                                    </Button>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center p-8 text-center space-y-4">
-                                <UploadCloud className="w-12 h-12 text-slate-300" />
-                                <div>
-                                    <p className="text-sm font-semibold text-ink">Click to upload cover image</p>
-                                    <p className="text-xs text-slate-custom mt-1">SVG, PNG, JPG or GIF (max 5MB)</p>
-                                </div>
-                                <Input
-                                    type="file"
-                                    accept="image/*"
-                                    disabled={isUploading}
-                                    className="cursor-pointer file:cursor-pointer w-full max-w-xs"
-                                    onChange={async (e) => {
-                                        const file = e.target.files?.[0];
-                                        if (!file) return;
-                                        try {
-                                            const { publicUrl } = await uploadFile(file, "news");
-                                            setImageUrl(publicUrl);
-                                            toast.success("Image uploaded successfully");
-                                        } catch (error: any) {
-                                            toast.error(`Error: ${error.message}`);
-                                        }
-                                    }}
-                                />
-                            </div>
-                        )}
-                    </div>
-                    <p className="text-xs text-slate-custom mt-1">Recommended size: 1200x800px or similar 3:2 ratio.</p>
-                </div>
+  async function onSubmit(formData: FormData) {
+    setIsLoading(true);
+    try {
+      if (selectedCategory === "custom") {
+        if (!customCategory.trim()) {
+          toast.error("Please enter a custom category name");
+          setIsLoading(false);
+          return;
+        }
+        formData.set("category", customCategory.trim());
+      } else {
+        formData.set("category", selectedCategory);
+      }
 
-                <div className="space-y-2">
-                    <Label htmlFor="content" className="text-sm font-bold text-ink">Article Content <span className="text-red-500">*</span></Label>
-                    <Textarea 
-                        id="content" 
-                        name="content" 
-                        required 
-                        placeholder="Write your article content here... (Markdown supported)" 
-                        className="min-h-[250px] rounded-xl bg-slate-50 border-transparent focus-visible:bg-white focus-visible:ring-amber resize-y p-4" 
-                    />
-                </div>
+      if (imageUrl) {
+        formData.set("imageUrl", imageUrl);
+      }
+
+      if (authorPictureUrl) {
+        formData.set("authorPictureUrl", authorPictureUrl);
+      }
+
+      formData.set("content", content);
+
+      const result = await createNews(formData);
+
+      if (result.success) {
+        toast.success(result.message);
+        router.push("/dashboard/news");
+        router.refresh();
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <form action={onSubmit} className="space-y-8">
+      {/* 1. ARTICLE TITLE & CATEGORY & SCHEDULE */}
+      <div className="space-y-5 bg-white p-6 rounded-3xl border border-line shadow-sm">
+        <h3 className="text-base font-bold text-ink flex items-center gap-2 border-b border-line pb-3">
+          <Newspaper className="w-5 h-5 text-amber" /> Article General Information
+        </h3>
+
+        <div className="space-y-2">
+          <Label htmlFor="title" className="text-sm font-bold text-ink">
+            Article Title <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id="title"
+            name="title"
+            required
+            placeholder="Enter an engaging title..."
+            className="h-11 rounded-xl bg-slate-50 border-line text-sm focus-visible:ring-amber"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="space-y-2">
+            <Label htmlFor="category" className="text-sm font-bold text-ink">
+              Category <span className="text-red-500">*</span>
+            </Label>
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger id="category" className="h-11 rounded-xl bg-slate-50 border-line font-medium text-sm">
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                {DEFAULT_NEWS_CATEGORIES.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
+                  </SelectItem>
+                ))}
+                <SelectItem value="custom" className="text-amber font-bold">
+                  + Add Custom Category...
+                </SelectItem>
+              </SelectContent>
+            </Select>
+
+            {selectedCategory === "custom" && (
+              <div className="pt-2 space-y-1">
+                <Label htmlFor="customCategoryInput" className="text-xs font-bold text-slate-custom uppercase tracking-wider">
+                  Custom Category Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="customCategoryInput"
+                  value={customCategory}
+                  onChange={(e) => setCustomCategory(e.target.value)}
+                  placeholder="e.g. Battery Storage, Solar Tariffs"
+                  required
+                  className="h-10 rounded-xl bg-slate-50 border-amber/50 text-sm focus-visible:ring-amber"
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2 flex flex-col justify-end">
+            <div className="flex items-center justify-between bg-slate-50 p-3.5 rounded-xl border border-line">
+              <div className="flex items-center space-x-3">
+                <Switch
+                  id="isPublished"
+                  name="isPublished"
+                  value="true"
+                  checked={isPublished}
+                  onCheckedChange={setIsPublished}
+                  className="data-[state=checked]:bg-teal"
+                />
+                <Label htmlFor="isPublished" className="text-sm font-bold cursor-pointer text-ink">
+                  Publish Immediately
+                </Label>
+              </div>
+              <span className="text-xs font-semibold text-slate-custom">
+                {isPublished ? "Now Live" : "Scheduled"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Date & Time Picker when Scheduled */}
+        {!isPublished && (
+          <div className="p-4 bg-amber/5 border border-amber/20 rounded-2xl space-y-2">
+            <Label htmlFor="publishedAt" className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5">
+              <Calendar className="w-4 h-4 text-amber" /> Schedule Publish Date & Time <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              type="datetime-local"
+              id="publishedAt"
+              name="publishedAt"
+              required={!isPublished}
+              className="h-11 rounded-xl bg-white border-line font-medium text-sm focus-visible:ring-amber"
+            />
+            <p className="text-xs text-slate-custom">
+              The article will automatically go live on the site when the specified date and time arrives.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* 2. COVER IMAGE UPLOAD */}
+      <div className="space-y-3 bg-white p-6 rounded-3xl border border-line shadow-sm">
+        <Label className="text-sm font-bold text-ink">Article Cover Image</Label>
+        <UploadZone
+          onUpload={handleCoverUpload}
+          isUploading={isUploading}
+          value={imageUrl}
+          title="Click or drag to upload cover image"
+          description="High resolution PNG or JPG, up to 5MB"
+          accept="image/*"
+        />
+        {imageUrl && (
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setImageUrl("")}
+              className="text-xs text-rose-600 hover:bg-rose-50 font-bold"
+            >
+              <X className="w-3.5 h-3.5 mr-1" /> Remove Cover Image
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* 3. RICH FORMATTING CONTENT EDITOR */}
+      <div className="space-y-3 bg-white p-6 rounded-3xl border border-line shadow-sm">
+        <div className="flex items-center justify-between border-b border-line pb-3">
+          <Label className="text-sm font-bold text-ink">
+            Article Content <span className="text-red-500">*</span>
+          </Label>
+          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+            <button
+              type="button"
+              onClick={() => setActiveTab("write")}
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors ${
+                activeTab === "write" ? "bg-white text-ink shadow-sm" : "text-slate-custom hover:text-ink"
+              }`}
+            >
+              Write (Markdown)
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("preview")}
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors ${
+                activeTab === "preview" ? "bg-white text-ink shadow-sm" : "text-slate-custom hover:text-ink"
+              }`}
+            >
+              Formatted Preview
+            </button>
+          </div>
+        </div>
+
+        {activeTab === "write" ? (
+          <div className="space-y-2">
+            {/* RICH FORMATTING TOOLBAR */}
+            <div className="flex flex-wrap items-center gap-1 bg-slate-100 p-2 rounded-xl border border-line">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertFormatting("**", "**", "bold text")}
+                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
+                title="Bold"
+              >
+                <Bold className="w-4 h-4" />
+              </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertFormatting("*", "*", "italic text")}
+                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
+                title="Italic"
+              >
+                <Italic className="w-4 h-4" />
+              </Button>
+
+              <div className="w-[1px] h-5 bg-slate-300 mx-1" />
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertFormatting("\n## ", "\n", "Heading 2")}
+                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
+                title="Heading 2"
+              >
+                <Heading2 className="w-4 h-4" />
+              </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertFormatting("\n### ", "\n", "Heading 3")}
+                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
+                title="Heading 3"
+              >
+                <Heading3 className="w-4 h-4" />
+              </Button>
+
+              <div className="w-[1px] h-5 bg-slate-300 mx-1" />
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertFormatting("\n- ", "\n- ", "List item")}
+                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
+                title="Bullet List"
+              >
+                <List className="w-4 h-4" />
+              </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertFormatting("\n1. ", "\n2. ", "List item")}
+                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
+                title="Numbered List"
+              >
+                <ListOrdered className="w-4 h-4" />
+              </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertFormatting("\n> ", "\n", "Quote text")}
+                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
+                title="Quote"
+              >
+                <Quote className="w-4 h-4" />
+              </Button>
+
+              <div className="w-[1px] h-5 bg-slate-300 mx-1" />
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertFormatting("[", "](https://example.com)", "Link text")}
+                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
+                title="Insert Link"
+              >
+                <LinkIcon className="w-4 h-4" />
+              </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertFormatting("\n```\n", "\n```\n", "Code block")}
+                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
+                title="Code Block"
+              >
+                <Code className="w-4 h-4" />
+              </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertFormatting("\n---\n", "", "")}
+                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
+                title="Horizontal Divider"
+              >
+                <Minus className="w-4 h-4" />
+              </Button>
             </div>
 
-            <div className="pt-4 border-t border-line flex justify-end gap-3">
-                <Button type="button" variant="outline" onClick={() => router.back()} disabled={isLoading} className="rounded-xl h-11 px-6 font-bold">
-                    Cancel
-                </Button>
-                <Button type="submit" disabled={isLoading} className="rounded-xl h-11 px-6 font-bold bg-amber text-ink hover:bg-amber/90">
-                    {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Newspaper className="w-4 h-4 mr-2" />}
-                    Save Article
-                </Button>
+            <Textarea
+              ref={textareaRef}
+              id="content"
+              name="content"
+              required
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Write your article content here... Use the toolbar above for rich formatting."
+              className="min-h-[300px] rounded-2xl bg-slate-50 border-line text-sm focus-visible:ring-amber font-sans leading-relaxed p-4"
+            />
+          </div>
+        ) : (
+          <div className="min-h-[300px] p-6 bg-slate-50 rounded-2xl border border-line prose prose-slate max-w-none text-slate-800 whitespace-pre-wrap leading-relaxed">
+            {content || <span className="text-slate-custom italic">Nothing to preview yet. Start typing in the Write tab.</span>}
+          </div>
+        )}
+      </div>
+
+      {/* 4. AUTHOR DETAILS SECTION */}
+      <div className="space-y-5 bg-white p-6 rounded-3xl border border-line shadow-sm">
+        <h3 className="text-base font-bold text-ink flex items-center gap-2 border-b border-line pb-3">
+          <User className="w-5 h-5 text-amber" /> Author Details
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="space-y-2">
+            <Label htmlFor="authorName" className="text-xs font-bold uppercase tracking-wider text-slate-custom">
+              Author Name (Optional)
+            </Label>
+            <div className="relative">
+              <User className="w-4 h-4 text-slate-custom absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Input
+                id="authorName"
+                name="authorName"
+                placeholder="e.g. Engr. Faisal Hameed"
+                className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
+              />
             </div>
-        </form>
-    );
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="authorDesignation" className="text-xs font-bold uppercase tracking-wider text-slate-custom">
+              Designation
+            </Label>
+            <div className="relative">
+              <Briefcase className="w-4 h-4 text-slate-custom absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Input
+                id="authorDesignation"
+                name="authorDesignation"
+                placeholder="e.g. Chief Renewable Analyst"
+                className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="authorOrganization" className="text-xs font-bold uppercase tracking-wider text-slate-custom">
+              Organization
+            </Label>
+            <div className="relative">
+              <Building className="w-4 h-4 text-slate-custom absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Input
+                id="authorOrganization"
+                name="authorOrganization"
+                placeholder="e.g. EnergyGurus / AEDB"
+                className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="authorEmail" className="text-xs font-bold uppercase tracking-wider text-slate-custom">
+              Email Address
+            </Label>
+            <div className="relative">
+              <Mail className="w-4 h-4 text-slate-custom absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Input
+                type="email"
+                id="authorEmail"
+                name="authorEmail"
+                placeholder="author@energygurus.online"
+                className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="authorLinkedIn" className="text-xs font-bold uppercase tracking-wider text-slate-custom">
+              LinkedIn Profile URL
+            </Label>
+            <div className="relative">
+              <Linkedin className="w-4 h-4 text-slate-custom absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Input
+                id="authorLinkedIn"
+                name="authorLinkedIn"
+                placeholder="https://linkedin.com/in/author-profile"
+                className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <Label className="text-xs font-bold uppercase tracking-wider text-slate-custom">Author Picture</Label>
+            <UploadZone
+              onUpload={handleAuthorPicUpload}
+              isUploading={isUploading}
+              value={authorPictureUrl}
+              title="Click or drag to upload author headshot photo"
+              description="PNG or JPG photo"
+              accept="image/*"
+            />
+            {authorPictureUrl && (
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setAuthorPictureUrl("")}
+                  className="text-xs text-rose-600 hover:bg-rose-50 font-bold"
+                >
+                  <X className="w-3.5 h-3.5 mr-1" /> Remove Picture
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* FOOTER ACTIONS */}
+      <div className="pt-4 border-t border-line flex justify-end gap-3">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => router.back()}
+          disabled={isLoading}
+          className="rounded-xl h-11 px-6 font-bold"
+        >
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="rounded-xl h-11 px-6 font-bold bg-amber text-ink hover:bg-amber/90"
+        >
+          {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Newspaper className="w-4 h-4 mr-2" />}
+          Save Article
+        </Button>
+      </div>
+    </form>
+  );
 }

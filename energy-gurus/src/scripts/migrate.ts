@@ -40,6 +40,19 @@ async function run() {
     }
   }
 
+  try {
+    console.log("3. Adding author details columns to news table...");
+    await sql`ALTER TABLE news ADD COLUMN IF NOT EXISTS author_name text;`;
+    await sql`ALTER TABLE news ADD COLUMN IF NOT EXISTS author_picture_url text;`;
+    await sql`ALTER TABLE news ADD COLUMN IF NOT EXISTS author_designation text;`;
+    await sql`ALTER TABLE news ADD COLUMN IF NOT EXISTS author_organization text;`;
+    await sql`ALTER TABLE news ADD COLUMN IF NOT EXISTS author_linkedin text;`;
+    await sql`ALTER TABLE news ADD COLUMN IF NOT EXISTS author_email text;`;
+    console.log("Success: author details columns added to news table.");
+  } catch (err: any) {
+    console.error("Error adding author columns to news:", err.message);
+  }
+
   console.log("Migration complete!");
   process.exit(0);
 }

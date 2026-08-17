@@ -1,17 +1,18 @@
 "use server";
 
 import { db } from "@/db";
-import { users } from "@/db/schema";
-import { eq, and, ne, or } from "drizzle-orm";
-import { clerkClient as createClerkClient } from "@clerk/nextjs/server";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { users, brands, epcInstallers, inquiries, reviews, epcProjects, products } from "@/db/schema";
+import { eq, or } from "drizzle-orm";
+import { clerkClient as createClerkClient, auth } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
 import { getUserRole } from "@/lib/roles";
 import { redis, CACHE_KEYS } from "@/lib/redis";
-import { brands, epcInstallers, inquiries, reviews, epcProjects, products } from "@/db/schema";
 import { deleteFile, extractKeyFromUrl } from "@/lib/r2";
 
+const adminWhitelist = ["nomiking0072012@gmail.com", "energygurusonline@gmail.com"];
 
 export async function deleteUser(userId: string) {
+    const { userId: currentClerkId } = await auth();
     const currentUserRole = await getUserRole();
     if (currentUserRole !== 'super-admin' && currentUserRole !== 'admin') {
         throw new Error("Unauthorized");
@@ -19,9 +20,18 @@ export async function deleteUser(userId: string) {
 
     // Find the user to delete
     const [userToDelete] = await db.select().from(users).where(eq(users.id, userId));
-    if (!userToDelete) throw new Error("User not found");
+    if (!userToDelete) return;
 
-    // Protection: Only super-admin can delete admins or super-admins
+    // Protection 1: NEVER delete the currently logged-in user account!
+    if (userToDelete.clerkId && userToDelete.clerkId === currentClerkId) {
+        throw new Error("System Protection: You cannot delete your own logged-in account!");
+    }
+
+    // Protection 2: NEVER delete whitelisted Super Admin accounts or admin accounts without super-admin permission
+    if (adminWhitelist.includes(userToDelete.email.toLowerCase())) {
+        throw new Error("System Protection: Whitelisted super-admin accounts cannot be deleted!");
+    }
+
     if (userToDelete.role === 'super-admin' || userToDelete.role === 'admin') {
         if (currentUserRole !== 'super-admin') {
             throw new Error("Only Super Admins can delete administrative accounts");
@@ -80,14 +90,13 @@ export async function deleteUser(userId: string) {
         }
     }
 
-    // Manual cleanup of relations to avoid FK constraint errors 
-    // (Backup in case DB cascade isn't synced yet)
+    // Cleanup relations
     await db.delete(inquiries).where(or(eq(inquiries.senderId, userId), eq(inquiries.receiverId, userId)));
     await db.delete(reviews).where(eq(reviews.authorId, userId));
     await db.delete(brands).where(eq(brands.userId, userId));
     await db.delete(epcInstallers).where(eq(epcInstallers.userId, userId));
 
-    // Clear Redis Caches for specific profiles before deleting from DB
+    // Clear Redis Caches
     try {
         const keysToDelete: string[] = [CACHE_KEYS.BRANDS_LIST, CACHE_KEYS.EPCS_LIST];
         if (brand) keysToDelete.push(CACHE_KEYS.BRAND_DETAILS(brand.id));
@@ -113,7 +122,10 @@ export async function updateUserRole(userId: string, newRole: any) {
     const [userToUpdate] = await db.select().from(users).where(eq(users.id, userId));
     if (!userToUpdate) throw new Error("User not found");
 
-    // Protection: Only super-admin can promote/demote admins
+    if (adminWhitelist.includes(userToUpdate.email.toLowerCase())) {
+        throw new Error("System Protection: Cannot change role of whitelisted super-admin");
+    }
+
     if (newRole === 'admin' || newRole === 'super-admin' || userToUpdate.role === 'admin' || userToUpdate.role === 'super-admin') {
         if (currentUserRole !== 'super-admin') {
             throw new Error("Only Super Admins can manage administrative roles");
@@ -141,7 +153,10 @@ export async function toggleUserStatus(userId: string) {
     const [user] = await db.select().from(users).where(eq(users.id, userId));
     if (!user) throw new Error("User not found");
 
-    // Protection: Only super-admin can disable other admins
+    if (adminWhitelist.includes(user.email.toLowerCase())) {
+        throw new Error("System Protection: Cannot deactivate whitelisted super-admin");
+    }
+
     if (user.role === 'admin' || user.role === 'super-admin') {
         if (currentUserRole !== 'super-admin') {
             throw new Error("Only Super Admins can manage administrative account status");
@@ -150,10 +165,8 @@ export async function toggleUserStatus(userId: string) {
 
     await db.update(users).set({ isActive: !user.isActive }).where(eq(users.id, userId));
 
-
     revalidatePath("/", "layout");
 
-    // Clear Redis Caches for specific profiles
     try {
         const [brand] = await db.select({ id: brands.id }).from(brands).where(eq(brands.userId, userId));
         const [epc] = await db.select({ id: epcInstallers.id }).from(epcInstallers).where(eq(epcInstallers.userId, userId));

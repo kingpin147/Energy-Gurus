@@ -21,6 +21,14 @@ export async function createNews(formData: FormData) {
         const imageUrl = formData.get("imageUrl") as string;
         const isPublishedImmediate = formData.get("isPublished") === "true";
         const publishedAtStr = formData.get("publishedAt") as string;
+
+        // Author metadata fields
+        const authorName = formData.get("authorName") as string || user.name || "Energy Gurus Admin";
+        const authorPictureUrl = formData.get("authorPictureUrl") as string || null;
+        const authorDesignation = formData.get("authorDesignation") as string || null;
+        const authorOrganization = formData.get("authorOrganization") as string || null;
+        const authorLinkedIn = formData.get("authorLinkedIn") as string || null;
+        const authorEmail = formData.get("authorEmail") as string || user.email || null;
         
         let finalPublishedAt: Date | null = null;
         if (isPublishedImmediate) {
@@ -42,6 +50,12 @@ export async function createNews(formData: FormData) {
             category,
             imageUrl: imageUrl || null,
             authorId: user.id,
+            authorName,
+            authorPictureUrl,
+            authorDesignation,
+            authorOrganization,
+            authorLinkedIn,
+            authorEmail,
             isPublished,
             publishedAt: finalPublishedAt || new Date(),
         });
@@ -53,7 +67,7 @@ export async function createNews(formData: FormData) {
         return { 
             success: true, 
             message: !isPublished && finalPublishedAt && finalPublishedAt > new Date()
-                ? `News scheduled for ${finalPublishedAt.toLocaleString()}`
+                ? `News article scheduled for ${finalPublishedAt.toLocaleString()}`
                 : "News article published successfully" 
         };
     } catch (error) {

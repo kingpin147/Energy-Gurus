@@ -7,6 +7,10 @@ import { getUserRole } from "@/lib/roles";
 import { revalidatePath } from "next/cache";
 import { redis, CACHE_KEYS } from "@/lib/redis";
 import { deleteUser } from "@/lib/actions/users";
+import { auth } from "@clerk/nextjs/server";
+import { deleteFile, extractKeyFromUrl } from "@/lib/r2";
+
+const adminWhitelist = ["nomiking0072012@gmail.com", "energygurusonline@gmail.com"];
 
 export async function getAllEpcInstallers() {
   const role = await getUserRole();
@@ -231,15 +235,72 @@ export async function deleteEpcInstallerAction(epcId: string, userId: string) {
     return { success: false, message: "Unauthorized access" };
   }
 
+  const { userId: currentClerkId } = await auth();
+
   try {
-    // deleteUser handles Clerk user deletion, R2 file cleanup, and database record cleanup
-    await deleteUser(userId);
+    const [epc] = await db.select().from(epcInstallers).where(eq(epcInstallers.id, epcId));
+    if (!epc) {
+      return { success: false, message: "EPC Installer profile not found" };
+    }
+
+    // 1. Clean up R2 media assets for this EPC installer
+    const fileUrlsToDelete: string[] = [];
+    if (epc.logoUrl) fileUrlsToDelete.push(epc.logoUrl);
+    if (epc.portfolio) fileUrlsToDelete.push(...epc.portfolio);
+    if (epc.reviewVideos) fileUrlsToDelete.push(...epc.reviewVideos);
+    if (epc.licenceDocuments) fileUrlsToDelete.push(...epc.licenceDocuments);
+
+    const projects = await db.select().from(epcProjects).where(eq(epcProjects.epcId, epc.id));
+    for (const p of projects) {
+      if (p.images) fileUrlsToDelete.push(...p.images);
+      if (p.videos) fileUrlsToDelete.push(...p.videos);
+    }
+
+    for (const url of fileUrlsToDelete) {
+      if (!url) continue;
+      try {
+        const key = extractKeyFromUrl(url);
+        await deleteFile(key);
+      } catch (e) {
+        console.error("Failed to delete R2 file:", url, e);
+      }
+    }
+
+    // 2. Remove relational records (Offices, Projects, EPC profile)
+    await db.delete(epcOffices).where(eq(epcOffices.epcId, epcId));
+    await db.delete(epcProjects).where(eq(epcProjects.epcId, epcId));
+    await db.delete(epcInstallers).where(eq(epcInstallers.id, epcId));
+
+    // Clear Redis Caches
+    try {
+      await redis.del(CACHE_KEYS.EPC_DETAILS(epcId));
+      await redis.del(CACHE_KEYS.EPCS_LIST);
+    } catch (e) {
+      console.warn("Redis cache deletion error:", e);
+    }
+
+    // 3. Check linked user before deleting user account
+    if (userId) {
+      const [linkedUser] = await db.select().from(users).where(eq(users.id, userId));
+      
+      const isSelf = linkedUser?.clerkId && linkedUser.clerkId === currentClerkId;
+      const isAdminUser = linkedUser && (adminWhitelist.includes(linkedUser.email.toLowerCase()) || linkedUser.role === 'super-admin' || linkedUser.role === 'admin');
+
+      // ONLY delete user account if it is a regular EPC account (NOT the current admin or whitelisted admin)
+      if (linkedUser && !isSelf && !isAdminUser) {
+        try {
+          await deleteUser(userId);
+        } catch (err) {
+          console.warn("User account cleanup notice:", err);
+        }
+      }
+    }
 
     revalidatePath("/dashboard/admin/onboard-epc");
     revalidatePath("/epcs");
     revalidatePath("/", "layout");
 
-    return { success: true, message: "EPC Installer deleted successfully" };
+    return { success: true, message: "EPC Installer profile deleted successfully" };
   } catch (error: any) {
     console.error("Error deleting EPC installer:", error);
     return { success: false, message: error?.message || "Failed to delete EPC installer" };
