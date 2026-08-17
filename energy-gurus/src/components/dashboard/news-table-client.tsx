@@ -371,9 +371,9 @@ export function NewsTableClient({ initialNews }: NewsTableClientProps) {
 
             return (
               <Card key={article.id} className="border-line shadow-sm rounded-2xl overflow-hidden bg-white flex flex-col hover:shadow-md transition-shadow">
-                <div className="aspect-[21/9] bg-slate-100 relative overflow-hidden flex items-center justify-center border-b border-line">
+                <div className="aspect-[16/9] bg-slate-950 relative overflow-hidden flex items-center justify-center border-b border-line p-2">
                   {article.imageUrl ? (
-                    <img src={article.imageUrl} alt={article.title} className="w-full h-full object-cover" />
+                    <img src={article.imageUrl} alt={article.title} className="w-full h-full object-contain" />
                   ) : (
                     <Newspaper className="w-8 h-8 text-slate-300" />
                   )}

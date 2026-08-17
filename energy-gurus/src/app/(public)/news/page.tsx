@@ -93,12 +93,14 @@ export default async function NewsPage({
                     {/* Featured Article */}
                     {featured && (
                         <div className="grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-10 items-center mb-14">
-                            <Link href={`/news/${featured.id}`} className="aspect-[16/10] rounded-[6px] overflow-hidden bg-gradient-to-br from-ink to-[#1b3157] flex items-center justify-center relative group">
+                            <Link href={`/news/${featured.id}`} className="rounded-[8px] overflow-hidden border border-line block relative group shadow-sm bg-slate-50">
                                 {featured.imageUrl ? (
-                                    <img src={featured.imageUrl} alt={featured.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    <img src={featured.imageUrl} alt={featured.title} className="w-full h-auto block group-hover:scale-[1.02] transition-transform duration-300" />
                                 ) : (
-                                    <div className="w-11 h-11 border-2 border-amber rounded-[3px] opacity-70 flex items-center justify-center">
-                                        <Newspaper className="w-6 h-6 text-amber" />
+                                    <div className="aspect-[2/1] bg-gradient-to-br from-ink to-[#1b3157] flex items-center justify-center py-12">
+                                        <div className="w-11 h-11 border-2 border-amber rounded-[3px] opacity-70 flex items-center justify-center">
+                                            <Newspaper className="w-6 h-6 text-amber" />
+                                        </div>
                                     </div>
                                 )}
                             </Link>
@@ -127,13 +129,15 @@ export default async function NewsPage({
                     {/* Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                         {gridArticles.map((article) => (
-                            <div key={article.id} className="bg-white border border-line rounded-[4px] overflow-hidden flex flex-col hover:border-teal transition-colors group">
-                                <Link href={`/news/${article.id}`} className="aspect-[16/9] bg-gradient-to-br from-ink to-[#1b3157] flex items-center justify-center overflow-hidden">
+                            <div key={article.id} className="bg-white border border-line rounded-[8px] overflow-hidden flex flex-col hover:border-teal hover:shadow-sm transition-all group">
+                                <Link href={`/news/${article.id}`} className="w-full bg-slate-50 block overflow-hidden border-b border-line">
                                     {article.imageUrl ? (
-                                        <img src={article.imageUrl} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        <img src={article.imageUrl} alt={article.title} className="w-full h-auto block group-hover:scale-[1.03] transition-transform duration-300" />
                                     ) : (
-                                        <div className="w-[30px] h-[30px] border-2 border-amber rounded-[3px] opacity-60 flex items-center justify-center">
-                                            <Newspaper className="w-4 h-4 text-amber" />
+                                        <div className="aspect-[2/1] bg-gradient-to-br from-ink to-[#1b3157] flex items-center justify-center py-8">
+                                            <div className="w-[30px] h-[30px] border-2 border-amber rounded-[3px] opacity-60 flex items-center justify-center">
+                                                <Newspaper className="w-4 h-4 text-amber" />
+                                            </div>
                                         </div>
                                     )}
                                 </Link>

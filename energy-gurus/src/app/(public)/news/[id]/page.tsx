@@ -99,8 +99,12 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ id:
 
                     {/* Featured Cover Image */}
                     {article.imageUrl ? (
-                        <div className="aspect-[16/9] md:aspect-[21/9] rounded-[6px] overflow-hidden mb-12 bg-slate-100 border border-line">
-                            <img src={article.imageUrl} alt={article.title} className="w-full h-full object-cover" />
+                        <div className="w-full rounded-[8px] overflow-hidden mb-12 border border-line shadow-sm bg-slate-50">
+                            <img 
+                                src={article.imageUrl} 
+                                alt={article.title} 
+                                className="w-full h-auto block" 
+                            />
                         </div>
                     ) : (
                         <div className="aspect-[21/9] rounded-[6px] bg-gradient-to-br from-ink to-[#1b3157] flex items-center justify-center mb-12">

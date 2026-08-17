@@ -31,8 +31,8 @@ export function Footer() {
                 <div className="flex gap-14 flex-wrap">
                     <div className="flex flex-col gap-2.5">
                         <Link href="/about" className="text-paper/60 hover:text-white transition-colors">About Us</Link>
-                        <Link href="/installers" className="text-paper/60 hover:text-white transition-colors">Find an Installer</Link>
-                        <Link href="/installers/onboard" className="text-amber hover:text-amber/80 transition-colors font-medium">Join as Installer</Link>
+                        <Link href="/news" className="text-paper/60 hover:text-white transition-colors">News</Link>
+                        <Link href="/podcast" className="text-paper/60 hover:text-white transition-colors">Podcasts</Link>
                         <Link href="/monitoring" className="text-paper/60 hover:text-white transition-colors">Monitoring & O&M</Link>
                     </div>
                     <div className="flex flex-col gap-2.5">
