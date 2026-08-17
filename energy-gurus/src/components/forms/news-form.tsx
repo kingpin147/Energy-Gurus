@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { createNews } from "@/lib/actions/news";
+import { createNews, updateNews } from "@/lib/actions/news";
 import { toast } from "sonner";
 import {
   Newspaper,
@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { useR2Upload } from "@/lib/hooks/use-r2-upload";
 import { UploadZone } from "@/components/ui/upload-zone";
+import { FormattedMarkdown } from "@/components/news/formatted-markdown";
 
 const DEFAULT_NEWS_CATEGORIES = [
   "Industry News",
@@ -41,16 +42,60 @@ const DEFAULT_NEWS_CATEGORIES = [
   "Project Sign Off",
 ];
 
-export function NewsForm() {
+interface NewsFormProps {
+  initialData?: {
+    id: string;
+    title: string;
+    content: string;
+    category: string;
+    imageUrl?: string | null;
+    isPublished: boolean;
+    publishedAt?: Date | string | null;
+    authorName?: string | null;
+    authorPictureUrl?: string | null;
+    authorDesignation?: string | null;
+    authorOrganization?: string | null;
+    authorLinkedIn?: string | null;
+    authorEmail?: string | null;
+  };
+}
+
+export function NewsForm({ initialData }: NewsFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState("");
-  const [authorPictureUrl, setAuthorPictureUrl] = useState("");
-  const [isPublished, setIsPublished] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>(DEFAULT_NEWS_CATEGORIES[0]);
-  const [customCategory, setCustomCategory] = useState<string>("");
-  const [content, setContent] = useState("");
+  const [title, setTitle] = useState(initialData?.title || "");
+  const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || "");
+  const [authorPictureUrl, setAuthorPictureUrl] = useState(initialData?.authorPictureUrl || "");
+  const [isPublished, setIsPublished] = useState(initialData?.isPublished ?? true);
+
+  const isDefaultCat = initialData?.category ? DEFAULT_NEWS_CATEGORIES.includes(initialData.category) : true;
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    initialData?.category ? (isDefaultCat ? initialData.category : "custom") : DEFAULT_NEWS_CATEGORIES[0]
+  );
+  const [customCategory, setCustomCategory] = useState<string>(
+    initialData?.category && !isDefaultCat ? initialData.category : ""
+  );
+
+  const getFormattedDate = () => {
+    if (!initialData?.publishedAt) return "";
+    const d = new Date(initialData.publishedAt);
+    if (isNaN(d.getTime())) return "";
+    // format as YYYY-MM-DDTHH:mm
+    const tzOffset = d.getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(d.getTime() - tzOffset)).toISOString().slice(0, 16);
+    return localISOTime;
+  };
+
+  const [publishedAt, setPublishedAt] = useState<string>(getFormattedDate());
+  const [content, setContent] = useState(initialData?.content || "");
   const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
+
+  // Author Metadata state
+  const [authorName, setAuthorName] = useState(initialData?.authorName || "");
+  const [authorDesignation, setAuthorDesignation] = useState(initialData?.authorDesignation || "");
+  const [authorOrganization, setAuthorOrganization] = useState(initialData?.authorOrganization || "");
+  const [authorEmail, setAuthorEmail] = useState(initialData?.authorEmail || "");
+  const [authorLinkedIn, setAuthorLinkedIn] = useState(initialData?.authorLinkedIn || "");
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { uploadFile, isUploading } = useR2Upload();
@@ -121,7 +166,9 @@ export function NewsForm() {
 
       formData.set("content", content);
 
-      const result = await createNews(formData);
+      const result = initialData?.id
+        ? await updateNews(initialData.id, formData)
+        : await createNews(formData);
 
       if (result.success) {
         toast.success(result.message);
@@ -142,7 +189,7 @@ export function NewsForm() {
       {/* 1. ARTICLE TITLE & CATEGORY & SCHEDULE */}
       <div className="space-y-5 bg-white p-6 rounded-3xl border border-line shadow-sm">
         <h3 className="text-base font-bold text-ink flex items-center gap-2 border-b border-line pb-3">
-          <Newspaper className="w-5 h-5 text-amber" /> Article General Information
+          <Newspaper className="w-5 h-5 text-amber" /> {initialData ? "Edit Article" : "Article General Information"}
         </h3>
 
         <div className="space-y-2">
@@ -153,6 +200,8 @@ export function NewsForm() {
             id="title"
             name="title"
             required
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             placeholder="Enter an engaging title..."
             className="h-11 rounded-xl bg-slate-50 border-line text-sm focus-visible:ring-amber"
           />
@@ -228,6 +277,8 @@ export function NewsForm() {
               type="datetime-local"
               id="publishedAt"
               name="publishedAt"
+              value={publishedAt}
+              onChange={(e) => setPublishedAt(e.target.value)}
               required={!isPublished}
               className="h-11 rounded-xl bg-white border-line font-medium text-sm focus-visible:ring-amber"
             />
@@ -425,8 +476,12 @@ export function NewsForm() {
             />
           </div>
         ) : (
-          <div className="min-h-[300px] p-6 bg-slate-50 rounded-2xl border border-line prose prose-slate max-w-none text-slate-800 whitespace-pre-wrap leading-relaxed">
-            {content || <span className="text-slate-custom italic">Nothing to preview yet. Start typing in the Write tab.</span>}
+          <div className="min-h-[300px] p-6 bg-slate-50 rounded-2xl border border-line">
+            {content ? (
+              <FormattedMarkdown content={content} />
+            ) : (
+              <span className="text-slate-custom italic text-sm">Nothing to preview yet. Start typing in the Write tab.</span>
+            )}
           </div>
         )}
       </div>
@@ -447,6 +502,8 @@ export function NewsForm() {
               <Input
                 id="authorName"
                 name="authorName"
+                value={authorName}
+                onChange={(e) => setAuthorName(e.target.value)}
                 placeholder="e.g. Engr. Faisal Hameed"
                 className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
               />
@@ -462,6 +519,8 @@ export function NewsForm() {
               <Input
                 id="authorDesignation"
                 name="authorDesignation"
+                value={authorDesignation}
+                onChange={(e) => setAuthorDesignation(e.target.value)}
                 placeholder="e.g. Chief Renewable Analyst"
                 className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
               />
@@ -477,6 +536,8 @@ export function NewsForm() {
               <Input
                 id="authorOrganization"
                 name="authorOrganization"
+                value={authorOrganization}
+                onChange={(e) => setAuthorOrganization(e.target.value)}
                 placeholder="e.g. EnergyGurus / AEDB"
                 className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
               />
@@ -493,6 +554,8 @@ export function NewsForm() {
                 type="email"
                 id="authorEmail"
                 name="authorEmail"
+                value={authorEmail}
+                onChange={(e) => setAuthorEmail(e.target.value)}
                 placeholder="author@energygurus.online"
                 className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
               />
@@ -508,6 +571,8 @@ export function NewsForm() {
               <Input
                 id="authorLinkedIn"
                 name="authorLinkedIn"
+                value={authorLinkedIn}
+                onChange={(e) => setAuthorLinkedIn(e.target.value)}
                 placeholder="https://linkedin.com/in/author-profile"
                 className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
               />
@@ -558,7 +623,7 @@ export function NewsForm() {
           className="rounded-xl h-11 px-6 font-bold bg-amber text-ink hover:bg-amber/90"
         >
           {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Newspaper className="w-4 h-4 mr-2" />}
-          Save Article
+          {initialData ? "Update Article" : "Save Article"}
         </Button>
       </div>
     </form>

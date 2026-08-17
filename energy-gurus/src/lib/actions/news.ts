@@ -76,6 +76,72 @@ export async function createNews(formData: FormData) {
     }
 }
 
+export async function updateNews(id: string, formData: FormData) {
+    try {
+        const { userId: clerkId } = await auth();
+        if (!clerkId) return { success: false, message: "Unauthorized" };
+
+        const title = formData.get("title") as string;
+        const content = formData.get("content") as string;
+        const category = formData.get("category") as string;
+        const imageUrl = formData.get("imageUrl") as string;
+        const isPublishedImmediate = formData.get("isPublished") === "true";
+        const publishedAtStr = formData.get("publishedAt") as string;
+
+        // Author metadata fields
+        const authorName = formData.get("authorName") as string || null;
+        const authorPictureUrl = formData.get("authorPictureUrl") as string || null;
+        const authorDesignation = formData.get("authorDesignation") as string || null;
+        const authorOrganization = formData.get("authorOrganization") as string || null;
+        const authorLinkedIn = formData.get("authorLinkedIn") as string || null;
+        const authorEmail = formData.get("authorEmail") as string || null;
+
+        if (!title || !content || !category) {
+            return { success: false, message: "Missing required fields" };
+        }
+
+        let finalPublishedAt: Date | undefined = undefined;
+        if (isPublishedImmediate) {
+            finalPublishedAt = new Date();
+        } else if (publishedAtStr) {
+            finalPublishedAt = new Date(publishedAtStr);
+        }
+
+        const isNowOrPast = finalPublishedAt ? finalPublishedAt <= new Date() : false;
+        const isPublished = isPublishedImmediate || isNowOrPast;
+
+        await db.update(news).set({
+            title,
+            content,
+            category,
+            imageUrl: imageUrl || null,
+            authorName,
+            authorPictureUrl,
+            authorDesignation,
+            authorOrganization,
+            authorLinkedIn,
+            authorEmail,
+            isPublished,
+            publishedAt: finalPublishedAt,
+            updatedAt: new Date(),
+        }).where(eq(news.id, id));
+
+        revalidatePath("/dashboard/news");
+        revalidatePath(`/dashboard/news/${id}/edit`);
+        revalidatePath("/news");
+        revalidatePath(`/news/${id}`);
+        revalidateTag("news", {});
+
+        return {
+            success: true,
+            message: "News article updated successfully"
+        };
+    } catch (error) {
+        console.error("Failed to update news:", error);
+        return { success: false, message: "Failed to update news article" };
+    }
+}
+
 export async function deleteNews(id: string) {
     try {
         await db.delete(news).where(eq(news.id, id));

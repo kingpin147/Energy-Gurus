@@ -9,6 +9,7 @@ import { ArrowLeft, Newspaper, Mail, Linkedin, Building, Briefcase } from "lucid
 import { unstable_cache } from "next/cache";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ShareButtons } from "@/components/news/share-buttons";
+import { FormattedMarkdown } from "@/components/news/formatted-markdown";
 
 const getNewsArticle = unstable_cache(
     async (id: string) => {
@@ -110,9 +111,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ id:
                     )}
 
                     {/* Formatted Article Content */}
-                    <div className="prose prose-lg prose-slate max-w-none text-graphite/90 marker:text-amber prose-a:text-teal hover:prose-a:text-teal/80 prose-headings:font-space-grotesk prose-headings:text-ink prose-img:rounded-[6px] whitespace-pre-wrap leading-relaxed mb-14">
-                        {article.content}
-                    </div>
+                    <FormattedMarkdown content={article.content} className="mb-14" />
 
                     {/* AUTHOR DETAILS CARD (renders if author metadata exists) */}
                     <div className="bg-white border border-line rounded-2xl p-6 md:p-8 space-y-4 shadow-sm">
