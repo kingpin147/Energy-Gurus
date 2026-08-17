@@ -21,7 +21,8 @@ export async function POST(req: Request) {
             "product-images", "product-datasheets",
             "podcast-thumbnails", "uploads",
             "project-images", "project-videos",
-            "live-qa-thumbnails", "expert-photos", "epc-reviews"
+            "live-qa-thumbnails", "expert-photos", "epc-reviews",
+            "news-cover", "news-authors", "news-images", "ad-banners", "team"
         ];
 
         // ── Multipart / binary upload (new proxy path) ──────────────────────

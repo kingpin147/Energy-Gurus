@@ -17,7 +17,8 @@ export function useR2Upload() {
             "product-images", "product-datasheets",
             "podcast-thumbnails", "uploads",
             "project-images", "project-videos",
-            "live-qa-thumbnails", "expert-photos", "epc-reviews"
+            "live-qa-thumbnails", "expert-photos", "epc-reviews",
+            "news-cover", "news-authors", "news-images", "ad-banners", "team"
         ];
 
         if (!ALLOWED_FOLDERS.includes(folder)) {
