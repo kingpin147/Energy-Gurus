@@ -1,6 +1,3 @@
-
-
-import { notFound } from 'next/navigation';
 import type { Metadata } from "next";
 import { Inter, Noto_Sans_Arabic, Outfit, Space_Grotesk, IBM_Plex_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -14,38 +11,37 @@ import "./globals.css";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"]
-    });
+});
 
 const notoArabic = Noto_Sans_Arabic({
   variable: "--font-noto-arabic",
   subsets: ["arabic"]
-    });
+});
 
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"]
-    });
+});
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"]
-    });
-
+});
 
 const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-ibm-plex-mono",
   subsets: ["latin"],
   weight: ["400", "500"]
-    });
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.energygurus.online"),
   title: {
     default: "EnergyGurus - Find Best & Top Solar Installers in Pakistan",
     template: "%s | EnergyGurus"
-    },
+  },
   description: "Discover the best and top solar installers in Pakistan with EnergyGurus. Get expert ideas on solar energy, compare tier-1 brands, and consult with the top gurus of solar.",
   keywords: [
     "best solar installers in Pakistan",
@@ -72,7 +68,7 @@ export const metadata: Metadata = {
     ],
     shortcut: "/favicon.ico",
     apple: "/logo-icon.svg"
-    },
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -86,15 +82,15 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: "EnergyGurus Pakistan"
-    },
+      },
     ]
-    },
+  },
   twitter: {
     card: "summary_large_image",
     title: "EnergyGurus - Find Best & Top Solar Installers in Pakistan",
     description: "Discover the best and top solar installers in Pakistan with EnergyGurus. Get expert ideas on solar energy, compare tier-1 brands, and consult with the top gurus of solar.",
     images: ["https://www.energygurus.online/new_hero_banner.jpg"]
-    },
+  },
   robots: {
     index: true,
     follow: true,
@@ -105,15 +101,15 @@ export const metadata: Metadata = {
       "max-image-preview": "large",
       "max-snippet": -1
     }
-    },
+  },
   alternates: {
     canonical: "https://www.energygurus.online"
-    }
-    };
+  }
+};
 
 export default function RootLayout({
   children
-    }: {
+}: {
   children: React.ReactNode;
 }) {
   const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
@@ -151,12 +147,12 @@ export default function RootLayout({
 
   const content = (
     <CSPostHogProvider>
-        <CompareProvider>
-          {children}
-          <Toaster position="top-right" expand={true} richColors />
-          <SpeedInsights />
-          <Analytics />
-        </CompareProvider>
+      <CompareProvider>
+        {children}
+        <Toaster position="top-right" expand={true} richColors />
+        <SpeedInsights />
+        <Analytics />
+      </CompareProvider>
     </CSPostHogProvider>
   );
 
@@ -177,45 +173,49 @@ export default function RootLayout({
             appearance={{
               variables: {
                 colorPrimary: "#12213A",
-                colorText: "#1B1F24",
+                colorText: "#12213A",
                 colorBackground: "#ffffff",
                 colorTextOnPrimaryBackground: "#ffffff",
                 fontFamily: "var(--font-space-grotesk), sans-serif",
-                borderRadius: "4px"
-    },
+                borderRadius: "16px"
+              },
               layout: {
-                logoImageUrl: "/logo-icon.svg"
-    },
+                logoImageUrl: "https://www.energygurus.online/logo-icon.svg",
+                socialButtonsVariant: "iconButton"
+              },
               elements: {
                 card: {
-                  boxShadow: "0 8px 32px 0 rgba(18, 33, 58, 0.07)",
-                  border: "1px solid rgba(18, 33, 58, 0.12)",
-                  borderRadius: "4px"
-    },
+                  boxShadow: "0 12px 40px 0 rgba(18, 33, 58, 0.08)",
+                  border: "1px solid rgba(18, 33, 58, 0.1)",
+                  borderRadius: "24px",
+                  padding: "2rem"
+                },
                 headerTitle: {
                   color: "#12213A",
-                  fontWeight: "700"
-    },
+                  fontWeight: "700",
+                  fontFamily: "var(--font-space-grotesk), sans-serif"
+                },
                 formButtonPrimary: {
                   backgroundColor: "#E8A33D",
                   color: "#12213A",
                   fontWeight: "700",
-                  borderRadius: "4px",
+                  borderRadius: "12px",
+                  fontSize: "0.95rem",
                   transition: "all 0.2s ease",
                   "&:hover": {
                     backgroundColor: "#f2b458"
-    }
-    },
+                  }
+                },
                 footerActionLink: {
                   color: "#E8A33D",
-                  fontWeight: "600",
+                  fontWeight: "700",
                   transition: "all 0.2s ease",
                   "&:hover": {
                     color: "#f2b458"
-    }
-    }
-    }
-    }}
+                  }
+                }
+              }
+            }}
           >
             {content}
           </ClerkProvider>
@@ -226,4 +226,3 @@ export default function RootLayout({
     </html>
   );
 }
-
