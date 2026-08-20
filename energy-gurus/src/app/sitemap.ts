@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { db } from '@/db';
-import { epcInstallers, brands, users, epcOffices, epcProjects, products, podcasts } from '@/db/schema';
-import { eq, sql, desc } from 'drizzle-orm';
+import { epcInstallers, brands, users, epcOffices, epcProjects, products, podcasts, news } from '@/db/schema';
+import { eq, sql, desc, or, lte } from 'drizzle-orm';
 import { getEpcCompleteness, getBrandCompleteness } from '@/lib/utils/completeness';
 
 const BASE_URL = 'https://www.energygurus.online';
@@ -22,6 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/monitoring',
     '/om',
     '/podcast',
+    '/news',
     '/live-qa',
     '/resources',
     '/about',
@@ -35,8 +36,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     sitemapEntries.push({
       url: `${BASE_URL}${path}`,
       lastModified: new Date(),
-      changeFrequency: path === '' ? 'daily' : 'weekly',
-      priority: path === '' ? 1.0 : path === '/epcs' || path === '/brands' ? 0.9 : 0.8
+      changeFrequency: path === '' || path === '/news' ? 'daily' : 'weekly',
+      priority: path === '' ? 1.0 : path === '/epcs' || path === '/brands' || path === '/news' ? 0.9 : 0.8
     });
   }
 
@@ -127,6 +128,42 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: episode.createdAt ? new Date(episode.createdAt) : new Date(),
         changeFrequency: 'monthly',
         priority: 0.6
+      });
+    }
+
+    // Fetch published News articles
+    const publishedNews = await db
+      .select({
+        id: news.id,
+        publishedAt: news.publishedAt,
+        updatedAt: news.updatedAt,
+        createdAt: news.createdAt,
+      })
+      .from(news)
+      .where(
+        or(
+          eq(news.isPublished, true),
+          lte(news.publishedAt, new Date())
+        )
+      )
+      .orderBy(desc(news.createdAt));
+
+    // 5. Dynamic News article pages
+    for (const article of publishedNews) {
+      const path = `/news/${article.id}`;
+      const lastModDate = article.publishedAt
+        ? new Date(article.publishedAt)
+        : article.updatedAt
+        ? new Date(article.updatedAt)
+        : article.createdAt
+        ? new Date(article.createdAt)
+        : new Date();
+
+      sitemapEntries.push({
+        url: `${BASE_URL}${path}`,
+        lastModified: lastModDate,
+        changeFrequency: 'weekly',
+        priority: 0.8
       });
     }
 
