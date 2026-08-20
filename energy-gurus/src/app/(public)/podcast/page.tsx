@@ -1,4 +1,4 @@
-import { Headphones, Youtube, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { db } from "@/db";
 import { podcasts } from "@/db/schema";
@@ -49,7 +49,7 @@ const getPodcasts = unstable_cache(
     const order = sortOrder === "asc" ? asc(podcasts.createdAt) : desc(podcasts.createdAt);
     return await db.select().from(podcasts).orderBy(order);
   },
-  ["podcasts-list-v2"],
+  ["podcasts-list-v2", "sortOrder"],
   { revalidate: 3600, tags: ["podcasts"] }
 );
 
@@ -91,7 +91,7 @@ export default async function PodcastListingPage({
       <AdBanner placement="skyscraper_right" targetPage="podcast" />
 
       {/* Header */}
-      <header className="bg-ink text-white pt-[64px]">
+      <header className="bg-ink text-white pt-[64px] pb-[40px]">
         <div className="max-w-[1180px] mx-auto px-5 md:px-8">
           <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-[18px]">
             <span className="w-5 h-[1px] bg-amber" />
@@ -100,35 +100,9 @@ export default async function PodcastListingPage({
           <h1 className="font-space-grotesk font-semibold text-[clamp(2rem,4vw,2.8rem)] tracking-[-0.01em]">
             Straight talk on solar.
           </h1>
-          <p className="text-paper/70 max-w-[560px] mt-[14px] text-[1.02rem] pb-[40px]">
+          <p className="text-paper/70 max-w-[560px] mt-[14px] text-[1.02rem]">
             New episodes breaking down the facts and figures behind solar energy — no jargon, no sales pressure. Watch on YouTube or listen wherever you get podcasts.
           </p>
-        </div>
-
-        {/* Subscribe Bar */}
-        <div className="bg-[#0e1b30] border-t border-white/10">
-          <div className="max-w-[1180px] mx-auto px-5 md:px-8 py-[18px] flex flex-wrap gap-[14px]">
-            <a
-              href="https://www.youtube.com/energygurus.online"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-[18px] py-2.5 rounded-[3px] text-[0.85rem] bg-amber/15 text-amber border border-amber transition-colors hover:bg-amber/25 font-semibold"
-            >
-              <Youtube className="w-4 h-4" /> Subscribe on YouTube
-            </a>
-            <a
-              href="#"
-              className="flex items-center gap-2 px-[18px] py-2.5 rounded-[3px] text-[0.85rem] bg-white/5 text-white border border-white/15 transition-colors hover:border-amber font-semibold"
-            >
-              <Headphones className="w-4 h-4 text-amber" /> Apple Podcasts
-            </a>
-            <a
-              href="#"
-              className="flex items-center gap-2 px-[18px] py-2.5 rounded-[3px] text-[0.85rem] bg-white/5 text-white border border-white/15 transition-colors hover:border-amber font-semibold"
-            >
-              <Headphones className="w-4 h-4 text-amber" /> Spotify
-            </a>
-          </div>
         </div>
       </header>
 
@@ -149,7 +123,9 @@ export default async function PodcastListingPage({
                   <iframe
                     src={`https://www.youtube.com/embed/${videoId}`}
                     title={featured.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
+                    loading="lazy"
                     className="absolute inset-0 w-full h-full border-0"
                   />
                 </div>

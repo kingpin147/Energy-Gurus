@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mail, Phone, MapPin, MessageSquare, Instagram, Linkedin, Twitter, CheckCircle2 } from "lucide-react";
+import { Mail, Phone, MapPin, Linkedin, Twitter, Youtube, Facebook, Music2, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { submitPublicContact } from "@/lib/actions/inquiry";
 
@@ -67,7 +67,9 @@ export function PublicContactForm() {
                                         </div>
                                         <div>
                                             <p className="text-sm font-semibold text-slate-custom">Call Us</p>
-                                            <p className="text-base font-bold">+92 (300) 123-4567</p>
+                                            <a href="tel:+923009433303" className="text-base font-bold hover:underline">
+                                                +923009433303
+                                            </a>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-4">
@@ -75,8 +77,8 @@ export function PublicContactForm() {
                                             <MapPin className="w-6 h-6" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-semibold text-slate-custom">Location</p>
-                                            <p className="text-base font-bold">Islamabad, Pakistan</p>
+                                            <p className="text-sm font-semibold text-slate-custom">Office</p>
+                                            <p className="text-base font-bold">Lahore - Pakistan</p>
                                         </div>
                                     </div>
                                 </div>
@@ -86,15 +88,21 @@ export function PublicContactForm() {
 
                             <div>
                                 <h4 className="font-bold mb-4">Follow Us</h4>
-                                <div className="flex gap-4">
-                                    <a href="https://x.com/energyguruspk" target="_blank" rel="noopener noreferrer" className="p-3 bg-white border rounded-full text-slate-custom hover:text-amber hover:border-amber transition-colors">
-                                        <Twitter className="w-5 h-5" />
+                                <div className="flex gap-3 flex-wrap">
+                                    <a href="https://www.tiktok.com/@energygurus.online" target="_blank" rel="noopener noreferrer" className="p-3 bg-white border rounded-full text-slate-custom hover:text-amber hover:border-amber transition-colors" aria-label="TikTok">
+                                        <Music2 className="w-5 h-5" />
                                     </a>
-                                    <a href="https://www.linkedin.com/company/energygurusonline" target="_blank" rel="noopener noreferrer" className="p-3 bg-white border rounded-full text-slate-custom hover:text-amber hover:border-amber transition-colors">
+                                    <a href="https://www.linkedin.com/company/energygurusonline" target="_blank" rel="noopener noreferrer" className="p-3 bg-white border rounded-full text-slate-custom hover:text-amber hover:border-amber transition-colors" aria-label="LinkedIn">
                                         <Linkedin className="w-5 h-5" />
                                     </a>
-                                    <a href="https://www.facebook.com/energygurus.online" target="_blank" rel="noopener noreferrer" className="p-3 bg-white border rounded-full text-slate-custom hover:text-amber hover:border-amber transition-colors">
-                                        <Instagram className="w-5 h-5" />
+                                    <a href="https://x.com/energyguruspk" target="_blank" rel="noopener noreferrer" className="p-3 bg-white border rounded-full text-slate-custom hover:text-amber hover:border-amber transition-colors" aria-label="X (Twitter)">
+                                        <Twitter className="w-5 h-5" />
+                                    </a>
+                                    <a href="https://www.youtube.com/@energygurus.online" target="_blank" rel="noopener noreferrer" className="p-3 bg-white border rounded-full text-slate-custom hover:text-amber hover:border-amber transition-colors" aria-label="YouTube">
+                                        <Youtube className="w-5 h-5" />
+                                    </a>
+                                    <a href="https://www.facebook.com/energygurus.online" target="_blank" rel="noopener noreferrer" className="p-3 bg-white border rounded-full text-slate-custom hover:text-amber hover:border-amber transition-colors" aria-label="Facebook">
+                                        <Facebook className="w-5 h-5" />
                                     </a>
                                 </div>
                             </div>

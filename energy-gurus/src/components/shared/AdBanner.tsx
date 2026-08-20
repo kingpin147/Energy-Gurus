@@ -41,7 +41,7 @@ const getActiveAd = unstable_cache(
 
         return activeAds.length > 0 ? activeAds[0] : null;
     },
-    ['active-ads-cache'],
+    ['active-ads-cache', 'placement', 'targetPage'],
     { revalidate: 300, tags: ['ads'] }
 );
 
