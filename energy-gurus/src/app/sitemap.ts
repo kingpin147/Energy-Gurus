@@ -135,6 +135,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const publishedNews = await db
       .select({
         id: news.id,
+        slug: news.slug,
         publishedAt: news.publishedAt,
         updatedAt: news.updatedAt,
         createdAt: news.createdAt,
@@ -150,7 +151,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // 5. Dynamic News article pages
     for (const article of publishedNews) {
-      const path = `/news/${article.id}`;
+      const path = `/news/${article.slug || article.id}`;
       const lastModDate = article.publishedAt
         ? new Date(article.publishedAt)
         : article.updatedAt

@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { news, users } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { notFound } from "next/navigation";
+import { eq, or } from "drizzle-orm";
+import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import { AdBanner } from "@/components/shared/AdBanner";
 import { format } from "date-fns";
@@ -10,12 +10,35 @@ import { unstable_cache } from "next/cache";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ShareButtons } from "@/components/news/share-buttons";
 import { FormattedMarkdown } from "@/components/news/formatted-markdown";
+import type { Metadata } from "next";
+
+function extractExcerpt(content?: string | null, maxLen = 160): string {
+    if (!content) return "Read the latest news and updates on Pakistan's solar industry, policy changes, and technological breakthroughs on EnergyGurus.";
+    const plainText = content
+        .replace(/#+\s+/g, '')
+        .replace(/(\*\*|__)(.*?)\1/g, '$2')
+        .replace(/(\*|_)(.*?)\1/g, '$2')
+        .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+        .replace(/!\[.*?\]\(.*?\)/g, '')
+        .replace(/`{1,3}[^`]*`{1,3}/g, '')
+        .replace(/[\r\n]+/g, ' ')
+        .trim();
+    if (plainText.length <= maxLen) return plainText;
+    return plainText.slice(0, maxLen).trim() + "...";
+}
 
 const getNewsArticle = unstable_cache(
-    async (id: string) => {
+    async (slugOrId: string) => {
+        const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(slugOrId);
+
+        const condition = isUuid
+            ? or(eq(news.slug, slugOrId), eq(news.id, slugOrId))
+            : eq(news.slug, slugOrId);
+
         const result = await db
             .select({
                 id: news.id,
+                slug: news.slug,
                 title: news.title,
                 content: news.content,
                 category: news.category,
@@ -32,23 +55,88 @@ const getNewsArticle = unstable_cache(
             })
             .from(news)
             .leftJoin(users, eq(news.authorId, users.id))
-            .where(eq(news.id, id))
+            .where(condition)
             .limit(1);
         
         return result[0];
     },
-    ['news-article-detail-v4'],
+    ['news-article-detail-v5'],
     { revalidate: 60, tags: ['news'] }
 );
 
-export default async function NewsDetailPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const article = await getNewsArticle(id);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+    const article = await getNewsArticle(slug);
+
+    const isLive = article && (article.isPublished || (article.publishedAt && new Date(article.publishedAt) <= new Date()));
+    if (!article || !isLive) {
+        return {
+            title: "News Article Not Found",
+            robots: { index: false, follow: false }
+        };
+    }
+
+    const targetSlug = article.slug || article.id;
+    const baseUrl = "https://www.energygurus.online";
+    const title = `${article.title} | EnergyGurus News`;
+    const description = extractExcerpt(article.content, 160);
+    const url = `${baseUrl}/news/${targetSlug}`;
+    const authorName = article.authorName || article.userName || "EnergyGurus";
+    const imageUrl = article.imageUrl || `${baseUrl}/new_hero_banner.jpg`;
+
+    return {
+        title,
+        description,
+        authors: [{ name: authorName }],
+        keywords: [
+            article.category,
+            "Pakistan solar news",
+            "solar industry updates",
+            "solar energy Pakistan",
+            "EnergyGurus",
+        ].filter(Boolean) as string[],
+        alternates: {
+            canonical: url,
+        },
+        openGraph: {
+            title,
+            description,
+            type: "article",
+            url,
+            siteName: "EnergyGurus",
+            publishedTime: article.publishedAt ? new Date(article.publishedAt).toISOString() : undefined,
+            authors: [authorName],
+            images: [
+                {
+                    url: imageUrl,
+                    width: 1200,
+                    height: 630,
+                    alt: article.title,
+                }
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: [imageUrl],
+        },
+    };
+}
+
+export default async function NewsDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
+    const article = await getNewsArticle(slug);
 
     const isLive = article && (article.isPublished || (article.publishedAt && new Date(article.publishedAt) <= new Date()));
 
     if (!article || !isLive) {
         notFound();
+    }
+
+    // 301 Permanent redirect if accessed by UUID or non-canonical slug
+    if (article.slug && slug !== article.slug) {
+        permanentRedirect(`/news/${article.slug}`);
     }
 
     const displayName = article.authorName || article.userName || "Energy Gurus";

@@ -7,6 +7,54 @@ import { AdBanner } from "@/components/shared/AdBanner";
 import { format } from "date-fns";
 import { Newspaper } from "lucide-react";
 import { NewsFilters } from "@/components/news/news-filters";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ category?: string }> }): Promise<Metadata> {
+    const { category } = await searchParams;
+    const baseUrl = "https://www.energygurus.online";
+    const isFiltered = category && category !== "All";
+    
+    const title = isFiltered 
+        ? `${category} - Solar News & Updates | EnergyGurus`
+        : "Solar News & Industry Updates in Pakistan | EnergyGurus";
+        
+    const description = isFiltered
+        ? `Stay updated with the latest ${category} in Pakistan's solar sector, policy reforms, and market developments.`
+        : "Stay up to date with the latest from Pakistan's solar industry, net metering policies, technology breakthroughs, and project updates.";
+
+    const url = isFiltered ? `${baseUrl}/news?category=${encodeURIComponent(category)}` : `${baseUrl}/news`;
+
+    return {
+        title,
+        description,
+        keywords: [
+            "Pakistan solar news",
+            "solar industry updates Pakistan",
+            "net metering policy Pakistan",
+            "solar EPC project sign off",
+            "solar technology breakthroughs",
+            "EnergyGurus news",
+        ],
+        alternates: {
+            canonical: url,
+        },
+        openGraph: {
+            title,
+            description,
+            url,
+            siteName: "EnergyGurus",
+            locale: "en_US",
+            type: "website",
+            images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "EnergyGurus Solar News & Updates" }],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: [`${baseUrl}/new_hero_banner.jpg`],
+        },
+    };
+}
 
 const DEFAULT_CATEGORIES = [
     "Industry News",
@@ -93,7 +141,7 @@ export default async function NewsPage({
                     {/* Featured Article */}
                     {featured && (
                         <div className="grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-10 items-center mb-14">
-                            <Link href={`/news/${featured.id}`} className="rounded-[8px] overflow-hidden border border-line block relative group shadow-sm bg-slate-50">
+                            <Link href={`/news/${featured.slug || featured.id}`} className="rounded-[8px] overflow-hidden border border-line block relative group shadow-sm bg-slate-50">
                                 {featured.imageUrl ? (
                                     <img src={featured.imageUrl} alt={featured.title} className="w-full h-auto block group-hover:scale-[1.02] transition-transform duration-300" />
                                 ) : (
@@ -108,7 +156,7 @@ export default async function NewsPage({
                                 <Link href={`/news?category=${encodeURIComponent(featured.category)}`} className="font-ibm-plex-mono text-[0.7rem] tracking-[0.06em] uppercase text-teal bg-[rgba(47,110,98,0.1)] px-[11px] py-[5px] rounded-[20px] inline-block mb-3.5 hover:bg-teal hover:text-white transition-colors">
                                     {featured.category}
                                 </Link>
-                                <Link href={`/news/${featured.id}`} className="block group">
+                                <Link href={`/news/${featured.slug || featured.id}`} className="block group">
                                     <h2 className="font-space-grotesk font-semibold text-[1.6rem] text-ink mb-3 group-hover:text-teal transition-colors">
                                         {featured.title}
                                     </h2>
@@ -130,7 +178,7 @@ export default async function NewsPage({
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                         {gridArticles.map((article) => (
                             <div key={article.id} className="bg-white border border-line rounded-[8px] overflow-hidden flex flex-col hover:border-teal hover:shadow-sm transition-all group">
-                                <Link href={`/news/${article.id}`} className="w-full bg-slate-50 block overflow-hidden border-b border-line">
+                                <Link href={`/news/${article.slug || article.id}`} className="w-full bg-slate-50 block overflow-hidden border-b border-line">
                                     {article.imageUrl ? (
                                         <img src={article.imageUrl} alt={article.title} className="w-full h-auto block group-hover:scale-[1.03] transition-transform duration-300" />
                                     ) : (
@@ -145,7 +193,7 @@ export default async function NewsPage({
                                     <Link href={`/news?category=${encodeURIComponent(article.category)}`} className="font-ibm-plex-mono text-[0.7rem] tracking-[0.06em] uppercase text-teal bg-[rgba(47,110,98,0.1)] px-[11px] py-[5px] rounded-[20px] self-start mb-2.5 hover:bg-teal hover:text-white transition-colors">
                                         {article.category}
                                     </Link>
-                                    <Link href={`/news/${article.id}`} className="flex flex-col flex-grow">
+                                    <Link href={`/news/${article.slug || article.id}`} className="flex flex-col flex-grow">
                                         <h3 className="font-space-grotesk font-semibold text-[1.02rem] text-ink mb-2 group-hover:text-teal transition-colors line-clamp-2">
                                             {article.title}
                                         </h3>

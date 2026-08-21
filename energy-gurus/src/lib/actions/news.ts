@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { users } from "@/db/schema";
+import { generateUniqueNewsSlug } from "@/lib/utils/slug";
 
 export async function createNews(formData: FormData) {
     try {
@@ -43,8 +44,10 @@ export async function createNews(formData: FormData) {
 
         const isNowOrPast = finalPublishedAt ? finalPublishedAt <= new Date() : false;
         const isPublished = isPublishedImmediate || isNowOrPast;
+        const slug = await generateUniqueNewsSlug(title);
 
         await db.insert(news).values({
+            slug,
             title,
             content,
             category,
@@ -62,6 +65,7 @@ export async function createNews(formData: FormData) {
 
         revalidatePath("/dashboard/news");
         revalidatePath("/news");
+        revalidatePath(`/news/${slug}`);
         revalidateTag("news", {});
         
         return { 
@@ -109,8 +113,10 @@ export async function updateNews(id: string, formData: FormData) {
 
         const isNowOrPast = finalPublishedAt ? finalPublishedAt <= new Date() : false;
         const isPublished = isPublishedImmediate || isNowOrPast;
+        const slug = await generateUniqueNewsSlug(title, id);
 
         await db.update(news).set({
+            slug,
             title,
             content,
             category,
@@ -130,6 +136,7 @@ export async function updateNews(id: string, formData: FormData) {
         revalidatePath(`/dashboard/news/${id}/edit`);
         revalidatePath("/news");
         revalidatePath(`/news/${id}`);
+        revalidatePath(`/news/${slug}`);
         revalidateTag("news", {});
 
         return {

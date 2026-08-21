@@ -330,6 +330,7 @@ export const monitoringRequests = pgTable('monitoring_requests', {
 
 export const news = pgTable('news', {
   id: uuid('id').defaultRandom().primaryKey(),
+  slug: text('slug').unique(),
   title: text('title').notNull(),
   content: text('content').notNull(),
   category: text('category').notNull(),
@@ -347,6 +348,7 @@ export const news = pgTable('news', {
   updatedAt: timestamp('updated_at').defaultNow().notNull()
 }, (table) => ({
   authorIdIdx: index('news_author_id_idx').on(table.authorId),
+  slugIdx: index('news_slug_idx').on(table.slug),
   createdAtIdx: index('news_created_at_idx').on(table.createdAt)
 }));
 
