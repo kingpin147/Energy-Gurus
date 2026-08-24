@@ -20,18 +20,53 @@ export async function updateEpcProfile(data: FormData | Partial<typeof epcInstal
   const role = await getUserRole();
   const isAdmin = role === "admin" || role === "super-admin";
 
+  const parseJsonArray = (value: FormDataEntryValue | string | null | undefined, fallback: any[] = []) => {
+    if (value === null || value === undefined || value === "") return fallback;
+    if (typeof value !== "string") return fallback;
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
   const isFormData = data instanceof FormData;
   const updateData = isFormData ? {
-    companyName: data.get("companyName") as string,
-    ceoName: data.get("ceoName") as string,
-    sectors: data.get("sectors") ? JSON.parse(data.get("sectors") as string) : [],
-    certifications: data.get("certifications") ? JSON.parse(data.get("certifications") as string) : [],
-    solarBrands: data.get("solarBrands") ? JSON.parse(data.get("solarBrands") as string) : [],
-    inverterBrands: data.get("inverterBrands") ? JSON.parse(data.get("inverterBrands") as string) : [],
-    batteryBrands: data.get("batteryBrands") ? JSON.parse(data.get("batteryBrands") as string) : [],
-    team: data.get("team") ? JSON.parse(data.get("team") as string) : [],
-    about: data.get("about") as string,
-    website: data.get("website") as string
+    companyName: (data.get("companyName") as string | null) || undefined,
+    ceoName: (data.get("ceoName") as string | null) || undefined,
+    designation: (data.get("designation") as string | null) || undefined,
+    businessType: (data.get("businessType") as string | null) || undefined,
+    email: (data.get("email") as string | null) || undefined,
+    contactNo: (data.get("contactNo") as string | null) || undefined,
+    whatsapp: (data.get("whatsapp") as string | null) || undefined,
+    address: (data.get("address") as string | null) || undefined,
+    area: (data.get("area") as string | null) || undefined,
+    city: (data.get("city") as string | null) || undefined,
+    country: (data.get("country") as string | null) || undefined,
+    coordinates: (data.get("coordinates") as string | null) || undefined,
+    logoUrl: (data.get("logoUrl") as string | null) || undefined,
+    portfolio: parseJsonArray(data.get("portfolio"), []),
+    socialLinks: parseJsonArray(data.get("socialLinks"), []),
+    reviewVideos: parseJsonArray(data.get("reviewVideos"), []),
+    photos: parseJsonArray(data.get("photos"), []),
+    sectors: parseJsonArray(data.get("sectors"), []),
+    certifications: parseJsonArray(data.get("certifications"), []),
+    brandsCertified: parseJsonArray(data.get("brandsCertified"), []),
+    solarBrands: parseJsonArray(data.get("solarBrands"), []),
+    inverterBrands: parseJsonArray(data.get("inverterBrands"), []),
+    batteryBrands: parseJsonArray(data.get("batteryBrands"), []),
+    solarCertDocuments: parseJsonArray(data.get("solarCertDocuments"), []),
+    inverterCertDocuments: parseJsonArray(data.get("inverterCertDocuments"), []),
+    batteryCertDocuments: parseJsonArray(data.get("batteryCertDocuments"), []),
+    team: parseJsonArray(data.get("team"), []),
+    about: (data.get("about") as string | null) || undefined,
+    website: (data.get("website") as string | null) || undefined,
+    yearsInBusiness: data.get("yearsInBusiness") ? Number(data.get("yearsInBusiness")) || undefined : undefined,
+    regNumber: (data.get("regNumber") as string | null) || undefined,
+    licenceDocuments: parseJsonArray(data.get("licenceDocuments"), []),
+    tier: ((data.get("tier") as string | null) as any) || undefined,
+    isVerified: data.get("isVerified") ? String(data.get("isVerified")) === "true" : undefined,
     } : data;
 
   let targetUserId = user.id;
@@ -46,7 +81,6 @@ export async function updateEpcProfile(data: FormData | Partial<typeof epcInstal
     .set({ ...updateData, updatedAt: new Date() })
     .where(eq(epcInstallers.userId, targetUserId));
 
-  // Invalidate Cache
   await redis.del(CACHE_KEYS.EPC_DETAILS(existingEpc.id));
   await redis.del(CACHE_KEYS.EPCS_LIST);
 

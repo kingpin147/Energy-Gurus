@@ -81,6 +81,18 @@ export async function onboardEpcInstaller(formData: FormData) {
         const officesStr = formData.get("offices") as string;
         const offices = officesStr ? JSON.parse(officesStr) : [];
 
+        const photosStr = formData.get("photos") as string;
+        const photos = photosStr ? JSON.parse(photosStr) : [];
+
+        const solarCertDocsStr = formData.get("solarCertDocuments") as string;
+        const solarCertDocuments = solarCertDocsStr ? JSON.parse(solarCertDocsStr) : [];
+
+        const inverterCertDocsStr = formData.get("inverterCertDocuments") as string;
+        const inverterCertDocuments = inverterCertDocsStr ? JSON.parse(inverterCertDocsStr) : [];
+
+        const batteryCertDocsStr = formData.get("batteryCertDocuments") as string;
+        const batteryCertDocuments = batteryCertDocsStr ? JSON.parse(batteryCertDocsStr) : [];
+
         // Social Links
         const socialLinks: { platform: string; url: string }[] = [];
         const website = formData.get("website") as string;
@@ -100,12 +112,16 @@ export async function onboardEpcInstaller(formData: FormData) {
             userId: newUser.id,
             companyName: companyName,
             ceoName: formData.get("ceoName") as string || null,
+            designation: formData.get("designation") as string || null,
+            businessType: formData.get("businessType") as string || null,
             email: email,
             contactNo: formData.get("contactNo") as string || null,
+            whatsapp: formData.get("whatsapp") as string || null,
             address: formData.get("address") as string || null,
             area: formData.get("area") as string || null,
             city: formData.get("city") as string || null,
             country: formData.get("country") as string || 'Pakistan',
+            coordinates: formData.get("coordinates") as string || null,
             website: website || null,
             socialLinks: socialLinks,
             yearsInBusiness: parseInt(formData.get("yearsInBusiness") as string) || null,
@@ -118,8 +134,12 @@ export async function onboardEpcInstaller(formData: FormData) {
             solarBrands: solarBrands.length > 0 ? solarBrands : [],
             inverterBrands: inverterBrands.length > 0 ? inverterBrands : [],
             batteryBrands: batteryBrands.length > 0 ? batteryBrands : [],
+            solarCertDocuments: solarCertDocuments,
+            inverterCertDocuments: inverterCertDocuments,
+            batteryCertDocuments: batteryCertDocuments,
             team: team,
             logoUrl: formData.get("logoUrl") as string || null,
+            photos: photos,
             licenceDocuments: formData.get("licenceDocuments") ? JSON.parse(formData.get("licenceDocuments") as string) : [],
             isVerified: isAdmin, // Auto verify if admin is onboarding, otherwise pending verification
         }).returning();
@@ -130,16 +150,19 @@ export async function onboardEpcInstaller(formData: FormData) {
                 .filter((o: any) => o.city || o.address || o.area)
                 .map((o: any) => ({
                     epcId: newEpc.id,
-                    officeNumber: o.address || null,
+                    officeNumber: o.officeNumber || null,
+                    address: o.address || null,
                     area: o.area || null,
                     city: o.city || formData.get("city") as string || "Main",
+                    country: o.country || 'Pakistan',
+                    coordinates: o.coordinates || null,
                 }));
             if (officeRecords.length > 0) {
                 await db.insert(epcOffices).values(officeRecords);
             }
         }
 
-        // 6. Insert projects if any
+        // 6. Insert projects & testimonials if any
         const allProjectRecords = [];
 
         if (projects && projects.length > 0) {
@@ -148,31 +171,35 @@ export async function onboardEpcInstaller(formData: FormData) {
                 .map((p: any) => ({
                     epcId: newEpc.id,
                     name: p.name || p.companyName || p.customerName || "Project",
+                    entryType: (p.entryType as 'project' | 'testimonial') || 'project',
                     youtubeUrl: p.youtubeUrl || null,
                     installationDate: p.installationDate || null,
                     customerName: p.customerName || null,
                     companyName: p.companyName || null,
                     city: p.city || null,
                     country: p.country || null,
-                    description: p.description || null
+                    description: p.description || null,
+                    systemType: p.systemType || null,
                 }));
             allProjectRecords.push(...projectRecords);
         }
 
-        // 7. Insert customer testimonials if any
+        // 7. Insert customer testimonials if any (legacy separate testimonials)
         if (testimonials && testimonials.length > 0) {
             const testimonialRecords = testimonials
                 .filter((t: any) => t.youtubeUrl || t.customerName || t.companyName || t.description)
                 .map((t: any) => ({
                     epcId: newEpc.id,
                     name: t.customerName ? `Testimonial - ${t.customerName}` : "Customer Testimonial",
+                    entryType: 'testimonial' as const,
                     youtubeUrl: t.youtubeUrl || null,
                     installationDate: t.installationDate || null,
                     customerName: t.customerName || null,
                     companyName: t.companyName || null,
                     city: t.city || null,
                     country: t.country || null,
-                    description: t.description || null
+                    description: t.description || null,
+                    systemType: t.systemType || null,
                 }));
             allProjectRecords.push(...testimonialRecords);
         }

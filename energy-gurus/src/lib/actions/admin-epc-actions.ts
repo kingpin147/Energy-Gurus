@@ -121,9 +121,17 @@ export async function adminUpdateEpcInstaller(epcId: string, data: {
   solarBrands?: string[];
   inverterBrands?: string[];
   batteryBrands?: string[];
+  designation?: string | null;
+  businessType?: string | null;
+  whatsapp?: string | null;
+  coordinates?: string | null;
+  photos?: string[];
+  solarCertDocuments?: string[];
+  inverterCertDocuments?: string[];
+  batteryCertDocuments?: string[];
   team?: { name: string; designation: string; linkedIn: string; imageUrl: string }[];
-  offices?: { officeNumber?: string; area?: string; city: string }[];
-  projects?: { name: string; customerName?: string; companyName?: string; installationDate?: string; city?: string; country?: string; systemSize?: string; description?: string; youtubeUrl?: string }[];
+  offices?: { officeNumber?: string; block?: string | null; address?: string; area?: string; city: string; country?: string; coordinates?: string; }[];
+  projects?: { name: string; entryType?: 'project' | 'testimonial'; customerName?: string; companyName?: string; installationDate?: string; city?: string; country?: string; segmentType?: string[]; systemSize?: string; systemType?: string; inverterModel?: string | null; batteryModel?: string | null; solarPanelModel?: string | null; description?: string; youtubeUrl?: string }[];
 }) {
   const role = await getUserRole();
   if (role !== "super-admin" && role !== "admin") {
@@ -146,12 +154,16 @@ export async function adminUpdateEpcInstaller(epcId: string, data: {
       .set({
         companyName: data.companyName,
         ceoName: data.ceoName ?? null,
+        designation: data.designation ?? null,
+        businessType: data.businessType ?? null,
         email: data.email ?? null,
         contactNo: data.contactNo ?? null,
+        whatsapp: data.whatsapp ?? null,
         address: data.address ?? null,
         area: data.area ?? null,
         city: data.city ?? null,
         country: data.country ?? 'Pakistan',
+        coordinates: data.coordinates ?? null,
         website: data.website ?? null,
         tier: data.tier ?? 'bronze',
         isVerified: data.isVerified ?? false,
@@ -163,6 +175,10 @@ export async function adminUpdateEpcInstaller(epcId: string, data: {
         solarBrands: data.solarBrands ?? [],
         inverterBrands: data.inverterBrands ?? [],
         batteryBrands: data.batteryBrands ?? [],
+        solarCertDocuments: data.solarCertDocuments ?? [],
+        inverterCertDocuments: data.inverterCertDocuments ?? [],
+        batteryCertDocuments: data.batteryCertDocuments ?? [],
+        photos: data.photos ?? [],
         team: data.team ?? [],
         updatedAt: new Date(),
       })
@@ -173,12 +189,16 @@ export async function adminUpdateEpcInstaller(epcId: string, data: {
       await db.delete(epcOffices).where(eq(epcOffices.epcId, epcId));
       if (data.offices.length > 0) {
         const officeRecords = data.offices
-          .filter((o) => o.city || o.officeNumber || o.area)
+          .filter((o) => o.city || o.address || o.area || o.block)
           .map((o) => ({
             epcId,
             officeNumber: o.officeNumber || null,
+            address: o.address || null,
+            block: o.block || null,
             area: o.area || null,
             city: o.city || data.city || "Main",
+            country: o.country || 'Pakistan',
+            coordinates: o.coordinates || null,
           }));
         if (officeRecords.length > 0) {
           await db.insert(epcOffices).values(officeRecords);
@@ -195,12 +215,18 @@ export async function adminUpdateEpcInstaller(epcId: string, data: {
           .map((p) => ({
             epcId,
             name: p.name || p.companyName || p.customerName || "Project",
+            entryType: p.entryType || 'project',
             customerName: p.customerName || null,
             companyName: p.companyName || null,
             installationDate: p.installationDate || null,
             city: p.city || null,
             country: p.country || null,
+            segmentType: Array.isArray(p.segmentType) ? p.segmentType : [],
             systemSize: p.systemSize || null,
+            systemType: p.systemType || null,
+            inverterModel: p.inverterModel || null,
+            batteryModel: p.batteryModel || null,
+            solarPanelModel: p.solarPanelModel || null,
             description: p.description || null,
             youtubeUrl: p.youtubeUrl || null,
           }));

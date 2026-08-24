@@ -155,6 +155,17 @@ export default async function EpcProfilePage({
   const instagramUrl = socialLinks.find(l => l.platform.toLowerCase() === "instagram")?.url || "#";
   const linkedinUrl = socialLinks.find(l => l.platform.toLowerCase() === "linkedin")?.url || "#";
   const youtubeUrl = socialLinks.find(l => l.platform.toLowerCase() === "youtube")?.url || "#";
+  const photos = (installer.photos as string[] | null) || [];
+  const reviewVideos = (installer.reviewVideos as string[] | null) || [];
+  const testimonialProjects = projects.filter((project) => project.entryType === "testimonial" || project.customerName || project.companyName || project.youtubeUrl);
+  const customerVideoEntries = testimonialProjects.length > 0 ? testimonialProjects.slice(0, 3) : reviewVideos.slice(0, 3).map((url, index) => ({
+    id: `${index}-review-video`,
+    name: `Customer Testimonial ${index + 1}`,
+    customerName: `Verified customer ${index + 1}`,
+    city: primaryCity,
+    youtubeUrl: url,
+  }));
+  const portfolioFallback = photos.length > 0 ? photos : projects.flatMap((project) => project.images || []);
 
   return (
     <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 min-h-screen">
@@ -186,11 +197,23 @@ export default async function EpcProfilePage({
               <div className="text-[1.05rem] text-slate-custom mb-3">
                 {installer.companyName}
               </div>
+              {(installer.designation || installer.businessType) && (
+                <div className="text-sm text-slate-custom mb-2">
+                  {installer.designation || ""}{installer.designation && installer.businessType ? " · " : ""}{installer.businessType || ""}
+                </div>
+              )}
               <div className="flex items-center gap-1.5 text-slate-custom text-[0.92rem] mb-[10px]">
                 📍 {primaryCity} {installer.isVerified && <span className="flex items-center text-teal ml-2" title="Verified Installer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Verified</span>}
                 {installer.tier === 'silver' && <span className="ml-2 bg-slate-200 text-slate-700 px-2 py-0.5 rounded text-xs font-bold uppercase">Silver</span>}
                 {installer.tier === 'gold' && <span className="ml-2 bg-amber/20 text-amber-600 px-2 py-0.5 rounded text-xs font-bold uppercase">Gold</span>}
               </div>
+              {(installer.contactNo || installer.whatsapp || installer.address) && (
+                <div className="text-sm text-slate-custom mb-3 space-y-1">
+                  {installer.contactNo && <div>Phone: {installer.contactNo}</div>}
+                  {installer.whatsapp && <div>WhatsApp: {installer.whatsapp}</div>}
+                  {installer.address && <div>Address: {installer.address}</div>}
+                </div>
+              )}
               <div className="flex flex-col gap-2 mb-4">
                 {(solarBrands.length > 0 || inverterBrands.length > 0 || batteryBrands.length > 0) ? (
                   <>
@@ -303,26 +326,35 @@ export default async function EpcProfilePage({
                           alt={project.name}
                           className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                         />
+                      ) : project.images && project.images.length > 0 ? (
+                        <img src={project.images[0]} alt={project.name} className="w-full h-full object-cover opacity-80" />
                       ) : null}
-                      <a
-                        href={(project as any).youtubeUrl || "#"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem] shadow-md group-hover:scale-110 transition-transform absolute"
-                      >
-                        ▶
-                      </a>
+                      {(project as any).youtubeUrl && (
+                        <a
+                          href={(project as any).youtubeUrl || "#"}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem] shadow-md group-hover:scale-110 transition-transform absolute"
+                        >
+                          ▶
+                        </a>
+                      )}
                     </div>
                     <div className="p-[16px_18px]">
                       <h3 className="font-space-grotesk font-semibold text-[0.98rem] text-ink mb-1">
                         {project.name}
                       </h3>
                       <p className="text-[0.85rem] text-slate-custom">
-                        {project.systemSize || project.systemType || "Solar project installation"}
+                        {project.systemSize || project.systemType || (Array.isArray(project.segmentType) && project.segmentType.length ? project.segmentType.join(", ") : "Solar project installation")}
                       </p>
                       {project.customerName && (
                         <p className="text-[0.75rem] text-slate-500 mt-2">
                           Client: {project.companyName || project.customerName}
+                        </p>
+                      )}
+                      {(project.inverterModel || project.batteryModel || project.solarPanelModel) && (
+                        <p className="text-[0.75rem] text-slate-500 mt-2">
+                          {project.inverterModel && `Inverter: ${project.inverterModel}`} {project.solarPanelModel && ` | Panels: ${project.solarPanelModel}`} {project.batteryModel && ` | Battery: ${project.batteryModel}`}
                         </p>
                       )}
                       {project.description && (
@@ -334,6 +366,18 @@ export default async function EpcProfilePage({
                   </div>
                 );
               })
+            ) : portfolioFallback.length > 0 ? (
+              portfolioFallback.slice(0, 3).map((image, index) => (
+                <div key={`${image}-${index}`} className="bg-white border border-line rounded-[4px] overflow-hidden">
+                  <div className="aspect-video bg-gradient-to-br from-ink to-[#1b3157] relative flex items-center justify-center overflow-hidden">
+                    <img src={image} alt={`${installer.companyName} portfolio ${index + 1}`} className="w-full h-full object-cover opacity-80" />
+                  </div>
+                  <div className="p-[16px_18px]">
+                    <h3 className="font-space-grotesk font-semibold text-[0.98rem] text-ink mb-1">Project Portfolio</h3>
+                    <p className="text-[0.85rem] text-slate-custom">Recent installation showcase</p>
+                  </div>
+                </div>
+              ))
             ) : (
               <>
                 <div className="bg-white border border-line rounded-[4px] overflow-hidden">
@@ -341,8 +385,8 @@ export default async function EpcProfilePage({
                     <div className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem]">▶</div>
                   </div>
                   <div className="p-[16px_18px]">
-                    <h3 className="font-space-grotesk font-semibold text-[0.98rem] text-ink mb-1">15 kW Rooftop Install</h3>
-                    <p className="text-[0.85rem] text-slate-custom">Residential install, completed in 3 days.</p>
+                    <h3 className="font-space-grotesk font-semibold text-[0.98rem] text-ink mb-1">Residential Rooftop Install</h3>
+                    <p className="text-[0.85rem] text-slate-custom">Home solar system completed in 3 days.</p>
                   </div>
                 </div>
                 <div className="bg-white border border-line rounded-[4px] overflow-hidden">
@@ -350,7 +394,7 @@ export default async function EpcProfilePage({
                     <div className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem]">▶</div>
                   </div>
                   <div className="p-[16px_18px]">
-                    <h3 className="font-space-grotesk font-semibold text-[0.98rem] text-ink mb-1">80 kW Commercial Plaza System</h3>
+                    <h3 className="font-space-grotesk font-semibold text-[0.98rem] text-ink mb-1">Commercial Plaza System</h3>
                     <p className="text-[0.85rem] text-slate-custom">Commercial rooftop installation.</p>
                   </div>
                 </div>
@@ -359,8 +403,8 @@ export default async function EpcProfilePage({
                     <div className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem]">▶</div>
                   </div>
                   <div className="p-[16px_18px]">
-                    <h3 className="font-space-grotesk font-semibold text-[0.98rem] text-ink mb-1">200 kW Unit Install</h3>
-                    <p className="text-[0.85rem] text-slate-custom">Industrial ground-mount system.</p>
+                    <h3 className="font-space-grotesk font-semibold text-[0.98rem] text-ink mb-1">Industrial Ground-Mount</h3>
+                    <p className="text-[0.85rem] text-slate-custom">Utility-scale clean energy installation.</p>
                   </div>
                 </div>
               </>
@@ -383,35 +427,27 @@ export default async function EpcProfilePage({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 mb-12">
-            <div className="bg-white border border-line rounded-[4px] overflow-hidden">
-              <div className="aspect-video bg-gradient-to-br from-teal to-[#1c4a41] relative flex items-center justify-center">
-                <div className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem]">▶</div>
-              </div>
-              <div className="p-[16px_18px]">
-                <div className="font-semibold text-[0.92rem] text-ink">Sana Malik</div>
-                <div className="text-[0.8rem] text-slate-custom mt-0.5">Model Town, Lahore</div>
-              </div>
-            </div>
-
-            <div className="bg-white border border-line rounded-[4px] overflow-hidden">
-              <div className="aspect-video bg-gradient-to-br from-teal to-[#1c4a41] relative flex items-center justify-center">
-                <div className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem]">▶</div>
-              </div>
-              <div className="p-[16px_18px]">
-                <div className="font-semibold text-[0.92rem] text-ink">Farooq Textiles</div>
-                <div className="text-[0.8rem] text-slate-custom mt-0.5">Sundar Estate, Lahore</div>
-              </div>
-            </div>
-
-            <div className="bg-white border border-line rounded-[4px] overflow-hidden">
-              <div className="aspect-video bg-gradient-to-br from-teal to-[#1c4a41] relative flex items-center justify-center">
-                <div className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem]">▶</div>
-              </div>
-              <div className="p-[16px_18px]">
-                <div className="font-semibold text-[0.92rem] text-ink">Bilal Farms</div>
-                <div className="text-[0.8rem] text-slate-custom mt-0.5">Sheikhupura</div>
-              </div>
-            </div>
+            {customerVideoEntries.length > 0 ? customerVideoEntries.map((entry: any) => {
+              const videoId = entry.youtubeUrl ? getYouTubeId(entry.youtubeUrl) : null;
+              return (
+                <div key={entry.id || entry.name} className="bg-white border border-line rounded-[4px] overflow-hidden">
+                  <div className="aspect-video bg-gradient-to-br from-teal to-[#1c4a41] relative flex items-center justify-center">
+                    {videoId ? (
+                      <img src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`} alt={entry.name} className="w-full h-full object-cover opacity-80" />
+                    ) : null}
+                    {entry.youtubeUrl && (
+                      <a href={entry.youtubeUrl} target="_blank" rel="noreferrer" className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem] absolute">▶</a>
+                    )}
+                  </div>
+                  <div className="p-[16px_18px]">
+                    <div className="font-semibold text-[0.92rem] text-ink">{entry.customerName || entry.name}</div>
+                    <div className="text-[0.8rem] text-slate-custom mt-0.5">{entry.city || entry.companyName || "Verified Customer"}</div>
+                  </div>
+                </div>
+              );
+            }) : (
+              <div className="col-span-full text-sm text-slate-custom border border-dashed rounded-xl p-8 text-center">No customer testimonial videos uploaded yet.</div>
+            )}
           </div>
 
           {/* Written Reviews & Submission */}
@@ -445,6 +481,14 @@ export default async function EpcProfilePage({
               {installer.about || `${installer.companyName} has been designing and installing solar systems across Pakistan, serving homeowners, businesses, and agricultural clients. The team specializes in rooftop residential systems and commercial solar installations.`}
             </p>
 
+            {(installer.businessType || installer.designation || installer.address) && (
+              <div className="mb-5 flex flex-wrap gap-3 text-sm text-slate-custom">
+                {installer.businessType && <span className="bg-slate-100 px-3 py-1 rounded-full">{installer.businessType}</span>}
+                {installer.designation && <span className="bg-slate-100 px-3 py-1 rounded-full">{installer.designation}</span>}
+                {installer.address && <span className="bg-slate-100 px-3 py-1 rounded-full">{installer.address}</span>}
+              </div>
+            )}
+
             <div className="flex gap-2 flex-wrap mb-6">
               {sectorsList.map((sector, i) => (
                 <span key={i} className="font-ibm-plex-mono text-[0.7rem] tracking-[0.05em] uppercase text-teal bg-[rgba(47,110,98,0.1)] px-[11px] py-[5px] rounded-[20px]">
@@ -470,10 +514,39 @@ export default async function EpcProfilePage({
                 <div className="text-[0.78rem] text-slate-custom uppercase tracking-[0.05em] mt-1">Systems Installed</div>
               </div>
               <div>
-                <div className="font-ibm-plex-mono text-[1.4rem] text-ink">NABCEP</div>
+                <div className="font-ibm-plex-mono text-[1.4rem] text-ink">{certificationsList.length || "NABCEP"}</div>
                 <div className="text-[0.78rem] text-slate-custom uppercase tracking-[0.05em] mt-1">Certified Team</div>
               </div>
             </div>
+
+            {photos.length > 0 && (
+              <div className="mt-8">
+                <h3 className="font-space-grotesk font-semibold text-[1.1rem] text-ink mb-4">Company Gallery</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {photos.slice(0, 8).map((photo, index) => (
+                    <div key={`${photo}-${index}`} className="overflow-hidden rounded-xl border border-line bg-white">
+                      <img src={photo} alt={`${installer.companyName} media ${index + 1}`} className="w-full h-32 object-cover" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(installer.solarCertDocuments?.length || installer.inverterCertDocuments?.length || installer.batteryCertDocuments?.length) && (
+              <div className="mt-8">
+                <h3 className="font-space-grotesk font-semibold text-[1.1rem] text-ink mb-4">Certification Documents</h3>
+                <div className="flex flex-wrap gap-3">
+                  {[...(installer.solarCertDocuments as string[] || []), ...(installer.inverterCertDocuments as string[] || []), ...(installer.batteryCertDocuments as string[] || [])]
+                    .filter(Boolean)
+                    .slice(0, 6)
+                    .map((doc, idx) => (
+                      <a key={`${doc}-${idx}`} href={doc} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-full border border-line bg-white px-3 py-2 text-xs font-medium text-blue-600 hover:bg-blue-50">
+                        Certificate {idx + 1}
+                      </a>
+                    ))}
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-2.5 flex-wrap pt-6 border-t border-line mt-[28px]">
               {websiteUrl !== "#" && (

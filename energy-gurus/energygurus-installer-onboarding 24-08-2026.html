@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Installer Onboarding — EnergyGurus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12213A; --paper:#F5F6F3; --amber:#E8A33D;
+    --teal:#2F6E62; --slate:#4A5A73; --graphite:#1B1F24;
+    --line: rgba(18,33,58,0.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Inter', sans-serif; color:var(--graphite); background:var(--paper); line-height:1.5;}
+  h1,h2,h3{font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:-0.01em;}
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:840px; margin:0 auto; padding:0 32px;}
+  :focus-visible{outline:2px solid var(--amber); outline-offset:3px;}
+  button{cursor:pointer; border:none; font-family:'Inter'; font-weight:600;}
+
+  nav{position:sticky; top:0; z-index:50; background:rgba(245,246,243,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line);}
+  nav .wrap{max-width:1180px; display:flex; align-items:center; justify-content:space-between; height:72px;}
+  .nav-links{display:flex; gap:28px; font-size:0.9rem; font-weight:500; color:var(--slate);}
+  .nav-links a:hover{color:var(--ink);}
+  .nav-cta{background:var(--ink); color:var(--paper); padding:11px 20px; border-radius:3px; font-size:0.88rem;}
+  @media(max-width:900px){ .nav-links{display:none;} }
+
+  .eyebrow{font-family:'IBM Plex Mono', monospace; font-size:0.76rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--amber); display:flex; align-items:center; gap:10px; margin-bottom:14px;}
+  .eyebrow::before{content:""; width:20px; height:1px; background:var(--amber);}
+  .eyebrow.teal{color:var(--teal);}
+  .eyebrow.teal::before{background:var(--teal);}
+
+  .page-head{background:var(--ink); color:#fff; padding:56px 0 40px;}
+  .page-head h1{font-size:clamp(1.8rem,4vw,2.4rem);}
+  .page-head p{color:rgba(245,246,243,0.7); max-width:600px; margin-top:14px; font-size:1rem;}
+
+  section{padding:48px 0;}
+
+  .form-progress{display:flex; gap:6px; margin-bottom:40px;}
+  .form-progress .step-dot{flex:1; height:3px; background:var(--line); border-radius:2px;}
+  .form-progress .step-dot.done{background:var(--teal);}
+
+  .form-card{background:#fff; border:1px solid var(--line); border-radius:6px; padding:36px; margin-bottom:24px;}
+  .form-card h2{font-size:1.15rem; color:var(--ink); margin-bottom:4px;}
+  .form-card .section-sub{color:var(--slate); font-size:0.86rem; margin-bottom:24px;}
+  .form-card .section-num{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:26px; height:26px; border-radius:50%; background:var(--paper); border:1px solid var(--line);
+    font-family:'IBM Plex Mono', monospace; font-size:0.78rem; color:var(--teal); margin-right:10px;
+  }
+
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  .form-grid .full{grid-column:1 / -1;}
+  .field label{
+    display:block; font-family:'IBM Plex Mono', monospace; font-size:0.72rem;
+    letter-spacing:0.06em; text-transform:uppercase; color:var(--slate); margin-bottom:8px;
+  }
+  .field .hint{font-size:0.78rem; color:var(--slate); margin-top:6px;}
+  .field input, .field select, .field textarea{
+    width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:3px;
+    font-family:'Inter'; font-size:0.92rem; color:var(--graphite); background:var(--paper);
+  }
+  .field textarea{resize:vertical; min-height:90px;}
+
+  /* upload dropzone */
+  .upload-zone{
+    border:1px dashed var(--line); border-radius:4px; padding:28px 20px;
+    text-align:center; background:var(--paper); cursor:pointer;
+  }
+  .upload-zone:hover{border-color:var(--teal);}
+  .upload-zone .upload-icon{font-size:1.4rem; margin-bottom:8px;}
+  .upload-zone .upload-text{font-size:0.88rem; color:var(--ink); font-weight:600;}
+  .upload-zone .upload-sub{font-size:0.78rem; color:var(--slate); margin-top:4px;}
+  .upload-zone input[type="file"]{display:none;}
+
+  .upload-zone.upload-zone-compact{
+    padding:14px 16px; display:flex; align-items:center; gap:10px; text-align:left;
+  }
+  .upload-zone.upload-zone-compact .upload-icon{font-size:1.1rem; margin-bottom:0;}
+  .upload-zone.upload-zone-compact .upload-text{font-size:0.82rem;}
+  .upload-zone.upload-zone-compact .upload-sub{font-size:0.74rem; margin-top:1px;}
+
+  /* checkbox / chip groups */
+  .chip-group{display:flex; flex-wrap:wrap; gap:10px;}
+  .chip-check{
+    display:flex; align-items:center; gap:7px;
+    border:1px solid var(--line); border-radius:20px; padding:8px 14px;
+    font-size:0.86rem; color:var(--slate); cursor:pointer;
+  }
+  .chip-check input{accent-color:var(--teal);}
+  .chip-check:has(input:checked){border-color:var(--teal); background:rgba(47,110,98,0.06); color:var(--ink);}
+
+  /* manual multi-entry list builder */
+  .entry-builder{margin-bottom:22px;}
+  .entry-builder:last-child{margin-bottom:0;}
+  .entry-builder-label{
+    font-family:'IBM Plex Mono', monospace; font-size:0.72rem; letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--ink); font-weight:600; margin-bottom:10px;
+  }
+  .entry-row{display:flex; gap:8px; margin-bottom:8px;}
+  .entry-row input{
+    flex:1; padding:11px 13px; border:1px solid var(--line); border-radius:3px;
+    font-family:'Inter'; font-size:0.9rem; color:var(--graphite); background:var(--paper);
+  }
+  .entry-add-btn{
+    background:var(--paper); border:1px solid var(--line) !important; color:var(--ink);
+    padding:0 16px; border-radius:3px; font-size:0.85rem; white-space:nowrap;
+  }
+  .entry-add-btn:hover{border-color:var(--teal) !important; color:var(--teal);}
+  .entry-tags{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;}
+  .entry-tag{
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(47,110,98,0.08); color:var(--teal);
+    font-size:0.82rem; padding:6px 10px 6px 12px; border-radius:20px;
+  }
+  .entry-tag button{
+    background:none; border:none; color:var(--teal); font-size:0.9rem; line-height:1; cursor:pointer; padding:0;
+  }
+
+  /* team member cards */
+  .team-members{display:flex; flex-direction:column; gap:14px; margin-bottom:16px;}
+  .team-member-row{
+    display:flex; gap:14px; align-items:flex-start;
+    border:1px solid var(--line); border-radius:4px; padding:14px; position:relative;
+  }
+  .team-photo-upload{
+    width:56px; height:56px; border-radius:50%; border:1px dashed var(--line);
+    display:flex; align-items:center; justify-content:center; font-size:1.1rem; color:var(--slate);
+    cursor:pointer; background:var(--paper); overflow:hidden; flex-shrink:0;
+  }
+  .team-photo-upload input{display:none;}
+  .team-fields{flex:1; display:flex; flex-direction:column; gap:10px; padding-right:32px;}
+  .team-fields-row{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .team-member-row input[type="text"]{
+    padding:10px 12px; border:1px solid var(--line); border-radius:3px;
+    font-family:'Inter'; font-size:0.88rem; background:var(--paper); color:var(--graphite); width:100%;
+  }
+  .team-remove-btn{
+    position:absolute; top:12px; right:12px;
+    background:none; border:none; color:var(--slate); font-size:1.1rem; cursor:pointer; padding:6px;
+  }
+  .team-remove-btn:hover{color:#c0392b;}
+  .add-team-btn{
+    background:var(--paper); border:1px dashed var(--line) !important; color:var(--ink);
+    padding:12px; border-radius:4px; font-size:0.88rem; width:100%;
+  }
+  .add-team-btn:hover{border-color:var(--teal) !important; color:var(--teal);}
+  @media(max-width:640px){ .team-fields-row{grid-template-columns:1fr;} }
+
+  /* multi-field entry cards (projects, testimonials) */
+  .entry-cards{display:flex; flex-direction:column; gap:16px; margin-bottom:16px;}
+  .entry-card{
+    border:1px solid var(--line); border-radius:4px; padding:18px; position:relative;
+  }
+  .entry-card-remove{
+    position:absolute; top:12px; right:12px; background:none; border:none;
+    color:var(--slate); font-size:1.1rem; cursor:pointer; padding:4px;
+  }
+  .entry-card-remove:hover{color:#c0392b;}
+  .entry-card-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .entry-card-grid .full{grid-column:1 / -1;}
+  .entry-card-field label{
+    display:block; font-family:'IBM Plex Mono', monospace; font-size:0.68rem;
+    letter-spacing:0.05em; text-transform:uppercase; color:var(--slate); margin-bottom:6px;
+  }
+  .entry-card-field input, .entry-card-field textarea{
+    width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:3px;
+    font-family:'Inter'; font-size:0.88rem; color:var(--graphite); background:var(--paper);
+  }
+  .entry-card-field textarea{resize:vertical; min-height:60px;}
+  @media(max-width:640px){ .entry-card-grid{grid-template-columns:1fr;} }
+
+  .radio-tier{display:flex; flex-direction:column; gap:10px;}
+  .tier-option{
+    display:flex; align-items:flex-start; gap:12px; border:1px solid var(--line); border-radius:4px; padding:14px 16px; cursor:pointer;
+  }
+  .tier-option:has(input:checked){border-color:var(--amber); background:rgba(232,163,61,0.05);}
+  .tier-option input{margin-top:3px; accent-color:var(--amber);}
+  .tier-option .tier-name{font-weight:600; color:var(--ink); font-size:0.92rem;}
+  .tier-option .tier-desc{font-size:0.82rem; color:var(--slate); margin-top:2px;}
+
+  .btn-primary{background:var(--amber); color:var(--ink); padding:15px 28px; border-radius:3px; font-size:0.95rem; width:100%;}
+  .btn-primary:hover{background:#f2b458;}
+  .form-note{font-size:0.8rem; color:var(--slate); margin-top:14px; text-align:center;}
+
+  .form-success{display:none; text-align:center; padding:60px 20px;}
+  .form-success .check-circle{
+    width:56px; height:56px; border-radius:50%; background:rgba(47,110,98,0.1); color:var(--teal);
+    display:flex; align-items:center; justify-content:center; font-size:1.6rem; margin:0 auto 20px;
+  }
+  .form-success h2{color:var(--ink); font-size:1.3rem; margin-bottom:10px;}
+  .form-success p{color:var(--slate); font-size:0.94rem;}
+
+  @media(max-width:700px){ .form-grid{grid-template-columns:1fr;} .form-card{padding:24px 20px;} }
+
+  footer{background:var(--ink); color:rgba(245,246,243,0.55); padding:32px 0; text-align:center; font-size:0.82rem;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="energygurus-homepage.html" style="font-family:'Space Grotesk'; font-weight:700; color:var(--ink);">EnergyGurus.Online</a>
+    <div class="nav-links">
+      <a href="energygurus-about-page.html">About Us</a>
+      <a href="energygurus-monitoring-page.html">Monitoring</a>
+      <a href="energygurus-podcast-page.html">Podcast</a>
+      <a href="energygurus-news-page.html">News</a>
+    </div>
+    <a href="energygurus-installer-page.html" class="nav-cta">Back to Directory</a>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <p class="eyebrow">Join the Network</p>
+    <h1>Get listed as a certified installer.</h1>
+    <p>Reach homeowners and businesses actively searching for solar &amp; storage installers. Fill out your profile below — our team reviews every application before it goes live.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+
+    <form id="onboardForm" onsubmit="return handleOnboardSubmit(event)">
+
+      <div class="form-progress">
+        <div class="step-dot done"></div>
+        <div class="step-dot done"></div>
+        <div class="step-dot done"></div>
+        <div class="step-dot done"></div>
+        <div class="step-dot done"></div>
+        <div class="step-dot done"></div>
+        <div class="step-dot done"></div>
+        <div class="step-dot done"></div>
+      </div>
+
+      <!-- 1. Basic Information -->
+      <div class="form-card">
+        <h2><span class="section-num">1</span>Basic Information</h2>
+        <p class="section-sub">Tell us about you and your company.</p>
+        <div class="form-grid">
+          <div class="field">
+            <label for="contactName">Name</label>
+            <input type="text" id="contactName" required>
+          </div>
+          <div class="field">
+            <label for="designation">Designation</label>
+            <input type="text" id="designation" placeholder="e.g. Owner, Sales Manager" required>
+          </div>
+          <div class="field">
+            <label for="companyName">Company Name</label>
+            <input type="text" id="companyName" required>
+          </div>
+          <div class="field">
+            <label for="businessType">Business Type</label>
+            <select id="businessType" required>
+              <option value="" disabled selected>Select business type</option>
+              <option value="sole">Sole Ownership</option>
+              <option value="partnership">Partnership</option>
+              <option value="private-ltd">Private Limited Company</option>
+              <option value="public-ltd">Public Limited Company</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="yearsBusiness">Years in Business</label>
+            <input type="number" id="yearsBusiness" min="0" required>
+          </div>
+          <div class="field full">
+            <label>Company Logo / Photo</label>
+            <div class="entry-cards" id="logoCards"></div>
+            <button type="button" class="add-team-btn" onclick="addLogoCard()">+ Add Another Photo</button>
+          </div>
+          <div class="field full">
+            <label for="bio">Short Bio</label>
+            <textarea id="bio" placeholder="Tell homeowners what makes your company a good fit — specialties, experience, service philosophy." required></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Location -->
+      <div class="form-card">
+        <h2><span class="section-num">2</span>Location</h2>
+        <p class="section-sub">Where do you operate?</p>
+        <div class="form-grid">
+          <div class="field full">
+            <label for="address">Full Address</label>
+            <input type="text" id="address" required>
+          </div>
+          <div class="field">
+            <label for="area">Area / Society</label>
+            <input type="text" id="area" required>
+          </div>
+          <div class="field">
+            <label for="city">City</label>
+            <input type="text" id="city" required>
+          </div>
+          <div class="field">
+            <label for="country">Country</label>
+            <input type="text" id="country" value="Pakistan" required>
+          </div>
+          <div class="field full">
+            <label for="coordinates">Location Coordinates (Latitude, Longitude)</label>
+            <input type="text" id="coordinates" placeholder="e.g. 31.5204, 74.3587">
+            <p class="hint" style="margin:6px 0 0;">Optional — helps customers find you accurately on the map. You can copy this from Google Maps by right-clicking your location.</p>
+          </div>
+        </div>
+
+        <div class="field full" style="margin-top:22px;">
+          <label>Additional Office Locations (If Any)</label>
+          <p class="hint" style="margin:-2px 0 14px;">Add another entry for each additional office you operate from.</p>
+          <div class="entry-cards" id="officeCards"></div>
+          <button type="button" class="add-team-btn" onclick="addOfficeCard()">+ Add Office</button>
+        </div>
+      </div>
+
+      <!-- 3. Contact Details -->
+      <div class="form-card">
+        <h2><span class="section-num">3</span>Contact Details</h2>
+        <p class="section-sub">How customers and our team will reach you.</p>
+        <div class="form-grid">
+          <div class="field">
+            <label for="voiceNumber">Voice Number</label>
+            <input type="tel" id="voiceNumber" placeholder="e.g. 042-111-000-111 or 03XX-XXXXXXX" required>
+          </div>
+          <div class="field">
+            <label for="whatsapp">WhatsApp Number</label>
+            <input type="tel" id="whatsapp" placeholder="e.g. 03XX-XXXXXXX">
+          </div>
+          <div class="field">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" required>
+          </div>
+          <div class="field">
+            <label for="website">Website</label>
+            <input type="text" id="website" placeholder="www.yourcompany.com">
+          </div>
+          <div class="field">
+            <label for="facebook">Facebook</label>
+            <input type="text" id="facebook" placeholder="Profile URL">
+          </div>
+          <div class="field">
+            <label for="instagram">Instagram</label>
+            <input type="text" id="instagram" placeholder="Profile URL">
+          </div>
+          <div class="field">
+            <label for="linkedin">LinkedIn</label>
+            <input type="text" id="linkedin" placeholder="Profile URL">
+          </div>
+          <div class="field full">
+            <label for="youtube">YouTube</label>
+            <input type="text" id="youtube" placeholder="Channel URL">
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Specialties -->
+      <div class="form-card">
+        <h2><span class="section-num">4</span>Specialties</h2>
+        <p class="section-sub">What systems do you install?</p>
+        <div class="field full">
+          <label>System Type</label>
+          <div class="chip-group">
+            <label class="chip-check"><input type="checkbox"> Residential</label>
+            <label class="chip-check"><input type="checkbox"> Commercial</label>
+            <label class="chip-check"><input type="checkbox"> Industrial</label>
+            <label class="chip-check"><input type="checkbox"> Agriculture</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Meet The Team -->
+      <div class="form-card">
+        <h2><span class="section-num">5</span>Meet The Team</h2>
+        <p class="section-sub">Add the people customers will meet — owners, sales, technical, or after-sales staff.</p>
+
+        <div class="team-members" id="teamMembers"></div>
+        <button type="button" class="add-team-btn" onclick="addTeamMember()">+ Add Team Member</button>
+      </div>
+
+      <!-- 6. Projects & Testimonials -->
+      <div class="form-card">
+        <h2><span class="section-num">6</span>Projects &amp; Testimonials</h2>
+        <p class="section-sub">Show off completed work and let real customers vouch for it. Select whether each entry is a Project or a Testimonial, and add as many as you like.</p>
+
+        <div class="entry-cards" id="projectCards"></div>
+        <button type="button" class="add-team-btn" onclick="addProjectCard()">+ Add Entry</button>
+      </div>
+
+      <!-- 7. Certifications & Documents -->
+      <div class="form-card">
+        <h2><span class="section-num">7</span>Certifications &amp; Documents</h2>
+        <p class="section-sub">Upload proof — this speeds up verification.</p>
+        <div class="form-grid">
+          <div class="field full">
+            <label>Certifications Held</label>
+            <div class="chip-group">
+              <label class="chip-check"><input type="checkbox"> AEDB Licence</label>
+              <label class="chip-check"><input type="checkbox"> PEC Licence</label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="regNumber">Business Registration / CNIC Number</label>
+            <input type="text" id="regNumber" required>
+          </div>
+          <div class="field">
+            <label>Upload Licence / Certification Documents</label>
+            <label class="upload-zone" for="docUpload">
+              <div class="upload-icon">📄</div>
+              <div class="upload-text">Click to upload</div>
+              <div class="upload-sub">PDF or image, up to 10MB each</div>
+              <input type="file" id="docUpload" accept=".pdf,image/*" multiple>
+            </label>
+          </div>
+          <div class="field full">
+            <label>Brands You Are Certified to Install</label>
+            <p class="hint" style="margin:-4px 0 16px;">Type a brand name and click Add. You can add multiple entries per category.</p>
+
+            <div class="entry-builder">
+              <div class="entry-builder-label">Solar Panels</div>
+              <div class="entry-row">
+                <input type="text" id="panelBrandInput" placeholder="e.g. LONGi Solar">
+                <button type="button" class="entry-add-btn" onclick="addEntry('panelBrandInput','panelBrandTags')">+ Add</button>
+              </div>
+              <div class="entry-tags" id="panelBrandTags"></div>
+              <label class="upload-zone upload-zone-compact" for="panelCertUpload" style="margin-top:10px;">
+                <div class="upload-icon">📄</div>
+                <div>
+                  <div class="upload-text">Upload Certificate(s)</div>
+                  <div class="upload-sub">PDF or image, per brand certification</div>
+                </div>
+                <input type="file" id="panelCertUpload" accept=".pdf,image/*" multiple>
+              </label>
+            </div>
+
+            <div class="entry-builder">
+              <div class="entry-builder-label">Inverters</div>
+              <div class="entry-row">
+                <input type="text" id="inverterBrandInput" placeholder="e.g. Huawei">
+                <button type="button" class="entry-add-btn" onclick="addEntry('inverterBrandInput','inverterBrandTags')">+ Add</button>
+              </div>
+              <div class="entry-tags" id="inverterBrandTags"></div>
+              <label class="upload-zone upload-zone-compact" for="inverterCertUpload" style="margin-top:10px;">
+                <div class="upload-icon">📄</div>
+                <div>
+                  <div class="upload-text">Upload Certificate(s)</div>
+                  <div class="upload-sub">PDF or image, per brand certification</div>
+                </div>
+                <input type="file" id="inverterCertUpload" accept=".pdf,image/*" multiple>
+              </label>
+            </div>
+
+            <div class="entry-builder">
+              <div class="entry-builder-label">Batteries</div>
+              <div class="entry-row">
+                <input type="text" id="batteryBrandInput" placeholder="e.g. CoreCell Energy">
+                <button type="button" class="entry-add-btn" onclick="addEntry('batteryBrandInput','batteryBrandTags')">+ Add</button>
+              </div>
+              <div class="entry-tags" id="batteryBrandTags"></div>
+              <label class="upload-zone upload-zone-compact" for="batteryCertUpload" style="margin-top:10px;">
+                <div class="upload-icon">📄</div>
+                <div>
+                  <div class="upload-text">Upload Certificate(s)</div>
+                  <div class="upload-sub">PDF or image, per brand certification</div>
+                </div>
+                <input type="file" id="batteryCertUpload" accept=".pdf,image/*" multiple>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 9. Verification Tier -->
+      <div class="form-card">
+        <h2><span class="section-num">8</span>Verification Tier</h2>
+        <p class="section-sub">Choose the tier you're applying for.</p>
+        <div class="radio-tier">
+          <label class="tier-option">
+            <input type="radio" name="tier" value="silver" checked>
+            <div>
+              <div class="tier-name">Silver — Verified</div>
+              <div class="tier-desc">Licence/certification checks, independent site audits, site videos, and customer testimonials — plus on-call or physical surveys with customers to gather feedback.</div>
+            </div>
+          </label>
+          <label class="tier-option">
+            <input type="radio" name="tier" value="gold">
+            <div>
+              <div class="tier-name">Gold — Verified + Featured</div>
+              <div class="tier-desc">Everything in Silver, plus featured placement.</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary">Submit Application</button>
+      <p class="form-note">Our team typically reviews applications within 3–5 business days.</p>
+
+      <div class="form-success" id="onboardSuccess">
+        <div class="check-circle">✓</div>
+        <h2>Application received</h2>
+        <p>Thanks for applying to join EnergyGurus.Online. Our team will review your profile and reach out within 3–5 business days.</p>
+      </div>
+
+    </form>
+
+  </div>
+</section>
+
+<footer>© 2026 EnergyGurus.online — All rights reserved.</footer>
+
+<script>
+let teamCount = 0;
+
+function addEntry(inputId, tagsContainerId) {
+  const input = document.getElementById(inputId);
+  const value = input.value.trim();
+  if (!value) return;
+  const container = document.getElementById(tagsContainerId);
+  const tag = document.createElement('span');
+  tag.className = 'entry-tag';
+  tag.innerHTML = `${value} <button type="button" onclick="this.parentElement.remove()">✕</button>`;
+  container.appendChild(tag);
+  input.value = '';
+  input.focus();
+}
+
+function addTeamMember() {
+  teamCount++;
+  const id = teamCount;
+  const container = document.getElementById('teamMembers');
+  const row = document.createElement('div');
+  row.className = 'team-member-row';
+  row.id = `team-row-${id}`;
+  row.innerHTML = `
+    <label class="team-photo-upload" for="team-photo-${id}">
+      📷
+      <input type="file" id="team-photo-${id}" accept="image/*">
+    </label>
+    <div class="team-fields">
+      <div class="team-fields-row">
+        <input type="text" placeholder="Name">
+        <input type="text" placeholder="Designation">
+      </div>
+      <input type="text" placeholder="LinkedIn Profile URL">
+    </div>
+    <button type="button" class="team-remove-btn" onclick="document.getElementById('team-row-${id}').remove()">✕</button>
+  `;
+  container.appendChild(row);
+}
+
+// start with one blank team member row
+addTeamMember();
+
+let logoCount = 0;
+
+function addLogoCard() {
+  logoCount++;
+  const id = logoCount;
+  const container = document.getElementById('logoCards');
+  const card = document.createElement('div');
+  card.className = 'entry-card';
+  card.id = `logo-card-${id}`;
+  card.innerHTML = `
+    <button type="button" class="entry-card-remove" onclick="document.getElementById('logo-card-${id}').remove()">✕</button>
+    <label class="upload-zone" for="logo-upload-${id}">
+      <div class="upload-icon">📷</div>
+      <div class="upload-text">Click to upload</div>
+      <div class="upload-sub">PNG or JPG, up to 5MB</div>
+      <input type="file" id="logo-upload-${id}" accept="image/*">
+    </label>
+  `;
+  container.appendChild(card);
+}
+
+// start with one blank photo upload slot
+addLogoCard();
+
+let officeCount = 0;
+
+function addOfficeCard() {
+  officeCount++;
+  const id = officeCount;
+  const container = document.getElementById('officeCards');
+  const card = document.createElement('div');
+  card.className = 'entry-card';
+  card.id = `office-card-${id}`;
+  card.innerHTML = `
+    <button type="button" class="entry-card-remove" onclick="document.getElementById('office-card-${id}').remove()">✕</button>
+    <div class="entry-card-grid">
+      <div class="entry-card-field full">
+        <label>Full Address</label>
+        <input type="text">
+      </div>
+      <div class="entry-card-field">
+        <label>Area / Society</label>
+        <input type="text">
+      </div>
+      <div class="entry-card-field">
+        <label>City</label>
+        <input type="text">
+      </div>
+      <div class="entry-card-field">
+        <label>Country</label>
+        <input type="text">
+      </div>
+      <div class="entry-card-field full">
+        <label>Location Coordinates (Latitude, Longitude)</label>
+        <input type="text" placeholder="e.g. 31.5204, 74.3587">
+      </div>
+    </div>
+  `;
+  container.appendChild(card);
+}
+
+let projectCount = 0;
+
+function addProjectCard() {
+  projectCount++;
+  const id = projectCount;
+  const container = document.getElementById('projectCards');
+  const card = document.createElement('div');
+  card.className = 'entry-card';
+  card.id = `project-card-${id}`;
+  card.innerHTML = `
+    <button type="button" class="entry-card-remove" onclick="document.getElementById('project-card-${id}').remove()">✕</button>
+    <div class="entry-card-grid">
+      <div class="entry-card-field full">
+        <label>YouTube Link</label>
+        <input type="text" placeholder="https://youtube.com/watch?v=...">
+      </div>
+      <div class="entry-card-field">
+        <label>Entry Type</label>
+        <select>
+          <option value="" disabled selected>Select entry type</option>
+          <option value="project">Project</option>
+          <option value="testimonial">Testimonial</option>
+        </select>
+      </div>
+      <div class="entry-card-field">
+        <label>Date of Installation</label>
+        <input type="date">
+      </div>
+      <div class="entry-card-field">
+        <label>System Type</label>
+        <select>
+          <option value="" disabled selected>Select type</option>
+          <option value="residential">Residential</option>
+          <option value="commercial">Commercial</option>
+          <option value="industrial">Industrial</option>
+          <option value="agriculture">Agriculture</option>
+        </select>
+      </div>
+      <div class="entry-card-field">
+        <label>Customer Name</label>
+        <input type="text">
+      </div>
+      <div class="entry-card-field">
+        <label>Company Name</label>
+        <input type="text">
+      </div>
+      <div class="entry-card-field">
+        <label>City</label>
+        <input type="text">
+      </div>
+      <div class="entry-card-field">
+        <label>Country</label>
+        <input type="text">
+      </div>
+      <div class="entry-card-field full">
+        <label>Short Description</label>
+        <textarea></textarea>
+      </div>
+    </div>
+  `;
+  container.appendChild(card);
+}
+
+// start with one blank entry
+addProjectCard();
+
+function handleOnboardSubmit(e) {
+  e.preventDefault();
+  document.getElementById('onboardForm').querySelectorAll('.form-progress, .form-card, .btn-primary, .form-note').forEach(el => el.style.display = 'none');
+  document.getElementById('onboardSuccess').style.display = 'block';
+  return false;
+}
+</script>
+
+</body>
+</html>

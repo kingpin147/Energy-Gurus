@@ -12,11 +12,23 @@ interface EpcProfileFormProps {
     epcId: string;
     defaultCompanyName: string;
     defaultCeoName?: string;
+    defaultDesignation?: string;
+    defaultBusinessType?: string;
+    defaultContactNo?: string;
+    defaultWhatsapp?: string;
+    defaultAddress?: string;
+    defaultArea?: string;
+    defaultCity?: string;
+    defaultCountry?: string;
     defaultSectors?: string[];
     defaultCertifications?: string[];
     defaultSolarBrands?: string[];
     defaultInverterBrands?: string[];
     defaultBatteryBrands?: string[];
+    defaultPhotos?: string[];
+    defaultSolarCertDocuments?: string[];
+    defaultInverterCertDocuments?: string[];
+    defaultBatteryCertDocuments?: string[];
     defaultTeam?: any[];
     defaultAbout: string;
     defaultWebsite: string;
@@ -25,12 +37,24 @@ interface EpcProfileFormProps {
 export function EpcProfileForm({ 
     epcId, 
     defaultCompanyName, 
-    defaultCeoName, 
+    defaultCeoName,
+    defaultDesignation = "",
+    defaultBusinessType = "",
+    defaultContactNo = "",
+    defaultWhatsapp = "",
+    defaultAddress = "",
+    defaultArea = "",
+    defaultCity = "",
+    defaultCountry = "Pakistan",
     defaultSectors = [], 
     defaultCertifications = [], 
     defaultSolarBrands = [],
     defaultInverterBrands = [],
     defaultBatteryBrands = [],
+    defaultPhotos = [],
+    defaultSolarCertDocuments = [],
+    defaultInverterCertDocuments = [],
+    defaultBatteryCertDocuments = [],
     defaultTeam = [],
     defaultAbout, 
     defaultWebsite 
@@ -43,11 +67,15 @@ export function EpcProfileForm({
     const [solarBrands, setSolarBrands] = useState<string[]>(defaultSolarBrands);
     const [inverterBrands, setInverterBrands] = useState<string[]>(defaultInverterBrands);
     const [batteryBrands, setBatteryBrands] = useState<string[]>(defaultBatteryBrands);
+    const [photos, setPhotos] = useState<string[]>(defaultPhotos);
+    const [solarCertDocuments, setSolarCertDocuments] = useState<string[]>(defaultSolarCertDocuments);
+    const [inverterCertDocuments, setInverterCertDocuments] = useState<string[]>(defaultInverterCertDocuments);
+    const [batteryCertDocuments, setBatteryCertDocuments] = useState<string[]>(defaultBatteryCertDocuments);
     const [tempSolarBrand, setTempSolarBrand] = useState("");
     const [tempInverterBrand, setTempInverterBrand] = useState("");
     const [tempBatteryBrand, setTempBatteryBrand] = useState("");
 
-    const [team, setTeam] = useState<{name: string, designation: string, linkedIn: string, imageUrl: string}[]>(defaultTeam);
+    const [team, setTeam] = useState<{name: string, designation: string, linkedIn: string, imageUrl: string}[]>(defaultTeam || []);
     
     const { uploadFile, isUploading } = useR2Upload();
 
@@ -70,6 +98,9 @@ export function EpcProfileForm({
         );
     };
 
+    const parseFields = (value: string | undefined) =>
+        value ? value.split(",").map((item) => item.trim()).filter(Boolean) : [];
+
     const handleSubmit = async (formData: FormData) => {
         setStatus("loading");
         setErrorMsg("");
@@ -79,7 +110,19 @@ export function EpcProfileForm({
             formData.set("solarBrands", JSON.stringify(solarBrands));
             formData.set("inverterBrands", JSON.stringify(inverterBrands));
             formData.set("batteryBrands", JSON.stringify(batteryBrands));
+            formData.set("photos", JSON.stringify(photos));
+            formData.set("solarCertDocuments", JSON.stringify(solarCertDocuments));
+            formData.set("inverterCertDocuments", JSON.stringify(inverterCertDocuments));
+            formData.set("batteryCertDocuments", JSON.stringify(batteryCertDocuments));
             formData.set("team", JSON.stringify(team.filter(t => t.name || t.designation)));
+            formData.set("designation", formData.get("designation")?.toString() || "");
+            formData.set("businessType", formData.get("businessType")?.toString() || "");
+            formData.set("contactNo", formData.get("contactNo")?.toString() || "");
+            formData.set("whatsapp", formData.get("whatsapp")?.toString() || "");
+            formData.set("address", formData.get("address")?.toString() || "");
+            formData.set("area", formData.get("area")?.toString() || "");
+            formData.set("city", formData.get("city")?.toString() || "");
+            formData.set("country", formData.get("country")?.toString() || "Pakistan");
             
             await updateEpcProfile(formData);
             setStatus("success");
@@ -110,6 +153,81 @@ export function EpcProfileForm({
                     <input
                         name="ceoName"
                         defaultValue={defaultCeoName}
+                        className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
+                    />
+                </div>
+                <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Designation</label>
+                    <input
+                        name="designation"
+                        defaultValue={defaultDesignation}
+                        placeholder="Owner / Sales Manager"
+                        className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
+                    />
+                </div>
+                <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Business Type</label>
+                    <select
+                        name="businessType"
+                        defaultValue={defaultBusinessType}
+                        className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
+                    >
+                        <option value="">Select business type</option>
+                        <option value="Sole Proprietorship">Sole Proprietorship</option>
+                        <option value="Private Limited Company">Private Limited Company</option>
+                        <option value="Partnership">Partnership</option>
+                        <option value="LLC">LLC</option>
+                        <option value="SME">SME</option>
+                    </select>
+                </div>
+                <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Voice Number</label>
+                    <input
+                        name="contactNo"
+                        type="tel"
+                        defaultValue={defaultContactNo}
+                        className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
+                    />
+                </div>
+                <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">WhatsApp Number</label>
+                    <input
+                        name="whatsapp"
+                        type="tel"
+                        defaultValue={defaultWhatsapp}
+                        className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
+                    />
+                </div>
+                <div className="md:col-span-2">
+                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Address</label>
+                    <input
+                        name="address"
+                        defaultValue={defaultAddress}
+                        placeholder="Street address"
+                        className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
+                    />
+                </div>
+                <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Area</label>
+                    <input
+                        name="area"
+                        defaultValue={defaultArea}
+                        className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
+                    />
+                </div>
+                <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">City</label>
+                    <input
+                        name="city"
+                        defaultValue={defaultCity}
+                        className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
+                    />
+                </div>
+                <div className="md:col-span-2">
+                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Country</label>
+                    <input
+                        name="country"
+                        defaultValue={defaultCountry}
                         className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
                     />
                 </div>
@@ -165,7 +283,6 @@ export function EpcProfileForm({
             <div>
                 <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Brands Certified To Install</label>
                 <div className="bg-paper/5 border rounded-2xl p-6 space-y-6">
-                    {/* Solar Panels */}
                     <div className="space-y-3">
                         <label className="block text-xs font-bold uppercase tracking-widest text-ink">Solar Panels</label>
                         <div className="flex gap-2">
@@ -186,7 +303,6 @@ export function EpcProfileForm({
                         </div>
                     </div>
                     
-                    {/* Inverters */}
                     <div className="space-y-3">
                         <label className="block text-xs font-bold uppercase tracking-widest text-ink">Inverters</label>
                         <div className="flex gap-2">
@@ -207,7 +323,6 @@ export function EpcProfileForm({
                         </div>
                     </div>
 
-                    {/* Batteries */}
                     <div className="space-y-3">
                         <label className="block text-xs font-bold uppercase tracking-widest text-ink">Batteries</label>
                         <div className="flex gap-2">
@@ -227,6 +342,46 @@ export function EpcProfileForm({
                             ))}
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Company Photos (comma-separated URLs)</label>
+                    <textarea
+                        value={photos.join(", ")}
+                        onChange={(e) => setPhotos(parseFields(e.target.value))}
+                        rows={3}
+                        className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none resize-none"
+                        placeholder="https://...jpg, https://...jpg"
+                    />
+                </div>
+                <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Solar Certification Docs</label>
+                    <textarea
+                        value={solarCertDocuments.join(", ")}
+                        onChange={(e) => setSolarCertDocuments(parseFields(e.target.value))}
+                        rows={3}
+                        className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none resize-none"
+                    />
+                </div>
+                <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Inverter Certification Docs</label>
+                    <textarea
+                        value={inverterCertDocuments.join(", ")}
+                        onChange={(e) => setInverterCertDocuments(parseFields(e.target.value))}
+                        rows={3}
+                        className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none resize-none"
+                    />
+                </div>
+                <div className="md:col-span-2">
+                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Battery Certification Docs</label>
+                    <textarea
+                        value={batteryCertDocuments.join(", ")}
+                        onChange={(e) => setBatteryCertDocuments(parseFields(e.target.value))}
+                        rows={3}
+                        className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none resize-none"
+                    />
                 </div>
             </div>
 
@@ -304,7 +459,6 @@ export function EpcProfileForm({
                 />
             </div>
 
-            {/* Feedback messages */}
             {status === "success" && (
                 <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 animate-in fade-in slide-in-from-top-2">
                     <CheckCircle2 className="w-5 h-5 shrink-0" />
@@ -322,7 +476,7 @@ export function EpcProfileForm({
             <button
                 type="submit"
                 disabled={status === "loading"}
-                className="w-full bg-amber text-ink text-ink h-12 rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60"
+                className="w-full bg-amber text-ink h-12 rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60"
             >
                 {status === "loading" ? (
                     <>

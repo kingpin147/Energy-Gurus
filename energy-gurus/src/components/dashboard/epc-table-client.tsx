@@ -89,21 +89,30 @@ type TeamMemberInput = {
 };
 
 type OfficeInput = {
-  officeNumber: string;
-  area: string;
-  city: string;
+  officeNumber?: string;
+  address?: string;
+  block?: string;
+  area?: string;
+  city?: string;
+  country?: string;
 };
 
 type ProjectInput = {
-  name: string;
-  customerName: string;
-  companyName: string;
-  installationDate: string;
-  city: string;
-  country: string;
-  systemSize: string;
-  description: string;
-  youtubeUrl: string;
+  name?: string;
+  entryType?: string;
+  customerName?: string;
+  companyName?: string;
+  installationDate?: string;
+  city?: string;
+  country?: string;
+  segmentType?: string[];
+  systemSize?: string;
+  systemType?: string;
+  inverterModel?: string;
+  batteryModel?: string;
+  solarPanelModel?: string;
+  description?: string;
+  youtubeUrl?: string;
 };
 
 export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) {
@@ -175,8 +184,11 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
     setEditFormData({
       companyName: epc.companyName || "",
       ceoName: epc.ceoName || "",
+      designation: (epc as any).designation || "",
+      businessType: (epc as any).businessType || "",
       email: epc.email || epc.userEmail || "",
       contactNo: epc.contactNo || "",
+      whatsapp: (epc as any).whatsapp || "",
       address: epc.address || "",
       area: epc.area || "",
       city: epc.city || "",
@@ -192,6 +204,10 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
       solarBrands: epc.solarBrands ? epc.solarBrands.join(", ") : "",
       inverterBrands: epc.inverterBrands ? epc.inverterBrands.join(", ") : "",
       batteryBrands: epc.batteryBrands ? epc.batteryBrands.join(", ") : "",
+      photos: Array.isArray((epc as any).photos) ? (epc as any).photos.join(", ") : "",
+      solarCertDocuments: Array.isArray((epc as any).solarCertDocuments) ? (epc as any).solarCertDocuments.join(", ") : "",
+      inverterCertDocuments: Array.isArray((epc as any).inverterCertDocuments) ? (epc as any).inverterCertDocuments.join(", ") : "",
+      batteryCertDocuments: Array.isArray((epc as any).batteryCertDocuments) ? (epc as any).batteryCertDocuments.join(", ") : "",
     });
 
     setEditTeam(Array.isArray(epc.team) ? epc.team : []);
@@ -206,8 +222,11 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
           setEditOffices(
             fullDetails.offices.map((o: any) => ({
               officeNumber: o.officeNumber || "",
+              address: o.address || "",
+              block: o.block || "",
               area: o.area || "",
               city: o.city || "",
+              country: o.country || "Pakistan",
             }))
           );
         }
@@ -215,12 +234,18 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
           setEditProjects(
             fullDetails.projects.map((p: any) => ({
               name: p.name || "",
+              entryType: p.entryType || "project",
               customerName: p.customerName || "",
               companyName: p.companyName || "",
               installationDate: p.installationDate || "",
               city: p.city || "",
               country: p.country || "Pakistan",
+              segmentType: Array.isArray(p.segmentType) ? p.segmentType : [],
               systemSize: p.systemSize || "",
+              systemType: p.systemType || "",
+              inverterModel: p.inverterModel || "",
+              batteryModel: p.batteryModel || "",
+              solarPanelModel: p.solarPanelModel || "",
               description: p.description || "",
               youtubeUrl: p.youtubeUrl || "",
             }))
@@ -261,11 +286,20 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
       .map((s: string) => s.trim())
       .filter(Boolean);
 
+    const parseCsv = (value: string | undefined) =>
+      (value || "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
     const payload = {
       companyName: editFormData.companyName,
       ceoName: editFormData.ceoName,
+      designation: editFormData.designation || null,
+      businessType: editFormData.businessType || null,
       email: editFormData.email,
       contactNo: editFormData.contactNo,
+      whatsapp: editFormData.whatsapp || null,
       address: editFormData.address,
       area: editFormData.area,
       city: editFormData.city,
@@ -281,9 +315,35 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
       solarBrands: solarArr,
       inverterBrands: inverterArr,
       batteryBrands: batteryArr,
+      photos: parseCsv(editFormData.photos),
+      solarCertDocuments: parseCsv(editFormData.solarCertDocuments),
+      inverterCertDocuments: parseCsv(editFormData.inverterCertDocuments),
+      batteryCertDocuments: parseCsv(editFormData.batteryCertDocuments),
       team: editTeam.filter((t) => t.name || t.designation),
-      offices: editOffices.filter((o) => o.city || o.officeNumber || o.area),
-      projects: editProjects.filter((p) => p.name || p.customerName || p.description),
+      offices: editOffices.filter((o) => o.city || o.officeNumber || o.area || o.block).map((o) => ({
+        ...o,
+        city: o.city || editFormData.city || "Main",
+        block: o.block || null,
+        address: o.address || undefined,
+        country: o.country || "Pakistan",
+      })),
+      projects: editProjects.filter((p) => p.name || p.customerName || p.description).map((p) => ({
+        name: p.name || p.companyName || p.customerName || "Project",
+        entryType: (p.entryType as 'project' | 'testimonial') || 'project',
+        customerName: p.customerName || undefined,
+        companyName: p.companyName || undefined,
+        installationDate: p.installationDate || undefined,
+        city: p.city || undefined,
+        country: p.country || "Pakistan",
+        segmentType: Array.isArray(p.segmentType) ? p.segmentType : [],
+        systemSize: p.systemSize || undefined,
+        systemType: p.systemType || undefined,
+        inverterModel: p.inverterModel || undefined,
+        batteryModel: p.batteryModel || undefined,
+        solarPanelModel: p.solarPanelModel || undefined,
+        description: p.description || undefined,
+        youtubeUrl: p.youtubeUrl || undefined,
+      })),
     };
 
     const res = await adminUpdateEpcInstaller(editEpc.id, payload);
@@ -954,6 +1014,33 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                     </div>
 
                     <div className="space-y-1.5">
+                      <Label className="text-xs font-bold uppercase text-slate-custom">WhatsApp Number</Label>
+                      <Input
+                        value={editFormData.whatsapp}
+                        onChange={(e) => setEditFormData({ ...editFormData, whatsapp: e.target.value })}
+                        className="bg-slate-50 border-line"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-bold uppercase text-slate-custom">Designation</Label>
+                      <Input
+                        value={editFormData.designation}
+                        onChange={(e) => setEditFormData({ ...editFormData, designation: e.target.value })}
+                        className="bg-slate-50 border-line"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-bold uppercase text-slate-custom">Business Type</Label>
+                      <Input
+                        value={editFormData.businessType}
+                        onChange={(e) => setEditFormData({ ...editFormData, businessType: e.target.value })}
+                        className="bg-slate-50 border-line"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
                       <Label className="text-xs font-bold uppercase text-slate-custom">City</Label>
                       <Input
                         value={editFormData.city}
@@ -1048,6 +1135,26 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                         value={editFormData.about}
                         onChange={(e) => setEditFormData({ ...editFormData, about: e.target.value })}
                         rows={4}
+                        className="bg-slate-50 border-line"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 md:col-span-3">
+                      <Label className="text-xs font-bold uppercase text-slate-custom">Company Photos (comma-separated URLs)</Label>
+                      <Textarea
+                        value={editFormData.photos || ""}
+                        onChange={(e) => setEditFormData({ ...editFormData, photos: e.target.value })}
+                        rows={3}
+                        className="bg-slate-50 border-line"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 md:col-span-3">
+                      <Label className="text-xs font-bold uppercase text-slate-custom">Solar Certification Documents (comma-separated URLs)</Label>
+                      <Textarea
+                        value={editFormData.solarCertDocuments || ""}
+                        onChange={(e) => setEditFormData({ ...editFormData, solarCertDocuments: e.target.value })}
+                        rows={3}
                         className="bg-slate-50 border-line"
                       />
                     </div>
@@ -1216,7 +1323,7 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => setEditOffices([...editOffices, { city: "", officeNumber: "", area: "" }])}
+                      onClick={() => setEditOffices([...editOffices, { city: "", officeNumber: "", address: "", block: "", area: "", country: "Pakistan" }])}
                       className="gap-1.5 text-xs font-bold rounded-xl border-line"
                     >
                       <Plus className="w-3.5 h-3.5 text-amber" /> Add Office Location
@@ -1253,6 +1360,20 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                                 setEditOffices(copy);
                               }}
                               placeholder="e.g. Office 302, Building A"
+                              className="bg-white border-line h-9 text-xs"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <Label className="text-[10px] uppercase font-bold text-slate-custom">Block / Phase</Label>
+                            <Input
+                              value={office.block}
+                              onChange={(e) => {
+                                const copy = [...editOffices];
+                                copy[idx].block = e.target.value;
+                                setEditOffices(copy);
+                              }}
+                              placeholder="e.g. Block D"
                               className="bg-white border-line h-9 text-xs"
                             />
                           </div>

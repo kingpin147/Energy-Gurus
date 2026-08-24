@@ -24,8 +24,44 @@ async function run() {
     console.error("Error adding certifications column:", err.message);
   }
 
+  // New columns for epc_installers (24-08-2026 onboarding update)
   try {
-    console.log("2. Converting segment_type column in epc_projects to jsonb...");
+    console.log("2a. Adding new epc_installers columns (designation, businessType, coordinates, whatsapp, photos, cert docs)...");
+    await sql`ALTER TABLE epc_installers ADD COLUMN IF NOT EXISTS designation text;`;
+    await sql`ALTER TABLE epc_installers ADD COLUMN IF NOT EXISTS business_type text;`;
+    await sql`ALTER TABLE epc_installers ADD COLUMN IF NOT EXISTS coordinates text;`;
+    await sql`ALTER TABLE epc_installers ADD COLUMN IF NOT EXISTS whatsapp text;`;
+    await sql`ALTER TABLE epc_installers ADD COLUMN IF NOT EXISTS photos jsonb DEFAULT '[]'::jsonb;`;
+    await sql`ALTER TABLE epc_installers ADD COLUMN IF NOT EXISTS solar_cert_documents jsonb DEFAULT '[]'::jsonb;`;
+    await sql`ALTER TABLE epc_installers ADD COLUMN IF NOT EXISTS inverter_cert_documents jsonb DEFAULT '[]'::jsonb;`;
+    await sql`ALTER TABLE epc_installers ADD COLUMN IF NOT EXISTS battery_cert_documents jsonb DEFAULT '[]'::jsonb;`;
+    console.log("Success: new epc_installers columns added.");
+  } catch (err: any) {
+    console.error("Error adding new epc_installers columns:", err.message);
+  }
+
+  // New columns for epc_offices
+  try {
+    console.log("2b. Adding new epc_offices columns (address, country, coordinates)...");
+    await sql`ALTER TABLE epc_offices ADD COLUMN IF NOT EXISTS address text;`;
+    await sql`ALTER TABLE epc_offices ADD COLUMN IF NOT EXISTS country text DEFAULT 'Pakistan';`;
+    await sql`ALTER TABLE epc_offices ADD COLUMN IF NOT EXISTS coordinates text;`;
+    console.log("Success: new epc_offices columns added.");
+  } catch (err: any) {
+    console.error("Error adding new epc_offices columns:", err.message);
+  }
+
+  // New column for epc_projects
+  try {
+    console.log("2c. Adding entry_type column to epc_projects...");
+    await sql`ALTER TABLE epc_projects ADD COLUMN IF NOT EXISTS entry_type text DEFAULT 'project';`;
+    console.log("Success: entry_type column added to epc_projects.");
+  } catch (err: any) {
+    console.error("Error adding entry_type column:", err.message);
+  }
+
+  try {
+    console.log("3. Converting segment_type column in epc_projects to jsonb...");
     // Check if the column is already jsonb or text. We can cast it.
     await sql`ALTER TABLE epc_projects ALTER COLUMN segment_type TYPE jsonb USING jsonb_build_array(segment_type);`;
     console.log("Success: segment_type column converted to jsonb.");
@@ -41,7 +77,7 @@ async function run() {
   }
 
   try {
-    console.log("3. Adding author details columns to news table...");
+    console.log("4. Adding author details columns to news table...");
     await sql`ALTER TABLE news ADD COLUMN IF NOT EXISTS author_name text;`;
     await sql`ALTER TABLE news ADD COLUMN IF NOT EXISTS author_picture_url text;`;
     await sql`ALTER TABLE news ADD COLUMN IF NOT EXISTS author_designation text;`;
