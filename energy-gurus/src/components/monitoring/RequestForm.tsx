@@ -166,8 +166,8 @@ export default function RequestForm() {
                                     <select name="systemSize" required value={size} onChange={handleSizeChange} className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber">
                                         <option value="">Select...</option>
                                         <option value="1">1 – 10 kW</option>
-                                        <option value="1.25">10 – 20 kW</option>
-                                        <option value="1.5">20 – 30 kW</option>
+                                        <option value="1.15">10 – 20 kW</option>
+                                        <option value="1.3">20 – 30 kW</option>
                                         <option value="contact">30 kW & Above (Contact Us)</option>
                                     </select>
                                 </div>
@@ -175,9 +175,9 @@ export default function RequestForm() {
                                     <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">Package</label>
                                     <select name="package" required value={pkg} onChange={(e) => setPkg(e.target.value)} className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber">
                                         <option value="">Select...</option>
-                                        <option value="1000">Basic (Annual Checkup)</option>
-                                        <option value="1800">Moderate (Bi-Annual Checkup)</option>
-                                        <option value="3000">Comprehensive (Quarterly Checkup)</option>
+                                        <option value="1200">Basic (Annual Checkup)</option>
+                                        <option value="1600">Moderate (Bi-Annual Checkup)</option>
+                                        <option value="2000">Comprehensive (Quarterly Checkup)</option>
                                     </select>
                                 </div>
                                 <div>
@@ -185,7 +185,7 @@ export default function RequestForm() {
                                     <select name="monitoringHours" required value={hours} onChange={(e) => setHours(e.target.value)} className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber">
                                         <option value="">Select...</option>
                                         <option value="1">12 Hours</option>
-                                        <option value="2">24 Hours</option>
+                                        <option value="1.2">24 Hours</option>
                                     </select>
                                 </div>
                                 <div className="md:col-span-2">

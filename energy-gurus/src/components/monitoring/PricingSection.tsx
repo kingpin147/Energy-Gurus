@@ -16,7 +16,7 @@ export default function PricingSection() {
         return `${exact ? '' : '~'}PKR ${formatted}/mo`;
     };
 
-    const coverageText = hours === 2 ? '24/7' : '12-hour cycle';
+    const coverageText = hours === 1.2 ? '24/7' : '12-hour cycle';
 
     const getPrepayClass = (val: number) => 
         discount === val 
@@ -51,8 +51,8 @@ export default function PricingSection() {
                             onChange={(e) => setSize(e.target.value)}
                         >
                             <option value="1">1 – 10 kW (Base price)</option>
-                            <option value="1.25">10 – 20 kW (+25%)</option>
-                            <option value="1.5">20 – 30 kW (+50%)</option>
+                            <option value="1.15">10 – 20 kW (+15%)</option>
+                            <option value="1.3">20 – 30 kW (+30%)</option>
                             <option value="contact">30 kW & Above (Contact Us)</option>
                         </select>
                     </div>
@@ -64,7 +64,7 @@ export default function PricingSection() {
                             onChange={(e) => setHours(parseFloat(e.target.value))}
                         >
                             <option value="1">12 Hours</option>
-                            <option value="2">24 Hours</option>
+                            <option value="1.2">24 Hours</option>
                         </select>
                     </div>
                     <div className="flex flex-col gap-1">
@@ -104,12 +104,18 @@ export default function PricingSection() {
                         <tbody>
                             <tr>
                                 <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] font-semibold text-ink whitespace-nowrap">Price</td>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">{calculatePrice(1000, true)}</td>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">{calculatePrice(1800)}</td>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom bg-[rgba(232,163,61,0.06)]">{calculatePrice(3000)}</td>
+                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">{calculatePrice(1200, true)}</td>
+                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">{calculatePrice(1600, true)}</td>
+                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom bg-[rgba(232,163,61,0.06)]">{calculatePrice(2000, true)}</td>
                             </tr>
                             <tr>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] font-semibold text-ink whitespace-nowrap">On-site visits / year</td>
+                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] font-semibold text-ink whitespace-nowrap">Onboarding Charges</td>
+                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">PKR 3,000</td>
+                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">PKR 3,000</td>
+                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom bg-[rgba(232,163,61,0.06)]">PKR 3,000</td>
+                            </tr>
+                            <tr>
+                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] font-semibold text-ink whitespace-nowrap">Free Detailed On-Site Audits / Year</td>
                                 <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">1</td>
                                 <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">2</td>
                                 <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom bg-[rgba(232,163,61,0.06)]">4</td>
@@ -122,36 +128,24 @@ export default function PricingSection() {
                             </tr>
                             <tr>
                                 <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] font-semibold text-ink whitespace-nowrap">Fault alerts</td>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">Email</td>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">Email + SMS</td>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom bg-[rgba(232,163,61,0.06)]">Email + SMS</td>
-                            </tr>
-                            <tr>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] font-semibold text-ink whitespace-nowrap">Panel cleaning</td>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">Add-on</td>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">Add-on</td>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom bg-[rgba(232,163,61,0.06)]">Add-on</td>
-                            </tr>
-                            <tr>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] font-semibold text-ink whitespace-nowrap">Panel, inverter & battery diagnostics</td>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">Each visit</td>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">Each visit</td>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom bg-[rgba(232,163,61,0.06)]">Each visit</td>
+                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">SMS</td>
+                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">SMS</td>
+                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom bg-[rgba(232,163,61,0.06)]">SMS</td>
                             </tr>
                             <tr>
                                 <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] font-semibold text-ink whitespace-nowrap">Performance report</td>
+                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">Monthly</td>
                                 <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">Fortnightly</td>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">Weekly</td>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom bg-[rgba(232,163,61,0.06)]">Daily</td>
+                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom bg-[rgba(232,163,61,0.06)]">Weekly</td>
                             </tr>
                             <tr>
                                 <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] font-semibold text-ink whitespace-nowrap">Fault response time</td>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">24 hours</td>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">24 hours</td>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom bg-[rgba(232,163,61,0.06)]">24 hours</td>
+                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">8 hours</td>
+                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">6 hours</td>
+                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom bg-[rgba(232,163,61,0.06)]">4 hours</td>
                             </tr>
                             <tr>
-                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] font-semibold text-ink whitespace-nowrap">Repair visit & equipment cost</td>
+                                <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] font-semibold text-ink whitespace-nowrap">Visit to Troubleshoot/Repair/Replace Equipments</td>
                                 <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">Billed separately</td>
                                 <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom">Billed separately</td>
                                 <td className="p-[16px_18px] text-left border-b border-line text-[0.88rem] text-slate-custom bg-[rgba(232,163,61,0.06)]">Billed separately</td>
@@ -165,15 +159,15 @@ export default function PricingSection() {
                             <tr>
                                 <td className="p-[16px_18px] text-left text-[0.88rem] font-semibold text-ink whitespace-nowrap border-none"></td>
                                 <td className="p-[16px_18px] text-left text-[0.88rem] border-none"><button onClick={() => { 
-                                    document.dispatchEvent(new CustomEvent('selectPackage', { detail: { pkg: '1000', size, hours: hours.toString(), plan: discount.toString() } }));
+                                    document.dispatchEvent(new CustomEvent('selectPackage', { detail: { pkg: '1200', size, hours: hours.toString(), plan: discount.toString() } }));
                                     document.getElementById('request-form')?.scrollIntoView({behavior: 'smooth'}) 
                                 }} className="px-4 py-[9px] rounded-[3px] text-[0.82rem] bg-paper border border-line text-ink whitespace-nowrap font-semibold hover:bg-line transition-colors">Select Basic</button></td>
                                 <td className="p-[16px_18px] text-left text-[0.88rem] border-none"><button onClick={() => { 
-                                    document.dispatchEvent(new CustomEvent('selectPackage', { detail: { pkg: '1800', size, hours: hours.toString(), plan: discount.toString() } }));
+                                    document.dispatchEvent(new CustomEvent('selectPackage', { detail: { pkg: '1600', size, hours: hours.toString(), plan: discount.toString() } }));
                                     document.getElementById('request-form')?.scrollIntoView({behavior: 'smooth'}) 
                                 }} className="px-4 py-[9px] rounded-[3px] text-[0.82rem] bg-paper border border-line text-ink whitespace-nowrap font-semibold hover:bg-line transition-colors">Select Moderate</button></td>
                                 <td className="p-[16px_18px] text-left text-[0.88rem] border-none bg-[rgba(232,163,61,0.06)]"><button onClick={() => { 
-                                    document.dispatchEvent(new CustomEvent('selectPackage', { detail: { pkg: '3000', size, hours: hours.toString(), plan: discount.toString() } }));
+                                    document.dispatchEvent(new CustomEvent('selectPackage', { detail: { pkg: '2000', size, hours: hours.toString(), plan: discount.toString() } }));
                                     document.getElementById('request-form')?.scrollIntoView({behavior: 'smooth'}) 
                                 }} className="px-4 py-[9px] rounded-[3px] text-[0.82rem] bg-ink border border-ink text-white whitespace-nowrap font-semibold hover:bg-ink/90 transition-colors">Select Comprehensive</button></td>
                             </tr>
@@ -182,7 +176,7 @@ export default function PricingSection() {
                 </div>
                 
                 <p className="text-slate-custom text-[0.9rem] mt-[18px] max-w-[640px]">
-                    Panel cleaning, repair/complaint visits, and any equipment replaced or installed are billed separately from the monthly package on every tier.
+                    Onboarding Charges (PKR 3,000) are a one-time fee, billed at sign-up. Any visit to troubleshoot, repair, or replace equipment is billed separately from the monthly package on every tier.
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
@@ -216,10 +210,10 @@ export default function PricingSection() {
                         <span className="text-ink font-semibold">1 – 10 kW</span><span className="font-ibm-plex-mono text-teal">Base price</span>
                     </div>
                     <div className="flex justify-between items-center py-3 border-t border-line text-[0.92rem]">
-                        <span className="text-ink font-semibold">10 – 20 kW</span><span className="font-ibm-plex-mono text-teal">+25%</span>
+                        <span className="text-ink font-semibold">10 – 20 kW</span><span className="font-ibm-plex-mono text-teal">+15%</span>
                     </div>
                     <div className="flex justify-between items-center py-3 border-t border-line text-[0.92rem]">
-                        <span className="text-ink font-semibold">20 – 30 kW</span><span className="font-ibm-plex-mono text-teal">+50%</span>
+                        <span className="text-ink font-semibold">20 – 30 kW</span><span className="font-ibm-plex-mono text-teal">+30%</span>
                     </div>
                     <div className="flex justify-between items-center py-3 border-t border-line text-[0.92rem]">
                         <span className="text-ink font-semibold">30 kW & Above</span><span className="font-ibm-plex-mono text-teal">Dealt separately — contact us</span>
