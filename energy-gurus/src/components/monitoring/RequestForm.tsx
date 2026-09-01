@@ -55,23 +55,23 @@ export default function RequestForm() {
 
     const getAmountLabel = () => {
         if (!pkg || !size || !hours || !plan) {
-            return { text: 'Select package, size, hours & plan above', ready: false };
+            return { text: 'Select package, size, type & plan above', ready: false };
         }
         if (size === 'contact') {
             return { text: 'Systems 30 kW & above are priced individually — our team will contact you with a custom quote.', ready: false };
         }
         
-        const base = parseFloat(pkg);
-        const sizeMult = parseFloat(size);
+        const base = parseFloat(size);
+        const sizeMult = parseFloat(pkg);
         const hoursMult = parseFloat(hours);
         const discount = parseFloat(plan);
         const monthly = Math.round((base * sizeMult * hoursMult * (1 - discount)) / 10) * 10;
         
         let periodLabel = 'per month';
         let payableNow = monthly;
-        if (discount === 0.1) { periodLabel = 'per quarter (billed every 3 months)'; payableNow = monthly * 3; }
-        else if (discount === 0.2) { periodLabel = 'per half-year (billed every 6 months)'; payableNow = monthly * 6; }
-        else if (discount === 0.4) { periodLabel = 'per year (billed annually)'; payableNow = monthly * 12; }
+        if (discount === 0.07) { periodLabel = 'per quarter (billed every 3 months)'; payableNow = monthly * 3; }
+        else if (discount === 0.15) { periodLabel = 'per half-year (billed every 6 months)'; payableNow = monthly * 6; }
+        else if (discount === 0.3) { periodLabel = 'per year (billed annually)'; payableNow = monthly * 12; }
         
         return { 
             text: `PKR ${payableNow.toLocaleString('en-US')} ${periodLabel} — approx. PKR ${monthly.toLocaleString('en-US')}/mo equivalent`, 
@@ -165,27 +165,30 @@ export default function RequestForm() {
                                     <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">System Size</label>
                                     <select name="systemSize" required value={size} onChange={handleSizeChange} className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber">
                                         <option value="">Select...</option>
-                                        <option value="1">1 – 10 kW</option>
-                                        <option value="1.15">10 – 20 kW</option>
-                                        <option value="1.3">20 – 30 kW</option>
-                                        <option value="contact">30 kW & Above (Contact Us)</option>
+                                        <option value="800">1 – 5 kW</option>
+                                        <option value="1200">6 – 10 kW</option>
+                                        <option value="1600">11 – 15 kW</option>
+                                        <option value="2000">16 – 20 kW</option>
+                                        <option value="2500">21 – 25 kW</option>
+                                        <option value="3000">26 – 30 kW</option>
+                                        <option value="contact">31 kW & Above (Contact Us)</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">Package</label>
                                     <select name="package" required value={pkg} onChange={(e) => setPkg(e.target.value)} className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber">
                                         <option value="">Select...</option>
-                                        <option value="1200">Basic (Annual Checkup)</option>
-                                        <option value="1600">Moderate (Bi-Annual Checkup)</option>
-                                        <option value="2000">Comprehensive (Quarterly Checkup)</option>
+                                        <option value="1">Basic (Annual Checkup)</option>
+                                        <option value="1.2">Moderate (Bi-Annual Checkup)</option>
+                                        <option value="1.4">Comprehensive (Quarterly Checkup)</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">Monitoring Hrs</label>
+                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">System Type</label>
                                     <select name="monitoringHours" required value={hours} onChange={(e) => setHours(e.target.value)} className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber">
                                         <option value="">Select...</option>
-                                        <option value="1">12 Hours</option>
-                                        <option value="1.2">24 Hours</option>
+                                        <option value="1">Grid Tied</option>
+                                        <option value="1.2">Hybrid</option>
                                     </select>
                                 </div>
                                 <div className="md:col-span-2">
@@ -193,9 +196,9 @@ export default function RequestForm() {
                                     <select name="paymentPlan" required value={plan} onChange={(e) => setPlan(e.target.value)} className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber">
                                         <option value="">Select...</option>
                                         <option value="0">Monthly</option>
-                                        <option value="0.1">Quarterly Advance (10% off)</option>
-                                        <option value="0.2">Bi-Annual Advance (20% off)</option>
-                                        <option value="0.4">Annual Advance (40% off)</option>
+                                        <option value="0.07">Quarterly Advance (7% off)</option>
+                                        <option value="0.15">Bi-Annual Advance (15% off)</option>
+                                        <option value="0.3">Annual Advance (30% off)</option>
                                     </select>
                                 </div>
                             </div>
