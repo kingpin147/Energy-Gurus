@@ -15,6 +15,7 @@ import { LiveQAForm } from "@/components/forms/live-qa-form";
 import { DeleteContentButton } from "@/components/dashboard/delete-content-button";
 import { unstable_cache } from "next/cache";
 import { LiveQAStatusSelect } from "@/components/dashboard/live-qa-status-select";
+import { EditPodcastDialog } from "@/components/dashboard/edit-podcast-dialog";
 
 const getPodcastsData = unstable_cache(
     async (sortVal: string, q?: string) => {
@@ -117,7 +118,8 @@ export default async function ContentManagementPage({
                                                 ) : (
                                                     <Youtube className="w-12 h-12 text-red-600" />
                                                 )}
-                                                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+                                                    <EditPodcastDialog podcast={podcast} />
                                                     <DeleteContentButton
                                                         id={podcast.id}
                                                         action={deletePodcast}

@@ -127,6 +127,7 @@ export async function deleteLiveQA(id: string) {
         return { success: false, message: "Failed to delete session." };
     }
 }
+
 export async function updateLiveQAStatus(id: string, status: 'upcoming' | 'live' | 'archived') {
     if (!id || !status) return { success: false, message: "Missing data" };
     if (!await isAdmin()) return { success: false, message: "Unauthorized" };
@@ -145,5 +146,41 @@ export async function updateLiveQAStatus(id: string, status: 'upcoming' | 'live'
     } catch (error) {
         console.error("Failed to update Live QA status:", error);
         return { success: false, message: "Failed to update status." };
+    }
+}
+
+export async function updatePodcast(id: string, formData: FormData) {
+    if (!id) return { success: false, message: "Invalid ID" };
+    if (!await isAdmin()) return { success: false, message: "Unauthorized" };
+
+    const title = formData.get("title")?.toString();
+    const description = formData.get("description")?.toString();
+    const youtubeUrl = formData.get("youtubeUrl")?.toString();
+    const thumbnailUrl = formData.get("thumbnailUrl")?.toString();
+    const guestName = formData.get("guestName")?.toString();
+
+    if (!title || !youtubeUrl) {
+        return { success: false, message: "Title and YouTube URL are required." };
+    }
+
+    try {
+        await db.update(podcasts)
+            .set({
+                title,
+                description,
+                youtubeUrl,
+                thumbnailUrl: thumbnailUrl || null,
+                guestName
+            })
+            .where(eq(podcasts.id, id));
+
+        revalidateTag('podcasts', {});
+        revalidateTag('homepage', {});
+        revalidatePath("/dashboard/content", "page");
+        revalidatePath("/podcast", "page");
+        return { success: true, message: "Podcast updated successfully" };
+    } catch (error) {
+        console.error("Failed to update podcast:", error);
+        return { success: false, message: "Failed to update podcast. Please try again." };
     }
 }
