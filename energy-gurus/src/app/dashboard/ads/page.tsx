@@ -42,7 +42,7 @@ export default async function AdsManagementPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {allAds.map((ad) => (
                     <Card key={ad.id} className="border-none shadow-sm rounded-3xl overflow-hidden group hover:shadow-md transition-all flex flex-col">
-                        <div className="aspect-[3/1] bg-slate-100 flex items-center justify-center relative border-b border-paper p-4">
+                        <div className="h-48 bg-slate-100 flex items-center justify-center relative border-b border-paper p-4">
                             <img src={ad.imageUrl} alt={ad.title} className="max-w-full max-h-full object-contain" />
                             <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Button asChild variant="secondary" size="icon" className="h-8 w-8 rounded-lg shadow-sm" title="Edit Ad">

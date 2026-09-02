@@ -61,24 +61,26 @@ export async function AdBanner({ placement, targetPage = "global", className = "
         innerClass = "ad-banner-inner";
     } else if (isSkyscraper) {
         wrapperClass += ` ad-sky ${isLeft ? "left" : "right"}`;
-        innerClass = "ad-sky-inner";
+        innerClass = "ad-sky-inner h-full max-h-[600px]";
     } else {
         wrapperClass += " ad-inline";
         innerClass = "ad-inline-inner";
     }
 
     if (ad) {
-        const imageEl = <img src={ad.imageUrl} alt={ad.title} className="w-full h-full object-cover" />;
+        const imageEl = <img src={ad.imageUrl} alt={ad.title} className="w-full h-full object-contain" />;
         
         return (
             <div className={wrapperClass}>
-                {ad.linkUrl ? (
-                    <a href={ad.linkUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
-                        {imageEl}
-                    </a>
-                ) : (
-                    imageEl
-                )}
+                <div className={innerClass + " overflow-hidden p-0 border-none bg-transparent"}>
+                    {ad.linkUrl ? (
+                        <a href={ad.linkUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+                            {imageEl}
+                        </a>
+                    ) : (
+                        imageEl
+                    )}
+                </div>
             </div>
         );
     }
