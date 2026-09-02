@@ -20,6 +20,8 @@ export async function addPodcast(formData: FormData) {
     const youtubeUrl = formData.get("youtubeUrl")?.toString();
     const thumbnailUrl = formData.get("thumbnailUrl")?.toString();
     const guestName = formData.get("guestName")?.toString();
+    const guestDesignation = formData.get("guestDesignation")?.toString();
+    const category = formData.get("category")?.toString();
 
     if (!title || !youtubeUrl) {
         return { success: false, message: "Title and YouTube URL are required." };
@@ -31,7 +33,9 @@ export async function addPodcast(formData: FormData) {
             description,
             youtubeUrl,
             thumbnailUrl,
-            guestName
+            guestName,
+            guestDesignation,
+            category
     });
 
         revalidateTag('podcasts', {});

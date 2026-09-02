@@ -111,6 +111,20 @@ export function PodcastForm() {
                 <input name="guestName" className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none transition-all" />
             </div>
             <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest opacity-60">Guest Designation</label>
+                <input name="guestDesignation" className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none transition-all" />
+            </div>
+            <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest opacity-60">Category</label>
+                <select name="category" className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none transition-all" required>
+                    <option value="">Select a category</option>
+                    <option value="Industry">Industry</option>
+                    <option value="Technology">Technology</option>
+                    <option value="Market Trends">Market Trends</option>
+                    <option value="Policy & Regulation">Policy & Regulation</option>
+                </select>
+            </div>
+            <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest opacity-60">Description</label>
                 <textarea name="description" rows={3} className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none transition-all" />
             </div>

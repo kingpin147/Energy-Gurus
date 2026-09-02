@@ -85,26 +85,6 @@ export async function AdBanner({ placement, targetPage = "global", className = "
         );
     }
 
-    // Placeholder rendering if no active ad
-    if (isLeaderboard) {
-        return (
-            <div className={wrapperClass}>
-                <div className="border border-dashed border-line rounded-[6px] bg-[rgba(18,33,58,0.02)] flex flex-col items-center justify-center text-center py-7 px-5 min-h-[110px] w-full">
-                    <span className="font-ibm-plex-mono text-[0.66rem] tracking-[0.1em] uppercase text-slate-custom/60 mb-1.5">Advertisement</span>
-                    <span className="font-space-grotesk text-[0.95rem] text-slate-custom/80">Your ad here — 728×90 leaderboard</span>
-                </div>
-            </div>
-        );
-    } else if (isSkyscraper) {
-        return (
-            <div className={wrapperClass}>
-                <div className="border border-dashed border-line rounded-[6px] bg-[rgba(18,33,58,0.02)] flex flex-col items-center justify-center text-center py-4 px-2.5 min-h-[400px] gap-2 h-full">
-                    <span className="font-ibm-plex-mono text-[0.6rem] tracking-[0.08em] uppercase text-slate-custom/60 [writing-mode:vertical-rl]">Ad</span>
-                    <span className="font-space-grotesk text-[0.8rem] text-slate-custom/75">160×600</span>
-                </div>
-            </div>
-        );
-    }
-    
+    // Hide the ad slot completely if no active ad is found
     return null;
 }

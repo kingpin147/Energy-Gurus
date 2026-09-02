@@ -156,6 +156,7 @@ export const podcasts = pgTable('podcasts', {
   thumbnailUrl: text('thumbnail_url'),
   guestName: text('guest_name'),
   guestDesignation: text('guest_designation'),
+  category: text('category'),
   createdAt: timestamp('created_at').defaultNow().notNull()
     }, (table) => ({
   createdAtIdx: index('podcasts_created_at_idx').on(table.createdAt)
