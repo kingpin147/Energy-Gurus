@@ -180,8 +180,14 @@
   /* ad banner */
   .ad-banner {
     max-width: 1180px;
-    margin: 28px auto;
-    padding: 0 32px;
+    margin: 16px auto;
+    padding: 0 8px;
+  }
+  @media (min-width: 768px) {
+    .ad-banner {
+      margin: 28px auto;
+      padding: 0 32px;
+    }
   }
   .ad-banner-inner {
     border: 1px dashed var(--color-line);
