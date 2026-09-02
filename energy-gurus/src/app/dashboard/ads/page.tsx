@@ -3,7 +3,7 @@ import { ads } from "@/db/schema";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { LayoutDashboard, Plus, Power, PowerOff } from "lucide-react";
+import { LayoutDashboard, Plus, Power, PowerOff, Pencil } from "lucide-react";
 import { desc } from "drizzle-orm";
 import { getUserRole } from "@/lib/roles";
 import Link from "next/link";
@@ -45,6 +45,11 @@ export default async function AdsManagementPage() {
                         <div className="aspect-[3/1] bg-slate-100 flex items-center justify-center relative border-b border-paper p-4">
                             <img src={ad.imageUrl} alt={ad.title} className="max-w-full max-h-full object-contain" />
                             <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button asChild variant="secondary" size="icon" className="h-8 w-8 rounded-lg shadow-sm" title="Edit Ad">
+                                    <Link href={`/dashboard/ads/${ad.id}/edit`}>
+                                        <Pencil className="w-4 h-4" />
+                                    </Link>
+                                </Button>
                                 <form action={toggleAdStatus.bind(null, ad.id, !ad.isActive)}>
                                     <Button type="submit" variant={ad.isActive ? "destructive" : "default"} size="icon" className="h-8 w-8 rounded-lg shadow-sm" title={ad.isActive ? "Deactivate Ad" : "Activate Ad"}>
                                         {ad.isActive ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}

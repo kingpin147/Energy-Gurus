@@ -10,7 +10,7 @@ import { Logo } from "@/components/ui/logo";
 
 const navLinks = [
     { label: "About Us", href: "/about" },
-    { label: "Monitoring & O&M", href: "/monitoring" },
+    { label: "Monitoring", href: "/monitoring" },
     { label: "News", href: "/news" },
     { label: "Podcasts", href: "/podcast" },
 ];

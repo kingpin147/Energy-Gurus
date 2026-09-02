@@ -16,6 +16,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import PricingSection from "@/components/monitoring/PricingSection";
 import RequestForm from "@/components/monitoring/RequestForm";
+import { AdBanner } from "@/components/shared/AdBanner";
 
 export async function generateMetadata({ params }: { params: Promise<{ }> }): Promise<Metadata> {
   
@@ -55,18 +56,8 @@ export default function MonitoringOverviewPage() {
         <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 overflow-x-hidden min-h-screen">
             
             {/* Skyscraper Ads */}
-            <div className="hidden [@media(min-width:1560px)]:block fixed top-1/2 -translate-y-1/2 w-[120px] z-40 left-3">
-                <div className="border border-dashed border-line rounded-[6px] bg-[rgba(18,33,58,0.02)] flex flex-col items-center justify-center text-center py-4 px-2.5 min-h-[400px] gap-2">
-                    <span className="font-ibm-plex-mono text-[0.6rem] tracking-[0.08em] uppercase text-slate-custom/60 [writing-mode:vertical-rl]">Ad</span>
-                    <span className="font-space-grotesk text-[0.8rem] text-slate-custom/75">160×600</span>
-                </div>
-            </div>
-            <div className="hidden [@media(min-width:1560px)]:block fixed top-1/2 -translate-y-1/2 w-[120px] z-40 right-3">
-                <div className="border border-dashed border-line rounded-[6px] bg-[rgba(18,33,58,0.02)] flex flex-col items-center justify-center text-center py-4 px-2.5 min-h-[400px] gap-2">
-                    <span className="font-ibm-plex-mono text-[0.6rem] tracking-[0.08em] uppercase text-slate-custom/60 [writing-mode:vertical-rl]">Ad</span>
-                    <span className="font-space-grotesk text-[0.8rem] text-slate-custom/75">160×600</span>
-                </div>
-            </div>
+            <AdBanner placement="skyscraper_left" targetPage="monitoring" />
+            <AdBanner placement="skyscraper_right" targetPage="monitoring" />
             <header className="bg-ink text-white pt-[88px] pb-[60px] relative overflow-hidden">
                 <div 
                     className="absolute inset-0 pointer-events-none z-0" 
@@ -76,7 +67,7 @@ export default function MonitoringOverviewPage() {
                     <div>
                         <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-[18px]">
                             <span className="w-5 h-[1px] bg-amber"></span>
-                            Monitoring & O&M
+                            Monitoring
                         </p>
                         <h1 className="font-space-grotesk font-semibold text-[clamp(2rem,4vw,2.9rem)] tracking-[-0.01em]">
                             Solar doesn't stop at installation.
@@ -110,10 +101,7 @@ export default function MonitoringOverviewPage() {
 
             {/* Top Ad Banner */}
             <div className="max-w-[1180px] mx-auto my-7 px-8">
-                <div className="border border-dashed border-line rounded-[6px] bg-[rgba(18,33,58,0.02)] flex flex-col items-center justify-center text-center py-7 px-5 min-h-[110px]">
-                    <span className="font-ibm-plex-mono text-[0.66rem] tracking-[0.1em] uppercase text-slate-custom/60 mb-1.5">Advertisement</span>
-                    <span className="font-space-grotesk text-[0.95rem] text-slate-custom/80">Your ad here — 728×90 leaderboard</span>
-                </div>
+                <AdBanner placement="leaderboard_top" targetPage="monitoring" />
             </div>
 
             <section className="py-[80px]">
@@ -272,10 +260,7 @@ export default function MonitoringOverviewPage() {
 
             {/* Bottom Ad Banner */}
             <div className="max-w-[1180px] mx-auto my-7 px-8">
-                <div className="border border-dashed border-line rounded-[6px] bg-[rgba(18,33,58,0.02)] flex flex-col items-center justify-center text-center py-7 px-5 min-h-[110px]">
-                    <span className="font-ibm-plex-mono text-[0.66rem] tracking-[0.1em] uppercase text-slate-custom/60 mb-1.5">Advertisement</span>
-                    <span className="font-space-grotesk text-[0.95rem] text-slate-custom/80">Your ad here — 728×90 leaderboard</span>
-                </div>
+                <AdBanner placement="leaderboard_bottom" targetPage="monitoring" />
             </div>
 
         </div>
