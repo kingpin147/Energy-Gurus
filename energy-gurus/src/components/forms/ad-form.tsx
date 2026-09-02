@@ -11,8 +11,11 @@ import { useRouter } from "next/navigation";
 export function AdForm() {
     const [imageUrl, setImageUrl] = useState("");
     const [fileName, setFileName] = useState("");
+    const [mobileImageUrl, setMobileImageUrl] = useState("");
+    const [mobileFileName, setMobileFileName] = useState("");
     const { uploadFile, isUploading } = useR2Upload();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const mobileFileInputRef = useRef<HTMLInputElement>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
 
@@ -28,6 +31,21 @@ export function AdForm() {
         } catch (error) {
             console.error(error);
             toast.error("Failed to upload ad image");
+        }
+    };
+
+    const handleMobileFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+            const { publicUrl } = await uploadFile(file, "ad-banners-mobile");
+            setMobileImageUrl(publicUrl);
+            setMobileFileName(file.name);
+            toast.success("Mobile ad image uploaded");
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to upload mobile ad image");
         }
     };
 
@@ -101,6 +119,56 @@ export function AdForm() {
                         </div>
                     )}
                     <input type="hidden" name="imageUrl" value={imageUrl} required />
+                </div>
+            </div>
+
+            <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest opacity-60">Mobile Ad Image (Optional)</label>
+                <div className="flex flex-col gap-3">
+                    {!mobileImageUrl ? (
+                        <div className="w-full">
+                            <input
+                                type="file"
+                                ref={mobileFileInputRef}
+                                className="hidden"
+                                accept="image/*"
+                                onChange={handleMobileFileChange}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => mobileFileInputRef.current?.click()}
+                                disabled={isUploading || isSubmitting}
+                                className="w-full bg-[#003e3e] hover:bg-[#002a2a] text-white font-bold rounded-xl h-12 flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-lg shadow-[#003e3e]/20"
+                            >
+                                {isUploading ? (
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                    <ImageIcon className="w-4 h-4" />
+                                )}
+                                {isUploading ? "Uploading..." : "Choose Mobile Ad Image"}
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-xl animate-in fade-in slide-in-from-top-1">
+                            <div className="w-24 h-12 rounded-lg border bg-white overflow-hidden shrink-0 flex items-center justify-center p-1">
+                                <img src={mobileImageUrl} className="max-w-full max-h-full object-contain" alt="" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2 text-green-600 text-sm font-bold">
+                                    <CheckCircle2 className="w-4 h-4" /> Image Ready
+                                </div>
+                                <p className="text-[10px] text-green-700/60 font-medium truncate">{mobileFileName}</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => { setMobileImageUrl(""); setMobileFileName(""); }}
+                                className="text-[10px] font-black uppercase text-red-500 hover:underline"
+                            >
+                                Remove
+                            </button>
+                        </div>
+                    )}
+                    <input type="hidden" name="mobileImageUrl" value={mobileImageUrl} />
                 </div>
             </div>
 

@@ -68,17 +68,21 @@ export async function AdBanner({ placement, targetPage = "global", className = "
     }
 
     if (ad) {
-        const imageEl = <img src={ad.imageUrl} alt={ad.title} className="w-full h-full object-contain" />;
-        
         return (
             <div className={wrapperClass}>
                 <div className={innerClass + " overflow-hidden p-0 border-none bg-transparent"}>
                     {ad.linkUrl ? (
                         <a href={ad.linkUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
-                            {imageEl}
+                            <picture>
+                                {ad.mobileImageUrl && <source media="(max-width: 767px)" srcSet={ad.mobileImageUrl} />}
+                                <img src={ad.imageUrl} alt={ad.title} className="w-full h-full object-contain" />
+                            </picture>
                         </a>
                     ) : (
-                        imageEl
+                        <picture>
+                            {ad.mobileImageUrl && <source media="(max-width: 767px)" srcSet={ad.mobileImageUrl} />}
+                            <img src={ad.imageUrl} alt={ad.title} className="w-full h-full object-contain" />
+                        </picture>
                     )}
                 </div>
             </div>

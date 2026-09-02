@@ -376,6 +376,7 @@ export const ads = pgTable('ads', {
   id: uuid('id').defaultRandom().primaryKey(),
   title: text('title').notNull(),
   imageUrl: text('image_url').notNull(),
+  mobileImageUrl: text('mobile_image_url'),
   linkUrl: text('link_url'),
   placement: text('placement').notNull(),
   targetPage: text('target_page').notNull(),
