@@ -255,7 +255,4 @@
     color: var(--color-slate-custom);
     opacity: 0.75;
   }
-  @media (max-width: 1560px) {
-    .ad-sky { display: none; }
-  }
 }
