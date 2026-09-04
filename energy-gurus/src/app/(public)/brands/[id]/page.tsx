@@ -55,6 +55,13 @@ export async function generateMetadata({
   return {
     title,
     description,
+    keywords: [
+      "best solar panels in Pakistan",
+      "tier-1 solar brands",
+      brand.brandName,
+      `${brand.brandName} solar panels in Pakistan`,
+      "solar inverter price in Pakistan"
+    ],
     alternates: {
       canonical: url
     },

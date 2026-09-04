@@ -19,8 +19,8 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
     description,
     keywords: [
       "best solar installers in Pakistan",
-      "top solar installers in Pakistan",
-      "top gurus of solar",
+      "top solar companies in Pakistan",
+      "solar installation near me",
       "verified solar EPC installers",
       "solar directory Pakistan",
     ],

@@ -89,6 +89,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         description,
         authors: [{ name: authorName }],
         keywords: [
+            "best solar panels in Pakistan",
+            "solar inverter price in Pakistan",
             article.category,
             "Pakistan solar news",
             "solar industry updates",

@@ -59,6 +59,13 @@ export async function generateMetadata({
   return {
     title,
     description,
+    keywords: [
+      "best solar installers in Pakistan",
+      "top solar companies in Pakistan",
+      "solar installation near me",
+      "verified EPC installers",
+      installer.companyName
+    ],
     alternates: {
       canonical: url
     },

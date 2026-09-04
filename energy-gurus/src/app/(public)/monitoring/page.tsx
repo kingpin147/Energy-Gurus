@@ -27,6 +27,13 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
   return {
     title,
     description,
+    keywords: [
+      "solar monitoring Pakistan",
+      "best solar panels in Pakistan",
+      "solar system telemetry",
+      "solar inverter monitoring Pakistan",
+      "solar O&M services"
+    ],
     alternates: {
       canonical: `${baseUrl}/monitoring`,
       

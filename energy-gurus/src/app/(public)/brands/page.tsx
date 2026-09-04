@@ -20,6 +20,13 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
   return {
     title,
     description,
+    keywords: [
+      "best solar panels in Pakistan",
+      "LONGi solar panels in Pakistan",
+      "JinkoSolar Pakistan",
+      "solar inverter price in Pakistan",
+      "tier-1 solar brands"
+    ],
     alternates: { canonical: `${baseUrl}/brands` },
     openGraph: {
       title, description,

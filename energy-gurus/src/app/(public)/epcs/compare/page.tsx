@@ -16,14 +16,19 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
   return {
     title,
     description,
+    keywords: [
+      "compare solar installers Pakistan",
+      "best solar companies in Pakistan",
+      "top solar installers in Pakistan",
+      "solar installation near me"
+    ],
     alternates: {
       canonical: `${baseUrl}/epcs/compare`,
-      
     },
     openGraph: {
+      url: `${baseUrl}/epcs/compare`,
       title,
       description,
-      url: `${baseUrl}/epcs/compare`,
       siteName: "EnergyGurus",
       locale: "en_US",
       type: "website",

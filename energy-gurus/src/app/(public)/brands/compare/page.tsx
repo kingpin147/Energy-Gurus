@@ -16,14 +16,19 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
   return {
     title,
     description,
+    keywords: [
+      "compare solar brands Pakistan",
+      "best solar panels in Pakistan",
+      "tier-1 solar brands",
+      "LONGi vs Jinko Pakistan"
+    ],
     alternates: {
       canonical: `${baseUrl}/brands/compare`,
-      
     },
     openGraph: {
+      url: `${baseUrl}/brands/compare`,
       title,
       description,
-      url: `${baseUrl}/brands/compare`,
       siteName: "EnergyGurus",
       locale: "en_US",
       type: "website",

@@ -44,27 +44,28 @@ export const metadata: Metadata = {
   },
   description: "Discover the best and top solar installers in Pakistan with EnergyGurus. Get expert ideas on solar energy, compare tier-1 brands, and consult with the top gurus of solar.",
   keywords: [
-    "best solar installers in Pakistan",
+    "solar panel price in Pakistan",
+    "best solar companies in Pakistan",
+    "LONGi solar panels in Pakistan",
+    "JinkoSolar Pakistan",
+    "5kW solar system price in Pakistan",
+    "10kW solar system price in Pakistan",
+    "solar inverter price in Pakistan",
+    "net metering in Pakistan",
     "top solar installers in Pakistan",
-    "top gurus of solar from Pakistan",
-    "best ideas on solar",
     "EnergyGurus",
     "verified solar EPC installers Pakistan",
     "tier-1 solar brands",
-    "solar panel verification",
     "solar energy audit Pakistan",
-    "solar monitoring Pakistan",
-    "commercial solar solutions Pakistan",
-    "residential solar installation Pakistan",
+    "solar monitoring Pakistan"
   ],
   authors: [{ name: "EnergyGurus Team", url: "https://www.energygurus.online" }],
   creator: "EnergyGurus",
   publisher: "EnergyGurus",
   icons: {
     icon: [
-      { url: "/logo-icon.svg", type: "image/svg+xml" },
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/logo-icon.svg", type: "image/svg+xml", sizes: "any" },
+      { url: "/favicon.ico", sizes: "48x48" }
     ],
     shortcut: "/favicon.ico",
     apple: "/logo-icon.svg"

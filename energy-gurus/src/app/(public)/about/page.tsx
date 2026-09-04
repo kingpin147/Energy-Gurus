@@ -9,6 +9,13 @@ export async function generateMetadata(): Promise<Metadata> {
     return {
         title,
         description,
+        keywords: [
+            "best solar panels in Pakistan",
+            "solar inverter price in Pakistan",
+            "solar company in Pakistan",
+            "reliable solar installation Pakistan",
+            "EnergyGurus"
+        ],
         alternates: {
             canonical: `${baseUrl}/about`
         },

@@ -224,9 +224,19 @@
     transform: translateY(-50%);
     width: 120px;
     z-index: 40;
+    display: none;
   }
-  .ad-sky.left { left: 12px; }
-  .ad-sky.right { right: 12px; }
+  @media (min-width: 1480px) {
+    .ad-sky {
+      display: block;
+    }
+    .ad-sky.left { 
+      left: calc(50% - 590px - 140px); 
+    }
+    .ad-sky.right { 
+      right: calc(50% - 590px - 140px); 
+    }
+  }
   .ad-sky .ad-sky-inner {
     border: 1px dashed var(--color-line);
     border-radius: 6px;

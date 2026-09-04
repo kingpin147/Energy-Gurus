@@ -17,6 +17,8 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
     title,
     description,
     keywords: [
+      "best solar panels in Pakistan",
+      "solar inverter price in Pakistan",
       "top gurus of solar from Pakistan",
       "best ideas on solar",
       "solar podcast Pakistan",

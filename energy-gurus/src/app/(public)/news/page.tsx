@@ -28,10 +28,11 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
         title,
         description,
         keywords: [
+            "best solar panels in Pakistan",
+            "solar inverter price in Pakistan",
             "Pakistan solar news",
-            "solar industry updates Pakistan",
             "net metering policy Pakistan",
-            "solar EPC project sign off",
+            "solar industry updates Pakistan",
             "solar technology breakthroughs",
             "EnergyGurus news",
         ],
