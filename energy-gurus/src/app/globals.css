@@ -198,8 +198,14 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 28px 20px;
-    min-height: 110px;
+    padding: 8px 4px;
+    min-height: 80px;
+  }
+  @media (min-width: 768px) {
+    .ad-banner-inner {
+      padding: 28px 20px;
+      min-height: 110px;
+    }
   }
   .ad-banner-inner .ad-tag {
     font-family: var(--font-ibm-plex-mono);
