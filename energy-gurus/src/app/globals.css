@@ -220,8 +220,7 @@
   /* skyscraper ad banners (left/right) */
   .ad-sky {
     position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 430px;
     width: 120px;
     z-index: 40;
     display: none;
@@ -249,6 +248,18 @@
     padding: 16px 10px;
     min-height: 400px;
     gap: 8px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  }
+  .ad-sky.left .ad-sky-inner {
+    transform-origin: left center;
+  }
+  .ad-sky.right .ad-sky-inner {
+    transform-origin: right center;
+  }
+  .ad-sky:hover .ad-sky-inner {
+    transform: scale(1.8);
+    z-index: 60;
+    position: relative;
   }
   .ad-sky .ad-tag {
     font-family: var(--font-ibm-plex-mono);
