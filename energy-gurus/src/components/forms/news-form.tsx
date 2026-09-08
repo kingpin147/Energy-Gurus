@@ -13,16 +13,6 @@ import { toast } from "sonner";
 import {
   Newspaper,
   Loader2,
-  Bold,
-  Italic,
-  Heading2,
-  Heading3,
-  List,
-  ListOrdered,
-  Quote,
-  Link as LinkIcon,
-  Code,
-  Minus,
   User,
   Mail,
   Linkedin,
@@ -33,7 +23,7 @@ import {
 } from "lucide-react";
 import { useR2Upload } from "@/lib/hooks/use-r2-upload";
 import { UploadZone } from "@/components/ui/upload-zone";
-import { FormattedMarkdown } from "@/components/news/formatted-markdown";
+import { TiptapEditor } from "@/components/ui/tiptap-editor";
 
 const DEFAULT_NEWS_CATEGORIES = [
   "Industry News",
@@ -88,7 +78,6 @@ export function NewsForm({ initialData }: NewsFormProps) {
 
   const [publishedAt, setPublishedAt] = useState<string>(getFormattedDate());
   const [content, setContent] = useState(initialData?.content || "");
-  const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
 
   // Author Metadata state
   const [authorName, setAuthorName] = useState(initialData?.authorName || "");
@@ -97,49 +86,26 @@ export function NewsForm({ initialData }: NewsFormProps) {
   const [authorEmail, setAuthorEmail] = useState(initialData?.authorEmail || "");
   const [authorLinkedIn, setAuthorLinkedIn] = useState(initialData?.authorLinkedIn || "");
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { uploadFile, isUploading } = useR2Upload();
 
-  // Cover image upload
   const handleCoverUpload = async (file: File) => {
     try {
-      const { publicUrl } = await uploadFile(file, "news-cover");
+      const { publicUrl } = await uploadFile(file, "news-covers");
       setImageUrl(publicUrl);
-      toast.success("Cover image uploaded successfully!");
-    } catch (err: any) {
+      toast.success("Cover image uploaded successfully");
+    } catch (error) {
       toast.error("Failed to upload cover image");
     }
   };
 
-  // Author picture upload
   const handleAuthorPicUpload = async (file: File) => {
     try {
       const { publicUrl } = await uploadFile(file, "news-authors");
       setAuthorPictureUrl(publicUrl);
-      toast.success("Author picture uploaded successfully!");
-    } catch (err: any) {
+      toast.success("Author picture uploaded successfully");
+    } catch (error) {
       toast.error("Failed to upload author picture");
     }
-  };
-
-  // Insert markdown helper into textarea
-  const insertFormatting = (before: string, after: string = "", defaultText: string = "") => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = content.substring(start, end) || defaultText;
-    const replacement = `${before}${selectedText}${after}`;
-
-    const newContent = content.substring(0, start) + replacement + content.substring(end);
-    setContent(newContent);
-
-    // Reposition cursor
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + before.length, start + before.length + selectedText.length);
-    }, 50);
   };
 
   async function onSubmit(formData: FormData) {
@@ -321,169 +287,8 @@ export function NewsForm({ initialData }: NewsFormProps) {
           <Label className="text-sm font-bold text-ink">
             Article Content <span className="text-red-500">*</span>
           </Label>
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
-            <button
-              type="button"
-              onClick={() => setActiveTab("write")}
-              className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors ${
-                activeTab === "write" ? "bg-white text-ink shadow-sm" : "text-slate-custom hover:text-ink"
-              }`}
-            >
-              Write (Markdown)
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("preview")}
-              className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors ${
-                activeTab === "preview" ? "bg-white text-ink shadow-sm" : "text-slate-custom hover:text-ink"
-              }`}
-            >
-              Formatted Preview
-            </button>
-          </div>
         </div>
-
-        {activeTab === "write" ? (
-          <div className="space-y-2">
-            {/* RICH FORMATTING TOOLBAR */}
-            <div className="flex flex-wrap items-center gap-1 bg-slate-100 p-2 rounded-xl border border-line">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => insertFormatting("**", "**", "bold text")}
-                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
-                title="Bold"
-              >
-                <Bold className="w-4 h-4" />
-              </Button>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => insertFormatting("*", "*", "italic text")}
-                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
-                title="Italic"
-              >
-                <Italic className="w-4 h-4" />
-              </Button>
-
-              <div className="w-[1px] h-5 bg-slate-300 mx-1" />
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => insertFormatting("\n## ", "\n", "Heading 2")}
-                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
-                title="Heading 2"
-              >
-                <Heading2 className="w-4 h-4" />
-              </Button>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => insertFormatting("\n### ", "\n", "Heading 3")}
-                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
-                title="Heading 3"
-              >
-                <Heading3 className="w-4 h-4" />
-              </Button>
-
-              <div className="w-[1px] h-5 bg-slate-300 mx-1" />
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => insertFormatting("\n- ", "\n- ", "List item")}
-                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
-                title="Bullet List"
-              >
-                <List className="w-4 h-4" />
-              </Button>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => insertFormatting("\n1. ", "\n2. ", "List item")}
-                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
-                title="Numbered List"
-              >
-                <ListOrdered className="w-4 h-4" />
-              </Button>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => insertFormatting("\n> ", "\n", "Quote text")}
-                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
-                title="Quote"
-              >
-                <Quote className="w-4 h-4" />
-              </Button>
-
-              <div className="w-[1px] h-5 bg-slate-300 mx-1" />
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => insertFormatting("[", "](https://example.com)", "Link text")}
-                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
-                title="Insert Link"
-              >
-                <LinkIcon className="w-4 h-4" />
-              </Button>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => insertFormatting("\n```\n", "\n```\n", "Code block")}
-                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
-                title="Code Block"
-              >
-                <Code className="w-4 h-4" />
-              </Button>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => insertFormatting("\n---\n", "", "")}
-                className="h-8 px-2.5 rounded-lg text-xs font-bold hover:bg-white text-slate-700"
-                title="Horizontal Divider"
-              >
-                <Minus className="w-4 h-4" />
-              </Button>
-            </div>
-
-            <Textarea
-              ref={textareaRef}
-              id="content"
-              name="content"
-              required
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Write your article content here... Use the toolbar above for rich formatting."
-              className="min-h-[300px] rounded-2xl bg-slate-50 border-line text-sm focus-visible:ring-amber font-sans leading-relaxed p-4"
-            />
-          </div>
-        ) : (
-          <div className="min-h-[300px] p-6 bg-slate-50 rounded-2xl border border-line">
-            {content ? (
-              <FormattedMarkdown content={content} />
-            ) : (
-              <span className="text-slate-custom italic text-sm">Nothing to preview yet. Start typing in the Write tab.</span>
-            )}
-          </div>
-        )}
+        <TiptapEditor content={content} onChange={setContent} />
       </div>
 
       {/* 4. AUTHOR DETAILS SECTION */}

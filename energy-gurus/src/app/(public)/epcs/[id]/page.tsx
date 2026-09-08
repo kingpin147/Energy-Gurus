@@ -183,175 +183,199 @@ export default async function EpcProfilePage({
       </div>
 
       {/* Profile Header */}
-      <header className="py-[32px] pb-[48px] border-b border-line">
-        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
+      <div className="profile-header">
+        <div className="wrap profile-top">
           
-          <div className="grid grid-cols-1 md:grid-cols-[120px_1fr_auto] gap-[28px] items-start">
-            {/* Avatar LG */}
-            <div className="w-[120px] h-[120px] rounded-[10px] bg-ink text-amber flex items-center justify-center font-space-grotesk font-bold text-[2.4rem] shrink-0 overflow-hidden">
-              {installer.logoUrl ? (
-                <Image src={installer.logoUrl} alt={installer.companyName} width={120} height={120} className="object-cover w-full h-full" />
+          {/* Avatar LG */}
+          <div className="avatar-lg">
+            {installer.logoUrl ? (
+              <Image src={installer.logoUrl} alt={installer.companyName} width={120} height={120} className="object-cover w-full h-full rounded-[10px]" />
+            ) : (
+              installer.companyName.substring(0, 2).toUpperCase()
+            )}
+          </div>
+
+          {/* Profile Name & Meta */}
+          <div className="profile-name">
+            <h1>
+              {installer.ceoName || installer.companyName}
+              {installer.isVerified && <span className="verified-tag gold" title="Verified Installer">★ Gold Verified</span>}
+            </h1>
+            <div className="company">
+              {installer.companyName}
+              {installer.designation && installer.businessType ? ` · ${installer.designation} · ${installer.businessType}` : ''}
+            </div>
+            
+            <div className="location-line">
+              <span>📍 {primaryCity}</span>
+              <span>· {yearsInBusiness} yrs in business</span>
+              {installer.tier === 'silver' && <span className="ml-2 bg-slate-200 text-slate-700 px-2 py-0.5 rounded text-xs font-bold uppercase">Silver</span>}
+            </div>
+            
+            {(installer.contactNo || installer.whatsapp || installer.address) && (
+              <div className="text-sm text-slate-custom mb-3 space-y-1">
+                {installer.contactNo && <div>Phone: {installer.contactNo}</div>}
+                {installer.whatsapp && <div>WhatsApp: {installer.whatsapp}</div>}
+                {installer.address && <div>Address: {installer.address}</div>}
+              </div>
+            )}
+            
+            <div className="cert-brands">
+              {(solarBrands.length > 0 || inverterBrands.length > 0 || batteryBrands.length > 0) ? (
+                <>
+                  {solarBrands.length > 0 && (
+                    <>
+                      <span className="cert-label">Solar</span>
+                      {solarBrands.map((brand, i) => (
+                        <span key={i} className="cert-logo">{brand}</span>
+                      ))}
+                    </>
+                  )}
+                  {inverterBrands.length > 0 && (
+                    <>
+                      <span className="cert-label">Inverters</span>
+                      {inverterBrands.map((brand, i) => (
+                        <span key={i} className="cert-logo">{brand}</span>
+                      ))}
+                    </>
+                  )}
+                  {batteryBrands.length > 0 && (
+                    <>
+                      <span className="cert-label">Batteries</span>
+                      {batteryBrands.map((brand, i) => (
+                        <span key={i} className="cert-logo">{brand}</span>
+                      ))}
+                    </>
+                  )}
+                </>
               ) : (
-                installer.companyName.substring(0, 2).toUpperCase()
+                <>
+                  <span className="cert-label">Certified By</span>
+                  {certBrands.map((brand, i) => (
+                    <span key={i} className="cert-logo">{brand}</span>
+                  ))}
+                </>
               )}
             </div>
 
-            {/* Profile Name & Meta */}
-            <div>
-              <h1 className="font-space-grotesk font-semibold text-[1.9rem] text-ink mb-1">
-                {installer.ceoName || installer.companyName}
-              </h1>
-              <div className="text-[1.05rem] text-slate-custom mb-3">
-                {installer.companyName}
-              </div>
-              {(installer.designation || installer.businessType) && (
-                <div className="text-sm text-slate-custom mb-2">
-                  {installer.designation || ""}{installer.designation && installer.businessType ? " · " : ""}{installer.businessType || ""}
-                </div>
-              )}
-              <div className="flex items-center gap-1.5 text-slate-custom text-[0.92rem] mb-[10px]">
-                📍 {primaryCity} {installer.isVerified && <span className="flex items-center text-teal ml-2" title="Verified Installer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Verified</span>}
-                {installer.tier === 'silver' && <span className="ml-2 bg-slate-200 text-slate-700 px-2 py-0.5 rounded text-xs font-bold uppercase">Silver</span>}
-                {installer.tier === 'gold' && <span className="ml-2 bg-amber/20 text-amber-600 px-2 py-0.5 rounded text-xs font-bold uppercase">Gold</span>}
-              </div>
-              {(installer.contactNo || installer.whatsapp || installer.address) && (
-                <div className="text-sm text-slate-custom mb-3 space-y-1">
-                  {installer.contactNo && <div>Phone: {installer.contactNo}</div>}
-                  {installer.whatsapp && <div>WhatsApp: {installer.whatsapp}</div>}
-                  {installer.address && <div>Address: {installer.address}</div>}
-                </div>
-              )}
-              <div className="flex flex-col gap-2 mb-4">
-                {(solarBrands.length > 0 || inverterBrands.length > 0 || batteryBrands.length > 0) ? (
-                  <>
-                    {solarBrands.length > 0 && (
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-ibm-plex-mono text-[0.68rem] tracking-[0.05em] uppercase text-slate-custom w-[80px]">Solar</span>
-                        {solarBrands.map((brand, i) => (
-                          <span key={i} className="h-[26px] px-[10px] rounded-[5px] bg-ink text-amber font-space-grotesk font-bold text-[0.66rem] tracking-[0.03em] flex items-center justify-center uppercase">{brand}</span>
-                        ))}
-                      </div>
-                    )}
-                    {inverterBrands.length > 0 && (
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-ibm-plex-mono text-[0.68rem] tracking-[0.05em] uppercase text-slate-custom w-[80px]">Inverters</span>
-                        {inverterBrands.map((brand, i) => (
-                          <span key={i} className="h-[26px] px-[10px] rounded-[5px] bg-ink text-amber font-space-grotesk font-bold text-[0.66rem] tracking-[0.03em] flex items-center justify-center uppercase">{brand}</span>
-                        ))}
-                      </div>
-                    )}
-                    {batteryBrands.length > 0 && (
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-ibm-plex-mono text-[0.68rem] tracking-[0.05em] uppercase text-slate-custom w-[80px]">Batteries</span>
-                        {batteryBrands.map((brand, i) => (
-                          <span key={i} className="h-[26px] px-[10px] rounded-[5px] bg-ink text-amber font-space-grotesk font-bold text-[0.66rem] tracking-[0.03em] flex items-center justify-center uppercase">{brand}</span>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-ibm-plex-mono text-[0.68rem] tracking-[0.05em] uppercase text-slate-custom mr-0.5">Certified By</span>
-                    {certBrands.map((brand, i) => (
-                      <span key={i} className="h-[26px] px-[10px] rounded-[5px] bg-ink text-amber font-space-grotesk font-bold text-[0.66rem] tracking-[0.03em] flex items-center justify-center uppercase">
-                        {brand}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
+            <div className="type-tags">
+              {sectorsList.map((sector, i) => (
+                <span key={i} className="type-tag">{sector}</span>
+              ))}
+              {certificationsList.map((cert, i) => (
+                <span key={i} className="type-tag">{cert}</span>
+              ))}
             </div>
 
-            {/* Profile CTA */}
-            <div className="flex flex-col gap-2.5 min-w-[180px]">
-              <a
-                href="#quote"
-                className="bg-amber text-ink rounded-[3px] px-[22px] py-[13px] text-[0.9rem] font-semibold text-center hover:bg-[#f2b458] transition-colors inline-block"
-              >
-                Request a Quote
-              </a>
+            <div className="social-row">
+              {websiteUrl !== "#" && (
+                <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="social-btn">
+                  <Globe />
+                </a>
+              )}
+              {facebookUrl !== "#" && (
+                <a href={facebookUrl} target="_blank" rel="noopener noreferrer" className="social-btn">
+                  <Facebook />
+                </a>
+              )}
+              {instagramUrl !== "#" && (
+                <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="social-btn">
+                  <Instagram />
+                </a>
+              )}
+              {linkedinUrl !== "#" && (
+                <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" className="social-btn">
+                  <Linkedin />
+                </a>
+              )}
+              {youtubeUrl !== "#" && (
+                <a href={youtubeUrl} target="_blank" rel="noopener noreferrer" className="social-btn">
+                  <Youtube />
+                </a>
+              )}
             </div>
           </div>
+
+          {/* Profile CTA */}
+          <div className="profile-actions">
+            <a href="#quote" className="btn-primary">
+              Request a Quote
+            </a>
+          </div>
+        </div>
 
           {/* Rating Cards */}
-          <div className="flex gap-[24px] mt-[24px] flex-wrap">
-            <div className="bg-white border border-line rounded-[6px] p-[20px_24px] flex items-center gap-[16px] flex-1 min-w-[240px]">
-              <div className="font-ibm-plex-mono text-[1.8rem] text-ink">
-                {rating ? rating.toFixed(1) : "5.0"}
-              </div>
-              <div>
-                <div className="text-amber text-[0.95rem]">
-                  {renderStars(rating || 5.0)}
+          <div className="wrap">
+            <div className="rating-block">
+              <div className="rating-card">
+                <div className="rating-num">
+                  {rating ? rating.toFixed(1) : "5.0"}
                 </div>
-                <div className="font-ibm-plex-mono text-[0.78rem] text-slate-custom uppercase tracking-[0.05em] mt-1">
-                  Customer Rating · {count} {count === 1 ? "Review" : "Reviews"}
+                <div className="rating-meta">
+                  <div className="stars">
+                    {renderStars(rating || 5.0)}
+                  </div>
+                  <div className="rating-label">
+                    Customer Rating · {count} {count === 1 ? "Review" : "Reviews"}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="bg-[rgba(232,163,61,0.05)] border border-amber rounded-[6px] p-[20px_24px] flex items-center gap-[16px] flex-1 min-w-[240px]">
-              <div className="font-ibm-plex-mono text-[1.8rem] text-amber">
-                {teamRating ? teamRating.toFixed(1) : "5.0"}
-              </div>
-              <div>
-                <div className="text-amber text-[0.95rem]">
-                  {renderStars(teamRating || 5.0)}
+              <div className="rating-card team">
+                <div className="rating-num">
+                  {teamRating ? teamRating.toFixed(1) : "5.0"}
                 </div>
-                <div className="font-ibm-plex-mono text-[0.78rem] text-slate-custom uppercase tracking-[0.05em] mt-1">
-                  EnergyGurus Team Rating {teamCount > 0 ? `· ${teamCount} ${teamCount === 1 ? "Review" : "Reviews"}` : ""}
+                <div className="rating-meta">
+                  <div className="stars">
+                    {renderStars(teamRating || 5.0)}
+                  </div>
+                  <div className="rating-label">
+                    EnergyGurus Team Rating {teamCount > 0 ? `· ${teamCount} ${teamCount === 1 ? "Review" : "Reviews"}` : ""}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-
         </div>
-      </header>
 
       {/* Portfolio — Project Videos */}
-      <section className="py-[56px]">
-        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
-          <div className="mb-8">
-            <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-2">
-              <span className="w-5 h-[1px] bg-amber"></span>
-              Portfolio
-            </p>
-            <h2 className="font-space-grotesk font-semibold text-[1.4rem] text-ink">
-              Project Videos
-            </h2>
+      <section>
+        <div className="wrap">
+          <div className="section-head">
+            <div className="eyebrow">Portfolio</div>
+            <h2>Project Videos</h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+          <div className="video-grid">
             {projects.length > 0 ? (
               projects.slice(0, 3).map((project) => {
                 const videoId = (project as any).youtubeUrl ? getYouTubeId((project as any).youtubeUrl) : null;
                 return (
-                  <div key={project.id} className="bg-white border border-line rounded-[4px] overflow-hidden">
-                    <div className="aspect-video bg-gradient-to-br from-ink to-[#1b3157] relative flex items-center justify-center overflow-hidden group">
+                  <div key={project.id} className="video-card">
+                    <div className="video-thumb group">
                       {videoId ? (
                         <img
                           src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
                           alt={project.name}
-                          className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                          className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity absolute inset-0"
                         />
                       ) : project.images && project.images.length > 0 ? (
-                        <img src={project.images[0]} alt={project.name} className="w-full h-full object-cover opacity-80" />
+                        <img src={project.images[0]} alt={project.name} className="w-full h-full object-cover opacity-80 absolute inset-0" />
                       ) : null}
                       {(project as any).youtubeUrl && (
                         <a
                           href={(project as any).youtubeUrl || "#"}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem] shadow-md group-hover:scale-110 transition-transform absolute"
+                          className="play shadow-md group-hover:scale-110 transition-transform absolute z-10"
                         >
                           ▶
                         </a>
                       )}
                     </div>
-                    <div className="p-[16px_18px]">
-                      <h3 className="font-space-grotesk font-semibold text-[0.98rem] text-ink mb-1">
-                        {project.name}
-                      </h3>
-                      <p className="text-[0.85rem] text-slate-custom">
+                    <div className="video-body">
+                      <h3>{project.name}</h3>
+                      <p>
                         {project.systemSize || project.systemType || (Array.isArray(project.segmentType) && project.segmentType.length ? project.segmentType.join(", ") : "Solar project installation")}
                       </p>
                       {project.customerName && (
@@ -375,43 +399,43 @@ export default async function EpcProfilePage({
               })
             ) : portfolioFallback.length > 0 ? (
               portfolioFallback.slice(0, 3).map((image, index) => (
-                <div key={`${image}-${index}`} className="bg-white border border-line rounded-[4px] overflow-hidden">
-                  <div className="aspect-video bg-gradient-to-br from-ink to-[#1b3157] relative flex items-center justify-center overflow-hidden">
-                    <img src={image} alt={`${installer.companyName} portfolio ${index + 1}`} className="w-full h-full object-cover opacity-80" />
+                <div key={`${image}-${index}`} className="video-card">
+                  <div className="video-thumb">
+                    <img src={image} alt={`${installer.companyName} portfolio ${index + 1}`} className="w-full h-full object-cover opacity-80 absolute inset-0" />
                   </div>
-                  <div className="p-[16px_18px]">
-                    <h3 className="font-space-grotesk font-semibold text-[0.98rem] text-ink mb-1">Project Portfolio</h3>
-                    <p className="text-[0.85rem] text-slate-custom">Recent installation showcase</p>
+                  <div className="video-body">
+                    <h3>Project Portfolio</h3>
+                    <p>Recent installation showcase</p>
                   </div>
                 </div>
               ))
             ) : (
               <>
-                <div className="bg-white border border-line rounded-[4px] overflow-hidden">
-                  <div className="aspect-video bg-gradient-to-br from-ink to-[#1b3157] relative flex items-center justify-center">
-                    <div className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem]">▶</div>
+                <div className="video-card">
+                  <div className="video-thumb">
+                    <div className="play">▶</div>
                   </div>
-                  <div className="p-[16px_18px]">
-                    <h3 className="font-space-grotesk font-semibold text-[0.98rem] text-ink mb-1">Residential Rooftop Install</h3>
-                    <p className="text-[0.85rem] text-slate-custom">Home solar system completed in 3 days.</p>
-                  </div>
-                </div>
-                <div className="bg-white border border-line rounded-[4px] overflow-hidden">
-                  <div className="aspect-video bg-gradient-to-br from-ink to-[#1b3157] relative flex items-center justify-center">
-                    <div className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem]">▶</div>
-                  </div>
-                  <div className="p-[16px_18px]">
-                    <h3 className="font-space-grotesk font-semibold text-[0.98rem] text-ink mb-1">Commercial Plaza System</h3>
-                    <p className="text-[0.85rem] text-slate-custom">Commercial rooftop installation.</p>
+                  <div className="video-body">
+                    <h3>Residential Rooftop Install</h3>
+                    <p>Home solar system completed in 3 days.</p>
                   </div>
                 </div>
-                <div className="bg-white border border-line rounded-[4px] overflow-hidden">
-                  <div className="aspect-video bg-gradient-to-br from-ink to-[#1b3157] relative flex items-center justify-center">
-                    <div className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem]">▶</div>
+                <div className="video-card">
+                  <div className="video-thumb">
+                    <div className="play">▶</div>
                   </div>
-                  <div className="p-[16px_18px]">
-                    <h3 className="font-space-grotesk font-semibold text-[0.98rem] text-ink mb-1">Industrial Ground-Mount</h3>
-                    <p className="text-[0.85rem] text-slate-custom">Utility-scale clean energy installation.</p>
+                  <div className="video-body">
+                    <h3>Commercial Plaza System</h3>
+                    <p>Commercial rooftop installation.</p>
+                  </div>
+                </div>
+                <div className="video-card">
+                  <div className="video-thumb">
+                    <div className="play">▶</div>
+                  </div>
+                  <div className="video-body">
+                    <h3>Industrial Ground-Mount</h3>
+                    <p>Utility-scale clean energy installation.</p>
                   </div>
                 </div>
               </>
@@ -421,34 +445,29 @@ export default async function EpcProfilePage({
       </section>
 
       {/* Customer Video Testimonials */}
-      <section className="bg-white border-y border-line py-[56px]">
-        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
-          <div className="mb-8">
-            <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-teal flex items-center gap-2.5 mb-2">
-              <span className="w-5 h-[1px] bg-teal"></span>
-              In Their Words
-            </p>
-            <h2 className="font-space-grotesk font-semibold text-[1.4rem] text-ink">
-              Customer Video Testimonials
-            </h2>
+      <section>
+        <div className="wrap">
+          <div className="section-head">
+            <div className="eyebrow">In Their Words</div>
+            <h2>Customer Video Testimonials</h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 mb-12">
+          <div className="video-grid">
             {customerVideoEntries.length > 0 ? customerVideoEntries.map((entry: any) => {
               const videoId = entry.youtubeUrl ? getYouTubeId(entry.youtubeUrl) : null;
               return (
-                <div key={entry.id || entry.name} className="bg-white border border-line rounded-[4px] overflow-hidden">
-                  <div className="aspect-video bg-gradient-to-br from-teal to-[#1c4a41] relative flex items-center justify-center">
+                <div key={entry.id || entry.name} className="video-card testimonial-card">
+                  <div className="video-thumb group">
                     {videoId ? (
-                      <img src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`} alt={entry.name} className="w-full h-full object-cover opacity-80" />
+                      <img src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`} alt={entry.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity absolute inset-0" />
                     ) : null}
                     {entry.youtubeUrl && (
-                      <a href={entry.youtubeUrl} target="_blank" rel="noreferrer" className="w-[44px] h-[44px] rounded-full bg-amber text-ink flex items-center justify-center text-[0.95rem] absolute">▶</a>
+                      <a href={entry.youtubeUrl} target="_blank" rel="noreferrer" className="play shadow-md group-hover:scale-110 transition-transform absolute z-10">▶</a>
                     )}
                   </div>
-                  <div className="p-[16px_18px]">
-                    <div className="font-semibold text-[0.92rem] text-ink">{entry.customerName || entry.name}</div>
-                    <div className="text-[0.8rem] text-slate-custom mt-0.5">{entry.city || entry.companyName || "Verified Customer"}</div>
+                  <div className="testimonial-body">
+                    <div className="cust-name">{entry.customerName || entry.name}</div>
+                    <div className="cust-loc">{entry.city || entry.companyName || "Verified Customer"}</div>
                   </div>
                 </div>
               );
@@ -471,20 +490,15 @@ export default async function EpcProfilePage({
       </section>
 
       {/* About Section */}
-      <section className="py-[56px]">
-        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
-          <div className="mb-8">
-            <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-2">
-              <span className="w-5 h-[1px] bg-amber"></span>
-              About
-            </p>
-            <h2 className="font-space-grotesk font-semibold text-[1.4rem] text-ink">
-              {installer.companyName}
-            </h2>
+      <section>
+        <div className="wrap">
+          <div className="section-head">
+            <div className="eyebrow">About</div>
+            <h2>{installer.companyName}</h2>
           </div>
 
-          <div className="bg-white border border-line rounded-[6px] p-8">
-            <p className="text-slate-custom text-[0.98rem] mb-5 leading-relaxed">
+          <div className="about-box">
+            <p>
               {installer.about || `${installer.companyName} has been designing and installing solar systems across Pakistan, serving homeowners, businesses, and agricultural clients. The team specializes in rooftop residential systems and commercial solar installations.`}
             </p>
 
@@ -496,33 +510,18 @@ export default async function EpcProfilePage({
               </div>
             )}
 
-            <div className="flex gap-2 flex-wrap mb-6">
-              {sectorsList.map((sector, i) => (
-                <span key={i} className="font-ibm-plex-mono text-[0.7rem] tracking-[0.05em] uppercase text-teal bg-[rgba(47,110,98,0.1)] px-[11px] py-[5px] rounded-[20px]">
-                  {sector}
-                </span>
-              ))}
-              {certificationsList.map((cert, i) => (
-                <span key={`cert-${i}`} className="font-ibm-plex-mono text-[0.7rem] tracking-[0.05em] uppercase text-amber bg-amber/10 px-[11px] py-[5px] rounded-[20px]">
-                  {cert}
-                </span>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 border-t border-line pt-6 mt-6">
-              <div>
-                <div className="font-ibm-plex-mono text-[1.4rem] text-ink">{yearsInBusiness} yrs</div>
-                <div className="text-[0.78rem] text-slate-custom uppercase tracking-[0.05em] mt-1">In Business</div>
+            <div className="cred-grid">
+              <div className="cred-item">
+                <div className="cred-val">{yearsInBusiness} yrs</div>
+                <div className="cred-label">In Business</div>
               </div>
-              <div>
-                <div className="font-ibm-plex-mono text-[1.4rem] text-ink">
-                  {projects.length > 0 ? `${projects.length}+` : "340+"}
-                </div>
-                <div className="text-[0.78rem] text-slate-custom uppercase tracking-[0.05em] mt-1">Systems Installed</div>
+              <div className="cred-item">
+                <div className="cred-val">{projects.length > 0 ? `${projects.length}+` : "340+"}</div>
+                <div className="cred-label">Systems Installed</div>
               </div>
-              <div>
-                <div className="font-ibm-plex-mono text-[1.4rem] text-ink">{certificationsList.length || "NABCEP"}</div>
-                <div className="text-[0.78rem] text-slate-custom uppercase tracking-[0.05em] mt-1">Certified Team</div>
+              <div className="cred-item">
+                <div className="cred-val">{certificationsList.length || "NABCEP"}</div>
+                <div className="cred-label">Certified Team</div>
               </div>
             </div>
 
@@ -622,17 +621,12 @@ export default async function EpcProfilePage({
       )}
 
       {/* Request a Quote Section */}
-      <section className="bg-white border-y border-line py-[56px]" id="quote">
-        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
-          <div className="text-center max-w-[560px] mx-auto mb-2">
-            <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center justify-center gap-2.5 mb-2">
-              <span className="w-5 h-[1px] bg-amber"></span>
-              Request a Quote
-            </p>
-            <h2 className="font-space-grotesk font-semibold text-[1.4rem] text-ink">
-              Get a quote from {installer.ceoName || installer.companyName}
-            </h2>
-            <p className="text-slate-custom mt-2.5 text-[0.95rem]">
+      <section className="quote-section" id="quote">
+        <div className="wrap">
+          <div className="section-head text-center">
+            <div className="eyebrow" style={{ justifyContent: 'center' }}>Request a Quote</div>
+            <h2>Get a quote from {installer.ceoName || installer.companyName}</h2>
+            <p style={{ color: 'var(--slate)', marginTop: '10px' }}>
               Share a few details and {installer.companyName} will follow up directly.
             </p>
           </div>
@@ -645,15 +639,10 @@ export default async function EpcProfilePage({
       </section>
 
       {/* Final CTA */}
-      <section className="bg-ink text-white py-[56px] text-center">
-        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
-          <h2 className="font-space-grotesk font-semibold text-[1.6rem] text-white mb-5">
-            Ready to work with {installer.companyName}?
-          </h2>
-          <a
-            href="#quote"
-            className="bg-amber text-ink rounded-[3px] px-7 py-[15px] text-[0.9rem] font-semibold inline-block hover:bg-[#f2b458] transition-colors"
-          >
+      <section className="final-cta">
+        <div className="wrap">
+          <h2>Ready to work with {installer.companyName}?</h2>
+          <a href="#quote" className="btn-primary">
             Request a Quote From {installer.ceoName || installer.companyName}
           </a>
         </div>

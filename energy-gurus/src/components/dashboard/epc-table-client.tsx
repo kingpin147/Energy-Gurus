@@ -530,12 +530,12 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleOpenView(epc.id)}
+                          onClick={() => window.location.href = `/dashboard/admin/onboard-epc/${epc.id}`}
                           className="h-8 px-2.5 rounded-lg text-slate-custom hover:text-ink hover:bg-slate-100"
-                          title="View Full Profile"
+                          title="Review Profile"
                         >
                           <Eye className="w-4 h-4 text-blue-600" />
-                          <span className="sr-only">View</span>
+                          <span className="sr-only">Review</span>
                         </Button>
 
                         <Button

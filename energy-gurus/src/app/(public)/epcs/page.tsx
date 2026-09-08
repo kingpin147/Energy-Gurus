@@ -163,7 +163,6 @@ export default async function EpcListingPage({
 
       {/* Filters + List Wrapper */}
       <InstallerFilters totalCount={installers.length}>
-        <div className="flex flex-col gap-4">
           {installers.map((installer) => {
             const yearsInBusiness = Math.max(1, new Date().getFullYear() - new Date(installer.createdAt).getFullYear());
             const locationText = installer.primaryCity ? `Serving ${installer.primaryCity}` : "Serving Pakistan";
@@ -172,18 +171,18 @@ export default async function EpcListingPage({
               <TrackedLink
                 key={installer.id}
                 href={`/epcs/${installer.id}` as any}
-                className="bg-white border border-line rounded-[4px] p-[26px_28px] grid grid-cols-1 sm:grid-cols-[56px_1fr_auto] gap-[22px] items-center hover:border-teal transition-colors group"
+                className="installer-card"
                 eventName="epc_profile_view"
                 eventProperties={{ epcId: installer.id, companyName: installer.companyName }}
               >
                 {/* Avatar */}
-                <div className="w-[56px] h-[56px] rounded-[6px] bg-ink text-amber flex items-center justify-center font-space-grotesk font-bold text-[1.15rem] overflow-hidden shrink-0">
+                <div className="avatar">
                   {installer.logoUrl ? (
                     <Image
                       src={installer.logoUrl}
                       width={56}
                       height={56}
-                      className="object-cover w-full h-full"
+                      className="object-cover w-full h-full rounded-[6px]"
                       alt={installer.companyName}
                     />
                   ) : (
@@ -192,21 +191,24 @@ export default async function EpcListingPage({
                 </div>
 
                 {/* Info */}
-                <div>
-                  <h3 className="font-space-grotesk font-semibold text-[1.12rem] text-ink mb-1">
+                <div className="installer-info">
+                  <h3>
                     {installer.companyName}
+                    {installer.isVerified && (
+                        <span className="verified-tag gold">★ Gold Verified</span>
+                    )}
                   </h3>
-                  <div className="text-[0.88rem] text-slate-custom mb-[10px]">
-                    📍 {locationText} · {yearsInBusiness} {yearsInBusiness === 1 ? "yr" : "yrs"} in business
+                  <div className="service-area">
+                    📍 {locationText} · {yearsInBusiness} {yearsInBusiness === 1 ? 'yr' : 'yrs'} in business
                     {installer.projectsCount > 0 && (
-                      <span className="ml-2">· {installer.projectsCount} project{installer.projectsCount !== 1 ? "s" : ""}</span>
+                      <span className="ml-2">· {installer.projectsCount} project{installer.projectsCount !== 1 ? 's' : ''}</span>
                     )}
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="badges">
                     {(installer.sectors as string[])?.slice(0, 4).map((sector, i) => (
                       <span
                         key={`sector-${i}`}
-                        className="font-ibm-plex-mono text-[0.68rem] tracking-[0.05em] uppercase text-teal bg-[rgba(47,110,98,0.1)] px-[9px] py-1 rounded-[20px]"
+                        className="badge"
                       >
                         {sector}
                       </span>
@@ -214,7 +216,7 @@ export default async function EpcListingPage({
                     {(installer.certifications as string[])?.slice(0, 3).map((cert, i) => (
                       <span
                         key={`cert-${i}`}
-                        className="font-ibm-plex-mono text-[0.68rem] tracking-[0.05em] uppercase text-teal bg-[rgba(47,110,98,0.1)] px-[9px] py-1 rounded-[20px]"
+                        className="badge"
                       >
                         {cert}
                       </span>
@@ -223,22 +225,21 @@ export default async function EpcListingPage({
                 </div>
 
                 {/* Right: rating + view button */}
-                <div className="text-left sm:text-right flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2.5 mt-2 sm:mt-0">
-                  <div className="font-ibm-plex-mono text-[0.88rem] text-graphite">
-                    <span className="text-amber">{renderStars(installer.avgRating || 5)}</span>
+                <div className="installer-right">
+                  <div className="rating">
+                    <span className="stars">{renderStars(installer.avgRating || 5)}</span>
                     <span className="ml-1.5">
-                      {installer.avgRating ? installer.avgRating.toFixed(1) : "5.0"}{" "}
-                      <span className="text-slate-custom">({installer.reviewCount || 0})</span>
+                      {installer.avgRating ? installer.avgRating.toFixed(1) : '5.0'}{' '}
+                      <span style={{ color: 'var(--slate)' }}>({installer.reviewCount || 0})</span>
                     </span>
                   </div>
-                  <span className="text-[0.85rem] font-semibold text-ink border border-line rounded-[3px] px-4 py-[9px] group-hover:border-ink transition-colors inline-block whitespace-nowrap">
+                  <span className="view-btn">
                     View Profile
                   </span>
                 </div>
               </TrackedLink>
             );
           })}
-        </div>
 
         {installers.length === 0 && (
           <div className="py-20 text-center bg-white border border-line rounded-[4px]">

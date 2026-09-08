@@ -170,97 +170,96 @@ export function EpcOnboardingForm({ isPublic = false }: { isPublic?: boolean } =
 
     if (isSubmitted) {
         return (
-            <div className="bg-white border border-line rounded-xl p-12 text-center my-8 shadow-sm">
-                <div className="w-16 h-16 rounded-full bg-teal/10 text-teal flex items-center justify-center mb-6 mx-auto">
-                    <CheckCircle2 size={36} />
+            <div className="text-center py-16 space-y-6">
+                <div className="w-20 h-20 bg-[rgba(47,110,98,0.1)] text-teal rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                 </div>
-                <h2 className="text-2xl font-space-grotesk font-semibold text-ink mb-2">
-                    {isPublic ? "Application received" : "EPC Onboarded Successfully"}
+                <h2 className="font-space-grotesk text-[1.6rem] font-bold text-ink">
+                    {isPublic ? "Application Submitted Successfully!" : "EPC Installer Onboarded!"}
                 </h2>
-                <p className="text-slate-custom mb-6 max-w-md mx-auto">
+                <p className="text-slate-custom max-w-md mx-auto">
                     {isPublic 
-                        ? "Thanks for applying to join EnergyGurus.Online. Our team will review your profile and reach out within 3–5 business days."
-                        : "The installer's account has been created and profile is live in the directory."}
+                        ? "Thank you for applying. Our verification team will review your details and contact you within 3-5 business days."
+                        : "The EPC installer profile has been created. They can now log in using the generated credentials."}
                 </p>
-                
-                {generatedPassword && !isPublic && (
-                    <div className="bg-slate-50 p-4 rounded-xl border border-line mb-6 max-w-md w-full mx-auto">
-                        <p className="text-sm font-bold text-slate-custom mb-2">Temporary Password for EPC:</p>
-                        <code className="text-lg bg-white px-3 py-1 rounded border border-line select-all font-mono text-ink">{generatedPassword}</code>
-                        <p className="text-xs text-slate-custom mt-2">Please share this securely or rely on the welcome email.</p>
+
+                {generatedPassword && (
+                    <div className="bg-[rgba(232,163,61,0.15)] border border-[rgba(232,163,61,0.3)] p-4 rounded-[6px] max-w-sm mx-auto mt-6 text-left">
+                        <p className="text-sm text-slate-700 mb-1">Your temporary password is:</p>
+                        <p className="font-mono text-lg font-bold text-ink">{generatedPassword}</p>
+                        <p className="text-xs text-slate-500 mt-2">Please save this password. You will need it to log in.</p>
                     </div>
                 )}
-                
-                <Button 
-                    onClick={() => router.push(isPublic ? '/epcs' : '/dashboard/users')} 
-                    className="bg-ink text-white hover:bg-ink/90 px-8 py-3 h-auto"
-                >
-                    {isPublic ? "Back to Directory" : "Return to Users"}
-                </Button>
+                <div className="mt-4">
+                    <Button onClick={() => window.location.reload()} variant="outline">
+                        Submit Another Application
+                    </Button>
+                </div>
             </div>
         );
     }
 
     return (
-        <form action={onSubmit} className="w-full max-w-5xl space-y-6 pb-20">
-
-            {/* Progress Bar - 8 steps */}
-            <div className="flex gap-1.5 mb-8">
-                {[1,2,3,4,5,6,7,8].map(i => (
-                    <div key={i} className="flex-1 h-[3px] bg-teal rounded-full" />
-                ))}
+        <form action={onSubmit} id="onboardForm">
+            <div className="form-progress">
+                <div className="step-dot done"></div>
+                <div className="step-dot done"></div>
+                <div className="step-dot done"></div>
+                <div className="step-dot done"></div>
+                <div className="step-dot done"></div>
+                <div className="step-dot done"></div>
+                <div className="step-dot done"></div>
+                <div className="step-dot done"></div>
             </div>
-            
+
             {/* 1. Basic Information */}
-            <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
-                <div className="flex items-center gap-3 mb-6">
-                    <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">1</span>
-                    <div>
-                        <h2 className="text-lg font-space-grotesk font-semibold text-ink">Basic Information</h2>
-                        <p className="text-sm text-slate-custom">Tell us about you and your company.</p>
+            <div className="form-card">
+                <h2><span className="section-num">1</span>Basic Information</h2>
+                <p className="section-sub">Tell us about you and your company.</p>
+                <div className="form-grid">
+                    <div className="field">
+                        <label htmlFor="ceoName">Name</label>
+                        <input type="text" id="ceoName" name="ceoName" required />
                     </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="space-y-2">
-                        <Label htmlFor="ceoName" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Name</Label>
-                        <Input id="ceoName" name="ceoName" required className="bg-slate-50 border-line" />
+                    <div className="field">
+                        <label htmlFor="designation">Designation</label>
+                        <input type="text" id="designation" name="designation" placeholder="e.g. Owner, Sales Manager" />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="designation" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Designation</Label>
-                        <Input id="designation" name="designation" placeholder="e.g. Owner, Sales Manager" className="bg-slate-50 border-line" />
+                    <div className="field">
+                        <label htmlFor="companyName">Company Name</label>
+                        <input type="text" id="companyName" name="companyName" required />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="companyName" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Company Name</Label>
-                        <Input id="companyName" name="companyName" required className="bg-slate-50 border-line" />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="businessType" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Business Type</Label>
-                        <select id="businessType" name="businessType" required className="w-full h-10 rounded-md bg-slate-50 border border-line px-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber/30">
+                    <div className="field">
+                        <label htmlFor="businessType">Business Type</label>
+                        <select id="businessType" name="businessType" required>
                             <option value="" disabled>Select business type</option>
-                            {BUSINESS_TYPES.map(bt => (
-                                <option key={bt.value} value={bt.value}>{bt.label}</option>
-                            ))}
+                            <option value="sole">Sole Ownership</option>
+                            <option value="partnership">Partnership</option>
+                            <option value="private-ltd">Private Limited Company</option>
+                            <option value="public-ltd">Public Limited Company</option>
                         </select>
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="yearsInBusiness" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Years in Business</Label>
-                        <Input id="yearsInBusiness" name="yearsInBusiness" type="number" min="0" required className="bg-slate-50 border-line" />
+                    <div className="field">
+                        <label htmlFor="yearsInBusiness">Years in Business</label>
+                        <input type="number" id="yearsInBusiness" name="yearsInBusiness" min="0" required />
                     </div>
-                    <div className="space-y-2 md:col-span-2">
-                        <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Company Logo / Photos</Label>
-                        <div className="space-y-3">
-                            {/* Main logo upload */}
-                            <UploadZone 
-                                onUpload={handleLogoUpload} 
-                                isUploading={isUploading}
-                                value={logoUrl}
-                                accept="image/*"
-                                title="Click to upload logo"
-                                description="PNG or JPG, up to 5MB"
-                            />
+                    <div className="field full">
+                        <label>Company Logo / Photo</label>
+                        <div className="entry-cards">
+                            {/* Logo */}
+                            <div className="entry-card">
+                                <UploadZone 
+                                    onUpload={handleLogoUpload} 
+                                    isUploading={isUploading}
+                                    value={logoUrl}
+                                    accept="image/*"
+                                    title="Click to upload logo"
+                                    description="PNG or JPG, up to 5MB"
+                                />
+                            </div>
                             {/* Additional photos */}
                             {photos.length > 0 && (
-                                <div className="flex flex-wrap gap-3">
+                                <div className="flex flex-wrap gap-3 mt-4">
                                     {photos.map((p, idx) => (
                                         <div key={idx} className="relative w-20 h-20 rounded-lg border border-line overflow-hidden group">
                                             <img src={p} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
@@ -271,669 +270,374 @@ export function EpcOnboardingForm({ isPublic = false }: { isPublic?: boolean } =
                                     ))}
                                 </div>
                             )}
-                            <Button type="button" variant="outline" className="w-full border-dashed" onClick={() => document.getElementById('additionalPhotoUpload')?.click()}>
-                                <Plus className="w-4 h-4 mr-2" /> Add Another Photo
-                            </Button>
-                            <input type="file" id="additionalPhotoUpload" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handlePhotoUpload(e.target.files[0]); e.target.value = ''; }} />
                         </div>
+                        <button type="button" className="add-team-btn mt-3" onClick={() => document.getElementById('additionalPhotoUpload')?.click()}>+ Add Another Photo</button>
+                        <input type="file" id="additionalPhotoUpload" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handlePhotoUpload(e.target.files[0]); e.target.value = ''; }} />
                     </div>
-                    <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="about" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Short Bio</Label>
-                        <Textarea id="about" name="about" required placeholder="Tell homeowners what makes your company a good fit — specialties, experience, service philosophy." className="bg-slate-50 border-line min-h-[90px]" />
+                    <div className="field full">
+                        <label htmlFor="about">Short Bio</label>
+                        <textarea id="about" name="about" required placeholder="Tell homeowners what makes your company a good fit — specialties, experience, service philosophy."></textarea>
                     </div>
                 </div>
             </div>
 
             {/* 2. Location */}
-            <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
-                <div className="flex items-center gap-3 mb-6">
-                    <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">2</span>
-                    <div>
-                        <h2 className="text-lg font-space-grotesk font-semibold text-ink">Location</h2>
-                        <p className="text-sm text-slate-custom">Where do you operate?</p>
+            <div className="form-card">
+                <h2><span className="section-num">2</span>Location</h2>
+                <p className="section-sub">Where do you operate?</p>
+                <div className="form-grid">
+                    <div className="field full">
+                        <label htmlFor="address">Full Address</label>
+                        <input type="text" id="address" name="address" required />
                     </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="address" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Full Address</Label>
-                        <Input id="address" name="address" required className="bg-slate-50 border-line" />
+                    <div className="field">
+                        <label htmlFor="area">Area / Society</label>
+                        <input type="text" id="area" name="area" required />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="area" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Area / Society</Label>
-                        <Input id="area" name="area" required className="bg-slate-50 border-line" />
+                    <div className="field">
+                        <label htmlFor="city">City</label>
+                        <input type="text" id="city" name="city" required />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="city" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">City</Label>
-                        <Input id="city" name="city" required className="bg-slate-50 border-line" />
+                    <div className="field">
+                        <label htmlFor="country">Country</label>
+                        <input type="text" id="country" name="country" defaultValue="Pakistan" required />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="country" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Country</Label>
-                        <Input id="country" name="country" defaultValue="Pakistan" required className="bg-slate-50 border-line" />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="coordinates" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Location Coordinates (Latitude, Longitude)</Label>
-                        <Input id="coordinates" name="coordinates" placeholder="e.g. 31.5204, 74.3587" className="bg-slate-50 border-line" />
-                        <p className="text-xs text-slate-custom mt-1">Optional — helps customers find you accurately on the map. You can copy this from Google Maps by right-clicking your location.</p>
+                    <div className="field full">
+                        <label htmlFor="coordinates">Location Coordinates (Latitude, Longitude)</label>
+                        <input type="text" id="coordinates" name="coordinates" placeholder="e.g. 31.5204, 74.3587" />
+                        <p className="hint">Optional — helps customers find you accurately on the map. You can copy this from Google Maps by right-clicking your location.</p>
                     </div>
                 </div>
 
-                {/* Additional Office Locations */}
-                <div className="mt-8 pt-6 border-t border-line space-y-4">
-                    <div>
-                        <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-ink font-semibold">Additional Office Locations (If Any)</Label>
-                        <p className="text-xs text-slate-custom mt-1">Add another entry for each additional office you operate from.</p>
-                    </div>
-
-                    {offices.map((office, idx) => (
-                        <div key={idx} className="p-5 border border-line rounded-xl relative bg-slate-50/50 space-y-4">
-                            <button 
-                                type="button" 
-                                onClick={() => setOffices(offices.filter((_, i) => i !== idx))} 
-                                className="absolute top-4 right-4 text-slate-400 hover:text-red-500"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-6">
-                                <div className="space-y-2 md:col-span-2">
-                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Full Address</Label>
-                                    <Input 
-                                        value={office.address} 
-                                        onChange={(e) => { const no = [...offices]; no[idx].address = e.target.value; setOffices(no); }}
-                                        className="bg-white" 
-                                        placeholder="Office address" 
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Area / Society</Label>
-                                    <Input 
-                                        value={office.area} 
-                                        onChange={(e) => { const no = [...offices]; no[idx].area = e.target.value; setOffices(no); }}
-                                        className="bg-white" 
-                                        placeholder="Area" 
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">City</Label>
-                                    <Input 
-                                        value={office.city} 
-                                        onChange={(e) => { const no = [...offices]; no[idx].city = e.target.value; setOffices(no); }}
-                                        className="bg-white" 
-                                        placeholder="City" 
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Country</Label>
-                                    <Input 
-                                        value={office.country} 
-                                        onChange={(e) => { const no = [...offices]; no[idx].country = e.target.value; setOffices(no); }}
-                                        className="bg-white" 
-                                        placeholder="Pakistan"
-                                    />
-                                </div>
-                                <div className="space-y-2 md:col-span-2">
-                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Location Coordinates (Latitude, Longitude)</Label>
-                                    <Input 
-                                        value={office.coordinates} 
-                                        onChange={(e) => { const no = [...offices]; no[idx].coordinates = e.target.value; setOffices(no); }}
-                                        className="bg-white" 
-                                        placeholder="e.g. 31.5204, 74.3587" 
-                                    />
+                <div className="field full" style={{ marginTop: '22px' }}>
+                    <label>Additional Office Locations (If Any)</label>
+                    <p className="hint" style={{ margin: '-2px 0 14px' }}>Add another entry for each additional office you operate from.</p>
+                    
+                    <div className="entry-cards">
+                        {offices.map((office, idx) => (
+                            <div key={idx} className="entry-card">
+                                <button type="button" className="entry-card-remove" onClick={() => setOffices(offices.filter((_, i) => i !== idx))}>✕</button>
+                                <div className="entry-card-grid">
+                                    <div className="entry-card-field full">
+                                        <label>Full Address</label>
+                                        <input type="text" value={office.address} onChange={(e) => { const no = [...offices]; no[idx].address = e.target.value; setOffices(no); }} />
+                                    </div>
+                                    <div className="entry-card-field">
+                                        <label>Area / Society</label>
+                                        <input type="text" value={office.area} onChange={(e) => { const no = [...offices]; no[idx].area = e.target.value; setOffices(no); }} />
+                                    </div>
+                                    <div className="entry-card-field">
+                                        <label>City</label>
+                                        <input type="text" value={office.city} onChange={(e) => { const no = [...offices]; no[idx].city = e.target.value; setOffices(no); }} />
+                                    </div>
+                                    <div className="entry-card-field">
+                                        <label>Country</label>
+                                        <input type="text" value={office.country} onChange={(e) => { const no = [...offices]; no[idx].country = e.target.value; setOffices(no); }} placeholder="Pakistan" />
+                                    </div>
+                                    <div className="entry-card-field full">
+                                        <label>Location Coordinates (Latitude, Longitude)</label>
+                                        <input type="text" value={office.coordinates} onChange={(e) => { const no = [...offices]; no[idx].coordinates = e.target.value; setOffices(no); }} placeholder="e.g. 31.5204, 74.3587" />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-
-                    <Button 
-                        type="button" 
-                        variant="outline" 
-                        className="w-full border-dashed"
-                        onClick={() => setOffices([...offices, { address: '', area: '', city: '', country: 'Pakistan', coordinates: '' }])}
-                    >
-                        <Plus className="w-4 h-4 mr-2" /> Add Office
-                    </Button>
+                        ))}
+                    </div>
+                    
+                    <button type="button" className="add-team-btn" style={{ marginTop: '14px' }} onClick={() => setOffices([...offices, { address: '', area: '', city: '', country: 'Pakistan', coordinates: '' }])}>+ Add Office</button>
                 </div>
             </div>
 
             {/* 3. Contact Details */}
-            <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
-                <div className="flex items-center gap-3 mb-6">
-                    <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">3</span>
-                    <div>
-                        <h2 className="text-lg font-space-grotesk font-semibold text-ink">Contact Details</h2>
-                        <p className="text-sm text-slate-custom">How customers and our team will reach you.</p>
+            <div className="form-card">
+                <h2><span className="section-num">3</span>Contact Details</h2>
+                <p className="section-sub">How customers and our team will reach you.</p>
+                <div className="form-grid">
+                    <div className="field">
+                        <label htmlFor="contactNo">Voice Number</label>
+                        <input type="tel" id="contactNo" name="contactNo" placeholder="e.g. 042-111-000-111 or 03XX-XXXXXXX" required />
                     </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="space-y-2">
-                        <Label htmlFor="contactNo" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Voice Number</Label>
-                        <Input id="contactNo" name="contactNo" type="tel" required placeholder="e.g. 042-111-000-111 or 03XX-XXXXXXX" className="bg-slate-50 border-line" />
+                    <div className="field">
+                        <label htmlFor="whatsapp">WhatsApp Number</label>
+                        <input type="tel" id="whatsapp" name="whatsapp" placeholder="e.g. 03XX-XXXXXXX" />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="whatsapp" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">WhatsApp Number</Label>
-                        <Input id="whatsapp" name="whatsapp" type="tel" placeholder="e.g. 03XX-XXXXXXX" className="bg-slate-50 border-line" />
+                    <div className="field">
+                        <label htmlFor="email">Email Address</label>
+                        <input type="email" id="email" name="email" required />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="email" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Email Address{!isPublic && " (Login Account)"}</Label>
-                        <Input id="email" name="email" type="email" required className="bg-slate-50 border-line" />
+                    <div className="field">
+                        <label htmlFor="website">Website</label>
+                        <input type="text" id="website" name="website" placeholder="www.yourcompany.com" />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="website" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Website</Label>
-                        <Input id="website" name="website" placeholder="www.yourcompany.com" className="bg-slate-50 border-line" />
+                    <div className="field">
+                        <label htmlFor="facebook">Facebook</label>
+                        <input type="text" id="facebook" name="facebook" placeholder="Profile URL" />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="facebook" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Facebook</Label>
-                        <Input id="facebook" name="facebook" placeholder="Profile URL" className="bg-slate-50 border-line" />
+                    <div className="field">
+                        <label htmlFor="instagram">Instagram</label>
+                        <input type="text" id="instagram" name="instagram" placeholder="Profile URL" />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="instagram" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Instagram</Label>
-                        <Input id="instagram" name="instagram" placeholder="Profile URL" className="bg-slate-50 border-line" />
+                    <div className="field">
+                        <label htmlFor="linkedin">LinkedIn</label>
+                        <input type="text" id="linkedin" name="linkedin" placeholder="Profile URL" />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="linkedin" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">LinkedIn</Label>
-                        <Input id="linkedin" name="linkedin" placeholder="Profile URL" className="bg-slate-50 border-line" />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="youtube" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">YouTube</Label>
-                        <Input id="youtube" name="youtube" placeholder="Channel URL" className="bg-slate-50 border-line" />
+                    <div className="field full">
+                        <label htmlFor="youtube">YouTube</label>
+                        <input type="text" id="youtube" name="youtube" placeholder="Channel URL" />
                     </div>
                 </div>
             </div>
 
             {/* 4. Specialties */}
-            <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
-                <div className="flex items-center gap-3 mb-6">
-                    <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">4</span>
-                    <div>
-                        <h2 className="text-lg font-space-grotesk font-semibold text-ink">Specialties</h2>
-                        <p className="text-sm text-slate-custom">What systems do you install?</p>
-                    </div>
-                </div>
-                <div className="space-y-3">
-                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">System Type</Label>
-                    <div className="flex flex-wrap gap-2">
-                        {selectedSectors.map(s => (
-                            <div 
-                                key={s} 
-                                className="flex items-center gap-2 border border-teal bg-teal/5 text-ink rounded-full px-3.5 py-1.5 cursor-pointer text-sm font-medium"
-                                onClick={() => toggleArray(s, selectedSectors, setSelectedSectors)}
-                            >
-                                <span className="text-teal font-bold">✓</span>
-                                <span>{s}</span>
-                                <X className="w-3.5 h-3.5 text-slate-400 hover:text-red-500 ml-1" onClick={(e) => { e.stopPropagation(); toggleArray(s, selectedSectors, setSelectedSectors); }} />
-                            </div>
+            <div className="form-card">
+                <h2><span className="section-num">4</span>Specialties</h2>
+                <p className="section-sub">What systems do you install?</p>
+                <div className="field full">
+                    <label>System Type</label>
+                    <div className="chip-group">
+                        {DEFAULT_SECTORS.map(sector => (
+                            <label key={sector} className="chip-check">
+                                <input type="checkbox" checked={selectedSectors.includes(sector)} onChange={() => toggleArray(sector, selectedSectors, setSelectedSectors)} /> 
+                                {sector}
+                            </label>
                         ))}
-                        {DEFAULT_SECTORS.filter(d => !selectedSectors.includes(d)).map(s => (
-                            <div 
-                                key={s} 
-                                className="flex items-center gap-2 border border-line bg-white text-slate-custom rounded-full px-3.5 py-1.5 cursor-pointer text-sm hover:border-slate-400"
-                                onClick={() => toggleArray(s, selectedSectors, setSelectedSectors)}
-                            >
-                                <span className="text-slate-300">+</span>
-                                <span>{s}</span>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Add custom specialty input */}
-                    <div className="flex gap-2 max-w-md pt-2">
-                        <Input 
-                            value={tempSector} 
-                            onChange={(e) => setTempSector(e.target.value)} 
-                            placeholder="Add custom specialty (e.g. Microgrids, Off-Grid)" 
-                            className="bg-slate-50 border-line text-sm"
-                            onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); addCustomItem(tempSector, selectedSectors, setSelectedSectors, () => setTempSector("")); }}}
-                        />
-                        <Button type="button" variant="outline" onClick={() => addCustomItem(tempSector, selectedSectors, setSelectedSectors, () => setTempSector(""))}>+ Add</Button>
                     </div>
                 </div>
             </div>
 
             {/* 5. Meet The Team */}
-            <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
-                <div className="flex items-center gap-3 mb-6">
-                    <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">5</span>
-                    <div>
-                        <h2 className="text-lg font-space-grotesk font-semibold text-ink">Meet The Team</h2>
-                        <p className="text-sm text-slate-custom">Add the people customers will meet — owners, sales, technical, or after-sales staff.</p>
-                    </div>
-                </div>
-                
-                <div className="space-y-4">
-                    {team.map((member, index) => (
-                        <div key={index} className="p-4 border border-line rounded-xl flex gap-4 relative bg-slate-50/50">
-                            {team.length > 1 && (
-                                <button type="button" onClick={() => setTeam(team.filter((_, i) => i !== index))} className="absolute top-4 right-4 text-slate-400 hover:text-red-500">
-                                    <X className="w-5 h-5" />
-                                </button>
-                            )}
-                            <div className="w-24 shrink-0">
-                                <UploadZone 
-                                    onUpload={async (f) => {
+            <div className="form-card">
+                <h2><span className="section-num">5</span>Meet The Team</h2>
+                <p className="section-sub">Add the people customers will meet — owners, sales, technical, or after-sales staff.</p>
+
+                <div className="team-members">
+                    {team.map((member, idx) => (
+                        <div key={idx} className="team-member-row">
+                            <label className="team-photo-upload" htmlFor={`team-photo-${idx}`} style={{ backgroundImage: member.imageUrl ? `url(${member.imageUrl})` : 'none', backgroundSize: 'cover' }}>
+                                {!member.imageUrl && '📷'}
+                                <input type="file" id={`team-photo-${idx}`} accept="image/*" onChange={async (e) => {
+                                    if (e.target.files?.[0]) {
                                         try {
-                                            const { publicUrl } = await uploadFile(f, "team");
-                                            const newTeam = [...team];
-                                            newTeam[index].imageUrl = publicUrl;
-                                            setTeam(newTeam);
-                                            toast.success("Photo uploaded");
-                                        } catch (e) {
-                                            toast.error("Upload failed");
-                                        }
-                                    }} 
-                                    isUploading={isUploading}
-                                    value={member.imageUrl}
-                                    accept="image/*"
-                                    title="Photo"
-                                />
-                            </div>
-                            <div className="flex-1 space-y-3">
-                                <div className="grid grid-cols-2 gap-3 pr-8">
-                                    <Input 
-                                        placeholder="Name" 
-                                        value={member.name}
-                                        onChange={(e) => { const nt = [...team]; nt[index].name = e.target.value; setTeam(nt); }}
-                                        className="bg-white"
-                                    />
-                                    <Input 
-                                        placeholder="Designation" 
-                                        value={member.designation}
-                                        onChange={(e) => { const nt = [...team]; nt[index].designation = e.target.value; setTeam(nt); }}
-                                        className="bg-white"
-                                    />
+                                            const { publicUrl } = await uploadFile(e.target.files[0], "epc-team");
+                                            const nt = [...team]; nt[idx].imageUrl = publicUrl; setTeam(nt);
+                                        } catch(err) { toast.error("Failed"); }
+                                    }
+                                }} />
+                            </label>
+                            <div className="team-fields">
+                                <div className="team-fields-row">
+                                    <input type="text" placeholder="Name" value={member.name} onChange={(e) => { const nt = [...team]; nt[idx].name = e.target.value; setTeam(nt); }} />
+                                    <input type="text" placeholder="Designation" value={member.designation} onChange={(e) => { const nt = [...team]; nt[idx].designation = e.target.value; setTeam(nt); }} />
                                 </div>
-                                <Input 
-                                    placeholder="LinkedIn Profile URL" 
-                                    value={member.linkedIn}
-                                    onChange={(e) => { const nt = [...team]; nt[index].linkedIn = e.target.value; setTeam(nt); }}
-                                    className="bg-white w-full"
-                                />
+                                <input type="text" placeholder="LinkedIn Profile URL" value={member.linkedIn} onChange={(e) => { const nt = [...team]; nt[idx].linkedIn = e.target.value; setTeam(nt); }} />
                             </div>
+                            <button type="button" className="team-remove-btn" onClick={() => setTeam(team.filter((_, i) => i !== idx))}>✕</button>
                         </div>
                     ))}
-                    <Button type="button" variant="outline" className="w-full border-dashed" onClick={() => setTeam([...team, { name: '', designation: '', linkedIn: '', imageUrl: '' }])}>
-                        <Plus className="w-4 h-4 mr-2" /> Add Team Member
-                    </Button>
                 </div>
+                <button type="button" className="add-team-btn" onClick={() => setTeam([...team, { name: '', designation: '', linkedIn: '', imageUrl: '' }])}>+ Add Team Member</button>
             </div>
 
-            {/* 6. Projects & Testimonials (Combined) */}
-            <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
-                <div className="flex items-center gap-3 mb-6">
-                    <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">6</span>
-                    <div>
-                        <h2 className="text-lg font-space-grotesk font-semibold text-ink">Projects & Testimonials</h2>
-                        <p className="text-sm text-slate-custom">Show off completed work and let real customers vouch for it. Select whether each entry is a Project or a Testimonial, and add as many as you like.</p>
-                    </div>
-                </div>
-                
-                <div className="space-y-4">
-                    {projects.map((project, index) => (
-                        <div key={index} className="p-5 border border-line rounded-xl relative bg-slate-50/50 space-y-4">
-                            {projects.length > 1 && (
-                                <button type="button" onClick={() => setProjects(projects.filter((_, i) => i !== index))} className="absolute top-4 right-4 text-slate-400 hover:text-red-500">
-                                    <X className="w-5 h-5" />
-                                </button>
-                            )}
-                            
-                            <div className="space-y-2 pr-8">
-                                <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">YouTube Link</Label>
-                                <Input 
-                                    placeholder="https://youtube.com/watch?v=..." 
-                                    value={project.youtubeUrl}
-                                    onChange={(e) => { const np = [...projects]; np[index].youtubeUrl = e.target.value; setProjects(np); }}
-                                    className="bg-white"
-                                />
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Entry Type</Label>
-                                    <select 
-                                        value={project.entryType}
-                                        onChange={(e) => { const np = [...projects]; np[index].entryType = e.target.value; setProjects(np); }}
-                                        className="w-full h-10 rounded-md bg-white border border-line px-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber/30"
-                                    >
+            {/* 6. Projects & Testimonials */}
+            <div className="form-card">
+                <h2><span className="section-num">6</span>Projects &amp; Testimonials</h2>
+                <p className="section-sub">Show off completed work and let real customers vouch for it. Select whether each entry is a Project or a Testimonial, and add as many as you like.</p>
+
+                <div className="entry-cards">
+                    {projects.map((proj, idx) => (
+                        <div key={idx} className="entry-card">
+                            <button type="button" className="entry-card-remove" onClick={() => setProjects(projects.filter((_, i) => i !== idx))}>✕</button>
+                            <div className="entry-card-grid">
+                                <div className="entry-card-field full">
+                                    <label>YouTube Link</label>
+                                    <input type="text" value={proj.youtubeUrl} onChange={(e) => { const np = [...projects]; np[idx].youtubeUrl = e.target.value; setProjects(np); }} placeholder="https://youtube.com/watch?v=..." />
+                                </div>
+                                <div className="entry-card-field">
+                                    <label>Entry Type</label>
+                                    <select value={proj.entryType} onChange={(e) => { const np = [...projects]; np[idx].entryType = e.target.value; setProjects(np); }}>
                                         <option value="" disabled>Select entry type</option>
                                         <option value="project">Project</option>
                                         <option value="testimonial">Testimonial</option>
                                     </select>
                                 </div>
-                                <div className="space-y-2">
-                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Date of Installation</Label>
-                                    <Input 
-                                        type="date"
-                                        value={project.installationDate}
-                                        onChange={(e) => { const np = [...projects]; np[index].installationDate = e.target.value; setProjects(np); }}
-                                        className="bg-white"
-                                    />
+                                <div className="entry-card-field">
+                                    <label>Date of Installation</label>
+                                    <input type="date" value={proj.installationDate} onChange={(e) => { const np = [...projects]; np[idx].installationDate = e.target.value; setProjects(np); }} />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">System Type</Label>
-                                    <select 
-                                        value={project.systemType}
-                                        onChange={(e) => { const np = [...projects]; np[index].systemType = e.target.value; setProjects(np); }}
-                                        className="w-full h-10 rounded-md bg-white border border-line px-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber/30"
-                                    >
+                                <div className="entry-card-field">
+                                    <label>System Type</label>
+                                    <select value={proj.systemType} onChange={(e) => { const np = [...projects]; np[idx].systemType = e.target.value; setProjects(np); }}>
                                         <option value="" disabled>Select type</option>
-                                        {SYSTEM_TYPES.map(st => (
-                                            <option key={st.value} value={st.value}>{st.label}</option>
-                                        ))}
+                                        {SYSTEM_TYPES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                                     </select>
                                 </div>
-                                <div className="space-y-2">
-                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Customer Name</Label>
-                                    <Input 
-                                        value={project.customerName}
-                                        onChange={(e) => { const np = [...projects]; np[index].customerName = e.target.value; setProjects(np); }}
-                                        className="bg-white"
-                                    />
+                                <div className="entry-card-field">
+                                    <label>Customer Name</label>
+                                    <input type="text" value={proj.customerName} onChange={(e) => { const np = [...projects]; np[idx].customerName = e.target.value; setProjects(np); }} />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Company Name</Label>
-                                    <Input 
-                                        value={project.companyName}
-                                        onChange={(e) => { const np = [...projects]; np[index].companyName = e.target.value; setProjects(np); }}
-                                        className="bg-white"
-                                    />
+                                <div className="entry-card-field">
+                                    <label>Company Name</label>
+                                    <input type="text" value={proj.companyName} onChange={(e) => { const np = [...projects]; np[idx].companyName = e.target.value; setProjects(np); }} />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">City</Label>
-                                    <Input 
-                                        value={project.city}
-                                        onChange={(e) => { const np = [...projects]; np[index].city = e.target.value; setProjects(np); }}
-                                        className="bg-white"
-                                    />
+                                <div className="entry-card-field">
+                                    <label>City</label>
+                                    <input type="text" value={proj.city} onChange={(e) => { const np = [...projects]; np[idx].city = e.target.value; setProjects(np); }} />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Country</Label>
-                                    <Input 
-                                        value={project.country}
-                                        onChange={(e) => { const np = [...projects]; np[index].country = e.target.value; setProjects(np); }}
-                                        className="bg-white"
-                                        placeholder="Pakistan"
-                                    />
+                                <div className="entry-card-field">
+                                    <label>Country</label>
+                                    <input type="text" value={proj.country} onChange={(e) => { const np = [...projects]; np[idx].country = e.target.value; setProjects(np); }} />
                                 </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Short Description</Label>
-                                <Textarea 
-                                    value={project.description}
-                                    onChange={(e) => { const np = [...projects]; np[index].description = e.target.value; setProjects(np); }}
-                                    className="bg-white"
-                                />
+                                <div className="entry-card-field full">
+                                    <label>Short Description</label>
+                                    <textarea value={proj.description} onChange={(e) => { const np = [...projects]; np[idx].description = e.target.value; setProjects(np); }}></textarea>
+                                </div>
                             </div>
                         </div>
                     ))}
-                    <Button type="button" variant="outline" className="w-full border-dashed" onClick={() => setProjects([...projects, { youtubeUrl: '', entryType: '', installationDate: '', systemType: '', customerName: '', companyName: '', city: '', country: '', description: '' }])}>
-                        <Plus className="w-4 h-4 mr-2" /> Add Entry
-                    </Button>
                 </div>
+                <button type="button" className="add-team-btn" onClick={() => setProjects([...projects, { youtubeUrl: '', entryType: '', installationDate: '', systemType: '', customerName: '', companyName: '', city: '', country: '', description: '' }])}>+ Add Entry</button>
             </div>
 
             {/* 7. Certifications & Documents */}
-            <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
-                <div className="flex items-center gap-3 mb-6">
-                    <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">7</span>
-                    <div>
-                        <h2 className="text-lg font-space-grotesk font-semibold text-ink">Certifications & Documents</h2>
-                        <p className="text-sm text-slate-custom">Upload proof — this speeds up verification.</p>
-                    </div>
-                </div>
-                <div className="space-y-6">
-                    {/* Certifications held */}
-                    <div className="space-y-3">
-                        <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Certifications Held</Label>
-                        <div className="flex flex-wrap gap-2">
-                            {selectedCerts.map(c => (
-                                <div 
-                                    key={c} 
-                                    className="flex items-center gap-2 border border-teal bg-teal/5 text-ink rounded-full px-3.5 py-1.5 cursor-pointer text-sm font-medium"
-                                    onClick={() => toggleArray(c, selectedCerts, setSelectedCerts)}
-                                >
-                                    <span className="text-teal font-bold">✓</span>
-                                    <span>{c}</span>
-                                    <X className="w-3.5 h-3.5 text-slate-400 hover:text-red-500 ml-1" onClick={(e) => { e.stopPropagation(); toggleArray(c, selectedCerts, setSelectedCerts); }} />
-                                </div>
-                            ))}
-                            {DEFAULT_CERTIFICATIONS.filter(d => !selectedCerts.includes(d)).map(c => (
-                                <div 
-                                    key={c} 
-                                    className="flex items-center gap-2 border border-line bg-white text-slate-custom rounded-full px-3.5 py-1.5 cursor-pointer text-sm hover:border-slate-400"
-                                    onClick={() => toggleArray(c, selectedCerts, setSelectedCerts)}
-                                >
-                                    <span className="text-slate-300">+</span>
-                                    <span>{c}</span>
-                                </div>
+            <div className="form-card">
+                <h2><span className="section-num">7</span>Certifications &amp; Documents</h2>
+                <p className="section-sub">Upload proof — this speeds up verification.</p>
+                <div className="form-grid">
+                    <div className="field full">
+                        <label>Certifications Held</label>
+                        <div className="chip-group">
+                            {DEFAULT_CERTIFICATIONS.map(cert => (
+                                <label key={cert} className="chip-check">
+                                    <input type="checkbox" checked={selectedCerts.includes(cert)} onChange={() => toggleArray(cert, selectedCerts, setSelectedCerts)} /> 
+                                    {cert}
+                                </label>
                             ))}
                         </div>
-
-                        {/* Add custom certification input */}
-                        <div className="flex gap-2 max-w-md pt-2">
-                            <Input 
-                                value={tempCert} 
-                                onChange={(e) => setTempCert(e.target.value)} 
-                                placeholder="Add certification (e.g. ISO 9001, Tier 1 Certified)" 
-                                className="bg-slate-50 border-line text-sm"
-                                onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); addCustomItem(tempCert, selectedCerts, setSelectedCerts, () => setTempCert("")); }}}
-                            />
-                            <Button type="button" variant="outline" onClick={() => addCustomItem(tempCert, selectedCerts, setSelectedCerts, () => setTempCert(""))}>+ Add</Button>
-                        </div>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
-                        <div className="space-y-2">
-                            <Label htmlFor="regNumber" className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Business Registration / CNIC Number</Label>
-                            <Input id="regNumber" name="regNumber" required className="bg-slate-50 border-line" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Upload Licence / Certification Documents</Label>
-                            <UploadZone 
-                                onUpload={handleDocUpload} 
-                                isUploading={isUploading}
-                                accept=".pdf,image/*"
-                                title="Click to upload documents"
-                                description="PDF or image, up to 10MB each"
-                            />
-                        </div>
+                    <div className="field">
+                        <label htmlFor="regNumber">Business Registration / CNIC Number</label>
+                        <input type="text" id="regNumber" name="regNumber" required />
                     </div>
-
-                    {/* Uploaded Documents List */}
-                    {uploadedDocs.length > 0 && (
-                        <div className="space-y-2 pt-2">
-                            <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom">Uploaded Documents ({uploadedDocs.length})</Label>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                {uploadedDocs.map((doc, idx) => (
-                                    <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 border border-line rounded-lg text-sm">
-                                        <div className="flex items-center gap-2.5 truncate mr-2">
-                                            <FileText className="w-4 h-4 text-teal shrink-0" />
-                                            <span className="truncate text-ink font-medium">{doc.name}</span>
-                                        </div>
-                                        <button 
-                                            type="button" 
-                                            onClick={() => setUploadedDocs(uploadedDocs.filter((_, i) => i !== idx))}
-                                            className="text-slate-400 hover:text-red-500 p-1 rounded hover:bg-slate-200 shrink-0"
-                                            title="Remove document"
-                                        >
-                                            <X className="w-4 h-4" />
-                                        </button>
+                    <div className="field">
+                        <label>Upload Licence / Certification Documents</label>
+                        <UploadZone 
+                            onUpload={handleDocUpload} 
+                            isUploading={isUploading}
+                            title="Click to upload"
+                            description="PDF or image, up to 10MB each"
+                            accept=".pdf,image/*"
+                        />
+                        {uploadedDocs.length > 0 && (
+                            <div className="mt-2 space-y-1">
+                                {uploadedDocs.map((doc, i) => (
+                                    <div key={i} className="text-xs text-slate-custom bg-slate-50 p-2 rounded flex justify-between">
+                                        <span className="truncate">{doc.name}</span>
+                                        <button type="button" onClick={() => setUploadedDocs(uploadedDocs.filter((_, idx) => idx !== i))} className="text-red-500 hover:underline">Remove</button>
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
+                    
+                    <div className="field full">
+                        <label>Brands You Are Certified to Install</label>
+                        <p className="hint" style={{ margin: '-4px 0 16px' }}>Type a brand name and click Add. You can add multiple entries per category.</p>
 
-                    {/* Brands Certified to Install with per-category cert uploads */}
-                    <div className="pt-4 border-t border-line space-y-6">
-                        <div>
-                            <Label className="text-xs font-ibm-plex-mono uppercase tracking-wider text-slate-custom mb-1 block">Brands You Are Certified To Install</Label>
-                            <p className="text-sm text-slate-custom mb-4">Type a brand name and click Add. You can add multiple entries per category.</p>
-                        </div>
-
-                        {/* Solar Panels */}
-                        <div className="space-y-3">
-                            <Label className="text-xs font-bold uppercase tracking-widest text-ink">Solar Panels</Label>
-                            <div className="flex gap-2">
-                                <Input 
-                                    value={tempSolarBrand} 
-                                    onChange={(e) => setTempSolarBrand(e.target.value)} 
-                                    placeholder="e.g. LONGi Solar" 
-                                    className="bg-slate-50 border-line"
-                                    onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempSolarBrand) { setSolarBrands([...solarBrands, tempSolarBrand.trim()]); setTempSolarBrand(""); }}}}
-                                />
-                                <Button type="button" variant="outline" onClick={() => { if (tempSolarBrand) { setSolarBrands([...solarBrands, tempSolarBrand.trim()]); setTempSolarBrand(""); } }}>+ Add</Button>
+                        <div className="entry-builder">
+                            <div className="entry-builder-label">Solar Panels</div>
+                            <div className="entry-row">
+                                <input type="text" placeholder="e.g. LONGi Solar" value={tempSolarBrand} onChange={e => setTempSolarBrand(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomItem(tempSolarBrand, solarBrands, setSolarBrands, () => setTempSolarBrand('')); } }} />
+                                <button type="button" className="entry-add-btn" onClick={() => addCustomItem(tempSolarBrand, solarBrands, setSolarBrands, () => setTempSolarBrand(''))}>+ Add</button>
                             </div>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                                {solarBrands.map((b, i) => (
-                                    <span key={i} className="flex items-center bg-teal/10 text-teal text-sm px-3 py-1 rounded-full font-medium">
-                                        {b} <X className="w-3.5 h-3.5 ml-2 cursor-pointer hover:text-red-500" onClick={() => setSolarBrands(solarBrands.filter((_, idx) => idx !== i))} />
-                                    </span>
+                            <div className="entry-tags">
+                                {solarBrands.map(b => (
+                                    <span key={b} className="entry-tag">{b} <button type="button" onClick={() => setSolarBrands(solarBrands.filter(i => i !== b))}>✕</button></span>
                                 ))}
                             </div>
-                            <UploadZone
-                                onUpload={(f) => handleBrandCertUpload(f, 'solar')}
-                                isUploading={isUploading}
-                                accept=".pdf,image/*"
-                                title="Upload Certificate(s)"
-                                description="PDF or image, per brand certification"
-                            />
-                            {solarCertDocs.length > 0 && (
-                                <div className="flex flex-wrap gap-2">
-                                    {solarCertDocs.map((d, i) => (
-                                        <span key={i} className="flex items-center bg-slate-50 border border-line text-xs px-2.5 py-1 rounded-lg">
-                                            <FileText className="w-3 h-3 mr-1.5 text-teal" /> {d.name}
-                                            <X className="w-3 h-3 ml-1.5 cursor-pointer text-slate-400 hover:text-red-500" onClick={() => setSolarCertDocs(solarCertDocs.filter((_, idx) => idx !== i))} />
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                        
-                        {/* Inverters */}
-                        <div className="space-y-3">
-                            <Label className="text-xs font-bold uppercase tracking-widest text-ink">Inverters</Label>
-                            <div className="flex gap-2">
-                                <Input 
-                                    value={tempInverterBrand} 
-                                    onChange={(e) => setTempInverterBrand(e.target.value)} 
-                                    placeholder="e.g. Huawei" 
-                                    className="bg-slate-50 border-line"
-                                    onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempInverterBrand) { setInverterBrands([...inverterBrands, tempInverterBrand.trim()]); setTempInverterBrand(""); }}}}
+                            <div className="mt-2">
+                                <UploadZone 
+                                    onUpload={(f) => handleBrandCertUpload(f, 'solar')} 
+                                    isUploading={isUploading}
+                                    title="Upload Certificate(s)"
+                                    description="PDF or image, per brand certification"
+                                    accept=".pdf,image/*"
                                 />
-                                <Button type="button" variant="outline" onClick={() => { if (tempInverterBrand) { setInverterBrands([...inverterBrands, tempInverterBrand.trim()]); setTempInverterBrand(""); } }}>+ Add</Button>
                             </div>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                                {inverterBrands.map((b, i) => (
-                                    <span key={i} className="flex items-center bg-teal/10 text-teal text-sm px-3 py-1 rounded-full font-medium">
-                                        {b} <X className="w-3.5 h-3.5 ml-2 cursor-pointer hover:text-red-500" onClick={() => setInverterBrands(inverterBrands.filter((_, idx) => idx !== i))} />
-                                    </span>
-                                ))}
-                            </div>
-                            <UploadZone
-                                onUpload={(f) => handleBrandCertUpload(f, 'inverter')}
-                                isUploading={isUploading}
-                                accept=".pdf,image/*"
-                                title="Upload Certificate(s)"
-                                description="PDF or image, per brand certification"
-                            />
-                            {inverterCertDocs.length > 0 && (
-                                <div className="flex flex-wrap gap-2">
-                                    {inverterCertDocs.map((d, i) => (
-                                        <span key={i} className="flex items-center bg-slate-50 border border-line text-xs px-2.5 py-1 rounded-lg">
-                                            <FileText className="w-3 h-3 mr-1.5 text-teal" /> {d.name}
-                                            <X className="w-3 h-3 ml-1.5 cursor-pointer text-slate-400 hover:text-red-500" onClick={() => setInverterCertDocs(inverterCertDocs.filter((_, idx) => idx !== i))} />
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
                         </div>
 
-                        {/* Batteries */}
-                        <div className="space-y-3">
-                            <Label className="text-xs font-bold uppercase tracking-widest text-ink">Batteries</Label>
-                            <div className="flex gap-2">
-                                <Input 
-                                    value={tempBatteryBrand} 
-                                    onChange={(e) => setTempBatteryBrand(e.target.value)} 
-                                    placeholder="e.g. CoreCell Energy" 
-                                    className="bg-slate-50 border-line"
-                                    onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempBatteryBrand) { setBatteryBrands([...batteryBrands, tempBatteryBrand.trim()]); setTempBatteryBrand(""); }}}}
-                                />
-                                <Button type="button" variant="outline" onClick={() => { if (tempBatteryBrand) { setBatteryBrands([...batteryBrands, tempBatteryBrand.trim()]); setTempBatteryBrand(""); } }}>+ Add</Button>
+                        <div className="entry-builder">
+                            <div className="entry-builder-label">Inverters</div>
+                            <div className="entry-row">
+                                <input type="text" placeholder="e.g. Huawei" value={tempInverterBrand} onChange={e => setTempInverterBrand(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomItem(tempInverterBrand, inverterBrands, setInverterBrands, () => setTempInverterBrand('')); } }} />
+                                <button type="button" className="entry-add-btn" onClick={() => addCustomItem(tempInverterBrand, inverterBrands, setInverterBrands, () => setTempInverterBrand(''))}>+ Add</button>
                             </div>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                                {batteryBrands.map((b, i) => (
-                                    <span key={i} className="flex items-center bg-teal/10 text-teal text-sm px-3 py-1 rounded-full font-medium">
-                                        {b} <X className="w-3.5 h-3.5 ml-2 cursor-pointer hover:text-red-500" onClick={() => setBatteryBrands(batteryBrands.filter((_, idx) => idx !== i))} />
-                                    </span>
+                            <div className="entry-tags">
+                                {inverterBrands.map(b => (
+                                    <span key={b} className="entry-tag">{b} <button type="button" onClick={() => setInverterBrands(inverterBrands.filter(i => i !== b))}>✕</button></span>
                                 ))}
                             </div>
-                            <UploadZone
-                                onUpload={(f) => handleBrandCertUpload(f, 'battery')}
-                                isUploading={isUploading}
-                                accept=".pdf,image/*"
-                                title="Upload Certificate(s)"
-                                description="PDF or image, per brand certification"
-                            />
-                            {batteryCertDocs.length > 0 && (
-                                <div className="flex flex-wrap gap-2">
-                                    {batteryCertDocs.map((d, i) => (
-                                        <span key={i} className="flex items-center bg-slate-50 border border-line text-xs px-2.5 py-1 rounded-lg">
-                                            <FileText className="w-3 h-3 mr-1.5 text-teal" /> {d.name}
-                                            <X className="w-3 h-3 ml-1.5 cursor-pointer text-slate-400 hover:text-red-500" onClick={() => setBatteryCertDocs(batteryCertDocs.filter((_, idx) => idx !== i))} />
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
+                            <div className="mt-2">
+                                <UploadZone 
+                                    onUpload={(f) => handleBrandCertUpload(f, 'inverter')} 
+                                    isUploading={isUploading}
+                                    title="Upload Certificate(s)"
+                                    description="PDF or image, per brand certification"
+                                    accept=".pdf,image/*"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="entry-builder">
+                            <div className="entry-builder-label">Batteries</div>
+                            <div className="entry-row">
+                                <input type="text" placeholder="e.g. CoreCell Energy" value={tempBatteryBrand} onChange={e => setTempBatteryBrand(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomItem(tempBatteryBrand, batteryBrands, setBatteryBrands, () => setTempBatteryBrand('')); } }} />
+                                <button type="button" className="entry-add-btn" onClick={() => addCustomItem(tempBatteryBrand, batteryBrands, setBatteryBrands, () => setTempBatteryBrand(''))}>+ Add</button>
+                            </div>
+                            <div className="entry-tags">
+                                {batteryBrands.map(b => (
+                                    <span key={b} className="entry-tag">{b} <button type="button" onClick={() => setBatteryBrands(batteryBrands.filter(i => i !== b))}>✕</button></span>
+                                ))}
+                            </div>
+                            <div className="mt-2">
+                                <UploadZone 
+                                    onUpload={(f) => handleBrandCertUpload(f, 'battery')} 
+                                    isUploading={isUploading}
+                                    title="Upload Certificate(s)"
+                                    description="PDF or image, per brand certification"
+                                    accept=".pdf,image/*"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* 8. Verification Tier */}
-            <div className="bg-white border border-line rounded-xl p-8 shadow-sm">
-                <div className="flex items-center gap-3 mb-6">
-                    <span className="w-7 h-7 rounded-full bg-slate-50 border border-line flex items-center justify-center font-ibm-plex-mono text-xs font-semibold text-teal">8</span>
-                    <div>
-                        <h2 className="text-lg font-space-grotesk font-semibold text-ink">Verification Tier</h2>
-                        <p className="text-sm text-slate-custom">Choose the tier you're applying for.</p>
-                    </div>
-                </div>
-                <div className="space-y-3">
-                    <div 
-                        className={`p-4 border rounded-lg cursor-pointer transition-colors ${selectedTier === 'silver' ? 'border-amber bg-amber/5' : 'border-line hover:bg-slate-50'}`}
-                        onClick={() => setSelectedTier('silver')}
-                    >
-                        <div className="flex items-center gap-2 mb-1">
-                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${selectedTier === 'silver' ? 'border-amber' : 'border-slate-300'}`}>
-                                {selectedTier === 'silver' && <div className="w-2 h-2 rounded-full bg-amber" />}
-                            </div>
-                            <span className="font-semibold text-ink">Silver — Verified</span>
+            <div className="form-card">
+                <h2><span className="section-num">8</span>Verification Tier</h2>
+                <p className="section-sub">Choose the tier you're applying for.</p>
+                <div className="radio-tier">
+                    <label className="tier-option">
+                        <input type="radio" name="tier" value="silver" checked={selectedTier === 'silver'} onChange={() => setSelectedTier('silver')} />
+                        <div>
+                            <div className="tier-name">Silver — Verified</div>
+                            <div className="tier-desc">Licence/certification checks, independent site audits, site videos, and customer testimonials — plus on-call or physical surveys with customers to gather feedback.</div>
                         </div>
-                        <p className="text-sm text-slate-custom ml-6">Licence/certification checks, independent site audits, site videos, and customer testimonials — plus on-call or physical surveys with customers to gather feedback.</p>
-                    </div>
-                    <div 
-                        className={`p-4 border rounded-lg cursor-pointer transition-colors ${selectedTier === 'gold' ? 'border-amber bg-amber/5' : 'border-line hover:bg-slate-50'}`}
-                        onClick={() => setSelectedTier('gold')}
-                    >
-                        <div className="flex items-center gap-2 mb-1">
-                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${selectedTier === 'gold' ? 'border-amber' : 'border-slate-300'}`}>
-                                {selectedTier === 'gold' && <div className="w-2 h-2 rounded-full bg-amber" />}
-                            </div>
-                            <span className="font-semibold text-ink">Gold — Verified + Featured</span>
+                    </label>
+                    <label className="tier-option">
+                        <input type="radio" name="tier" value="gold" checked={selectedTier === 'gold'} onChange={() => setSelectedTier('gold')} />
+                        <div>
+                            <div className="tier-name">Gold — Verified + Featured</div>
+                            <div className="tier-desc">Everything in Silver, plus featured placement.</div>
                         </div>
-                        <p className="text-sm text-slate-custom ml-6">Everything in Silver, plus featured placement.</p>
-                    </div>
+                    </label>
                 </div>
             </div>
 
-            <Button type="submit" disabled={isLoading || isUploading} className="w-full bg-amber hover:bg-[#f2b458] text-ink font-semibold h-12 text-base">
-                {isLoading ? (isPublic ? 'Submitting Application...' : 'Onboarding...') : (isPublic ? 'Submit Application' : 'Onboard EPC Installer')}
-            </Button>
-            {isPublic && (
-                <p className="text-xs text-slate-custom text-center mt-3">
-                    Our team typically reviews applications within 3–5 business days.
-                </p>
-            )}
-            
+            <button type="submit" className="btn-primary" disabled={isLoading}>
+                {isLoading ? 'Submitting...' : 'Submit Application'}
+            </button>
+            <p className="form-note">Our team typically reviews applications within 3–5 business days.</p>
         </form>
+
     );
 }
