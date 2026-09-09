@@ -37,21 +37,7 @@ export default async function AdminReviewPage({ params }: { params: Promise<{ id
   const batteryBrands = Array.isArray(epc.batteryBrands) ? epc.batteryBrands : [];
 
   return (
-    <div className="bg-paper min-h-screen text-graphite font-sans pb-20">
-      <nav className="sticky top-0 z-50 bg-ink border-b border-[rgba(255,255,255,0.08)]">
-        <div className="max-w-[1400px] mx-auto px-8 h-16 flex items-center justify-between">
-          <div className="font-space-grotesk font-bold text-white text-base flex items-center gap-2.5">
-            EnergyGurus 
-            <span className="font-ibm-plex-mono text-[0.65rem] tracking-[0.08em] uppercase text-amber bg-[rgba(232,163,61,0.15)] px-2 py-1 rounded-[3px]">
-              Admin
-            </span>
-          </div>
-          <div className="text-[rgba(245,246,243,0.7)] text-[0.86rem]">
-            Reviewing as: Verification Team
-          </div>
-        </div>
-      </nav>
-
+    <div className="admin-review-page bg-paper min-h-screen text-graphite font-sans pb-20">
       <div className="page-wrap max-w-[1400px] mx-auto px-8 pt-7 pb-20 grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-7">
         
         <div className="top-bar col-span-full flex items-center justify-between mb-2">

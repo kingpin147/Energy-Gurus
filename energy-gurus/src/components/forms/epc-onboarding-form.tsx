@@ -200,7 +200,7 @@ export function EpcOnboardingForm({ isPublic = false }: { isPublic?: boolean } =
     }
 
     return (
-        <form action={onSubmit} id="onboardForm">
+        <form action={onSubmit} id="onboardForm" className="installer-onboarding">
             <div className="form-progress">
                 <div className="step-dot done"></div>
                 <div className="step-dot done"></div>

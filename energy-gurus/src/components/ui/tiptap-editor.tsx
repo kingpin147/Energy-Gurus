@@ -56,14 +56,30 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
       return;
     }
 
-    // empty
+    // empty — remove link
     if (url === '') {
       editor.chain().focus().extendMarkRange('link').unsetLink().run();
       return;
     }
 
-    // update link
-    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+    // Normalize URL: add https:// if no protocol is present
+    const normalizedUrl = url.match(/^https?:\/\//) ? url : `https://${url}`;
+
+    // Check if there is selected text
+    const { from, to } = editor.state.selection;
+    const hasSelection = from !== to;
+
+    if (hasSelection) {
+      // Wrap selected text with link
+      editor.chain().focus().extendMarkRange('link').setLink({ href: normalizedUrl }).run();
+    } else {
+      // No text selected — insert the URL as clickable link text
+      editor
+        .chain()
+        .focus()
+        .insertContent(`<a href="${normalizedUrl}">${url}</a>`)
+        .run();
+    }
   };
 
   const addImage = () => {

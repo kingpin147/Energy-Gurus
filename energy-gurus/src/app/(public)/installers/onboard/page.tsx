@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function PublicInstallerOnboardingPage() {
   return (
-    <div className="font-sans text-graphite bg-paper leading-relaxed min-h-screen">
+    <div className="installer-onboarding font-sans text-graphite bg-paper leading-relaxed min-h-screen">
       {/* Header Section matching HTML */}
       <header className="bg-ink text-white pt-[56px] pb-[40px]">
         <div className="max-w-[1180px] mx-auto px-5 md:px-8">
