@@ -2,13 +2,10 @@ import { db } from "@/db";
 import { reviews, users, epcInstallers, brands } from "@/db/schema";
 import { getUserRole } from "@/lib/roles";
 import { redirect } from "next/navigation";
-import { eq, desc, and } from "drizzle-orm";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Star, ShieldCheck, Trash2, User, Building2, Briefcase } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { eq, desc } from "drizzle-orm";
+import { ReviewModerationQueue } from "@/components/dashboard/ReviewModerationQueue";
 import { AdminReviewForm } from "@/components/forms/admin-review-form";
-import { deleteReviewAction } from "@/lib/actions/reviews";
+import { Star, ShieldCheck } from "lucide-react";
 
 export default async function AdminReviewsPage() {
   const role = await getUserRole();
@@ -39,210 +36,111 @@ export default async function AdminReviewsPage() {
     .where(eq(users.isActive, true))
     .orderBy(brands.brandName);
 
-  // Fetch EPC Reviews
-  const epcReviews = await db
+  // Fetch all reviews
+  const rawReviews = await db
     .select({
-      review: reviews,
-      author: users,
-      epc: epcInstallers
+      id: reviews.id,
+      rating: reviews.rating,
+      comment: reviews.comment,
+      status: reviews.status,
+      rejectionReason: reviews.rejectionReason,
+      proofUrl: reviews.proofUrl,
+      authorName: reviews.authorName,
+      authorEmail: reviews.authorEmail,
+      isVerifiedPurchase: reviews.isVerifiedPurchase,
+      targetType: reviews.targetType,
+      targetId: reviews.targetId,
+      createdAt: reviews.createdAt,
+      userAuthorName: users.name,
+      userAuthorEmail: users.email
     })
     .from(reviews)
-    .innerJoin(epcInstallers, eq(reviews.targetId, epcInstallers.id))
     .leftJoin(users, eq(reviews.authorId, users.id))
-    .where(eq(reviews.targetType, "epc"))
     .orderBy(desc(reviews.createdAt));
 
-  // Fetch Brand Reviews
-  const brandReviews = await db
-    .select({
-      review: reviews,
-      author: users,
-      brand: brands
-    })
-    .from(reviews)
-    .innerJoin(brands, eq(reviews.targetId, brands.id))
-    .leftJoin(users, eq(reviews.authorId, users.id))
-    .where(eq(reviews.targetType, "brand"))
-    .orderBy(desc(reviews.createdAt));
+  // Map target names (Brand name or EPC company name)
+  const formattedReviews = rawReviews.map((r) => {
+    let targetName = "Unknown Target";
+    if (r.targetType === "brand") {
+      const match = allBrands.find((b) => b.id === r.targetId);
+      targetName = match?.name || "Solar Brand";
+    } else if (r.targetType === "epc") {
+      const match = allEpcs.find((e) => e.id === r.targetId);
+      targetName = match?.name || "EPC Installer";
+    }
+
+    return {
+      id: r.id,
+      rating: r.rating,
+      comment: r.comment,
+      status: r.status as "pending" | "approved" | "rejected",
+      rejectionReason: r.rejectionReason,
+      proofUrl: r.proofUrl,
+      authorName: r.authorName || r.userAuthorName || "Customer",
+      authorEmail: r.authorEmail || r.userAuthorEmail || null,
+      isVerifiedPurchase: r.isVerifiedPurchase,
+      targetType: r.targetType as "brand" | "epc",
+      targetName,
+      targetId: r.targetId,
+      createdAt: r.createdAt
+    };
+  });
 
   return (
-    <div className="p-6 md:p-8 space-y-8 max-w-[1200px] mx-auto">
-      {/* Page Header */}
-      <div className="flex items-center gap-4">
-        <div className="w-12 h-12 bg-amber text-ink rounded-2xl flex items-center justify-center font-bold text-xl shadow-sm">
-          <Star className="w-6 h-6 fill-current text-ink" />
+    <div className="bg-cream min-h-screen text-ink pb-20">
+      
+      {/* Top Bar */}
+      <div className="bg-navy-deep text-paper/70 text-xs py-2.5 px-5 md:px-8 border-b border-white/10">
+        <div className="max-w-[1180px] mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <span>EnergyGurus Admin</span>
+            <span>/</span>
+            <span>Brands & Installers</span>
+            <span>/</span>
+            <span className="text-white font-bold">Review Moderation</span>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl md:text-3xl font-space-grotesk font-bold tracking-tight text-ink">
-            Admin Reviews & Team Ratings
+      </div>
+
+      {/* Header */}
+      <div className="bg-white border-b border-line py-8 shadow-sm">
+        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
+          <div className="flex items-center gap-2 text-xs font-bold text-amber-deep uppercase tracking-wider mb-2">
+            <ShieldCheck className="w-4 h-4 text-amber-deep" />
+            Quality & Trust Assurance
+          </div>
+          <h1 className="font-fraunces text-2xl md:text-3xl font-bold text-navy-deep">
+            Review Moderation & Official Ratings
           </h1>
-          <p className="text-slate-custom text-sm">
-            Give official EnergyGurus Team Ratings and moderate reviews for Solar Installers and Brands.
+          <p className="text-xs md:text-sm text-slate-custom mt-1 max-w-2xl leading-relaxed">
+            Customer reviews submitted across all brand and installer pages. Approve to publish, or reject with a reason sent back to the reviewer. Nothing appears on public pages until approved.
           </p>
         </div>
       </div>
 
-      {/* Main Tabs */}
-      <Tabs defaultValue="installers" className="w-full space-y-6">
-        <TabsList className="h-12 p-1 bg-paper border border-line rounded-xl inline-flex w-full sm:w-auto">
-          <TabsTrigger
-            value="installers"
-            className="px-6 rounded-lg font-bold text-xs uppercase tracking-widest gap-2 flex-1 sm:flex-initial data-[state=active]:bg-ink data-[state=active]:text-white"
-          >
-            <Briefcase className="w-4 h-4" /> Installers ({epcReviews.length})
-          </TabsTrigger>
-          <TabsTrigger
-            value="brands"
-            className="px-6 rounded-lg font-bold text-xs uppercase tracking-widest gap-2 flex-1 sm:flex-initial data-[state=active]:bg-ink data-[state=active]:text-white"
-          >
-            <Building2 className="w-4 h-4" /> Brands ({brandReviews.length})
-          </TabsTrigger>
-        </TabsList>
+      {/* Main Content */}
+      <div className="max-w-[1180px] mx-auto px-5 md:px-8 py-8 space-y-10">
+        
+        {/* Moderation Queue */}
+        <section>
+          <ReviewModerationQueue reviews={formattedReviews} />
+        </section>
 
-        {/* ── INSTALLERS TAB ── */}
-        <TabsContent value="installers" className="space-y-8 outline-none">
-          {/* Admin Review Submission Form for Installers */}
-          <AdminReviewForm targetType="epc" options={allEpcs} />
-
-          {/* List of Installer Reviews */}
-          <div className="space-y-4">
-            <h3 className="font-space-grotesk font-bold text-xl text-ink">
-              All Installer Reviews ({epcReviews.length})
-            </h3>
-
-            {epcReviews.map(({ review, author, epc }) => {
-              const isAdminAuthor = author?.role === "admin" || author?.role === "super-admin";
-
-              return (
-                <Card key={review.id} className="border border-line shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
-                      <div className="flex-1 space-y-3">
-                        <div className="flex items-center gap-3 flex-wrap">
-                          <div className="w-9 h-9 rounded-full bg-ink text-amber flex items-center justify-center font-bold text-sm">
-                            {author?.name ? author.name.substring(0, 2).toUpperCase() : <User className="w-4 h-4" />}
-                          </div>
-                          <div>
-                            <p className="font-bold text-sm text-ink">{author?.name || "Anonymous User"}</p>
-                            <p className="text-xs text-slate-custom font-medium">Target: <strong className="text-ink">{epc.companyName}</strong></p>
-                          </div>
-                          {isAdminAuthor && (
-                            <span className="bg-amber/10 text-amber border border-amber/30 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
-                              <ShieldCheck className="w-3.5 h-3.5" /> EnergyGurus Team Rating
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="flex items-center text-yellow-500 gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-4 h-4 ${i < review.rating ? "fill-current text-yellow-500" : "text-gray-300"}`} />
-                          ))}
-                          <span className="ml-2 text-xs font-bold text-graphite">{review.rating}.0 / 5.0</span>
-                        </div>
-
-                        <p className="bg-paper p-3.5 rounded-xl text-sm italic text-graphite border border-line/60">
-                          &quot;{review.comment}&quot;
-                        </p>
-
-                        <p className="text-[10px] font-bold text-slate-custom uppercase tracking-widest">
-                          Posted on {new Date(review.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-
-                      <form action={async () => {
-                        "use server";
-                        await deleteReviewAction(review.id, epc.id, "epc");
-                      }}>
-                        <Button variant="ghost" size="sm" type="submit" className="text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg">
-                          <Trash2 className="w-4 h-4 mr-1" /> Delete
-                        </Button>
-                      </form>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-
-            {epcReviews.length === 0 && (
-              <div className="py-16 text-center border border-dashed border-line rounded-2xl bg-white">
-                <p className="text-slate-custom font-medium">No installer reviews found.</p>
-              </div>
-            )}
+        {/* Official Team Rating Form */}
+        <section className="bg-white border border-line rounded-[4px] p-6 md:p-8 shadow-sm">
+          <div className="border-b border-line pb-4 mb-6">
+            <h2 className="font-fraunces text-lg font-bold text-navy-deep flex items-center gap-2">
+              <Star className="w-4 h-4 text-amber fill-amber" />
+              Submit Official EnergyGurus Team Rating
+            </h2>
+            <p className="text-xs text-slate-custom mt-1">
+              Add verified benchmark ratings for brands or installers evaluated by EnergyGurus technical experts.
+            </p>
           </div>
-        </TabsContent>
+          <AdminReviewForm allEpcs={allEpcs} allBrands={allBrands} />
+        </section>
 
-        {/* ── BRANDS TAB ── */}
-        <TabsContent value="brands" className="space-y-8 outline-none">
-          {/* Admin Review Submission Form for Brands */}
-          <AdminReviewForm targetType="brand" options={allBrands} />
-
-          {/* List of Brand Reviews */}
-          <div className="space-y-4">
-            <h3 className="font-space-grotesk font-bold text-xl text-ink">
-              All Brand Reviews ({brandReviews.length})
-            </h3>
-
-            {brandReviews.map(({ review, author, brand }) => {
-              const isAdminAuthor = author?.role === "admin" || author?.role === "super-admin";
-
-              return (
-                <Card key={review.id} className="border border-line shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
-                      <div className="flex-1 space-y-3">
-                        <div className="flex items-center gap-3 flex-wrap">
-                          <div className="w-9 h-9 rounded-full bg-ink text-amber flex items-center justify-center font-bold text-sm">
-                            {author?.name ? author.name.substring(0, 2).toUpperCase() : <User className="w-4 h-4" />}
-                          </div>
-                          <div>
-                            <p className="font-bold text-sm text-ink">{author?.name || "Anonymous User"}</p>
-                            <p className="text-xs text-slate-custom font-medium">Target: <strong className="text-ink">{brand.brandName}</strong></p>
-                          </div>
-                          {isAdminAuthor && (
-                            <span className="bg-amber/10 text-amber border border-amber/30 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
-                              <ShieldCheck className="w-3.5 h-3.5" /> EnergyGurus Team Rating
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="flex items-center text-yellow-500 gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-4 h-4 ${i < review.rating ? "fill-current text-yellow-500" : "text-gray-300"}`} />
-                          ))}
-                          <span className="ml-2 text-xs font-bold text-graphite">{review.rating}.0 / 5.0</span>
-                        </div>
-
-                        <p className="bg-paper p-3.5 rounded-xl text-sm italic text-graphite border border-line/60">
-                          &quot;{review.comment}&quot;
-                        </p>
-
-                        <p className="text-[10px] font-bold text-slate-custom uppercase tracking-widest">
-                          Posted on {new Date(review.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-
-                      <form action={async () => {
-                        "use server";
-                        await deleteReviewAction(review.id, brand.id, "brand");
-                      }}>
-                        <Button variant="ghost" size="sm" type="submit" className="text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg">
-                          <Trash2 className="w-4 h-4 mr-1" /> Delete
-                        </Button>
-                      </form>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-
-            {brandReviews.length === 0 && (
-              <div className="py-16 text-center border border-dashed border-line rounded-2xl bg-white">
-                <p className="text-slate-custom font-medium">No brand reviews found.</p>
-              </div>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+      </div>
     </div>
   );
 }

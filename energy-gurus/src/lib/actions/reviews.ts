@@ -11,35 +11,67 @@ import { getUserRole } from "@/lib/roles";
 export async function submitReview(formData: FormData) {
     try {
         const { userId: clerkId } = await auth();
-        if (!clerkId) throw new Error("Must be signed in to review");
+        let authorId: string | null = null;
+        let authorRole: string = "user";
 
-        // Find the internal DB user
-        const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId));
-        if (!user) throw new Error("User record not found");
+        if (clerkId) {
+            const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId));
+            if (user) {
+                authorId = user.id;
+                authorRole = user.role;
+            }
+        }
+
+        // If not signed in via Clerk, lookup or create a guest user placeholder
+        if (!authorId) {
+            const guestEmail = (formData.get("authorEmail") as string)?.trim() || `guest_${Date.now()}@energygurus.online`;
+            const guestName = (formData.get("reviewerName") as string || formData.get("authorName") as string)?.trim() || "Customer";
+            
+            let [existingUser] = await db.select().from(users).where(eq(users.email, guestEmail));
+            if (!existingUser) {
+                [existingUser] = await db.insert(users).values({
+                    clerkId: `guest_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+                    email: guestEmail,
+                    name: guestName,
+                    role: "epc",
+                    isActive: true
+                }).returning();
+            }
+            authorId = existingUser.id;
+        }
 
         const targetId = formData.get("targetId") as string;
         const targetType = formData.get("targetType") as "epc" | "brand";
-        const rating = parseInt(formData.get("rating") as string);
+        const rating = parseInt(formData.get("rating") as string) || 5;
         const comment = formData.get("comment") as string;
-        const reviewerName = (formData.get("reviewerName") as string)?.trim();
+        const reviewerName = (formData.get("reviewerName") as string || formData.get("authorName") as string)?.trim();
+        const authorEmail = (formData.get("authorEmail") as string)?.trim();
+        const proofUrl = (formData.get("proofUrl") as string)?.trim() || null;
 
-        // Always update the display name with what the reviewer typed
-        // so it shows correctly in the review list
-        if (reviewerName) {
+        if (reviewerName && clerkId) {
             await db.update(users)
                 .set({ name: reviewerName, updatedAt: new Date() })
                 .where(eq(users.clerkId, clerkId));
         }
 
-        await db.insert(reviews).values({
-            authorId: user.id,
+        // Admin submissions are auto-approved, public customer reviews go to pending moderation
+        const isAdmin = authorRole === "admin" || authorRole === "super-admin";
+        const initialStatus = isAdmin ? "approved" : "pending";
+
+        const [newReview] = await db.insert(reviews).values({
+            authorId,
             targetId,
             targetType,
             rating,
-            comment
-    });
+            comment,
+            status: initialStatus,
+            proofUrl,
+            authorName: reviewerName,
+            authorEmail,
+            isVerifiedPurchase: !!proofUrl
+        }).returning();
 
-        // Invalidate Redis cache for specific profiles and list cache keys
+        // Invalidate Redis cache
         try {
             if (targetType === "brand") {
                 await redis.del(CACHE_KEYS.BRAND_DETAILS(targetId), CACHE_KEYS.BRANDS_LIST);
@@ -51,9 +83,125 @@ export async function submitReview(formData: FormData) {
         }
 
         revalidatePath("/", "layout");
-    } catch (error) {
+        revalidatePath("/dashboard/reviews", "layout");
+        revalidatePath("/dashboard/moderation", "layout");
+
+        return {
+            success: true,
+            status: initialStatus,
+            message: initialStatus === "pending"
+                ? "Thank you! Your review has been submitted for moderation and will appear once approved."
+                : "Review published successfully!"
+        };
+    } catch (error: any) {
         console.error("[submitReview Error]:", error);
-        throw error;
+        return { success: false, message: error?.message || "Failed to submit review" };
+    }
+}
+
+export async function approveReviewAction(reviewId: string, isVerifiedPurchase?: boolean) {
+    try {
+        const role = await getUserRole();
+        if (role !== "super-admin" && role !== "admin") {
+            return { success: false, message: "Unauthorized" };
+        }
+
+        const [review] = await db.select().from(reviews).where(eq(reviews.id, reviewId));
+        if (!review) return { success: false, message: "Review not found" };
+
+        await db.update(reviews)
+            .set({
+                status: "approved",
+                rejectionReason: null,
+                isVerifiedPurchase: isVerifiedPurchase !== undefined ? isVerifiedPurchase : review.isVerifiedPurchase
+            })
+            .where(eq(reviews.id, reviewId));
+
+        if (review.targetId) {
+            try {
+                if (review.targetType === "brand") {
+                    await redis.del(CACHE_KEYS.BRAND_DETAILS(review.targetId), CACHE_KEYS.BRANDS_LIST);
+                } else if (review.targetType === "epc") {
+                    await redis.del(CACHE_KEYS.EPC_DETAILS(review.targetId), CACHE_KEYS.EPCS_LIST);
+                }
+            } catch (e) {
+                console.error("Cache clear failed:", e);
+            }
+        }
+
+        revalidatePath("/", "layout");
+        revalidatePath("/dashboard/reviews", "layout");
+        revalidatePath("/dashboard/moderation", "layout");
+
+        return { success: true, message: "Review approved and published!" };
+    } catch (error: any) {
+        console.error("approveReviewAction error:", error);
+        return { success: false, message: error?.message || "Failed to approve review" };
+    }
+}
+
+export async function rejectReviewAction(reviewId: string, rejectionReason: string) {
+    try {
+        const role = await getUserRole();
+        if (role !== "super-admin" && role !== "admin") {
+            return { success: false, message: "Unauthorized" };
+        }
+
+        const [review] = await db.select().from(reviews).where(eq(reviews.id, reviewId));
+        if (!review) return { success: false, message: "Review not found" };
+
+        await db.update(reviews)
+            .set({
+                status: "rejected",
+                rejectionReason: rejectionReason || "Review did not meet EnergyGurus publishing guidelines."
+            })
+            .where(eq(reviews.id, reviewId));
+
+        if (review.targetId) {
+            try {
+                if (review.targetType === "brand") {
+                    await redis.del(CACHE_KEYS.BRAND_DETAILS(review.targetId), CACHE_KEYS.BRANDS_LIST);
+                } else if (review.targetType === "epc") {
+                    await redis.del(CACHE_KEYS.EPC_DETAILS(review.targetId), CACHE_KEYS.EPCS_LIST);
+                }
+            } catch (e) {
+                console.error("Cache clear failed:", e);
+            }
+        }
+
+        revalidatePath("/", "layout");
+        revalidatePath("/dashboard/reviews", "layout");
+        revalidatePath("/dashboard/moderation", "layout");
+
+        return { success: true, message: "Review rejected and moved to archive." };
+    } catch (error: any) {
+        console.error("rejectReviewAction error:", error);
+        return { success: false, message: error?.message || "Failed to reject review" };
+    }
+}
+
+export async function toggleVerifyReviewAction(reviewId: string) {
+    try {
+        const role = await getUserRole();
+        if (role !== "super-admin" && role !== "admin") {
+            return { success: false, message: "Unauthorized" };
+        }
+
+        const [review] = await db.select().from(reviews).where(eq(reviews.id, reviewId));
+        if (!review) return { success: false, message: "Review not found" };
+
+        await db.update(reviews)
+            .set({ isVerifiedPurchase: !review.isVerifiedPurchase })
+            .where(eq(reviews.id, reviewId));
+
+        revalidatePath("/", "layout");
+        revalidatePath("/dashboard/reviews", "layout");
+        revalidatePath("/dashboard/moderation", "layout");
+
+        return { success: true, message: `Review marked as ${!review.isVerifiedPurchase ? "Verified Purchase" : "Standard Review"}` };
+    } catch (error: any) {
+        console.error("toggleVerifyReviewAction error:", error);
+        return { success: false, message: error?.message || "Failed to toggle verification" };
     }
 }
 
@@ -63,7 +211,7 @@ export async function getProfileRating(targetId: string) {
         total: count(reviews.id)
     })
         .from(reviews)
-        .where(eq(reviews.targetId, targetId));
+        .where(and(eq(reviews.targetId, targetId), eq(reviews.status, "approved")));
 
     return {
         rating: result[0]?.average ? parseFloat(result[0].average) : null,
@@ -82,6 +230,7 @@ export async function getTeamRating(targetId: string, targetType: "epc" | "brand
             and(
                 eq(reviews.targetId, targetId),
                 eq(reviews.targetType, targetType),
+                eq(reviews.status, "approved"),
                 inArray(users.role, ["admin", "super-admin"])
             )
         );
@@ -120,8 +269,10 @@ export async function submitAdminReview(formData: FormData) {
             targetId,
             targetType,
             rating,
-            comment: comment || "Official EnergyGurus Team Rating."
-    });
+            comment: comment || "Official EnergyGurus Team Rating.",
+            status: "approved",
+            isVerifiedPurchase: true
+        });
 
         // Invalidate Redis cache
         try {

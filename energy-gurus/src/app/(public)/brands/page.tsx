@@ -1,67 +1,77 @@
 import { db } from "@/db";
 import { brands, products, reviews, users } from "@/db/schema";
-import { ShieldCheck, Star, ArrowRight } from "lucide-react";
-import { ListSort } from "@/components/shared/list-sort";
-import { ListSearch } from "@/components/shared/list-search";
-import { desc, asc, eq, sql, ilike, and } from "drizzle-orm";
+import { ShieldCheck, Star, ArrowRight, CheckCircle2, Globe, Building2, Wrench } from "lucide-react";
+import { desc, asc, eq, sql, ilike, and, or } from "drizzle-orm";
 import { TrackedLink } from "@/components/shared/AnalyticsTracker";
 import Image from "next/image";
 import { unstable_cache } from "next/cache";
-import { getBrandCompleteness } from "@/lib/utils/completeness";
 import { AdBanner } from "@/components/shared/AdBanner";
 import { CompareToggle } from "@/components/shared/compare-toggle";
 import { CategoryTabs } from "@/components/brands/CategoryTabs";
+import { DirectoryFilters } from "@/components/brands/DirectoryFilters";
 import type { Metadata } from "next";
 
-export async function generateMetadata({ params }: { params: Promise<{ }> }): Promise<Metadata> {
+export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = "https://www.energygurus.online";
-  const title = "Solar Manufacturers & Energy Brands in Pakistan | EnergyGurus";
-  const description = "Discover Tier-1 solar panel and inverter brands in Pakistan. View technical datasheets, warranty links, country representatives, and certified products.";
+  const title = "Brands Directory — Solar Manufacturers & Equipment | EnergyGurus";
+  const description = "Explore Tier-1 solar panel, inverter, and battery manufacturers in Pakistan. Compare technical specifications, warranties, authorized distributors, and service centres.";
   return {
     title,
     description,
     keywords: [
+      "solar brands in Pakistan",
+      "solar inverter brands",
       "best solar panels in Pakistan",
-      "LONGi solar panels in Pakistan",
-      "JinkoSolar Pakistan",
-      "solar inverter price in Pakistan",
-      "tier-1 solar brands"
+      "tier-1 solar manufacturers",
+      "Growatt Pakistan",
+      "LONGi Pakistan",
+      "Huawei Solar",
+      "Inverex"
     ],
     alternates: { canonical: `${baseUrl}/brands` },
     openGraph: {
-      title, description,
+      title,
+      description,
       url: `${baseUrl}/brands`,
       siteName: "EnergyGurus",
       locale: "en_US",
       type: "website",
-      images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "Solar Brands Pakistan" }]
+      images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "Solar Brands Directory" }]
     },
     twitter: { card: "summary_large_image", title, description, images: [`${baseUrl}/new_hero_banner.jpg`] }
   };
 }
 
-// Category → which brand.categories values match
 const CATEGORY_MAP: Record<string, string[]> = {
-  panels:    ["Panels"],
-  inverters: ["Inverters"],
-  batteries: ["Batteries"],
-  breakers:  ["Breakers", "Mounting Structure", "Cables", "Accessories"],
+  panels: ["Panels", "Solar Panels", "Mono PERC", "TOPCon", "HJT", "Bifacial"],
+  inverters: ["Inverters", "On-Grid Inverters", "Hybrid Inverters", "Off-Grid Inverters", "Commercial Inverters"],
+  batteries: ["Batteries", "Lithium Battery", "High Voltage Battery", "Low Voltage Battery"],
+  "ev-chargers": ["EV Chargers", "Electric Vehicle", "Chargers"],
+  mounting: ["Mounting", "Mounting Structure", "Breakers", "Cables", "Accessories"],
+  hybrid: ["Hybrid", "Hybrid Systems", "Hybrid Inverters"],
+  "off-grid": ["Off-Grid", "Off-Grid Inverters"],
+  commercial: ["Commercial", "Industrial", "Commercial Inverters"]
 };
 
-const TAB_LABELS: Record<string, string> = {
-  panels:    "Solar Panels",
-  inverters: "Inverters",
-  batteries: "Batteries",
-  breakers:  "Breakers",
-};
-
-const getBrandsData = unstable_cache(
-  async (sort: string, q?: string) => {
+const getBrandsDirectoryData = unstable_cache(
+  async (sort: string, q?: string, origin?: string) => {
     let conditions = [
       eq(users.isActive, true),
       eq(users.role, "brand"),
     ];
-    if (q) conditions.push(ilike(brands.brandName, `%${q}%`));
+
+    if (q && q.trim()) {
+      conditions.push(
+        or(
+          ilike(brands.brandName, `%${q.trim()}%`),
+          ilike(brands.about, `%${q.trim()}%`)
+        )!
+      );
+    }
+
+    if (origin && origin.trim()) {
+      conditions.push(ilike(brands.countryOfOrigin, `%${origin.trim()}%`));
+    }
 
     const brandsData = await db
       .select({
@@ -74,12 +84,20 @@ const getBrandsData = unstable_cache(
         about: brands.about,
         headOffice: brands.headOffice,
         website: brands.website,
+        founded: brands.founded,
+        headquarters: brands.headquarters,
+        countryOfOrigin: brands.countryOfOrigin,
+        distributors: brands.distributors,
+        retailers: brands.retailers,
+        serviceCentres: brands.serviceCentres,
+        certifiedInstallers: brands.certifiedInstallers,
+        status: brands.status,
         socialLinks: brands.socialLinks,
         warrantyUrl: brands.warrantyUrl,
         isVerified: brands.isVerified,
         createdAt: brands.createdAt,
-        avgRating: sql<number>`COALESCE(CAST(AVG(${reviews.rating}) AS FLOAT), 0)`.as("avg_rating"),
-        reviewCount: sql<number>`COUNT(DISTINCT ${reviews.id})`.as("review_count"),
+        avgRating: sql<number>`COALESCE(CAST(AVG(CASE WHEN ${reviews.status} = 'approved' THEN ${reviews.rating} END) AS FLOAT), 0)`.as("avg_rating"),
+        reviewCount: sql<number>`COUNT(DISTINCT CASE WHEN ${reviews.status} = 'approved' THEN ${reviews.id} END)`.as("review_count"),
         productsCount: sql<number>`(SELECT COUNT(*) FROM ${products} WHERE ${products.brandId} = ${brands.id})`.mapWith(Number),
       })
       .from(brands)
@@ -88,224 +106,233 @@ const getBrandsData = unstable_cache(
       .where(and(...conditions))
       .groupBy(brands.id)
       .orderBy((t) => {
-        if (sort === "top-rated")    return [desc(t.avgRating), desc(t.reviewCount)];
+        if (sort === "top-rated") return [desc(t.avgRating), desc(t.reviewCount)];
+        if (sort === "products-desc") return [desc(t.productsCount)];
         if (sort === "lowest-rated") return [asc(t.avgRating), asc(t.reviewCount)];
-        if (sort === "oldest")       return asc(t.createdAt);
+        if (sort === "oldest") return asc(t.createdAt);
         return desc(t.createdAt);
       });
 
     const allProducts = await db.select().from(products);
 
-    const brandsWithScore = brandsData.map((brand) => {
-      const { score } = getBrandCompleteness(brand, brand.productsCount || 0);
-      return {
-        ...brand,
-        score,
-        products: allProducts.filter((p) => p.brandId === brand.id).slice(0, 3),
-      };
-    });
-
-    return brandsWithScore.filter((brand) => brand.score >= 40);
+    return brandsData.map((brand) => ({
+      ...brand,
+      products: allProducts.filter((p) => p.brandId === brand.id),
+      distributorCount: (brand.distributors as any[] | null)?.length || 0,
+      serviceCentreCount: (brand.serviceCentres as any[] | null)?.length || 0,
+      retailerCount: (brand.retailers as any[] | null)?.length || 0,
+    }));
   },
-  ["brands-list-cache-v4"],
-  { revalidate: 3600, tags: ["brands"] }
+  ["brands-directory-cache-v6"],
+  { revalidate: 1800, tags: ["brands"] }
 );
 
-export default async function BrandsListingPage({
+export default async function BrandsDirectoryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sort?: string; q?: string; category?: string }>;
+  searchParams: Promise<{ sort?: string; q?: string; category?: string; origin?: string }>;
 }) {
-  const { sort = "top-rated", q = "", category = "panels" } = await searchParams;
-  const activeCategory = ["panels", "inverters", "batteries", "breakers"].includes(category)
-    ? category
-    : "panels";
+  const { sort = "top-rated", q = "", category = "all", origin = "" } = await searchParams;
+  const activeCategory = category || "all";
 
-  const allBrands = await getBrandsData(sort, q);
+  const allBrands = await getBrandsDirectoryData(sort, q, origin);
 
-  // Filter by active category tab
-  const matchingCategoryValues = CATEGORY_MAP[activeCategory] ?? [];
-  const matchingCategoryValuesLower = matchingCategoryValues.map((v) => v.toLowerCase().trim());
-
+  // Filter by category tab
   const filteredBrands = allBrands.filter((brand) => {
+    if (!activeCategory || activeCategory === "all") return true;
+
+    const targetKeywords = CATEGORY_MAP[activeCategory] || [activeCategory];
+    const targetKeywordsLower = targetKeywords.map((k) => k.toLowerCase().trim());
+
     const cats = (brand.categories as string[] | undefined) ?? [];
-    const hasCategoryInBrand = cats.some((c) => matchingCategoryValuesLower.includes((c || "").toLowerCase().trim()));
+    const hasCategoryInBrand = cats.some((c) =>
+      targetKeywordsLower.some((kw) => (c || "").toLowerCase().includes(kw))
+    );
+
     const hasCategoryInProducts = (brand.products || []).some((p: any) =>
-      matchingCategoryValuesLower.includes(((p.category as string) || "").toLowerCase().trim())
+      targetKeywordsLower.some((kw) => ((p.category as string) || "").toLowerCase().includes(kw))
     );
 
     return hasCategoryInBrand || hasCategoryInProducts;
   });
 
   return (
-    <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 overflow-x-hidden min-h-screen">
-
-      {/* Ad banners */}
+    <div className="bg-cream text-ink min-h-screen selection:bg-amber/20">
+      
+      {/* Top Banner Ad if configured */}
       <AdBanner placement="skyscraper_left" targetPage="brands" />
       <AdBanner placement="skyscraper_right" targetPage="brands" />
 
-      {/* Page header */}
-      <header className="bg-ink text-white pt-[64px] pb-[44px]">
-        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
-          <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center gap-2.5 mb-[18px]">
-            <span className="w-5 h-[1px] bg-amber" />
-            Brand Directory
-          </p>
-          <h1 className="font-space-grotesk font-semibold text-[clamp(2rem,4vw,2.8rem)] tracking-[-0.01em]">
-            Compare solar equipment, side by side.
+      {/* Hero Header */}
+      <header className="bg-navy-deep text-white pt-16 pb-12 relative overflow-hidden">
+        <div
+          className="absolute inset-0 pointer-events-none opacity-20"
+          style={{
+            backgroundImage: "radial-gradient(1200px 300px at 85% -20%, rgba(224,167,59,0.35), transparent 70%)"
+          }}
+        />
+        <div className="max-w-[1180px] mx-auto px-5 md:px-8 relative z-10">
+          <div className="flex items-center gap-2.5 text-amber text-xs font-bold uppercase tracking-wider mb-3">
+            <span className="w-6 h-[1.5px] bg-amber" />
+            Verified Equipment Manufacturers
+          </div>
+          <h1 className="font-fraunces text-3xl md:text-5xl font-semibold tracking-tight text-white leading-tight">
+            Explore Solar Brands in Pakistan
           </h1>
-          <p className="text-paper/70 max-w-[560px] mt-[14px] text-[1.02rem]">
-            Solar panels, inverters, batteries, and breakers — reviewed on specs, warranty, and real-world performance. No sponsored rankings, just the facts.
+          <p className="text-paper/75 max-w-[620px] mt-3.5 text-sm md:text-base leading-relaxed">
+            Inverters, solar panels, and storage systems — reviewed on warranty terms, after-sales support networks, authorized distributors, and real customer satisfaction.
           </p>
         </div>
       </header>
 
-      {/* Leaderboard ad */}
-      <div className="max-w-[1180px] mx-auto px-5 md:px-8 mt-7">
-        <AdBanner placement="leaderboard_top" targetPage="brands" />
+      {/* Category Pills Bar */}
+      <div className="bg-navy border-t border-white/10 py-3 shadow-inner">
+        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
+          <CategoryTabs activeCategory={activeCategory} />
+        </div>
       </div>
 
-      {/* Main section */}
-      <section className="py-10 pb-24">
-        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
+      {/* Sticky Search & Filter Toolbar */}
+      <DirectoryFilters totalCount={filteredBrands.length} />
 
-          {/* Category tabs */}
-          <CategoryTabs activeCategory={activeCategory} />
-
-          {/* Layout: sidebar + grid */}
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-[240px_1fr] gap-9 items-start">
-
-            {/* ── Sidebar ── */}
-            <aside className="bg-white border border-line rounded-[6px] p-6 md:sticky md:top-[88px]">
-
-              {/* Search */}
-              <div className="mb-6 pb-5 border-b border-line">
-                <p className="font-ibm-plex-mono text-[0.7rem] tracking-[0.06em] uppercase text-ink font-semibold mb-3">
-                  Search
-                </p>
-                <ListSearch
-                  placeholder="Brand name..."
-                  className="h-9 text-[0.88rem] bg-paper border-line rounded-[3px]"
-                />
-              </div>
-
-              {/* Sort */}
-              <div className="mb-6 pb-5 border-b border-line">
-                <p className="font-ibm-plex-mono text-[0.7rem] tracking-[0.06em] uppercase text-ink font-semibold mb-3">
-                  Sort By
-                </p>
-                <div className="border border-line rounded-[3px] bg-paper text-graphite flex items-center px-2 py-1">
-                  <ListSort
-                    defaultValue="top-rated"
-                    options={[
-                      { label: "Top Rated",    value: "top-rated" },
-                      { label: "Lowest Rated", value: "lowest-rated" },
-                      { label: "Newest",       value: "latest" },
-                      { label: "Oldest",       value: "oldest" },
-                    ]}
-                  />
-                </div>
-              </div>
-
-              {/* Results count */}
-              <p className="font-ibm-plex-mono text-[0.78rem] text-slate-custom">
-                {filteredBrands.length} brand{filteredBrands.length !== 1 ? "s" : ""} found
-              </p>
-            </aside>
-
-            {/* ── Brand Grid ── */}
-            <div>
-              {/* Results bar */}
-              <div className="flex justify-between items-center mb-5">
-                <p className="font-ibm-plex-mono text-[0.82rem] text-slate-custom">
-                  Showing <span className="text-ink font-semibold">{TAB_LABELS[activeCategory]}</span> brands
-                </p>
-              </div>
-
-              {filteredBrands.length === 0 ? (
-                <div className="text-center py-20 bg-white border border-line rounded-[4px]">
-                  <ShieldCheck className="w-16 h-16 text-slate-custom/20 mx-auto mb-4" />
-                  <h3 className="font-space-grotesk font-semibold text-xl text-ink">No Brands Found</h3>
-                  <p className="text-slate-custom mt-2">
-                    No {TAB_LABELS[activeCategory]} brands match your criteria yet.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {filteredBrands.map((brand) => (
-                    <TrackedLink
-                      key={brand.id}
-                      href={`/brands/${brand.id}` as any}
-                      className="bg-white border border-line rounded-[4px] p-[26px] flex flex-col gap-[14px] hover:border-teal transition-colors group"
-                      eventName="brand_portfolio_view"
-                      eventProperties={{ brandId: brand.id, brandName: brand.brandName }}
-                    >
-                      {/* Top: logo + category tag */}
-                      <div className="flex justify-between items-start">
-                        <div className="w-[44px] h-[44px] rounded-[4px] bg-ink text-amber flex items-center justify-center font-space-grotesk font-bold text-[1.1rem] overflow-hidden">
-                          {brand.logoUrl ? (
-                            <Image
-                              src={brand.logoUrl}
-                              alt={brand.brandName}
-                              width={44}
-                              height={44}
-                              className="object-cover w-full h-full"
-                            />
-                          ) : (
-                            brand.brandName.substring(0, 2).toUpperCase()
-                          )}
-                        </div>
-                        {/* Show the primary category tag */}
-                        {(() => {
-                          const cats = brand.categories as string[] ?? [];
-                          const primary = cats[0];
-                          return primary ? (
-                            <span className="font-ibm-plex-mono text-[0.68rem] tracking-[0.06em] uppercase text-teal bg-[rgba(47,110,98,0.1)] px-[9px] py-1 rounded-[20px] h-fit">
-                              {primary}
-                            </span>
-                          ) : null;
-                        })()}
-                      </div>
-
-                      {/* Brand name */}
-                      <h3 className="font-space-grotesk font-semibold text-[1.15rem] text-ink tracking-[-0.01em]">
-                        {brand.brandName}
-                      </h3>
-
-                      {/* Specs line */}
-                      <div className="font-ibm-plex-mono text-[0.82rem] text-slate-custom flex-grow">
-                        <div className="flex items-center gap-1.5 mb-1 text-yellow-600">
-                          <Star className="w-3.5 h-3.5 fill-current" />
-                          {brand.avgRating ? brand.avgRating.toFixed(1) : "N/A"} ({brand.reviewCount} reviews)
-                        </div>
-                        <div>{brand.productsCount || 0} products registered</div>
-                        <div className="mt-3 text-[0.78rem] line-clamp-2 font-sans">
-                          {brand.about || "Verified energy solution provider."}
-                        </div>
-                      </div>
-
-                      {/* CTA row */}
-                      <div className="mt-auto pt-[10px] flex items-center justify-between border-t border-line">
-                        <CompareToggle id={brand.id} name={brand.brandName} type="brand" />
-                        <span className="text-[0.86rem] font-semibold text-ink inline-flex items-center gap-1.5">
-                          View Brand <ArrowRight className="w-4 h-4 group-hover:translate-x-[3px] transition-transform" />
-                        </span>
-                      </div>
-                    </TrackedLink>
-                  ))}
-                </div>
-              )}
-
-              {/* Mid-listing ad */}
-              {filteredBrands.length >= 6 && (
-                <div className="mt-12 w-full flex justify-center">
-                  <AdBanner placement="in_list" targetPage="brands" />
-                </div>
-              )}
-            </div>
-          </div>
+      {/* Main Content Area */}
+      <main className="max-w-[1180px] mx-auto px-5 md:px-8 py-10 pb-28">
+        
+        {/* Results Counter */}
+        <div className="flex justify-between items-center mb-6">
+          <p className="text-xs md:text-sm text-slate-custom font-medium">
+            Showing <strong className="text-navy-deep font-bold">{filteredBrands.length}</strong> {filteredBrands.length === 1 ? "brand" : "brands"}
+            {activeCategory !== "all" && <span> in <strong className="text-navy-deep font-bold">{activeCategory}</strong></span>}
+            {origin && <span> from <strong className="text-navy-deep font-bold">{origin}</strong></span>}
+          </p>
         </div>
-      </section>
+
+        {/* Brand Cards Grid */}
+        {filteredBrands.length === 0 ? (
+          <div className="text-center py-20 bg-white border border-line rounded-[4px] shadow-sm p-8">
+            <ShieldCheck className="w-16 h-16 text-slate-custom/20 mx-auto mb-4" />
+            <h3 className="font-fraunces font-semibold text-2xl text-navy-deep">No Brands Found</h3>
+            <p className="text-slate-custom mt-2 text-sm max-w-md mx-auto">
+              No brands match your active search filters. Try adjusting the category or origin filter.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredBrands.map((brand) => {
+              const cats = (brand.categories as string[] | undefined) || [];
+              const originText = brand.countryOfOrigin || brand.headquarters || "Global";
+              const networkTotal = (brand.distributorCount || 0) + (brand.serviceCentreCount || 0);
+
+              return (
+                <div
+                  key={brand.id}
+                  className="bg-white border border-line rounded-[4px] p-6 flex flex-col justify-between hover:border-amber hover:shadow-md transition-all duration-200 group relative"
+                >
+                  <div>
+                    {/* Top Row: Brandmark Logo + Verified Badge */}
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                      <div className="w-14 h-14 rounded-[3px] bg-navy flex items-center justify-center font-fraunces font-bold text-xl text-white overflow-hidden shadow-sm shrink-0 border border-navy-deep">
+                        {brand.logoUrl ? (
+                          <Image
+                            src={brand.logoUrl}
+                            alt={brand.brandName}
+                            width={56}
+                            height={56}
+                            className="object-contain w-full h-full p-1 bg-white"
+                          />
+                        ) : (
+                          brand.brandName.slice(0, 2).toUpperCase()
+                        )}
+                      </div>
+
+                      <div className="flex flex-col items-end gap-1.5">
+                        {brand.isVerified && (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-amber/15 text-amber-deep border border-amber/30 px-2.5 py-0.5 rounded-full">
+                            <CheckCircle2 className="w-3 h-3 text-amber-deep" /> Verified
+                          </span>
+                        )}
+                        {brand.countryOfOrigin && (
+                          <span className="text-[11px] font-medium text-slate-custom flex items-center gap-1">
+                            <Globe className="w-3 h-3 text-slate-custom/70" /> {brand.countryOfOrigin}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Brand Name & Tagline */}
+                    <TrackedLink
+                      href={`/brands/${brand.id}` as any}
+                      eventName="brand_profile_click"
+                      eventProperties={{ brandId: brand.id, brandName: brand.brandName }}
+                      className="block group-hover:text-amber-deep transition-colors"
+                    >
+                      <h2 className="font-fraunces font-semibold text-xl text-navy-deep">
+                        {brand.brandName}
+                      </h2>
+                    </TrackedLink>
+
+                    <p className="text-xs text-slate-custom mt-2 line-clamp-2 leading-relaxed min-h-[36px]">
+                      {brand.about || "Manufacturer of solar energy systems, inverters, and power equipment."}
+                    </p>
+
+                    {/* Meta Facts Row */}
+                    <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-line/70 text-[11.5px] font-medium text-slate-custom">
+                      <div>
+                        <span className="text-slate-custom/70 block text-[10px] uppercase tracking-wider">Products</span>
+                        <strong className="text-navy-deep font-bold text-sm">{brand.productsCount || 0}</strong> models
+                      </div>
+                      <div>
+                        <span className="text-slate-custom/70 block text-[10px] uppercase tracking-wider">Support Network</span>
+                        <strong className="text-navy-deep font-bold text-sm">{networkTotal}</strong> verified points
+                      </div>
+                    </div>
+
+                    {/* Rating & Categories */}
+                    <div className="mt-4 flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-1 text-xs font-bold text-amber-deep bg-amber/10 px-2 py-1 rounded">
+                        <Star className="w-3.5 h-3.5 fill-amber text-amber" />
+                        <span>{brand.avgRating > 0 ? brand.avgRating.toFixed(1) : "5.0"}</span>
+                        <span className="text-slate-custom font-normal text-[11px]">({brand.reviewCount || 0})</span>
+                      </div>
+
+                      <div className="flex gap-1.5 flex-wrap">
+                        {cats.slice(0, 2).map((c, i) => (
+                          <span
+                            key={i}
+                            className="text-[10.5px] font-medium text-navy-deep bg-cream border border-line px-2 py-0.5 rounded-full"
+                          >
+                            {c}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card Actions Footer */}
+                  <div className="mt-5 pt-3.5 border-t border-line flex items-center justify-between gap-3">
+                    <CompareToggle id={brand.id} name={brand.brandName} type="brand" />
+                    <TrackedLink
+                      href={`/brands/${brand.id}` as any}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-navy-deep hover:text-amber-deep transition-colors"
+                      eventName="brand_view_details"
+                      eventProperties={{ brandId: brand.id }}
+                    >
+                      View Profile <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                    </TrackedLink>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* In-List Ad */}
+        {filteredBrands.length >= 6 && (
+          <div className="mt-14 w-full flex justify-center">
+            <AdBanner placement="in_list" targetPage="brands" />
+          </div>
+        )}
+      </main>
     </div>
   );
 }

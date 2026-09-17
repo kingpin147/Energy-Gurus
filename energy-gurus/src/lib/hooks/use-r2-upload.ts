@@ -13,11 +13,11 @@ export function useR2Upload() {
         // 1. Pre-flight Client-Side Validations
         const ALLOWED_FOLDERS = [
             "epc-logos", "epc-projects", "epc-portfolios", "epc-portfolio", "epc-documents",
-            "brand-logos", "brand-gallery",
-            "product-images", "product-datasheets",
+            "brand-logos", "brand-gallery", "brand-documents", "brand-team", "brand-proofs",
+            "product-images", "product-datasheets", "product-manuals",
             "podcast-thumbnails", "uploads",
             "project-images", "project-videos",
-            "live-qa-thumbnails", "expert-photos", "epc-reviews",
+            "live-qa-thumbnails", "expert-photos", "epc-reviews", "review-proofs",
             "news-cover", "news-authors", "news-images", "ad-banners", "team"
         ];
 

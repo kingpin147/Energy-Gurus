@@ -20,7 +20,7 @@ export async function ReviewList({ targetId }: { targetId: string }) {
         .leftJoin(users, eq(reviews.authorId, users.id))
         .leftJoin(brands, eq(brands.userId, users.id))
         .leftJoin(epcInstallers, eq(epcInstallers.userId, users.id))
-        .where(eq(reviews.targetId, targetId))
+        .where(and(eq(reviews.targetId, targetId), eq(reviews.status, "approved")))
         .orderBy(desc(reviews.createdAt));
 
     if (allReviews.length === 0) {
