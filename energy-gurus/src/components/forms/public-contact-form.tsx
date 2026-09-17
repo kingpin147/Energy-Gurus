@@ -89,7 +89,7 @@ export function PublicContactForm() {
                             <div>
                                 <h4 className="font-bold mb-4">Follow Us</h4>
                                 <div className="flex gap-3 flex-wrap">
-                                    <a href="https://www.tiktok.com/@energygurus.online" target="_blank" rel="noopener noreferrer" className="p-3 bg-white border rounded-full text-slate-custom hover:text-amber hover:border-amber transition-colors" aria-label="TikTok">
+                                    <a href="https://www.tiktok.com/@energygurusonline" target="_blank" rel="noopener noreferrer" className="p-3 bg-white border rounded-full text-slate-custom hover:text-amber hover:border-amber transition-colors" aria-label="TikTok">
                                         <Music2 className="w-5 h-5" />
                                     </a>
                                     <a href="https://www.linkedin.com/company/energygurusonline" target="_blank" rel="noopener noreferrer" className="p-3 bg-white border rounded-full text-slate-custom hover:text-amber hover:border-amber transition-colors" aria-label="LinkedIn">

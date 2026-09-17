@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brands — EnergyGurus.Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #0F2A47;
+    --navy-deep: #0A1D33;
+    --amber: #E0A73B;
+    --amber-deep: #B9832A;
+    --cream: #F7F4EC;
+    --paper: #FFFFFF;
+    --ink: #1E2A36;
+    --ink-soft: #55636E;
+    --line: #E3DFD3;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:'Fraunces', serif;color:var(--navy-deep);margin:0;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 28px;}
+
+  /* Site nav */
+  .sitebar{background:var(--navy-deep);color:#EFE9DA;padding:14px 0;}
+  .sitebar .wrap{display:flex;align-items:center;justify-content:space-between;}
+  .sitebar .mark{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px;letter-spacing:.2px;}
+  .sitebar .mark svg{width:17px;height:17px;flex-shrink:0;}
+  .sitebar nav{display:flex;gap:26px;font-size:13.5px;}
+  .sitebar nav a{color:#C7D0D8;}
+  .sitebar nav a.on, .sitebar nav a:hover{color:#fff;}
+
+  /* Page header */
+  .page-head{
+    background:var(--navy);
+    background-image: radial-gradient(1200px 220px at 85% -40%, rgba(224,167,59,0.14), transparent 60%);
+    color:#fff;padding:40px 0 32px;
+  }
+  .page-head h1{font-size:30px;font-weight:600;}
+  .page-head p{color:#C7D0D8;font-size:14.5px;margin-top:8px;max-width:56ch;}
+
+  /* Toolbar */
+  .toolbar{
+    background:var(--paper);border-bottom:1px solid var(--line);
+    padding:16px 0;position:sticky;top:0;z-index:10;
+  }
+  .toolbar .wrap{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+  .search-input{
+    flex:1;min-width:220px;padding:10px 14px;border:1px solid var(--line);
+    border-radius:var(--radius);font-size:14px;font-family:inherit;background:#FEFEFC;
+  }
+  .filter-select{
+    padding:10px 14px;border:1px solid var(--line);border-radius:var(--radius);
+    font-size:13.5px;font-family:inherit;background:#FEFEFC;color:var(--ink);
+  }
+  .cat-pills{display:flex;gap:8px;flex-wrap:wrap;}
+  .cat-pill{
+    font-size:13px;font-weight:600;padding:8px 15px;border-radius:100px;
+    border:1px solid var(--line);background:var(--paper);color:var(--ink-soft);cursor:pointer;
+  }
+  .cat-pill.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+
+  /* Grid */
+  .content{padding:32px 0 70px;}
+  .result-count{font-size:13px;color:var(--ink-soft);margin-bottom:18px;}
+  .brand-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+
+  .brand-card{
+    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px;display:flex;flex-direction:column;transition:box-shadow .15s ease, border-color .15s ease;
+  }
+  .brand-card:hover{border-color:#D8D2C0;box-shadow:0 6px 20px rgba(15,42,71,0.07);}
+  .brand-card.featured{border-color:var(--amber-deep);box-shadow:0 6px 20px rgba(185,131,42,0.12);}
+
+  .bc-top{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;}
+  .bc-mark{
+    width:56px;height:56px;border-radius:var(--radius);flex-shrink:0;
+    background:var(--navy);display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces',serif;font-weight:700;font-size:20px;color:#fff;
+  }
+  .bc-name-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+  .bc-name{font-size:16px;font-weight:600;color:var(--navy-deep);}
+  .bc-verified{
+    display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:600;
+    background:#FBF0DA;color:var(--amber-deep);padding:2px 7px;border-radius:100px;
+  }
+  .bc-verified svg{width:10px;height:10px;}
+  .bc-tagline{font-size:12.5px;color:var(--ink-soft);margin-top:4px;line-height:1.4;}
+
+  .bc-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+  .bc-chip{font-size:11px;background:var(--cream);border:1px solid var(--line);padding:3px 9px;border-radius:100px;color:var(--ink);}
+
+  .bc-stats{display:flex;gap:18px;margin-bottom:18px;padding-top:14px;border-top:1px solid var(--line);}
+  .bc-stat .num{font-size:14px;font-weight:600;color:var(--navy-deep);}
+  .bc-stat .lbl{font-size:10.5px;color:var(--ink-soft);margin-top:1px;}
+
+  .bc-action{
+    margin-top:auto;text-align:center;font-size:13px;font-weight:600;
+    padding:10px;border-radius:var(--radius);background:var(--cream);color:var(--navy-deep);
+    border:1px solid var(--line);
+  }
+  .brand-card:hover .bc-action{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+  @media (max-width:900px){
+    .brand-grid{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:620px){
+    .brand-grid{grid-template-columns:1fr;}
+    .sitebar nav{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="sitebar">
+  <div class="wrap">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 7" stroke="#E0A73B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      EnergyGurus.Online
+    </div>
+    <nav>
+      <a href="#">About Us</a>
+      <a href="#">Monitoring</a>
+      <a href="#" class="on">Brands</a>
+      <a href="#">Podcast</a>
+      <a href="#">News</a>
+    </nav>
+  </div>
+</div>
+
+<header class="page-head">
+  <div class="wrap">
+    <h1>Brands</h1>
+    <p>Verified solar and storage brands — checked for licencing, distribution, and after-sales support before they're listed here.</p>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="wrap">
+    <input class="search-input" placeholder="Search brands, e.g. Growatt, Huawei, LONGi">
+    <select class="filter-select" id="countryFilter"><option value="">All countries of origin</option><option>China</option><option>Germany</option><option>USA</option><option>Pakistan</option></select>
+    <select class="filter-select"><option>Sort: Featured first</option><option>Highest rated</option><option>A–Z</option></select>
+  </div>
+  <div class="wrap" style="margin-top:12px;">
+    <div class="cat-pills">
+      <button class="cat-pill active">All</button>
+      <button class="cat-pill">Solar Panels</button>
+      <button class="cat-pill">Inverters</button>
+      <button class="cat-pill">Batteries</button>
+      <button class="cat-pill">BESS</button>
+      <button class="cat-pill">Breakers</button>
+    </div>
+  </div>
+</div>
+
+<main class="content">
+  <div class="wrap">
+    <div class="result-count" id="resultCount">6 verified brands</div>
+    <div class="brand-grid" id="brandGrid">
+
+      <a href="brand-profile-page.html" class="brand-card featured" data-country="China">
+        <div class="bc-top">
+          <div class="bc-mark">G</div>
+          <div>
+            <div class="bc-name-row">
+              <span class="bc-name">Growatt</span>
+              <span class="bc-verified"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified</span>
+            </div>
+            <div class="bc-tagline">Global inverter and energy storage manufacturer, distributed in Pakistan through an authorized channel.</div>
+          </div>
+        </div>
+        <div class="bc-chips">
+          <span class="bc-chip">Solar Panels</span>
+          <span class="bc-chip">Inverters</span>
+          <span class="bc-chip">Batteries</span>
+        </div>
+        <div class="bc-stats">
+          <div class="bc-stat"><div class="num">4.6 ★</div><div class="lbl">128 reviews</div></div>
+          <div class="bc-stat"><div class="num">17 GW</div><div class="lbl">Inverter capacity</div></div>
+          <div class="bc-stat"><div class="num">3</div><div class="lbl">Distributors, PK</div></div>
+        </div>
+        <div class="bc-action">View Profile</div>
+      </a>
+
+      <a href="#" class="brand-card" data-country="China">
+        <div class="bc-top">
+          <div class="bc-mark" style="background:#1F2937;">H</div>
+          <div>
+            <div class="bc-name-row">
+              <span class="bc-name">Huawei</span>
+              <span class="bc-verified"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified</span>
+            </div>
+            <div class="bc-tagline">FusionSolar inverters and smart string ESS, with a growing service network in Pakistan.</div>
+          </div>
+        </div>
+        <div class="bc-chips">
+          <span class="bc-chip">Inverters</span>
+          <span class="bc-chip">BESS</span>
+        </div>
+        <div class="bc-stats">
+          <div class="bc-stat"><div class="num">4.5 ★</div><div class="lbl">64 reviews</div></div>
+          <div class="bc-stat"><div class="num">12 GW</div><div class="lbl">Inverter capacity</div></div>
+          <div class="bc-stat"><div class="num">2</div><div class="lbl">Distributors, PK</div></div>
+        </div>
+        <div class="bc-action">View Profile</div>
+      </a>
+
+      <a href="#" class="brand-card" data-country="China">
+        <div class="bc-top">
+          <div class="bc-mark" style="background:#7A4A1C;">L</div>
+          <div>
+            <div class="bc-name-row">
+              <span class="bc-name">LONGi</span>
+              <span class="bc-verified"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified</span>
+            </div>
+            <div class="bc-tagline">High-efficiency mono panels and the LONGi One integrated storage platform.</div>
+          </div>
+        </div>
+        <div class="bc-chips">
+          <span class="bc-chip">Solar Panels</span>
+          <span class="bc-chip">BESS</span>
+        </div>
+        <div class="bc-stats">
+          <div class="bc-stat"><div class="num">4.7 ★</div><div class="lbl">91 reviews</div></div>
+          <div class="bc-stat"><div class="num">45 GW</div><div class="lbl">Panel capacity</div></div>
+          <div class="bc-stat"><div class="num">4</div><div class="lbl">Distributors, PK</div></div>
+        </div>
+        <div class="bc-action">View Profile</div>
+      </a>
+
+      <a href="#" class="brand-card" data-country="China">
+        <div class="bc-top">
+          <div class="bc-mark" style="background:#3E5C4A;">J</div>
+          <div>
+            <div class="bc-name-row">
+              <span class="bc-name">Jinko Solar</span>
+              <span class="bc-verified"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified</span>
+            </div>
+            <div class="bc-tagline">TOPCon and bifacial panel manufacturer with a broad wattage range for residential and commercial roofs.</div>
+          </div>
+        </div>
+        <div class="bc-chips">
+          <span class="bc-chip">Solar Panels</span>
+        </div>
+        <div class="bc-stats">
+          <div class="bc-stat"><div class="num">4.4 ★</div><div class="lbl">57 reviews</div></div>
+          <div class="bc-stat"><div class="num">56 GW</div><div class="lbl">Panel capacity</div></div>
+          <div class="bc-stat"><div class="num">3</div><div class="lbl">Distributors, PK</div></div>
+        </div>
+        <div class="bc-action">View Profile</div>
+      </a>
+
+      <a href="#" class="brand-card" data-country="China">
+        <div class="bc-top">
+          <div class="bc-mark" style="background:#4A3B7A;">S</div>
+          <div>
+            <div class="bc-name-row">
+              <span class="bc-name">Solis</span>
+              <span class="bc-verified"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified</span>
+            </div>
+            <div class="bc-tagline">String and hybrid inverters for residential and light commercial systems.</div>
+          </div>
+        </div>
+        <div class="bc-chips">
+          <span class="bc-chip">Inverters</span>
+        </div>
+        <div class="bc-stats">
+          <div class="bc-stat"><div class="num">4.3 ★</div><div class="lbl">39 reviews</div></div>
+          <div class="bc-stat"><div class="num">8 GW</div><div class="lbl">Inverter capacity</div></div>
+          <div class="bc-stat"><div class="num">2</div><div class="lbl">Distributors, PK</div></div>
+        </div>
+        <div class="bc-action">View Profile</div>
+      </a>
+
+      <a href="#" class="brand-card" data-country="Pakistan">
+        <div class="bc-top">
+          <div class="bc-mark" style="background:#8A2E2E;">C</div>
+          <div>
+            <div class="bc-name-row">
+              <span class="bc-name">Crown Micro</span>
+              <span class="bc-verified"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified</span>
+            </div>
+            <div class="bc-tagline">Protection devices and breakers built for DC solar arrays and hybrid installations.</div>
+          </div>
+        </div>
+        <div class="bc-chips">
+          <span class="bc-chip">Breakers</span>
+        </div>
+        <div class="bc-stats">
+          <div class="bc-stat"><div class="num">4.2 ★</div><div class="lbl">18 reviews</div></div>
+          <div class="bc-stat"><div class="num">—</div><div class="lbl">Capacity n/a</div></div>
+          <div class="bc-stat"><div class="num">1</div><div class="lbl">Distributor, PK</div></div>
+        </div>
+        <div class="bc-action">View Profile</div>
+      </a>
+
+    </div>
+  </div>
+</main>
+
+<script>
+  const countryFilter = document.getElementById('countryFilter');
+  const brandGrid = document.getElementById('brandGrid');
+  const resultCount = document.getElementById('resultCount');
+  const cards = Array.from(brandGrid.querySelectorAll('.brand-card'));
+
+  countryFilter.addEventListener('change', () => {
+    const selected = countryFilter.value;
+    let visible = 0;
+    cards.forEach(card => {
+      const match = !selected || card.dataset.country === selected;
+      card.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    resultCount.textContent = `${visible} verified brand${visible === 1 ? '' : 's'}${selected ? ' from ' + selected : ''}`;
+  });
+</script>
+
+</body>
+</html>

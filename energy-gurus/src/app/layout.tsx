@@ -126,7 +126,7 @@ export default function RootLayout({
         "url": "https://www.energygurus.online",
         "logo": "https://www.energygurus.online/logo-icon.svg",
         "sameAs": [
-          "https://www.tiktok.com/@energygurus.online",
+          "https://www.tiktok.com/@energygurusonline",
           "https://www.linkedin.com/company/energygurusonline",
           "https://x.com/energyguruspk",
           "https://www.youtube.com/@energygurus.online",

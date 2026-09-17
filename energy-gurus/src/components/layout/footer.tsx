@@ -10,7 +10,7 @@ export function Footer() {
                         Powering informed solar decisions — brands, installers, and expertise, all in one place.
                     </div>
                     <div className="flex gap-3 items-center">
-                        <a href="https://www.tiktok.com/@energygurus.online" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-paper/5 border border-paper/10 text-amber hover:bg-amber hover:text-ink transition-colors" aria-label="TikTok">
+                        <a href="https://www.tiktok.com/@energygurusonline" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-paper/5 border border-paper/10 text-amber hover:bg-amber hover:text-ink transition-colors" aria-label="TikTok">
                             <Music2 className="w-5 h-5" />
                         </a>
                         <a href="https://www.linkedin.com/company/energygurusonline" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-paper/5 border border-paper/10 text-amber hover:bg-amber hover:text-ink transition-colors" aria-label="LinkedIn">

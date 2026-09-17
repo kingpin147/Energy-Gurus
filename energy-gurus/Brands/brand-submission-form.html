@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add / Edit Brand — EnergyGurus.Online Admin</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --navy: #0F2A47;
+    --navy-deep: #0A1D33;
+    --amber: #E0A73B;
+    --amber-deep: #B9832A;
+    --cream: #F7F4EC;
+    --paper: #FFFFFF;
+    --ink: #1E2A36;
+    --ink-soft: #55636E;
+    --line: #E3DFD3;
+    --good: #3E7D5A;
+    --good-bg: #E8F2EC;
+    --warn: #B9832A;
+    --warn-bg: #FBF0DA;
+    --danger: #B4453C;
+    --danger-bg: #F8E9E7;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:'Fraunces', serif;color:var(--navy-deep);margin:0;}
+  a{color:inherit;}
+  input,select,textarea{font-family:inherit;}
+
+  /* ---- Admin top bar ---- */
+  .adminbar{
+    background:var(--navy-deep);
+    color:#EFE9DA;
+    padding:10px 0;
+  }
+  .adminbar .wrap{display:flex;align-items:center;justify-content:space-between;max-width:1180px;margin:0 auto;padding:0 28px;}
+  .adminbar .mark{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;}
+  .adminbar .mark svg{width:15px;height:15px;}
+  .adminbar .crumbs{font-size:13px;color:#B9C3CC;}
+  .adminbar .crumbs a{color:#DCE3E8;text-decoration:none;}
+  .adminbar .crumbs a:hover{text-decoration:underline;}
+
+  /* ---- Status / action header (sticky) ---- */
+  .statusbar{
+    position:sticky;top:0;z-index:20;
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+    padding:16px 0;
+  }
+  .statusbar .wrap{
+    max-width:1180px;margin:0 auto;padding:0 28px;
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  }
+  .statusbar h1{font-size:21px;font-weight:600;}
+  .statusbar .meta{font-size:12.5px;color:var(--ink-soft);margin-top:3px;}
+  .status-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:100px;
+  }
+  .status-draft{background:#EEF0F2;color:#54606A;}
+  .status-pending{background:var(--warn-bg);color:var(--warn);}
+  .status-changes{background:var(--danger-bg);color:var(--danger);}
+  .status-live{background:var(--good-bg);color:var(--good);}
+  .status-pill svg{width:12px;height:12px;}
+  .status-left{display:flex;align-items:center;gap:12px;}
+  .actions{display:flex;gap:10px;}
+  .btn{
+    font-size:13.5px;font-weight:600;
+    padding:10px 18px;border-radius:var(--radius);
+    border:1px solid transparent;cursor:pointer;white-space:nowrap;
+  }
+  .btn-amber{background:var(--amber);color:var(--navy-deep);}
+  .btn-amber:hover{background:#eab857;}
+  .btn-ghost{background:transparent;border-color:var(--line);color:var(--ink);}
+  .btn-ghost:hover{border-color:#c9c4b3;}
+  .btn-navy{background:var(--navy);color:#fff;}
+  .btn-navy:hover{background:var(--navy-deep);}
+
+  /* review-notes banner */
+  .review-banner{
+    background:var(--danger-bg);border-bottom:1px solid #EAD2CE;
+    display:none;
+  }
+  .review-banner.show{display:block;}
+  .review-banner .wrap{max-width:1180px;margin:0 auto;padding:14px 28px;display:flex;gap:12px;align-items:flex-start;}
+  .review-banner svg{width:18px;height:18px;color:var(--danger);flex-shrink:0;margin-top:2px;}
+  .review-banner b{color:var(--danger);}
+  .review-banner p{margin:3px 0 0;font-size:13.5px;color:#7A342C;}
+
+  /* ---- Layout ---- */
+  .layout{max-width:1180px;margin:0 auto;padding:28px;display:grid;grid-template-columns:220px 1fr;gap:32px;align-items:start;}
+  .sidenav{position:sticky;top:88px;display:flex;flex-direction:column;gap:2px;}
+  .sidenav a{
+    font-size:13.5px;font-weight:500;color:var(--ink-soft);
+    padding:9px 12px;border-radius:var(--radius);text-decoration:none;
+    border-left:3px solid transparent;
+  }
+  .sidenav a:hover{color:var(--ink);background:#FBFAF6;}
+  .sidenav a.on{color:var(--navy-deep);font-weight:600;border-left-color:var(--amber);background:#FBFAF6;}
+  .sidenav .count{
+    float:right;font-size:11px;background:var(--cream);border:1px solid var(--line);
+    padding:1px 7px;border-radius:100px;color:var(--ink-soft);
+  }
+
+  .main{display:flex;flex-direction:column;gap:22px;}
+  .panel{
+    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    padding:26px;scroll-margin-top:90px;
+  }
+  .panel-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--line);}
+  .panel-head h2{font-size:18px;font-weight:600;}
+  .panel-head p{font-size:13px;color:var(--ink-soft);margin-top:4px;max-width:60ch;}
+
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field.full{grid-column:1 / -1;}
+  .field label{font-size:12.5px;font-weight:600;color:var(--ink);}
+  .field .hint{font-size:11.5px;color:var(--ink-soft);font-weight:400;}
+  .field input[type=text], .field input[type=number], .field input[type=url], .field input[type=email], .field select, .field textarea{
+    border:1px solid var(--line);border-radius:var(--radius);padding:9px 11px;font-size:13.5px;background:#FEFEFC;color:var(--ink);
+  }
+  .field textarea{resize:vertical;min-height:80px;}
+  .field input:focus, .field select:focus, .field textarea:focus{outline:2px solid rgba(224,167,59,0.5);outline-offset:0;border-color:var(--amber-deep);}
+
+  .checkbox-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .cbox{display:flex;align-items:center;gap:7px;font-size:13px;}
+  .cbox input{accent-color:var(--amber-deep);}
+
+  .upload-box{
+    border:1.5px dashed var(--line);border-radius:var(--radius);
+    padding:18px;text-align:center;font-size:12.5px;color:var(--ink-soft);
+    cursor:pointer;background:#FDFCF9;
+  }
+  .upload-box:hover{border-color:var(--amber-deep);color:var(--ink);}
+  .upload-box svg{width:20px;height:20px;margin-bottom:6px;color:var(--amber-deep);}
+  .upload-spec{font-size:11px;color:var(--ink-soft);margin-top:5px;line-height:1.4;}
+
+  /* First-time submission demo: locks everything past Profile */
+  .locked-section{position:relative;}
+  .locked-section .panel-head, .locked-section .rep-list, .locked-section .add-row-btn,
+  .locked-section .add-cat-btn, .locked-section > div[style*="background:var(--cream)"]{display:none !important;}
+  .lock-notice{
+    display:none;text-align:center;padding:40px 20px;color:var(--ink-soft);
+  }
+  .locked-section .lock-notice{display:block;}
+  .lock-notice svg{width:26px;height:26px;color:var(--line);margin-bottom:12px;}
+  .lock-notice p{font-size:13.5px;max-width:42ch;margin:0 auto;}
+  .sidenav a.locked{color:#B9B4A3;pointer-events:none;}
+  .sidenav a.locked .lock-icon{display:inline;margin-left:4px;}
+  .sidenav a .lock-icon{display:none;width:11px;height:11px;vertical-align:-1px;}
+
+  /* Repeatable rows (products, distributors, installers, retailers, centres, team) */
+  .rep-list{display:flex;flex-direction:column;gap:14px;}
+  .rep-item{
+    border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px;position:relative;background:#FDFCF9;
+  }
+  .rep-item-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .rep-item-head .idx{font-size:12px;font-weight:600;color:var(--amber-deep);text-transform:uppercase;letter-spacing:.3px;}
+  .rep-remove{
+    background:none;border:none;color:var(--danger);font-size:12px;font-weight:600;cursor:pointer;
+    display:flex;align-items:center;gap:4px;
+  }
+  .rep-remove svg{width:13px;height:13px;}
+  .rep-duplicate{
+    background:none;border:none;color:var(--navy-deep);font-size:12px;font-weight:600;cursor:pointer;
+    display:flex;align-items:center;gap:4px;margin-right:14px;
+  }
+  .rep-duplicate svg{width:13px;height:13px;}
+  .rep-duplicate:hover{color:var(--amber-deep);}
+  .add-row-btn{
+    display:inline-flex;align-items:center;gap:6px;
+    background:none;border:1.5px dashed var(--line);color:var(--navy-deep);
+    font-size:13px;font-weight:600;padding:11px 16px;border-radius:var(--radius);
+    cursor:pointer;margin-top:6px;width:100%;justify-content:center;
+  }
+  .add-row-btn:hover{border-color:var(--amber-deep);background:#FDFAF3;}
+  .add-row-btn svg{width:14px;height:14px;}
+
+  .add-cat-btn{
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--cream);border:1px solid var(--line);color:var(--navy-deep);
+    font-size:12.5px;font-weight:600;padding:9px 14px;border-radius:100px;
+    cursor:pointer;
+  }
+  .add-cat-btn:hover{border-color:var(--amber-deep);background:#FDFAF3;}
+  .add-cat-btn svg{width:13px;height:13px;color:var(--amber-deep);}
+
+  .pick-map-btn{
+    display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+    background:var(--cream);border:1px solid var(--line);color:var(--navy-deep);
+    font-size:12.5px;font-weight:600;padding:9px 12px;border-radius:var(--radius);cursor:pointer;
+  }
+  .pick-map-btn:hover{border-color:var(--amber-deep);}
+  .pick-map-btn svg{width:14px;height:14px;flex-shrink:0;color:var(--amber-deep);}
+
+  /* Certified installers: existing-directory search */
+  .directory-search{
+    display:flex;gap:10px;margin-bottom:14px;
+  }
+  .directory-search input{flex:1;border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;font-size:13.5px;}
+  .picked-list{display:flex;flex-direction:column;gap:8px;}
+  .picked-row{
+    display:flex;align-items:center;justify-content:space-between;
+    border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;background:#FDFCF9;
+  }
+  .picked-main{display:flex;flex-direction:column;}
+  .picked-main .pname{font-size:13.5px;font-weight:600;color:var(--navy-deep);}
+  .picked-main .pcity{font-size:12px;color:var(--ink-soft);}
+  .picked-actions{display:flex;align-items:center;gap:10px;}
+  .tier-select{border:1px solid var(--line);border-radius:var(--radius);padding:6px 8px;font-size:12.5px;}
+
+  .section-divider{border:none;border-top:1px solid var(--line);margin:18px 0;}
+
+  .approval-log{display:flex;flex-direction:column;gap:10px;margin-top:6px;}
+  .log-row{display:flex;gap:10px;font-size:12.5px;color:var(--ink-soft);}
+  .log-dot{width:7px;height:7px;border-radius:50%;background:var(--line);margin-top:5px;flex-shrink:0;}
+  .log-dot.ok{background:var(--good);}
+  .log-dot.pend{background:var(--amber-deep);}
+  .log-row b{color:var(--ink);}
+
+  @media (max-width:900px){
+    .layout{grid-template-columns:1fr;}
+    .sidenav{position:static;flex-direction:row;overflow-x:auto;}
+    .field-row{grid-template-columns:1fr;}
+    .checkbox-grid{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="adminbar">
+<div class="wrap">
+<div class="mark">
+<svg fill="none" viewbox="0 0 24 24"><path d="M4 12.5l5.5 5.5L20 7" stroke="#E0A73B" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"></path></svg>
+      EnergyGurus.Online — Admin
+    </div>
+<div class="crumbs"><a href="#">Brands</a>  /  <a href="#">All Brands</a>  /  Growatt</div>
+</div>
+</div>
+<div class="review-banner show" id="reviewBanner">
+<div class="wrap">
+<svg fill="none" viewbox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9L2.8 17.3a1.6 1.6 0 001.4 2.4h15.6a1.6 1.6 0 001.4-2.4L13.7 3.9a1.6 1.6 0 00-2.8 0z" stroke="currentColor" stroke-linejoin="round" stroke-width="1.7"></path></svg>
+<div>
+<b>Changes requested by admin</b>
+<p>"Distributor list needs contact numbers before this can go live. Product datasheets are missing for 2 items — please attach before resubmitting."</p>
+</div>
+</div>
+</div>
+<div class="statusbar">
+<div class="wrap">
+<div class="status-left">
+<div>
+<h1>Growatt</h1>
+<div class="meta">Last saved 3 minutes ago · Editing as Aafaaq Ali Khan</div>
+</div>
+<span class="status-pill status-changes">
+<svg fill="none" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"></circle><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path></svg>
+        Changes Requested
+      </span>
+</div>
+<div class="actions">
+<button class="btn btn-ghost">Preview Draft</button>
+<button class="btn btn-navy">Save Draft</button>
+<button class="btn btn-amber">Submit for Review</button>
+</div>
+</div>
+<div class="wrap" style="margin-top:12px;">
+<div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);background:var(--cream);border:1px solid var(--line);border-radius:var(--radius);padding:9px 14px;">
+<svg viewBox="0 0 24 24" fill="none" style="width:14px;height:14px;color:var(--good);flex-shrink:0;"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M8 12.5l2.5 2.5L16 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<span><b style="color:var(--ink);">Live on the public page:</b> the version approved Aug 30, 2026. Everything you edit here stays in draft and won't replace it until this submission is approved — a "Changes Requested" status never unpublishes what's already live.</span>
+<button onclick="toggleNewBrandDemo(this)" style="margin-left:auto;background:none;border:1px solid var(--line);border-radius:100px;padding:5px 12px;font-size:11.5px;font-weight:600;color:var(--navy-deep);cursor:pointer;white-space:nowrap;">Preview: first-time submission</button>
+</div>
+</div>
+</div>
+<div class="layout">
+<nav class="sidenav" id="sidenav">
+<a class="on" href="#sec-profile">Profile</a>
+<a href="#sec-products" data-lockable>Products <span class="count">5</span><svg class="lock-icon" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="1.6"/></svg></a>
+<a href="#sec-news" data-lockable>News &amp; Updates <span class="count">5</span><svg class="lock-icon" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="1.6"/></svg></a>
+<a href="#sec-distributors" data-lockable>Authorized Distributors <span class="count">3</span><svg class="lock-icon" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="1.6"/></svg></a>
+<a href="#sec-retailers" data-lockable>Authorized Retailers <span class="count">2</span><svg class="lock-icon" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="1.6"/></svg></a>
+<a href="#sec-centres" data-lockable>Flagship Stores &amp; Service Centres <span class="count">4</span><svg class="lock-icon" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="1.6"/></svg></a>
+<a href="#sec-history">Approval History</a>
+</nav>
+<div class="main">
+<!-- PROFILE -->
+<section class="panel" id="sec-profile">
+<div class="panel-head">
+<div>
+<h2>Profile</h2>
+<p>Core brand identity, company overview, and after-sales contact details shown on the public profile page.</p>
+</div>
+</div>
+<div class="field-row">
+<div class="field"><label>Brand name</label><input type="text" value="Growatt"/></div>
+<div class="field"><label>Website</label><input type="url" value="https://growatt.com"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Founded</label><input type="text" value="2010"/></div>
+<div class="field"><label>Headquarters</label><input type="text" value="Shenzhen, China"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Country of origin <span class="hint">used to filter the Brands directory</span></label>
+<select id="countryOfOrigin" onchange="document.getElementById('countryOtherField').hidden = (this.value !== 'Other')">
+<option>China</option>
+<option>Germany</option>
+<option>USA</option>
+<option>Japan</option>
+<option>South Korea</option>
+<option>India</option>
+<option>Pakistan</option>
+<option>Other</option>
+</select>
+</div>
+<div class="field" id="countryOtherField" hidden>
+<label>Specify country</label>
+<input type="text" id="countryOtherInput" placeholder="e.g. Vietnam"/>
+</div>
+</div>
+<div class="field-row">
+<div class="field full"><label>Tagline <span class="hint">— shown under the brand name</span></label><input type="text" value="Global inverter and energy storage manufacturer, distributed in Pakistan through an authorized channel partner network."/></div>
+</div>
+<div class="field-row">
+<div class="field full"><label>About / company overview</label><textarea>Growatt designs and manufactures string inverters, hybrid inverters, and residential and commercial energy storage systems, with a product range spanning off-grid, on-grid, and hybrid solar applications.</textarea></div>
+</div>
+<div class="field-row">
+<div class="field full"><label>Global locations <span class="hint">comma separated</span></label><input type="text" value="Germany, USA, Brazil, India, Pakistan"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Solar Panels — annual capacity <span class="hint">optional</span></label><input type="text" placeholder="e.g. 5 GW"/></div>
+<div class="field"><label>Inverters — annual capacity</label><input type="text" value="17 GW"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Batteries — annual capacity <span class="hint">optional</span></label><input type="text" placeholder="e.g. 2 GWh"/></div>
+<div class="field"><label>BESS — annual capacity <span class="hint">optional</span></label><input type="text" placeholder="e.g. 3 GWh"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Breakers — annual capacity <span class="hint">optional</span></label><input type="text" placeholder="e.g. 10 million units"/></div>
+</div>
+<div class="field-row">
+<div class="field full">
+<label>Product categories</label>
+<div class="checkbox-grid">
+<label class="cbox"><input checked="" type="checkbox"/> Solar Panels</label>
+<label class="cbox"><input checked="" type="checkbox"/> Inverters</label>
+<label class="cbox"><input checked="" type="checkbox"/> Batteries</label>
+<label class="cbox"><input type="checkbox"/> BESS</label>
+<label class="cbox"><input type="checkbox"/> Breakers</label>
+</div>
+</div>
+</div>
+<hr class="section-divider"/>
+<h3 style="font-size:15px;font-weight:600;margin-bottom:4px;">Social media handles</h3>
+<p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;">Shown as icon links under the brand overview. Leave any platform blank if the brand isn't on it.</p>
+<div class="field-row">
+<div class="field"><label>LinkedIn</label><input placeholder="https://linkedin.com/company/..." type="url" value="https://linkedin.com/company/growatt-new-energy"/></div>
+<div class="field"><label>Facebook</label><input placeholder="https://facebook.com/..." type="url" value="https://facebook.com/growattnewenergy"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Instagram</label><input placeholder="https://instagram.com/..." type="url"/></div>
+<div class="field"><label>X (Twitter)</label><input placeholder="https://x.com/..." type="url"/></div>
+</div>
+<div class="field-row" style="margin-bottom:0;">
+<div class="field"><label>YouTube</label><input placeholder="https://youtube.com/@..." type="url"/></div>
+<div class="field"><label>TikTok</label><input placeholder="https://tiktok.com/@..." type="url"/></div>
+</div>
+<hr class="section-divider"/>
+<div class="field-row">
+<div class="field"><label>Brand logo</label><div class="upload-box"><svg fill="none" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg><div>Drop logo file or click to upload</div></div><div class="upload-spec">PNG, transparent background, 400×400px, max 2MB</div></div>
+<div class="field"><label>Manufacturing facility photo/video</label><div class="upload-box"><svg fill="none" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg><div>Drop file or click to upload</div></div><div class="upload-spec">JPG/PNG 1600×900px (16:9) max 5MB, or MP4 video max 50MB</div></div>
+</div>
+<hr class="section-divider"/>
+<h3 style="font-size:15px;font-weight:600;margin-bottom:12px;">After-sales contact</h3>
+<div class="field-row">
+<div class="field"><label>Phone</label><input type="text" value="+92 42 111 000 111"/></div>
+<div class="field"><label>Email</label><input type="email" value="service.pk@growatt.com"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>WhatsApp number</label><input type="text" value="+92 300 1112222"/></div>
+<div class="field"><label>WhatsApp default message <span class="hint">optional</span></label><input placeholder="e.g. Hi, I need after-sales support for my Growatt system" type="text"/></div>
+</div>
+<p style="font-size:12.5px;color:var(--ink-soft);margin:4px 0 12px;">Add every office relevant to this brand — head office, regional offices, or country offices. Shown on the profile page and used to route customer enquiries by region.</p>
+<div class="rep-list" id="office-list">
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Office 1</span><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div>
+<div class="field-row">
+<div class="field"><label>Office label</label><input type="text" value="Regional Office"/></div>
+<div class="field"><label>Region covered</label><input type="text" value="Pakistan"/></div>
+</div>
+<div class="field-row">
+<div class="field full"><label>Address</label><input type="text" value="Regional office — Lahore, PK"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Latitude</label><input inputmode="decimal" type="text" value="31.5204"/></div>
+<div class="field"><label>Longitude</label><input inputmode="decimal" type="text" value="74.3587"/></div>
+<div class="field" style="justify-content:flex-end;"><label> </label><button class="pick-map-btn" type="button"><svg fill="none" viewbox="0 0 24 24"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" stroke="currentColor" stroke-width="1.6"></path><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.6"></circle></svg> Pick on map</button></div>
+</div>
+<label class="cbox" style="margin-bottom:10px;"><input type="checkbox" class="same-contact-toggle" checked/> Same phone/email/WhatsApp as main after-sales contact</label>
+<div class="field-row same-contact-fields" style="margin-bottom:0;" hidden>
+<div class="field"><label>Phone <span class="hint">optional</span></label><input type="text" value="+92 42 111 000 111"/></div>
+<div class="field"><label>Email <span class="hint">optional</span></label><input placeholder="Leave blank to use main contact" type="email"/></div>
+<div class="field"><label>WhatsApp <span class="hint">optional</span></label><input placeholder="Leave blank to use main contact" type="text"/></div>
+</div>
+</div>
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Office 2</span><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div>
+<div class="field-row">
+<div class="field"><label>Office label</label><input type="text" value="Head Office"/></div>
+<div class="field"><label>Region covered</label><input type="text" value="Global"/></div>
+</div>
+<div class="field-row">
+<div class="field full"><label>Address</label><input type="text" value="Shenzhen, China"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Latitude</label><input inputmode="decimal" type="text" value="22.5431"/></div>
+<div class="field"><label>Longitude</label><input inputmode="decimal" type="text" value="114.0579"/></div>
+<div class="field" style="justify-content:flex-end;"><label> </label><button class="pick-map-btn" type="button"><svg fill="none" viewbox="0 0 24 24"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" stroke="currentColor" stroke-width="1.6"></path><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.6"></circle></svg> Pick on map</button></div>
+</div>
+<label class="cbox" style="margin-bottom:10px;"><input type="checkbox" class="same-contact-toggle" checked/> Same phone/email/WhatsApp as main after-sales contact</label>
+<div class="field-row same-contact-fields" style="margin-bottom:0;" hidden>
+<div class="field"><label>Phone <span class="hint">optional</span></label><input placeholder="Leave blank to use main contact" type="text"/></div>
+<div class="field"><label>Email <span class="hint">optional</span></label><input placeholder="Leave blank to use main contact" type="email"/></div>
+<div class="field"><label>WhatsApp <span class="hint">optional</span></label><input placeholder="Leave blank to use main contact" type="text"/></div>
+</div>
+</div>
+</div>
+<button class="add-row-btn" data-target="office-list"><svg fill="none" viewbox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path></svg> Add office</button>
+<hr class="section-divider"/>
+<h3 style="font-size:15px;font-weight:600;margin-bottom:4px;">Local team</h3>
+<p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;">Sales, Technical, and After-Sales contacts shown on the profile page.</p>
+<div class="rep-list" id="team-list">
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Sales Team</span><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div>
+<div class="field-row">
+<div class="field"><label>Name</label><input type="text" value="Hassan Ali"/></div>
+<div class="field"><label>Role</label><input type="text" value="Regional Sales Manager"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Photo <span class="hint">optional</span></label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg></div><div class="upload-spec">JPG/PNG, square 400×400px, max 2MB. Falls back to initials if left blank.</div></div>
+<div class="field"><label>LinkedIn profile <span class="hint">optional</span></label><input type="url" value="https://linkedin.com/in/hassan-ali-growatt"/></div>
+</div>
+</div>
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Technical Team</span><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div>
+<div class="field-row">
+<div class="field"><label>Name</label><input type="text" value="Faisal Khan"/></div>
+<div class="field"><label>Role</label><input type="text" value="Technical Support Lead"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Photo <span class="hint">optional</span></label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg></div><div class="upload-spec">JPG/PNG, square 400×400px, max 2MB. Falls back to initials if left blank.</div></div>
+<div class="field"><label>LinkedIn profile <span class="hint">optional</span></label><input placeholder="https://linkedin.com/in/..." type="url"/></div>
+</div>
+</div>
+</div>
+<button class="add-row-btn" data-target="team-list"><svg fill="none" viewbox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path></svg> Add team member</button>
+<hr class="section-divider"/>
+<h3 style="font-size:15px;font-weight:600;margin-bottom:4px;">Key worldwide projects</h3>
+<p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;">Notable installations that showcase this brand's products globally. Shown on the profile page under "Key Worldwide Projects."</p>
+<div class="rep-list" id="project-list">
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Project 1</span><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div>
+<div class="field-row">
+<div class="field"><label>Project title</label><input type="text" value="120 MW Utility-Scale Plant — Rajasthan, India"/></div>
+<div class="field"><label>Location</label><input type="text" value="Rajasthan, India"/></div>
+</div>
+<div class="field-row" style="margin-bottom:0;">
+<div class="field full"><label>Description</label><input type="text" value="Hybrid inverter deployment across a multi-phase solar farm rollout."/></div>
+</div>
+<div class="field-row">
+<div class="field full"><label>Project photos <span class="hint">multiple allowed</span></label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg><div>Drop photos or click to upload — add as many as you like</div></div><div class="upload-spec">JPG/PNG only, 1600×900px (16:9) recommended, max 5MB each</div></div>
+</div>
+</div>
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Project 2</span><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div>
+<div class="field-row">
+<div class="field"><label>Project title</label><input type="text" value="Residential Storage Rollout — Bavaria, Germany"/></div>
+<div class="field"><label>Location</label><input type="text" value="Bavaria, Germany"/></div>
+</div>
+<div class="field-row" style="margin-bottom:0;">
+<div class="field full"><label>Description</label><input type="text" value="8,000+ home battery installations supporting a regional self-consumption programme."/></div>
+</div>
+<div class="field-row">
+<div class="field full"><label>Project photos <span class="hint">multiple allowed</span></label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg><div>Drop photos or click to upload — add as many as you like</div></div><div class="upload-spec">JPG/PNG only, 1600×900px (16:9) recommended, max 5MB each</div></div>
+</div>
+</div>
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Project 3</span><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div>
+<div class="field-row">
+<div class="field"><label>Project title</label><input type="text" value="Commercial Rooftop Portfolio — São Paulo, Brazil"/></div>
+<div class="field"><label>Location</label><input type="text" value="São Paulo, Brazil"/></div>
+</div>
+<div class="field-row" style="margin-bottom:0;">
+<div class="field full"><label>Description</label><input type="text" value="String inverter deployment across 40 commercial rooftop sites."/></div>
+</div>
+<div class="field-row">
+<div class="field full"><label>Project photos <span class="hint">multiple allowed</span></label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg><div>Drop photos or click to upload — add as many as you like</div></div><div class="upload-spec">JPG/PNG only, 1600×900px (16:9) recommended, max 5MB each</div></div>
+</div>
+</div>
+</div>
+<button class="add-row-btn" data-target="project-list"><svg fill="none" viewbox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path></svg> Add project</button>
+</section>
+<!-- PRODUCTS -->
+<section class="panel" id="sec-products">
+<div class="lock-notice">
+<svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="1.6"/></svg>
+<p>Complete and submit your Profile first. This section unlocks once your Profile is approved for the first time.</p>
+</div>
+<div class="panel-head">
+<div>
+<h2>Products</h2>
+<p>Pick a category first — the spec fields below change to match it, so a panel asks for efficiency and degradation while a breaker asks for pole count and amperage. Use the buttons below to add as many of each type as you need.</p>
+</div>
+</div>
+
+<div style="background:var(--cream);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:20px;">
+<label class="cbox" style="margin-bottom:10px;font-weight:600;"><input type="checkbox" id="sharedWarrantyToggle" checked/> Use one warranty terms &amp; conditions document for all products</label>
+<div id="sharedWarrantyUpload">
+<div class="field"><div class="upload-box" style="padding:12px;"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin:0;"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><div>Drop file or click to upload</div></div><div class="upload-spec">PDF only, max 5MB — applies to every product below unless overridden individually</div></div>
+</div>
+<p id="sharedWarrantyNote" style="font-size:12px;color:var(--ink-soft);margin:8px 0 0;" hidden>Uncheck a product's own "use shared policy" box below if a specific product needs different terms (e.g. a longer panel warranty than your standard policy).</p>
+</div>
+
+<div class="rep-list" id="product-list">
+<!-- Example: Solar Panel -->
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Product 1 — Solar Panel</span><div style="display:flex;align-items:center;"><button class="rep-duplicate" type="button"><svg fill="none" viewbox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"></rect><path d="M16 8V5.5A1.5 1.5 0 0014.5 4h-9A1.5 1.5 0 004 5.5v9A1.5 1.5 0 005.5 16H8" stroke="currentColor" stroke-width="1.6"></path></svg> Duplicate</button><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div></div>
+<div class="field-row">
+<div class="field"><label>Model name</label><input type="text" value="Growatt GNM-585M"/></div>
+<div class="field"><label>Category</label>
+<select class="cat-select">
+<option selected="" value="panel">Solar Panel</option>
+<option value="inverter">Inverter</option>
+<option value="res-battery">Battery</option>
+<option value="bess">BESS</option>
+<option value="breaker">Breaker</option>
+</select>
+</div>
+</div>
+<div class="spec-group" data-cat="panel">
+<div class="field-row">
+<div class="field"><label>Technology</label><select><option>TOPCon</option><option>Back Contact</option><option>HJT</option><option>Other</option></select></div>
+<div class="field"><label>Type</label><select><option>Bifacial</option><option>Monofacial</option></select></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Wattage (W)</label><input type="text" value="585"/></div>
+<div class="field"><label>Efficiency (%)</label><input type="text" value="22.6"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Module width (mm)</label><input type="text" value="1134"/></div>
+<div class="field"><label>Module height (mm)</label><input type="text" value="2278"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Yearly degradation (%/yr)</label><input type="text" value="0.4"/></div>
+<div class="field"><label>Performance warranty (yrs)</label><input type="text" value="30"/></div>
+<div class="field"><label>Product warranty (yrs)</label><input type="text" value="15"/></div>
+</div>
+</div>
+<div class="spec-group" data-cat="inverter" hidden=""></div>
+<div class="spec-group" data-cat="res-battery" hidden=""></div>
+<div class="spec-group" data-cat="bess" hidden=""></div>
+<div class="spec-group" data-cat="breaker" hidden=""></div>
+<div class="field-row" style="margin-top:4px;">
+<div class="field"><label>Product image</label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg></div><div class="upload-spec">JPG/PNG, square 800×800px, white or transparent background, max 2MB</div></div>
+<div class="field"><label>Datasheet (PDF)</label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg></div><div class="upload-spec">PDF only, max 10MB</div></div>
+</div>
+<div class="field-row">
+<label class="cbox warranty-override-toggle-label" style="grid-column:1/-1;margin-bottom:8px;"><input type="checkbox" class="warranty-override-toggle"/> This product needs different warranty terms than the shared policy above</label>
+<div class="field full warranty-override-field" hidden><label>Warranty terms &amp; conditions (PDF)</label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg><div>Drop file or click to upload</div></div><div class="upload-spec">PDF only, max 5MB — coverage period, exclusions, and how to file a claim</div></div>
+</div>
+</div>
+<!-- Example: Inverter -->
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Product 2 — Inverter</span><div style="display:flex;align-items:center;"><button class="rep-duplicate" type="button"><svg fill="none" viewbox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"></rect><path d="M16 8V5.5A1.5 1.5 0 0014.5 4h-9A1.5 1.5 0 004 5.5v9A1.5 1.5 0 005.5 16H8" stroke="currentColor" stroke-width="1.6"></path></svg> Duplicate</button><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div></div>
+<div class="field-row">
+<div class="field"><label>Model name</label><input type="text" value="MIN 6000TL-X"/></div>
+<div class="field"><label>Category</label>
+<select class="cat-select">
+<option value="panel">Solar Panel</option>
+<option selected="" value="inverter">Inverter</option>
+<option value="res-battery">Battery</option>
+<option value="bess">BESS</option>
+<option value="breaker">Breaker</option>
+</select>
+</div>
+</div>
+<div class="spec-group" data-cat="panel" hidden=""></div>
+<div class="spec-group" data-cat="inverter">
+<div class="field-row">
+<div class="field"><label>Inverter type</label><select><option>High Voltage</option><option>Low Voltage</option></select></div>
+<div class="field"><label>Size (kW)</label><input type="text" value="6"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Phase</label><select><option selected="">Single Phase</option><option>Three Phase</option></select></div>
+<div class="field"><label>Protection (IP rating)</label><select><option>IP20</option><option>IP21</option><option>IP54</option><option selected="">IP65</option><option>IP66</option></select></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Warranty — replacement (yrs)</label><input type="text" value="5"/></div>
+<div class="field"><label>Warranty — repair (yrs)</label><input type="text" value="10"/></div>
+</div>
+<div class="field-row">
+<div class="field full"><label>Service centres <span class="hint">comma separated</span></label><input type="text" value="Lahore, Karachi, Islamabad, Faisalabad"/></div>
+</div>
+</div>
+<div class="spec-group" data-cat="res-battery" hidden=""></div>
+<div class="spec-group" data-cat="bess" hidden=""></div>
+<div class="spec-group" data-cat="breaker" hidden=""></div>
+<div class="field-row" style="margin-top:4px;">
+<div class="field"><label>Product image</label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg></div><div class="upload-spec">JPG/PNG, square 800×800px, white or transparent background, max 2MB</div></div>
+<div class="field"><label>Datasheet (PDF)</label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg></div><div class="upload-spec">PDF only, max 10MB</div></div>
+</div>
+<div class="field-row">
+<label class="cbox warranty-override-toggle-label" style="grid-column:1/-1;margin-bottom:8px;"><input type="checkbox" class="warranty-override-toggle"/> This product needs different warranty terms than the shared policy above</label>
+<div class="field full warranty-override-field" hidden><label>Warranty terms &amp; conditions (PDF)</label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg><div>Drop file or click to upload</div></div><div class="upload-spec">PDF only, max 5MB — coverage period, exclusions, and how to file a claim</div></div>
+</div>
+</div>
+<!-- Example: Battery -->
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Product 3 — Battery</span><div style="display:flex;align-items:center;"><button class="rep-duplicate" type="button"><svg fill="none" viewbox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"></rect><path d="M16 8V5.5A1.5 1.5 0 0014.5 4h-9A1.5 1.5 0 004 5.5v9A1.5 1.5 0 005.5 16H8" stroke="currentColor" stroke-width="1.6"></path></svg> Duplicate</button><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div></div>
+<div class="field-row">
+<div class="field"><label>Model name</label><input type="text" value="APX 5.0"/></div>
+<div class="field"><label>Category</label>
+<select class="cat-select">
+<option value="panel">Solar Panel</option>
+<option value="inverter">Inverter</option>
+<option selected="" value="res-battery">Battery</option>
+<option value="bess">BESS</option>
+<option value="breaker">Breaker</option>
+</select>
+</div>
+</div>
+<div class="spec-group" data-cat="panel" hidden=""></div>
+<div class="spec-group" data-cat="inverter" hidden=""></div>
+<div class="spec-group" data-cat="res-battery">
+<div class="field-row">
+<div class="field"><label>Type</label><select><option selected="">Low Voltage</option><option>High Voltage</option></select></div>
+<div class="field"><label>Size (kWh)</label><select><option>1.2</option><option>2.4</option><option selected="">5</option><option>10</option><option>16</option><option>32</option></select></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Protection (IP rating)</label><select><option>IP20</option><option>IP21</option><option>IP34</option><option>IP40</option><option selected="">IP54</option><option>IP65</option><option>IP66</option></select></div>
+<div class="field"><label>Stackable</label><select><option>Yes</option><option selected="">No</option></select></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Warranty — replacement (yrs)</label><input type="text" value="5"/></div>
+<div class="field"><label>Warranty — repair (yrs)</label><input type="text" value="10"/></div>
+</div>
+<div class="field-row">
+<div class="field full"><label>Service centres <span class="hint">comma separated</span></label><input type="text" value="Lahore, Karachi, Islamabad"/></div>
+</div>
+</div>
+<div class="spec-group" data-cat="bess" hidden=""></div>
+<div class="spec-group" data-cat="breaker" hidden=""></div>
+<div class="field-row" style="margin-top:4px;">
+<div class="field"><label>Product image</label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg></div><div class="upload-spec">JPG/PNG, square 800×800px, white or transparent background, max 2MB</div></div>
+<div class="field"><label>Datasheet (PDF)</label>
+<div class="upload-box" style="padding:12px;border-color:var(--danger);color:var(--danger);">Missing — required</div><div class="upload-spec">PDF only, max 10MB</div>
+</div>
+</div>
+<div class="field-row">
+<label class="cbox warranty-override-toggle-label" style="grid-column:1/-1;margin-bottom:8px;"><input type="checkbox" class="warranty-override-toggle"/> This product needs different warranty terms than the shared policy above</label>
+<div class="field full warranty-override-field" hidden><label>Warranty terms &amp; conditions (PDF)</label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg><div>Drop file or click to upload</div></div><div class="upload-spec">PDF only, max 5MB — coverage period, exclusions, and how to file a claim</div></div>
+</div>
+</div>
+<!-- Example: BESS -->
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Product 4 — BESS</span><div style="display:flex;align-items:center;"><button class="rep-duplicate" type="button"><svg fill="none" viewbox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"></rect><path d="M16 8V5.5A1.5 1.5 0 0014.5 4h-9A1.5 1.5 0 004 5.5v9A1.5 1.5 0 005.5 16H8" stroke="currentColor" stroke-width="1.6"></path></svg> Duplicate</button><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div></div>
+<div class="field-row">
+<div class="field"><label>Model name</label><input type="text" value="Growatt WIT 100H Commercial Cabinet"/></div>
+<div class="field"><label>Category</label>
+<select class="cat-select">
+<option value="panel">Solar Panel</option>
+<option value="inverter">Inverter</option>
+<option value="res-battery">Battery</option>
+<option selected="" value="bess">BESS</option>
+<option value="breaker">Breaker</option>
+</select>
+</div>
+</div>
+<div class="spec-group" data-cat="panel" hidden=""></div>
+<div class="spec-group" data-cat="inverter" hidden=""></div>
+<div class="spec-group" data-cat="res-battery" hidden=""></div>
+<div class="spec-group" data-cat="bess">
+<div class="field-row">
+<div class="field"><label>Application</label><select><option>Commercial</option><option>Industrial</option><option selected="">Utility-Scale</option></select></div>
+<div class="field"><label>Enclosure type</label><select><option>Indoor Cabinet</option><option selected="">Outdoor Container</option></select></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Capacity</label><input type="text" value="215 kWh"/></div>
+<div class="field"><label>Power rating</label><input type="text" value="100 kW"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Chemistry</label><select><option selected="">LFP</option><option>NMC</option><option>Other</option></select></div>
+<div class="field"><label>Cycle life</label><input type="text" value="6000 cycles"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Warranty (yrs)</label><input type="text" value="10"/></div>
+</div>
+</div>
+<div class="spec-group" data-cat="breaker" hidden=""></div>
+<div class="field-row" style="margin-top:4px;">
+<div class="field"><label>Product image</label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg></div><div class="upload-spec">JPG/PNG, square 800×800px, white or transparent background, max 2MB</div></div>
+<div class="field"><label>Datasheet (PDF)</label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg></div><div class="upload-spec">PDF only, max 10MB</div></div>
+</div>
+<div class="field-row">
+<label class="cbox warranty-override-toggle-label" style="grid-column:1/-1;margin-bottom:8px;"><input type="checkbox" class="warranty-override-toggle"/> This product needs different warranty terms than the shared policy above</label>
+<div class="field full warranty-override-field" hidden><label>Warranty terms &amp; conditions (PDF)</label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg><div>Drop file or click to upload</div></div><div class="upload-spec">PDF only, max 5MB — coverage period, exclusions, and how to file a claim</div></div>
+</div>
+</div>
+<!-- Example: Breaker -->
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Product 5 — Breaker</span><div style="display:flex;align-items:center;"><button class="rep-duplicate" type="button"><svg fill="none" viewbox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"></rect><path d="M16 8V5.5A1.5 1.5 0 0014.5 4h-9A1.5 1.5 0 004 5.5v9A1.5 1.5 0 005.5 16H8" stroke="currentColor" stroke-width="1.6"></path></svg> Duplicate</button><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div></div>
+<div class="field-row">
+<div class="field"><label>Model name</label><input type="text" value="Growatt DC MCB-63A"/></div>
+<div class="field"><label>Category</label>
+<select class="cat-select">
+<option value="panel">Solar Panel</option>
+<option value="inverter">Inverter</option>
+<option value="res-battery">Battery</option>
+<option value="bess">BESS</option>
+<option selected="" value="breaker">Breaker</option>
+</select>
+</div>
+</div>
+<div class="spec-group" data-cat="panel" hidden=""></div>
+<div class="spec-group" data-cat="inverter" hidden=""></div>
+<div class="spec-group" data-cat="res-battery" hidden=""></div>
+<div class="spec-group" data-cat="bess" hidden=""></div>
+<div class="spec-group" data-cat="breaker">
+<div class="field-row">
+<div class="field"><label>Type</label><select><option selected="">DC</option><option>AC</option></select></div>
+<div class="field"><label>Phase</label><select><option selected="">Single Phase</option><option>Three Phase</option></select></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Item</label><select><option selected="">Breakers</option><option>SPDs</option><option>Change Overs</option><option>VA Protection Device</option><option>VA Protection Device KWH</option><option>VA Protection Device KWH with WiFi 10 in 1</option><option>MC4 Connectors with Fuse</option><option>Y Connectors</option></select></div>
+<div class="field"><label>Breaker category</label><select><option selected="">MCB</option><option>MCCB</option></select></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Pole</label><select><option selected="">2</option><option>3</option><option>4</option></select></div>
+<div class="field"><label>In</label><select><option>20kA</option><option>40kA</option><option selected="">60kA</option><option>100kA</option></select></div>
+<div class="field"><label>Imax</label><select><option>40kA</option><option selected="">60kA</option><option>80kA</option></select></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Voltage</label><select><option>120-300V</option><option>275V</option><option>385V</option><option>440V</option><option>600V</option><option>750V</option><option selected="">1000V</option><option>1500V</option></select></div>
+<div class="field"><label>Amp</label><select><option>16A</option><option>20A</option><option>30A</option><option>40A</option><option selected="">63A</option><option>75A</option><option>80A</option><option>100A</option></select></div>
+</div>
+</div>
+<div class="field-row" style="margin-top:4px;">
+<div class="field"><label>Product image</label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg></div><div class="upload-spec">JPG/PNG, square 800×800px, white or transparent background, max 2MB</div></div>
+<div class="field"><label>Datasheet (PDF)</label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg></div><div class="upload-spec">PDF only, max 10MB</div></div>
+</div>
+<div class="field-row">
+<label class="cbox warranty-override-toggle-label" style="grid-column:1/-1;margin-bottom:8px;"><input type="checkbox" class="warranty-override-toggle"/> This product needs different warranty terms than the shared policy above</label>
+<div class="field full warranty-override-field" hidden><label>Warranty terms &amp; conditions (PDF)</label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg><div>Drop file or click to upload</div></div><div class="upload-spec">PDF only, max 5MB — coverage period, exclusions, and how to file a claim</div></div>
+</div>
+</div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;">
+<button class="add-cat-btn" data-cat="panel" type="button"><svg fill="none" viewbox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path></svg> Add Solar Panel</button>
+<button class="add-cat-btn" data-cat="inverter" type="button"><svg fill="none" viewbox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path></svg> Add Inverter</button>
+<button class="add-cat-btn" data-cat="res-battery" type="button"><svg fill="none" viewbox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path></svg> Add Battery</button>
+<button class="add-cat-btn" data-cat="bess" type="button"><svg fill="none" viewbox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path></svg> Add BESS</button>
+<button class="add-cat-btn" data-cat="breaker" type="button"><svg fill="none" viewbox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path></svg> Add Breaker</button>
+</div>
+</section>
+<section class="panel" id="sec-news">
+<div class="lock-notice">
+<svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="1.6"/></svg>
+<p>Complete and submit your Profile first. This section unlocks once your Profile is approved for the first time.</p>
+</div>
+<div class="panel-head">
+<div>
+<h2>News &amp; Updates</h2>
+<p>Product launches, inaugurations, outlet openings, events, and announcements. Shown on the profile page's "News &amp; Updates" tab, most recent first.</p>
+<p style="font-size:12px;color:var(--good);margin-top:6px;display:flex;align-items:center;gap:6px;">
+<svg viewBox="0 0 24 24" fill="none" style="width:13px;height:13px;flex-shrink:0;"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+Updates use a fast-track lane — click "Publish Now" on an update to send just that item for a quick admin check, without re-submitting your whole profile.
+</p>
+</div>
+</div>
+<div class="rep-list" id="news-list">
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Update 1</span><div style="display:flex;align-items:center;gap:14px;"><span class="status-pill status-live" style="padding:3px 10px;font-size:11px;">Live</span><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div></div>
+<div class="field-row">
+<div class="field"><label>Title</label><input type="text" value="Growatt launches WIT 100H commercial storage cabinet in Pakistan"/></div>
+<div class="field"><label>Type</label><select><option selected>Product Launch</option><option>Inauguration</option><option>Outlet Opening</option><option>Event</option><option>Announcement</option></select></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Date</label><input type="text" value="2026-09-02"/></div>
+<div class="field"><label>Location</label><input type="text" value="Lahore, Punjab"/></div>
+</div>
+<div class="field-row" style="margin-bottom:0;">
+<div class="field full"><label>Short description</label><input type="text" value="The utility-scale battery cabinet is now available through EY Enterprise / Salman Traders, targeting commercial and industrial self-consumption projects."/></div>
+</div>
+<div class="field-row">
+<div class="field full"><label>Photo <span class="hint">optional</span></label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg><div>Drop photo or click to upload</div></div><div class="upload-spec">JPG/PNG, 1600×900px (16:9), max 5MB</div></div>
+</div>
+</div>
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Update 2</span><div style="display:flex;align-items:center;gap:14px;"><span class="status-pill status-draft" style="padding:3px 10px;font-size:11px;">Draft</span><button class="publish-news-btn btn btn-amber" type="button" style="padding:5px 12px;font-size:11.5px;">Publish Now</button><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div></div>
+<div class="field-row">
+<div class="field"><label>Title</label><input type="text" value="New Growatt service centre opens on Shahrah-e-Faisal"/></div>
+<div class="field"><label>Type</label><select><option>Product Launch</option><option>Inauguration</option><option selected>Outlet Opening</option><option>Event</option><option>Announcement</option></select></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Date</label><input type="text" value="2026-08-14"/></div>
+<div class="field"><label>Location</label><input type="text" value="Karachi, Sindh"/></div>
+</div>
+<div class="field-row" style="margin-bottom:0;">
+<div class="field full"><label>Short description</label><input type="text" value="The Karachi service centre adds warranty claims and repair drop-off support for customers across Sindh."/></div>
+</div>
+<div class="field-row">
+<div class="field full"><label>Photo <span class="hint">optional</span></label><div class="upload-box" style="padding:12px;"><svg fill="none" style="width:16px;height:16px;margin:0;" viewbox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg><div>Drop photo or click to upload</div></div><div class="upload-spec">JPG/PNG, 1600×900px (16:9), max 5MB</div></div>
+</div>
+</div>
+</div>
+<button class="add-row-btn" data-target="news-list"><svg fill="none" viewbox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path></svg> Add update</button>
+</section>
+<!-- AUTHORIZED DISTRIBUTORS -->
+<section class="panel" id="sec-distributors">
+<div class="lock-notice">
+<svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="1.6"/></svg>
+<p>Complete and submit your Profile first. This section unlocks once your Profile is approved for the first time.</p>
+</div>
+<div class="panel-head">
+<div>
+<h2>Authorized Distributors</h2>
+<p>Companies authorized to import, stock, and distribute this brand's products in Pakistan.</p>
+</div>
+</div>
+<div class="rep-list" id="distributor-list">
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Distributor 1</span><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div>
+<div class="field-row">
+<div class="field"><label>Company name</label><input type="text" value="EY Enterprise / Salman Traders (ReadSolar)"/></div>
+<div class="field"><label>Region covered</label><input type="text" value="Nationwide"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Contact number <span class="hint">— required</span></label><input placeholder="Missing" style="border-color:var(--danger);" type="text"/></div>
+<div class="field"><label>Authorized since</label><input type="text" value="2025"/></div>
+</div>
+<div class="field-row">
+<div class="field full"><label>Office address</label><input type="text" value="12-B, Model Town, Lahore, Punjab"/></div>
+</div>
+<div class="field-row" style="margin-bottom:0;">
+<div class="field"><label>Latitude</label><input inputmode="decimal" type="text" value="31.4805"/></div>
+<div class="field"><label>Longitude</label><input inputmode="decimal" type="text" value="74.3286"/></div>
+<div class="field" style="justify-content:flex-end;"><label> </label><button class="pick-map-btn" type="button"><svg fill="none" viewbox="0 0 24 24"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" stroke="currentColor" stroke-width="1.6"></path><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.6"></circle></svg> Pick on map</button></div>
+</div>
+</div>
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Distributor 2</span><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div>
+<div class="field-row">
+<div class="field"><label>Company name</label><input type="text" value="Solar Vision Traders"/></div>
+<div class="field"><label>Region covered</label><input type="text" value="Sindh"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Contact number <span class="hint">— required</span></label><input placeholder="Missing" style="border-color:var(--danger);" type="text"/></div>
+<div class="field"><label>Authorized since</label><input type="text" value="2023"/></div>
+</div>
+<div class="field-row">
+<div class="field full"><label>Office address</label><input type="text" value="Shop 4, Regal Trade Square, Saddar, Karachi"/></div>
+</div>
+<div class="field-row" style="margin-bottom:0;">
+<div class="field"><label>Latitude</label><input inputmode="decimal" type="text" value="24.8546"/></div>
+<div class="field"><label>Longitude</label><input inputmode="decimal" type="text" value="67.0210"/></div>
+<div class="field" style="justify-content:flex-end;"><label> </label><button class="pick-map-btn" type="button"><svg fill="none" viewbox="0 0 24 24"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" stroke="currentColor" stroke-width="1.6"></path><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.6"></circle></svg> Pick on map</button></div>
+</div>
+</div>
+</div>
+<button class="add-row-btn" data-target="distributor-list"><svg fill="none" viewbox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path></svg> Add distributor</button>
+</section>
+<!-- CERTIFIED RETAILERS -->
+<section class="panel" id="sec-retailers">
+<div class="lock-notice">
+<svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="1.6"/></svg>
+<p>Complete and submit your Profile first. This section unlocks once your Profile is approved for the first time.</p>
+</div>
+<div class="panel-head">
+<div>
+<h2>Authorized Retailers</h2>
+<p>Retail outlets authorized to sell genuine products directly to customers.</p>
+</div>
+</div>
+<div class="rep-list" id="retailer-list">
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Retailer 1</span><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div>
+<div class="field-row">
+<div class="field"><label>Shop name</label><input type="text" value="Hall Road Solar Mart"/></div>
+<div class="field"><label>City</label><input type="text" value="Lahore"/></div>
+</div>
+<div class="field-row">
+<div class="field full"><label>Address</label><input type="text" value="Hall Road, Lahore"/></div>
+</div>
+<div class="field-row" style="margin-bottom:0;">
+<div class="field"><label>Latitude</label><input inputmode="decimal" type="text" value="31.5656"/></div>
+<div class="field"><label>Longitude</label><input inputmode="decimal" type="text" value="74.3095"/></div>
+<div class="field" style="justify-content:flex-end;"><label> </label><button class="pick-map-btn" type="button"><svg fill="none" viewbox="0 0 24 24"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" stroke="currentColor" stroke-width="1.6"></path><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.6"></circle></svg> Pick on map</button></div>
+</div>
+</div>
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Retailer 2</span><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div>
+<div class="field-row">
+<div class="field"><label>Shop name</label><input type="text" value="Power House Electronics"/></div>
+<div class="field"><label>City</label><input type="text" value="Karachi"/></div>
+</div>
+<div class="field-row">
+<div class="field full"><label>Address</label><input type="text" value="Electric Market, Karachi"/></div>
+</div>
+<div class="field-row" style="margin-bottom:0;">
+<div class="field"><label>Latitude</label><input inputmode="decimal" type="text" value="24.8608"/></div>
+<div class="field"><label>Longitude</label><input inputmode="decimal" type="text" value="67.0104"/></div>
+<div class="field" style="justify-content:flex-end;"><label> </label><button class="pick-map-btn" type="button"><svg fill="none" viewbox="0 0 24 24"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" stroke="currentColor" stroke-width="1.6"></path><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.6"></circle></svg> Pick on map</button></div>
+</div>
+</div>
+</div>
+<button class="add-row-btn" data-target="retailer-list"><svg fill="none" viewbox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path></svg> Add retailer</button>
+</section>
+<!-- FLAGSHIP STORES / SERVICE CENTRES -->
+<section class="panel" id="sec-centres">
+<div class="lock-notice">
+<svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="1.6"/></svg>
+<p>Complete and submit your Profile first. This section unlocks once your Profile is approved for the first time.</p>
+</div>
+<div class="panel-head">
+<div>
+<h2>Flagship Stores &amp; Customer Service Centres</h2>
+<p>Brand-operated locations for product demonstrations, warranty claims, and technical support.</p>
+</div>
+</div>
+<div class="rep-list" id="centre-list">
+<div class="rep-item">
+<div class="rep-item-head"><span class="idx">Location 1</span><button class="rep-remove"><svg fill="none" viewbox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg> Remove</button></div>
+<div class="field-row">
+<div class="field"><label>Location name</label><input type="text" value="Growatt Flagship Store — Lahore"/></div>
+<div class="field"><label>City</label><input type="text" value="Lahore"/></div>
+</div>
+<div class="field-row">
+<div class="field full"><label>Address</label><input type="text" value="Plot 14, Main Boulevard Gulberg, Lahore, Punjab"/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Latitude</label><input inputmode="decimal" type="text" value="31.5087"/></div>
+<div class="field"><label>Longitude</label><input inputmode="decimal" type="text" value="74.3453"/></div>
+<div class="field" style="justify-content:flex-end;"><label> </label><button class="pick-map-btn" type="button"><svg fill="none" viewbox="0 0 24 24"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" stroke="currentColor" stroke-width="1.6"></path><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.6"></circle></svg> Pick on map</button></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Services offered <span class="hint">comma separated</span></label><input type="text" value="Product Display, Warranty Claims, Technical Support"/></div>
+<div class="field"><label>Hours</label><input type="text" value="Mon–Sat, 10am–7pm"/></div>
+</div>
+</div>
+</div>
+<button class="add-row-btn" data-target="centre-list"><svg fill="none" viewbox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path></svg> Add location</button>
+</section>
+<!-- APPROVAL HISTORY -->
+<section class="panel" id="sec-history">
+<div class="panel-head">
+<div>
+<h2>Approval History</h2>
+<p>Submission and review activity for this brand page.</p>
+</div>
+</div>
+<div class="approval-log">
+<div class="log-row"><span class="log-dot"></span> <span><b>Changes requested</b> by Admin — 3 minutes ago. Missing distributor contact numbers and 2 product datasheets.</span></div>
+<div class="log-row"><span class="log-dot pend"></span> <span><b>Submitted for review</b> by Aafaaq Ali Khan — 1 hour ago.</span></div>
+<div class="log-row"><span class="log-dot ok"></span> <span><b>Draft created</b> by Aafaaq Ali Khan — 2 days ago.</span></div>
+</div>
+</section>
+</div>
+</div>
+<script>
+  // sidenav scroll-spy + smooth scroll
+  const links = document.querySelectorAll('.sidenav a[href^="#"]');
+  const sections = [...links].map(l => document.querySelector(l.getAttribute('href')));
+  links.forEach(l => l.addEventListener('click', e=>{
+    e.preventDefault();
+    document.querySelector(l.getAttribute('href')).scrollIntoView({behavior:'smooth'});
+  }));
+  window.addEventListener('scroll', () => {
+    let current = sections[0];
+    sections.forEach(s => { if (s && window.scrollY + 110 >= s.offsetTop) current = s; });
+    links.forEach(l => l.classList.toggle('on', l.getAttribute('href') === '#' + current.id));
+  });
+
+  // add-row buttons: clone last item in target list
+  document.querySelectorAll('.add-row-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const list = document.getElementById(btn.dataset.target);
+      const items = list.querySelectorAll('.rep-item');
+      const clone = items[items.length - 1].cloneNode(true);
+      clone.querySelectorAll('input[type=text], input[type=email], input[type=url]').forEach(i => i.value = '');
+      const idx = clone.querySelector('.idx');
+      if (idx) idx.textContent = idx.textContent.replace(/\d+/, items.length + 1).replace(/Product \d+|Distributor \d+|Retailer \d+|Location \d+|Office \d+|Project \d+|Update \d+/, m => m.replace(/\d+/, items.length + 1));
+      list.appendChild(clone);
+      attachRemove(clone);
+    });
+  });
+  function attachRemove(scope){
+    scope.querySelectorAll('.rep-remove').forEach(btn => {
+      btn.addEventListener('click', () => btn.closest('.rep-item, .picked-row').remove());
+    });
+  }
+  attachRemove(document);
+
+  // Duplicate: clone a product row WITH its current values (unlike "Add X" which
+  // starts empty) so admins can add spec variants (different wattage, size, etc.)
+  // without re-entering everything.
+  function attachDuplicateButtons(scope){
+    scope.querySelectorAll('.rep-duplicate').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.rep-item');
+        const clone = item.cloneNode(true);
+        // copy live input/select/textarea values into the clone's attributes
+        // so cloneNode (which only copies the DOM, not live form state) keeps them
+        item.querySelectorAll('input, select, textarea').forEach((el, i) => {
+          const target = clone.querySelectorAll('input, select, textarea')[i];
+          if (el.tagName === 'SELECT') target.value = el.value;
+          else target.value = el.value;
+        });
+        const idx = clone.querySelector('.idx');
+        if (idx) idx.textContent = idx.textContent.replace(/^Product \d+/, 'Product ' + (item.parentElement.querySelectorAll('.rep-item').length + 1)) + ' (copy)';
+        item.after(clone);
+        attachRemove(clone);
+        attachDuplicateButtons(clone);
+        attachCategoryToggles(clone);
+        attachWarrantyOverrides(clone);
+        clone.scrollIntoView({behavior:'smooth', block:'center'});
+      });
+    });
+  }
+  attachDuplicateButtons(document);
+
+  // "Same as main contact" checkboxes on offices: reveal override fields only when unchecked
+  document.querySelectorAll('.same-contact-toggle').forEach(cb => {
+    const fields = cb.closest('.rep-item').querySelector('.same-contact-fields');
+    cb.addEventListener('change', () => { fields.hidden = cb.checked; });
+  });
+
+  // Shared warranty policy: hide the upload if the brand isn't using a shared doc
+  const sharedToggle = document.getElementById('sharedWarrantyToggle');
+  const sharedUpload = document.getElementById('sharedWarrantyUpload');
+  const sharedNote = document.getElementById('sharedWarrantyNote');
+  function syncSharedWarranty(){
+    sharedUpload.hidden = !sharedToggle.checked;
+    sharedNote.hidden = !sharedToggle.checked;
+    document.querySelectorAll('.warranty-override-toggle-label').forEach(l => { l.hidden = !sharedToggle.checked; });
+  }
+  sharedToggle.addEventListener('change', syncSharedWarranty);
+  syncSharedWarranty();
+
+  // Per-product override: only show that product's own warranty upload when checked
+  function attachWarrantyOverrides(scope){
+    scope.querySelectorAll('.warranty-override-toggle').forEach(cb => {
+      cb.addEventListener('change', () => {
+        cb.closest('.rep-item').querySelector('.warranty-override-field').hidden = !cb.checked;
+      });
+    });
+  }
+  attachWarrantyOverrides(document);
+
+  // Demo toggle: shows what a brand-new (never-yet-approved) submission looks like —
+  // Products/News/Distributors/Retailers/Centres are locked until the Profile is
+  // approved once, so a first-time brand isn't shown a wall of empty required fields.
+  let newBrandDemoOn = false;
+  function toggleNewBrandDemo(btn){
+    newBrandDemoOn = !newBrandDemoOn;
+    ['sec-products','sec-news','sec-distributors','sec-retailers','sec-centres'].forEach(id => {
+      document.getElementById(id).classList.toggle('locked-section', newBrandDemoOn);
+    });
+    document.querySelectorAll('.sidenav a[data-lockable]').forEach(a => a.classList.toggle('locked', newBrandDemoOn));
+    btn.textContent = newBrandDemoOn ? 'Back to full form' : 'Preview: first-time submission';
+  }
+
+  // Category-driven product spec fields: show only the spec-group matching
+  // the selected category within that product's own rep-item.
+  function applyCategory(select){
+    const item = select.closest('.rep-item');
+    if(!item) return;
+    item.querySelectorAll('.spec-group').forEach(g => {
+      g.hidden = g.dataset.cat !== select.value;
+    });
+  }
+  function attachCategoryToggles(scope){
+    scope.querySelectorAll('.cat-select').forEach(sel => {
+      sel.addEventListener('change', () => applyCategory(sel));
+    });
+  }
+  attachCategoryToggles(document);
+
+  // When a product row is cloned via "Add product", reset it to the
+  // Solar Panel category and clear the copied spec values so admins
+  // aren't left with a Panel's fields mislabeled as a Breaker's.
+  const CATEGORY_LABELS = {
+    panel: 'Solar Panel',
+    inverter: 'Inverter',
+    'res-battery': 'Battery',
+    bess: 'BESS',
+    breaker: 'Breaker'
+  };
+
+  const SPEC_TEMPLATES = {
+    panel: `
+      <div class="field-row">
+        <div class="field"><label>Technology</label><select><option>TOPCon</option><option>Back Contact</option><option>HJT</option><option>Other</option></select></div>
+        <div class="field"><label>Type</label><select><option>Bifacial</option><option>Monofacial</option></select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Wattage (W)</label><input type="text"></div>
+        <div class="field"><label>Efficiency (%)</label><input type="text"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Module width (mm)</label><input type="text"></div>
+        <div class="field"><label>Module height (mm)</label><input type="text"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Yearly degradation (%/yr)</label><input type="text"></div>
+        <div class="field"><label>Performance warranty (yrs)</label><input type="text"></div>
+        <div class="field"><label>Product warranty (yrs)</label><input type="text"></div>
+      </div>`,
+    inverter: `
+      <div class="field-row">
+        <div class="field"><label>Inverter type</label><select><option>High Voltage</option><option>Low Voltage</option></select></div>
+        <div class="field"><label>Size (kW)</label><input type="text"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Phase</label><select><option>Single Phase</option><option>Three Phase</option></select></div>
+        <div class="field"><label>Protection (IP rating)</label><select><option>IP20</option><option>IP21</option><option>IP54</option><option>IP65</option><option>IP66</option></select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Warranty — replacement (yrs)</label><input type="text"></div>
+        <div class="field"><label>Warranty — repair (yrs)</label><input type="text"></div>
+      </div>
+      <div class="field-row">
+        <div class="field full"><label>Service centres <span class="hint">comma separated</span></label><input type="text"></div>
+      </div>`,
+    'res-battery': `
+      <div class="field-row">
+        <div class="field"><label>Type</label><select><option>Low Voltage</option><option>High Voltage</option></select></div>
+        <div class="field"><label>Size (kWh)</label><select><option>1.2</option><option>2.4</option><option>5</option><option>10</option><option>16</option><option>32</option></select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Protection (IP rating)</label><select><option>IP20</option><option>IP21</option><option>IP34</option><option>IP40</option><option>IP54</option><option>IP65</option><option>IP66</option></select></div>
+        <div class="field"><label>Stackable</label><select><option>Yes</option><option>No</option></select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Warranty — replacement (yrs)</label><input type="text"></div>
+        <div class="field"><label>Warranty — repair (yrs)</label><input type="text"></div>
+      </div>
+      <div class="field-row">
+        <div class="field full"><label>Service centres <span class="hint">comma separated</span></label><input type="text"></div>
+      </div>`,
+    bess: `
+      <div class="field-row">
+        <div class="field"><label>Application</label><select><option>Commercial</option><option>Industrial</option><option>Utility-Scale</option></select></div>
+        <div class="field"><label>Enclosure type</label><select><option>Indoor Cabinet</option><option>Outdoor Container</option></select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Capacity</label><input type="text" placeholder="e.g. 215 kWh"></div>
+        <div class="field"><label>Power rating</label><input type="text" placeholder="e.g. 100 kW"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Chemistry</label><select><option>LFP</option><option>NMC</option><option>Other</option></select></div>
+        <div class="field"><label>Cycle life</label><input type="text" placeholder="e.g. 6000 cycles"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Warranty (yrs)</label><input type="text"></div>
+      </div>`,
+    breaker: `
+      <div class="field-row">
+        <div class="field"><label>Type</label><select><option>DC</option><option>AC</option></select></div>
+        <div class="field"><label>Phase</label><select><option>Single Phase</option><option>Three Phase</option></select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Item</label><select><option>Breakers</option><option>SPDs</option><option>Change Overs</option><option>VA Protection Device</option><option>VA Protection Device KWH</option><option>VA Protection Device KWH with WiFi 10 in 1</option><option>MC4 Connectors with Fuse</option><option>Y Connectors</option></select></div>
+        <div class="field"><label>Breaker category</label><select><option>MCB</option><option>MCCB</option></select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Pole</label><select><option>2</option><option>3</option><option>4</option></select></div>
+        <div class="field"><label>In</label><select><option>20kA</option><option>40kA</option><option>60kA</option><option>100kA</option></select></div>
+        <div class="field"><label>Imax</label><select><option>40kA</option><option>60kA</option><option>80kA</option></select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Voltage</label><select><option>120-300V</option><option>275V</option><option>385V</option><option>440V</option><option>600V</option><option>750V</option><option>1000V</option><option>1500V</option></select></div>
+        <div class="field"><label>Amp</label><select><option>16A</option><option>20A</option><option>30A</option><option>40A</option><option>63A</option><option>75A</option><option>80A</option><option>100A</option></select></div>
+      </div>`
+  };
+
+  function buildProductRow(category, number){
+    const label = CATEGORY_LABELS[category];
+    let groups = '';
+    Object.keys(CATEGORY_LABELS).forEach(cat => {
+      if (cat === category) {
+        groups += `<div class="spec-group" data-cat="${cat}">${SPEC_TEMPLATES[cat]}</div>`;
+      } else {
+        groups += `<div class="spec-group" data-cat="${cat}" hidden></div>`;
+      }
+    });
+    const options = Object.keys(CATEGORY_LABELS).map(cat =>
+      `<option value="${cat}"${cat === category ? ' selected' : ''}>${CATEGORY_LABELS[cat]}</option>`
+    ).join('');
+
+    return `
+      <div class="rep-item">
+        <div class="rep-item-head"><span class="idx">Product ${number} — ${label}</span><button class="rep-remove"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Remove</button></div>
+        <div class="field-row">
+          <div class="field"><label>Model name</label><input type="text"></div>
+          <div class="field"><label>Category</label><select class="cat-select">${options}</select></div>
+        </div>
+        ${groups}
+        <div class="field-row" style="margin-top:4px;">
+          <div class="field"><label>Product image</label><div class="upload-box" style="padding:12px;"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin:0;"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="upload-spec">JPG/PNG, square 800×800px, white or transparent background, max 2MB</div></div>
+          <div class="field"><label>Datasheet (PDF)</label><div class="upload-box" style="padding:12px;"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin:0;"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="upload-spec">PDF only, max 10MB</div></div>
+        </div>
+        <div class="field-row">
+          <label class="cbox warranty-override-toggle-label" style="grid-column:1/-1;margin-bottom:8px;"><input type="checkbox" class="warranty-override-toggle"/> This product needs different warranty terms than the shared policy above</label>
+          <div class="field full warranty-override-field" hidden><label>Warranty terms &amp; conditions (PDF)</label><div class="upload-box" style="padding:12px;"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin:0;"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><div>Drop file or click to upload</div></div><div class="upload-spec">PDF only, max 5MB — coverage period, exclusions, and how to file a claim</div></div>
+        </div>
+      </div>`;
+  }
+
+  document.querySelectorAll('.add-cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const list = document.getElementById('product-list');
+      const number = list.querySelectorAll('.rep-item').length + 1;
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = buildProductRow(btn.dataset.cat, number).trim();
+      const newItem = wrapper.firstElementChild;
+      list.appendChild(newItem);
+      attachCategoryToggles(newItem);
+      attachRemove(newItem);
+      attachDuplicateButtons(newItem);
+      attachWarrantyOverrides(newItem);
+      if (sharedToggle && !sharedToggle.checked) {
+        const label = newItem.querySelector('.warranty-override-toggle-label');
+        if (label) label.hidden = false;
+      }
+      newItem.scrollIntoView({behavior:'smooth', block:'center'});
+    });
+  });
+</script>
+</body>
+</html>
