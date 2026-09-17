@@ -6,6 +6,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from '@vercel/analytics/next';
 import { Toaster } from 'sonner';
 import { CompareProvider } from '@/components/shared/compare-context';
+import Script from "next/script";
 import "./globals.css";
 
 const inter = Inter({
@@ -126,7 +127,7 @@ export default function RootLayout({
         "url": "https://www.energygurus.online",
         "logo": "https://www.energygurus.online/logo-icon.svg",
         "sameAs": [
-          "https://www.tiktok.com/@energygurusonline",
+          "https://www.tiktok.com/@energygurus.online",
           "https://www.linkedin.com/company/energygurusonline",
           "https://x.com/energyguruspk",
           "https://www.youtube.com/@energygurus.online",
@@ -169,6 +170,22 @@ export default function RootLayout({
         className={`${inter.variable} ${outfit.variable} ${notoArabic.variable} ${spaceGrotesk.variable} ${ibmPlexMono.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
+        <Script
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=G-5YRFLM63R3"
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-5YRFLM63R3');
+            `,
+          }}
+        />
         {isClerkConfigured ? (
           <ClerkProvider
             appearance={{
