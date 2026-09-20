@@ -57,6 +57,16 @@
   --color-slate-custom: #4A5A73;
   --color-graphite: #1B1F24;
   --color-line: rgba(18, 33, 58, 0.12);
+  --color-navy: #0F2A47;
+  --color-navy-deep: #0A1D33;
+  --color-cream: #F7F4EC;
+  --color-amber-deep: #B9832A;
+  --color-good: #3E7D5A;
+  --color-good-bg: #E8F2EC;
+  --color-warn: #B9832A;
+  --color-warn-bg: #FBF0DA;
+  --color-danger: #B4453C;
+  --color-danger-bg: #F8E9E7;
 }
 
 :root {
