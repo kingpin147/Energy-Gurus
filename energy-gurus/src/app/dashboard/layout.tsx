@@ -34,7 +34,7 @@ export default async function DashboardLayout({
 
             {/* Desktop Sidebar — only visible at 1024px+ */}
             <aside className="desktop-sidebar">
-                <div className="h-[72px] flex items-center px-6 border-b border-line">
+                <div className="min-h-[84px] pt-5 pb-3 flex items-center px-6 border-b border-line">
                     <Logo />
                 </div>
 

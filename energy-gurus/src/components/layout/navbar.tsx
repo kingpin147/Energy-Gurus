@@ -11,7 +11,6 @@ import { Logo } from "@/components/ui/logo";
 const navLinks = [
     { label: "About Us", href: "/about" },
     { label: "Brands", href: "/brands" },
-    { label: "Solar Installers", href: "/epcs" },
     { label: "Monitoring", href: "/monitoring" },
     { label: "News", href: "/news" },
     { label: "Podcasts", href: "/podcast" },
@@ -30,7 +29,7 @@ export function Navbar() {
 
     return (
         <nav className="sticky top-0 z-50 bg-paper/92 backdrop-blur-[8px] border-b border-line">
-            <div className="flex items-center justify-between max-w-[1180px] mx-auto px-5 md:px-8 h-[72px]">
+            <div className="flex items-center justify-between max-w-[1180px] mx-auto px-5 md:px-8 h-[80px] py-3">
                 {/* Logo */}
                 <Logo />
 

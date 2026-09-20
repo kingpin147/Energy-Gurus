@@ -102,19 +102,6 @@ export default async function AdminReviewsPage() {
 
   return (
     <div className="bg-cream min-h-screen text-ink pb-20">
-      
-      {/* Top Bar */}
-      <div className="bg-navy-deep text-paper/70 text-xs py-2.5 px-5 md:px-8 border-b border-white/10">
-        <div className="max-w-[1180px] mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <span>EnergyGurus Admin</span>
-            <span>/</span>
-            <span>Brands & Installers</span>
-            <span>/</span>
-            <span className="text-white font-bold">Review Moderation</span>
-          </div>
-        </div>
-      </div>
 
       {/* Header */}
       <div className="bg-white border-b border-line py-8 shadow-sm">

@@ -226,22 +226,6 @@ export function BrandSubmissionEditor({
 
   return (
     <div className="bg-cream text-ink min-h-screen pb-24">
-      
-      {/* Admin / Brand Bar */}
-      <div className="bg-navy-deep text-paper/70 text-xs py-2.5 px-5 md:px-8 border-b border-white/10">
-        <div className="max-w-[1180px] mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <span>Brands</span>
-            <span>/</span>
-            <span>Management Portal</span>
-            <span>/</span>
-            <span className="text-white font-bold">{brand.brandName}</span>
-          </div>
-          <span className="text-[11px] text-paper/60">
-            Editing as <strong className="text-white">{currentUser?.name || "Brand Manager"}</strong>
-          </span>
-        </div>
-      </div>
 
       {/* Changes Requested Banner */}
       {status === "changes_requested" && (

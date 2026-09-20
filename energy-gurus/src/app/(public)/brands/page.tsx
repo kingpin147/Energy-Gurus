@@ -55,75 +55,78 @@ const CATEGORY_MAP: Record<string, string[]> = {
 
 const getBrandsDirectoryData = unstable_cache(
   async (sort: string, q?: string, origin?: string) => {
-    let conditions = [
-      eq(users.isActive, true),
-      or(eq(brands.status, "live"), eq(brands.isVerified, true))!
-    ];
+    try {
+      let conditions = [];
 
-    if (q && q.trim()) {
-      conditions.push(
-        or(
-          ilike(brands.brandName, `%${q.trim()}%`),
-          ilike(brands.about, `%${q.trim()}%`)
-        )!
-      );
+      if (q && q.trim()) {
+        conditions.push(
+          or(
+            ilike(brands.brandName, `%${q.trim()}%`),
+            ilike(brands.about, `%${q.trim()}%`)
+          )!
+        );
+      }
+
+      if (origin && origin.trim()) {
+        conditions.push(ilike(brands.countryOfOrigin, `%${origin.trim()}%`));
+      }
+
+      const brandsData = await db
+        .select({
+          id: brands.id,
+          brandName: brands.brandName,
+          categories: brands.categories,
+          countryHead: brands.countryHead,
+          customerCareHead: brands.customerCareHead,
+          logoUrl: brands.logoUrl,
+          about: brands.about,
+          headOffice: brands.headOffice,
+          website: brands.website,
+          founded: brands.founded,
+          headquarters: brands.headquarters,
+          countryOfOrigin: brands.countryOfOrigin,
+          distributors: brands.distributors,
+          retailers: brands.retailers,
+          serviceCentres: brands.serviceCentres,
+          certifiedInstallers: brands.certifiedInstallers,
+          status: brands.status,
+          socialLinks: brands.socialLinks,
+          warrantyUrl: brands.warrantyUrl,
+          isVerified: brands.isVerified,
+          createdAt: brands.createdAt,
+          avgRating: sql<number>`COALESCE(CAST(AVG(CASE WHEN ${reviews.status} = 'approved' THEN ${reviews.rating} END) AS FLOAT), 0)`.as("avg_rating"),
+          reviewCount: sql<number>`COUNT(DISTINCT CASE WHEN ${reviews.status} = 'approved' THEN ${reviews.id} END)`.as("review_count"),
+          productsCount: sql<number>`(SELECT COUNT(*) FROM ${products} WHERE ${products.brandId} = ${brands.id})`.mapWith(Number),
+        })
+        .from(brands)
+        .leftJoin(users, eq(users.id, brands.userId))
+        .leftJoin(reviews, eq(reviews.targetId, brands.id))
+        .where(conditions.length > 0 ? and(...conditions) : undefined)
+        .groupBy(brands.id)
+        .orderBy((t) => {
+          if (sort === "top-rated") return [desc(t.avgRating), desc(t.reviewCount)];
+          if (sort === "products-desc") return [desc(t.productsCount)];
+          if (sort === "lowest-rated") return [asc(t.avgRating), asc(t.reviewCount)];
+          if (sort === "oldest") return asc(t.createdAt);
+          return desc(t.createdAt);
+        });
+
+      const allProducts = await db.select().from(products);
+
+      return brandsData.map((brand) => ({
+        ...brand,
+        products: allProducts.filter((p) => p.brandId === brand.id),
+        distributorCount: (brand.distributors as any[] | null)?.length || 0,
+        serviceCentreCount: (brand.serviceCentres as any[] | null)?.length || 0,
+        retailerCount: (brand.retailers as any[] | null)?.length || 0,
+        createdAt: brand.createdAt ? new Date(brand.createdAt).toISOString() : new Date().toISOString()
+      }));
+    } catch (err) {
+      console.error("Error fetching brands directory data:", err);
+      return [];
     }
-
-    if (origin && origin.trim()) {
-      conditions.push(ilike(brands.countryOfOrigin, `%${origin.trim()}%`));
-    }
-
-    const brandsData = await db
-      .select({
-        id: brands.id,
-        brandName: brands.brandName,
-        categories: brands.categories,
-        countryHead: brands.countryHead,
-        customerCareHead: brands.customerCareHead,
-        logoUrl: brands.logoUrl,
-        about: brands.about,
-        headOffice: brands.headOffice,
-        website: brands.website,
-        founded: brands.founded,
-        headquarters: brands.headquarters,
-        countryOfOrigin: brands.countryOfOrigin,
-        distributors: brands.distributors,
-        retailers: brands.retailers,
-        serviceCentres: brands.serviceCentres,
-        certifiedInstallers: brands.certifiedInstallers,
-        status: brands.status,
-        socialLinks: brands.socialLinks,
-        warrantyUrl: brands.warrantyUrl,
-        isVerified: brands.isVerified,
-        createdAt: brands.createdAt,
-        avgRating: sql<number>`COALESCE(CAST(AVG(CASE WHEN ${reviews.status} = 'approved' THEN ${reviews.rating} END) AS FLOAT), 0)`.as("avg_rating"),
-        reviewCount: sql<number>`COUNT(DISTINCT CASE WHEN ${reviews.status} = 'approved' THEN ${reviews.id} END)`.as("review_count"),
-        productsCount: sql<number>`(SELECT COUNT(*) FROM ${products} WHERE ${products.brandId} = ${brands.id})`.mapWith(Number),
-      })
-      .from(brands)
-      .innerJoin(users, eq(users.id, brands.userId))
-      .leftJoin(reviews, eq(reviews.targetId, brands.id))
-      .where(and(...conditions))
-      .groupBy(brands.id)
-      .orderBy((t) => {
-        if (sort === "top-rated") return [desc(t.avgRating), desc(t.reviewCount)];
-        if (sort === "products-desc") return [desc(t.productsCount)];
-        if (sort === "lowest-rated") return [asc(t.avgRating), asc(t.reviewCount)];
-        if (sort === "oldest") return asc(t.createdAt);
-        return desc(t.createdAt);
-      });
-
-    const allProducts = await db.select().from(products);
-
-    return brandsData.map((brand) => ({
-      ...brand,
-      products: allProducts.filter((p) => p.brandId === brand.id),
-      distributorCount: (brand.distributors as any[] | null)?.length || 0,
-      serviceCentreCount: (brand.serviceCentres as any[] | null)?.length || 0,
-      retailerCount: (brand.retailers as any[] | null)?.length || 0,
-    }));
   },
-  ["brands-directory-cache-v6"],
+  ["brands-directory-cache-v7"],
   { revalidate: 1800, tags: ["brands"] }
 );
 
