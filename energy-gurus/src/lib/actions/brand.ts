@@ -225,6 +225,8 @@ export async function adminUpdateBrandStatusAction(
     revalidatePath(`/brands/${brandId}`, "page");
     revalidatePath("/brands", "page");
     revalidatePath("/dashboard/brand", "page");
+    revalidatePath("/dashboard/moderation", "layout");
+    revalidatePath("/dashboard/moderation", "page");
 
     return { success: true, message: `Brand status updated to ${newStatus}` };
   } catch (e: any) {

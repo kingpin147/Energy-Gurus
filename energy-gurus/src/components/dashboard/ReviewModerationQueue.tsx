@@ -191,8 +191,8 @@ export function ReviewModerationQueue({ reviews }: { reviews: ReviewItem[] }) {
                           </span>
                         )}
                       </div>
-                      <span className="text-[11px] text-slate-custom">
-                        Submitted on {new Date(rev.createdAt).toLocaleString()}
+                      <span className="text-[11px] text-slate-custom" suppressHydrationWarning>
+                        Submitted on {rev.createdAt ? new Date(rev.createdAt).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A"}
                       </span>
                     </div>
                   </div>

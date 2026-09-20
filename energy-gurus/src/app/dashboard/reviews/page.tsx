@@ -14,77 +14,91 @@ export default async function AdminReviewsPage() {
     redirect("/dashboard");
   }
 
-  // Fetch all active EPC installers for dropdown
-  const allEpcs = await db
-    .select({
-      id: epcInstallers.id,
-      name: epcInstallers.companyName
-    })
-    .from(epcInstallers)
-    .innerJoin(users, eq(users.id, epcInstallers.userId))
-    .where(eq(users.isActive, true))
-    .orderBy(epcInstallers.companyName);
+  let allEpcs: { id: string; name: string }[] = [];
+  let allBrands: { id: string; name: string }[] = [];
+  let formattedReviews: any[] = [];
 
-  // Fetch all active Brands for dropdown
-  const allBrands = await db
-    .select({
-      id: brands.id,
-      name: brands.brandName
-    })
-    .from(brands)
-    .innerJoin(users, eq(users.id, brands.userId))
-    .where(eq(users.isActive, true))
-    .orderBy(brands.brandName);
+  try {
+    // Fetch all EPC installers for dropdown
+    const epcsData = await db
+      .select({
+        id: epcInstallers.id,
+        name: epcInstallers.companyName
+      })
+      .from(epcInstallers)
+      .orderBy(epcInstallers.companyName);
 
-  // Fetch all reviews
-  const rawReviews = await db
-    .select({
-      id: reviews.id,
-      rating: reviews.rating,
-      comment: reviews.comment,
-      status: reviews.status,
-      rejectionReason: reviews.rejectionReason,
-      proofUrl: reviews.proofUrl,
-      authorName: reviews.authorName,
-      authorEmail: reviews.authorEmail,
-      isVerifiedPurchase: reviews.isVerifiedPurchase,
-      targetType: reviews.targetType,
-      targetId: reviews.targetId,
-      createdAt: reviews.createdAt,
-      userAuthorName: users.name,
-      userAuthorEmail: users.email
-    })
-    .from(reviews)
-    .leftJoin(users, eq(reviews.authorId, users.id))
-    .orderBy(desc(reviews.createdAt));
+    allEpcs = epcsData.map((e) => ({
+      id: e.id,
+      name: e.name || "EPC Installer"
+    }));
 
-  // Map target names (Brand name or EPC company name)
-  const formattedReviews = rawReviews.map((r) => {
-    let targetName = "Unknown Target";
-    if (r.targetType === "brand") {
-      const match = allBrands.find((b) => b.id === r.targetId);
-      targetName = match?.name || "Solar Brand";
-    } else if (r.targetType === "epc") {
-      const match = allEpcs.find((e) => e.id === r.targetId);
-      targetName = match?.name || "EPC Installer";
-    }
+    // Fetch all Brands for dropdown
+    const brandsData = await db
+      .select({
+        id: brands.id,
+        name: brands.brandName
+      })
+      .from(brands)
+      .orderBy(brands.brandName);
 
-    return {
-      id: r.id,
-      rating: r.rating,
-      comment: r.comment,
-      status: r.status as "pending" | "approved" | "rejected",
-      rejectionReason: r.rejectionReason,
-      proofUrl: r.proofUrl,
-      authorName: r.authorName || r.userAuthorName || "Customer",
-      authorEmail: r.authorEmail || r.userAuthorEmail || null,
-      isVerifiedPurchase: r.isVerifiedPurchase,
-      targetType: r.targetType as "brand" | "epc",
-      targetName,
-      targetId: r.targetId,
-      createdAt: r.createdAt
-    };
-  });
+    allBrands = brandsData.map((b) => ({
+      id: b.id,
+      name: b.name || "Solar Brand"
+    }));
+
+    // Fetch all reviews
+    const rawReviews = await db
+      .select({
+        id: reviews.id,
+        rating: reviews.rating,
+        comment: reviews.comment,
+        status: reviews.status,
+        rejectionReason: reviews.rejectionReason,
+        proofUrl: reviews.proofUrl,
+        authorName: reviews.authorName,
+        authorEmail: reviews.authorEmail,
+        isVerifiedPurchase: reviews.isVerifiedPurchase,
+        targetType: reviews.targetType,
+        targetId: reviews.targetId,
+        createdAt: reviews.createdAt,
+        userAuthorName: users.name,
+        userAuthorEmail: users.email
+      })
+      .from(reviews)
+      .leftJoin(users, eq(reviews.authorId, users.id))
+      .orderBy(desc(reviews.createdAt));
+
+    // Map target names (Brand name or EPC company name)
+    formattedReviews = rawReviews.map((r) => {
+      let targetName = "Unknown Target";
+      if (r.targetType === "brand") {
+        const match = allBrands.find((b) => b.id === r.targetId);
+        targetName = match?.name || "Solar Brand";
+      } else if (r.targetType === "epc") {
+        const match = allEpcs.find((e) => e.id === r.targetId);
+        targetName = match?.name || "EPC Installer";
+      }
+
+      return {
+        id: r.id,
+        rating: r.rating || 5,
+        comment: r.comment || "",
+        status: (r.status || "pending") as "pending" | "approved" | "rejected",
+        rejectionReason: r.rejectionReason || null,
+        proofUrl: r.proofUrl || null,
+        authorName: r.authorName || r.userAuthorName || "Customer",
+        authorEmail: r.authorEmail || r.userAuthorEmail || null,
+        isVerifiedPurchase: !!r.isVerifiedPurchase,
+        targetType: (r.targetType || "epc") as "brand" | "epc",
+        targetName,
+        targetId: r.targetId,
+        createdAt: r.createdAt ? new Date(r.createdAt).toISOString() : new Date().toISOString()
+      };
+    });
+  } catch (error) {
+    console.error("Error loading AdminReviewsPage data:", error);
+  }
 
   return (
     <div className="bg-cream min-h-screen text-ink pb-20">

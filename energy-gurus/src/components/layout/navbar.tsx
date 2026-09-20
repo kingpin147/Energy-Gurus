@@ -10,6 +10,8 @@ import { Logo } from "@/components/ui/logo";
 
 const navLinks = [
     { label: "About Us", href: "/about" },
+    { label: "Brands", href: "/brands" },
+    { label: "Solar Installers", href: "/epcs" },
     { label: "Monitoring", href: "/monitoring" },
     { label: "News", href: "/news" },
     { label: "Podcasts", href: "/podcast" },

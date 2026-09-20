@@ -57,7 +57,7 @@ const getBrandsDirectoryData = unstable_cache(
   async (sort: string, q?: string, origin?: string) => {
     let conditions = [
       eq(users.isActive, true),
-      eq(users.role, "brand"),
+      or(eq(brands.status, "live"), eq(brands.isVerified, true))!
     ];
 
     if (q && q.trim()) {
