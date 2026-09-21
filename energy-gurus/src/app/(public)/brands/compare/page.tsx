@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { brands, products, reviews, users } from "@/db/schema";
-import { eq, inArray, sql } from "drizzle-orm";
+import { eq, inArray, sql, and } from "drizzle-orm";
 import { Star, ShieldCheck, ArrowLeft, Package, User, Phone, Globe, ExternalLink } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,7 +8,6 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 export async function generateMetadata({ params }: { params: Promise<{ }> }): Promise<Metadata> {
-  
   const baseUrl = "https://www.energygurus.online";
   const title = "Compare Solar Brands & Tier-1 Manufacturers | EnergyGurus";
   const description = "Compare solar panel and inverter brands side-by-side. View product counts, country head contacts, warranty details, and customer ratings.";
@@ -40,12 +39,12 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
       description,
       images: [`${baseUrl}/new_hero_banner.jpg`]
     }
-    };
+  };
 }
 
 export default async function BrandsComparePage({
   searchParams
-    }: {
+}: {
   searchParams: Promise<{ ids?: string }>;
 }) {
   const { ids } = await searchParams;
@@ -72,7 +71,7 @@ export default async function BrandsComparePage({
     })
     .from(brands)
     .leftJoin(reviews, eq(reviews.targetId, brands.id))
-    .where(inArray(brands.id, idArray))
+    .where(and(inArray(brands.id, idArray), eq(brands.status, 'live')))
     .groupBy(brands.id);
 
   if (brandList.length < 2) return notFound();

@@ -56,7 +56,7 @@ const CATEGORY_MAP: Record<string, string[]> = {
 const getBrandsDirectoryData = unstable_cache(
   async (sort: string, q?: string, origin?: string) => {
     try {
-      let conditions = [];
+      let conditions = [eq(brands.status, 'live')];
 
       if (q && q.trim()) {
         conditions.push(

@@ -40,21 +40,24 @@ interface BrandItem {
 
 export function BrandModerationQueue({ brands }: { brands: BrandItem[] }) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"pending" | "live" | "changes_requested">("pending");
+  const [activeTab, setActiveTab] = useState<"pending" | "live" | "changes_requested" | "drafts">("pending");
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const pendingBrands = brands.filter((b) => b.status === "pending_review");
   const liveBrands = brands.filter((b) => b.status === "live");
-  const changesRequestedBrands = brands.filter((b) => b.status === "changes_requested" || b.status === "draft");
+  const changesRequestedBrands = brands.filter((b) => b.status === "changes_requested");
+  const draftBrands = brands.filter((b) => b.status === "draft");
 
   const displayedBrands =
     activeTab === "pending"
       ? pendingBrands
       : activeTab === "live"
       ? liveBrands
-      : changesRequestedBrands;
+      : activeTab === "changes_requested"
+      ? changesRequestedBrands
+      : draftBrands;
 
   const handleApprove = async (id: string) => {
     setProcessingId(id);
@@ -100,7 +103,7 @@ export function BrandModerationQueue({ brands }: { brands: BrandItem[] }) {
     <div className="space-y-6">
       
       {/* Queue Tabs */}
-      <div className="bg-white border border-line rounded-[4px] p-1.5 inline-flex gap-1 shadow-sm">
+      <div className="bg-white border border-line rounded-[4px] p-1.5 inline-flex flex-wrap gap-1 shadow-sm">
         <button
           onClick={() => setActiveTab("pending")}
           className={`px-5 py-2 rounded text-xs font-bold transition-colors cursor-pointer flex items-center gap-2 ${
@@ -141,6 +144,18 @@ export function BrandModerationQueue({ brands }: { brands: BrandItem[] }) {
           <AlertTriangle className="w-3.5 h-3.5" />
           Changes Requested ({changesRequestedBrands.length})
         </button>
+
+        <button
+          onClick={() => setActiveTab("drafts")}
+          className={`px-5 py-2 rounded text-xs font-bold transition-colors cursor-pointer flex items-center gap-2 ${
+            activeTab === "drafts"
+              ? "bg-navy-deep text-white shadow-sm"
+              : "text-slate-custom hover:text-navy-deep"
+          }`}
+        >
+          <Building2 className="w-3.5 h-3.5" />
+          Drafts / In Progress ({draftBrands.length})
+        </button>
       </div>
 
       {/* Brand Submissions List */}
@@ -148,11 +163,13 @@ export function BrandModerationQueue({ brands }: { brands: BrandItem[] }) {
         <div className="text-center py-20 bg-white border border-line rounded-[4px] shadow-sm">
           <Building2 className="w-12 h-12 text-slate-custom/30 mx-auto mb-3" />
           <h4 className="font-fraunces font-semibold text-lg text-navy-deep">
-            No {activeTab === "pending" ? "pending" : activeTab === "live" ? "live" : "changes requested"} brands
+            No {activeTab === "pending" ? "pending" : activeTab === "live" ? "live" : activeTab === "changes_requested" ? "changes requested" : "draft"} brands
           </h4>
           <p className="text-xs text-slate-custom mt-1">
             {activeTab === "pending"
               ? "All submitted brand profiles have been moderated."
+              : activeTab === "drafts"
+              ? "No brand owners currently have drafts in progress."
               : `No brand profiles currently in this list.`}
           </p>
         </div>
@@ -213,6 +230,11 @@ export function BrandModerationQueue({ brands }: { brands: BrandItem[] }) {
                   {b.status === "changes_requested" && (
                     <span className="inline-flex items-center gap-1 text-xs font-bold bg-danger-bg text-danger border border-danger/30 px-3 py-1 rounded-full">
                       <AlertTriangle className="w-3.5 h-3.5" /> Changes Requested
+                    </span>
+                  )}
+                  {b.status === "draft" && (
+                    <span className="inline-flex items-center gap-1 text-xs font-bold bg-gray-100 text-slate-custom border border-gray-300 px-3 py-1 rounded-full">
+                      <Clock className="w-3.5 h-3.5 text-slate-custom" /> Draft (In Progress)
                     </span>
                   )}
                 </div>

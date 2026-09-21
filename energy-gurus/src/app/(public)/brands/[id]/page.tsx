@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { redis, CACHE_KEYS } from "@/lib/redis";
 import { BrandProfileView } from "@/components/brands/BrandProfileView";
+import { auth } from "@clerk/nextjs/server";
+import { getUserRole } from "@/lib/roles";
 
 export async function generateMetadata({
   params
@@ -66,6 +68,17 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
   // Fetch brand
   const [brand] = await db.select().from(brands).where(eq(brands.id, id));
   if (!brand) return notFound();
+
+  // If brand is not live, only allow brand owner or admin to preview
+  if (brand.status !== "live") {
+    const { userId: clerkId } = await auth();
+    if (!clerkId) return notFound();
+    const role = await getUserRole();
+    const [dbUser] = await db.select().from(users).where(eq(users.clerkId, clerkId));
+    const isOwner = dbUser && dbUser.id === brand.userId;
+    const isAdmin = role === "admin" || role === "super-admin";
+    if (!isOwner && !isAdmin) return notFound();
+  }
 
   // Fetch products
   const brandProducts = await db

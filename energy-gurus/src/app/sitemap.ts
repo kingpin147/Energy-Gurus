@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { db } from '@/db';
 import { epcInstallers, brands, users, epcOffices, epcProjects, products, podcasts, news } from '@/db/schema';
-import { eq, sql, desc, or, lte } from 'drizzle-orm';
+import { eq, and, sql, desc, or, lte } from 'drizzle-orm';
 import { getEpcCompleteness, getBrandCompleteness } from '@/lib/utils/completeness';
 
 const BASE_URL = 'https://www.energygurus.online';
@@ -93,7 +93,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })
       .from(brands)
       .innerJoin(users, eq(users.id, brands.userId))
-      .where(eq(users.isActive, true));
+      .where(and(eq(users.isActive, true), eq(brands.status, 'live')));
 
     const validBrands = activeBrands.filter(b => {
       const { score } = getBrandCompleteness(b, b.productsCount || 0);

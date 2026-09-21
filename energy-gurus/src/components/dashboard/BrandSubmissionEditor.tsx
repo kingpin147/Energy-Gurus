@@ -300,14 +300,6 @@ export function BrandSubmissionEditor({
           </div>
 
           <div className="flex items-center gap-2.5">
-            <Link
-              href={`/brands/${brand.id}`}
-              target="_blank"
-              className="px-3.5 py-2 text-xs font-semibold bg-cream border border-line rounded-[3px] text-navy-deep hover:bg-paper inline-flex items-center gap-1.5 shadow-sm"
-            >
-              <Eye className="w-3.5 h-3.5" /> Preview Public Page
-            </Link>
-
             <button
               onClick={handleSaveDraft}
               disabled={isSaving || isUploading}
