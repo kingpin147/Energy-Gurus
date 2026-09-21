@@ -40,17 +40,23 @@ export default async function Dashboard() {
     } else if (role === 'brand') {
         title = "Brand Center";
         subtitle = "Manage your product ecosystem and brand reputation.";
-        const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId!));
-        const [brand] = await db.select().from(brands).where(eq(brands.userId, user.id));
-        const productCount = brand ? await db.select({ count: sql<number>`count(*)` }).from(products).where(eq(products.brandId, brand.id)) : [{ count: 0 }];
-        const inquiryCount = await db.select({ count: sql<number>`count(*)` }).from(inquiries).where(eq(inquiries.receiverId, user.id));
+        const [user] = clerkId ? await db.select().from(users).where(eq(users.clerkId, clerkId)) : [];
+        if (!user) {
+            stats = [
+                { title: "Welcome", value: "—", unit: "Setting up your brand profile…", icon: <Activity className="w-4 h-4 text-amber" /> },
+            ];
+        } else {
+            const [brand] = await db.select().from(brands).where(eq(brands.userId, user.id));
+            const productCount = brand ? await db.select({ count: sql<number>`count(*)` }).from(products).where(eq(products.brandId, brand.id)) : [{ count: 0 }];
+            const inquiryCount = await db.select({ count: sql<number>`count(*)` }).from(inquiries).where(eq(inquiries.receiverId, user.id));
 
-        stats = [
-            { title: "Active Products", value: productCount[0].count.toString(), unit: "In directory", icon: <Package className="w-4 h-4 text-amber" /> },
-            { title: "Verifications", value: "450", unit: "Successful checks", icon: <ShieldCheck className="w-4 h-4 text-green-500" /> },
-            { title: "Brand Inquiries", value: inquiryCount[0].count.toString(), unit: "Total received", icon: <MessageSquare className="w-4 h-4 text-amber" /> },
-            { title: "Support Tickets", value: "3", unit: "Open cases", icon: <AlertTriangle className="w-4 h-4 text-red-500" /> },
-        ];
+            stats = [
+                { title: "Active Products", value: (productCount[0]?.count ?? 0).toString(), unit: "In directory", icon: <Package className="w-4 h-4 text-amber" /> },
+                { title: "Brand Status", value: brand?.isVerified ? "Verified" : (brand?.status || "Draft").toUpperCase(), unit: "Verification", icon: <ShieldCheck className="w-4 h-4 text-green-500" /> },
+                { title: "Brand Inquiries", value: (inquiryCount[0]?.count ?? 0).toString(), unit: "Total received", icon: <MessageSquare className="w-4 h-4 text-amber" /> },
+                { title: "Catalog Status", value: brand ? "Active" : "Pending Setup", unit: "Account Health", icon: <AlertTriangle className="w-4 h-4 text-amber" /> },
+            ];
+        }
     } else if (role === 'admin' || role === 'super-admin') {
         title = "Admin Console";
         subtitle = "Global platform management and oversight.";

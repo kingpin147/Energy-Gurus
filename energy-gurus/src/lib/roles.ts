@@ -39,22 +39,66 @@ export const getUserRole = cache(async (): Promise<UserRole> => {
     // 2. Fallback to Clerk primary email directly
     const user = await getCurrentUser();
     const primaryEmail = user?.emailAddresses?.find(e => e.id === user.primaryEmailAddressId)?.emailAddress || user?.emailAddresses?.[0]?.emailAddress;
+    const lowerEmail = primaryEmail?.toLowerCase();
     
-    if (primaryEmail && whitelist.includes(primaryEmail.toLowerCase())) {
-      // Auto-heal: Ensure user record exists in local DB as super-admin
-      if (userId) {
-        await db.insert(users).values({
-          clerkId: userId,
-          email: primaryEmail.toLowerCase(),
-          name: user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : "Super Admin",
-          role: "super-admin",
-          isActive: true
-        }).onConflictDoUpdate({
-          target: users.email,
-          set: { role: "super-admin", clerkId: userId, isActive: true }
-        });
+    if (lowerEmail) {
+      if (whitelist.includes(lowerEmail)) {
+        // Auto-heal: Ensure user record exists in local DB as super-admin
+        if (userId) {
+          await db.insert(users).values({
+            clerkId: userId,
+            email: lowerEmail,
+            name: user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : "Super Admin",
+            role: "super-admin",
+            isActive: true
+          }).onConflictDoUpdate({
+            target: users.email,
+            set: { role: "super-admin", clerkId: userId, isActive: true }
+          });
+        }
+        return "super-admin";
       }
-      return "super-admin";
+
+      // Check if user already exists in DB by email
+      const [dbUserByEmail] = await db
+        .select({ id: users.id, role: users.role, clerkId: users.clerkId })
+        .from(users)
+        .where(eq(users.email, lowerEmail))
+        .limit(1);
+
+      if (dbUserByEmail) {
+        if (userId && dbUserByEmail.clerkId !== userId) {
+          await db.update(users).set({ clerkId: userId }).where(eq(users.id, dbUserByEmail.id));
+        }
+        return dbUserByEmail.role as UserRole;
+      }
+
+      // Check if user has an active invitation
+      const { invitations } = await import("@/db/schema");
+      const [invitation] = await db
+        .select()
+        .from(invitations)
+        .where(eq(invitations.email, lowerEmail))
+        .limit(1);
+
+      if (invitation) {
+        if (userId) {
+          await db.insert(users).values({
+            clerkId: userId,
+            email: lowerEmail,
+            name: user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : lowerEmail.split('@')[0],
+            role: invitation.role,
+            isActive: true
+          }).onConflictDoUpdate({
+            target: users.email,
+            set: { role: invitation.role, clerkId: userId, isActive: true }
+          });
+
+          // Delete consumed invitation
+          await db.delete(invitations).where(eq(invitations.id, invitation.id));
+        }
+        return invitation.role;
+      }
     }
 
     // 3. Fallback to session claims
