@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -48,6 +48,31 @@ export function BrandSubmissionEditor({
   const { uploadFile, isUploading } = useR2Upload();
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState("sec-profile");
+
+  const scrollToSection = (id: string) => {
+    setActiveTab(id);
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", `#${id}`);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hash) {
+      const id = window.location.hash.replace("#", "");
+      if (id) {
+        setActiveTab(id);
+        setTimeout(() => {
+          const el = document.getElementById(id);
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 150);
+      }
+    }
+  }, []);
 
   // Form State
   const [brandName, setBrandName] = useState(brand.brandName || "");
@@ -309,63 +334,42 @@ export function BrandSubmissionEditor({
         
         {/* Left Sidebar Navigation */}
         <aside className="bg-white border border-line rounded-[4px] p-3 sticky top-[80px] space-y-1 shadow-sm">
-          <a
-            href="#sec-profile"
-            className="flex items-center justify-between p-2.5 rounded text-xs font-bold text-navy-deep hover:bg-cream transition-colors border-l-3 border-amber"
-          >
-            <span>Core Profile & Story</span>
-          </a>
-          <a
-            href="#sec-products"
-            className="flex items-center justify-between p-2.5 rounded text-xs font-semibold text-slate-custom hover:bg-cream hover:text-navy-deep transition-colors"
-          >
-            <span>Products</span>
-            <span className="text-[10.5px] bg-cream border border-line px-2 py-0.5 rounded-full font-bold">
-              {productsList.length}
-            </span>
-          </a>
-          <a
-            href="#sec-distributors"
-            className="flex items-center justify-between p-2.5 rounded text-xs font-semibold text-slate-custom hover:bg-cream hover:text-navy-deep transition-colors"
-          >
-            <span>Distributors</span>
-            <span className="text-[10.5px] bg-cream border border-line px-2 py-0.5 rounded-full font-bold">
-              {distributors.length}
-            </span>
-          </a>
-          <a
-            href="#sec-retailers"
-            className="flex items-center justify-between p-2.5 rounded text-xs font-semibold text-slate-custom hover:bg-cream hover:text-navy-deep transition-colors"
-          >
-            <span>Retailers & Dealers</span>
-            <span className="text-[10.5px] bg-cream border border-line px-2 py-0.5 rounded-full font-bold">
-              {retailers.length}
-            </span>
-          </a>
-          <a
-            href="#sec-centres"
-            className="flex items-center justify-between p-2.5 rounded text-xs font-semibold text-slate-custom hover:bg-cream hover:text-navy-deep transition-colors"
-          >
-            <span>Service Centres</span>
-            <span className="text-[10.5px] bg-cream border border-line px-2 py-0.5 rounded-full font-bold">
-              {serviceCentres.length}
-            </span>
-          </a>
-          <a
-            href="#sec-team"
-            className="flex items-center justify-between p-2.5 rounded text-xs font-semibold text-slate-custom hover:bg-cream hover:text-navy-deep transition-colors"
-          >
-            <span>Local Pakistan Team</span>
-            <span className="text-[10.5px] bg-cream border border-line px-2 py-0.5 rounded-full font-bold">
-              {team.length}
-            </span>
-          </a>
-          <a
-            href="#sec-history"
-            className="flex items-center justify-between p-2.5 rounded text-xs font-semibold text-slate-custom hover:bg-cream hover:text-navy-deep transition-colors"
-          >
-            <span>Approval History</span>
-          </a>
+          {[
+            { id: "sec-profile", label: "Core Profile & Story", count: null },
+            { id: "sec-products", label: "Products", count: productsList.length },
+            { id: "sec-distributors", label: "Distributors", count: distributors.length },
+            { id: "sec-retailers", label: "Retailers & Dealers", count: retailers.length },
+            { id: "sec-centres", label: "Service Centres", count: serviceCentres.length },
+            { id: "sec-team", label: "Local Pakistan Team", count: team.length },
+            { id: "sec-history", label: "Approval History", count: null },
+          ].map((item) => {
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => scrollToSection(item.id)}
+                className={`w-full flex items-center justify-between p-2.5 rounded text-xs transition-all cursor-pointer text-left ${
+                  isActive
+                    ? "font-bold text-navy-deep bg-cream border-l-4 border-amber shadow-xs"
+                    : "font-semibold text-slate-custom hover:bg-cream hover:text-navy-deep"
+                }`}
+              >
+                <span>{item.label}</span>
+                {item.count !== null && (
+                  <span
+                    className={`text-[10.5px] px-2 py-0.5 rounded-full font-bold border ${
+                      isActive
+                        ? "bg-amber/20 border-amber/40 text-navy-deep"
+                        : "bg-cream border-line text-slate-custom"
+                    }`}
+                  >
+                    {item.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </aside>
 
         {/* Right Editor Panels */}
@@ -858,12 +862,151 @@ export function BrandSubmissionEditor({
             </div>
           </section>
 
-          {/* SECTION 4: SERVICE CENTRES */}
+          {/* SECTION 4: RETAILERS & DEALERS */}
+          <section id="sec-retailers" className="bg-white border border-line rounded-[4px] p-6 md:p-8 shadow-sm space-y-6 scroll-mt-24">
+            <div className="flex items-center justify-between border-b border-line pb-4 flex-wrap gap-2">
+              <div>
+                <h2 className="font-fraunces text-lg font-bold text-navy-deep">
+                  4. Authorized Retailers & Solar Shops ({retailers.length})
+                </h2>
+                <p className="text-xs text-slate-custom mt-1">
+                  Verified retail partner shops, market dealers, and local authorized stockists.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setRetailers([
+                    ...retailers,
+                    { name: "", city: "Lahore", address: "", phone: "", whatsapp: "", mapUrl: "" }
+                  ])
+                }
+                className="px-3.5 py-1.5 bg-amber hover:bg-amber-deep text-navy-deep font-bold text-xs rounded-[3px] inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
+              >
+                <Plus className="w-3.5 h-3.5" /> Add Retailer
+              </button>
+            </div>
+
+            {retailers.length === 0 ? (
+              <p className="text-xs text-slate-custom italic py-2">
+                No retailers added yet. Click &quot;Add Retailer&quot; above to list authorized shops and local dealers.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {retailers.map((ret, idx) => (
+                  <div key={idx} className="p-4 bg-paper border border-line rounded-[3px] space-y-3 relative">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[11px] font-bold text-amber-deep uppercase tracking-wider">
+                        Retailer / Dealer #{idx + 1}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setRetailers(retailers.filter((_, i) => i !== idx))}
+                        className="text-danger hover:text-red-700 text-xs font-semibold cursor-pointer flex items-center gap-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Remove
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-navy-deep mb-1">Shop / Business Name *</label>
+                        <input
+                          type="text"
+                          value={ret.name || ""}
+                          placeholder="e.g. Al-Madina Solar Traders"
+                          onChange={(e) => {
+                            const list = [...retailers];
+                            list[idx].name = e.target.value;
+                            setRetailers(list);
+                          }}
+                          className="w-full text-xs p-2 bg-white border border-line rounded"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-navy-deep mb-1">City</label>
+                        <input
+                          type="text"
+                          value={ret.city || ""}
+                          placeholder="e.g. Rawalpindi"
+                          onChange={(e) => {
+                            const list = [...retailers];
+                            list[idx].city = e.target.value;
+                            setRetailers(list);
+                          }}
+                          className="w-full text-xs p-2 bg-white border border-line rounded"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-navy-deep mb-1">Phone Number</label>
+                        <input
+                          type="text"
+                          value={ret.phone || ""}
+                          placeholder="0300-1234567"
+                          onChange={(e) => {
+                            const list = [...retailers];
+                            list[idx].phone = e.target.value;
+                            setRetailers(list);
+                          }}
+                          className="w-full text-xs p-2 bg-white border border-line rounded"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-navy-deep mb-1">WhatsApp</label>
+                        <input
+                          type="text"
+                          value={ret.whatsapp || ""}
+                          placeholder="+92 300 1234567"
+                          onChange={(e) => {
+                            const list = [...retailers];
+                            list[idx].whatsapp = e.target.value;
+                            setRetailers(list);
+                          }}
+                          className="w-full text-xs p-2 bg-white border border-line rounded"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-navy-deep mb-1">Google Maps Link</label>
+                        <input
+                          type="url"
+                          value={ret.mapUrl || ""}
+                          placeholder="https://maps.google.com/..."
+                          onChange={(e) => {
+                            const list = [...retailers];
+                            list[idx].mapUrl = e.target.value;
+                            setRetailers(list);
+                          }}
+                          className="w-full text-xs p-2 bg-white border border-line rounded"
+                        />
+                      </div>
+                      <div className="md:col-span-3">
+                        <label className="block text-[11px] font-semibold text-navy-deep mb-1">Shop Address</label>
+                        <input
+                          type="text"
+                          value={ret.address || ""}
+                          placeholder="Shop # 12, Hall Road, Lahore"
+                          onChange={(e) => {
+                            const list = [...retailers];
+                            list[idx].address = e.target.value;
+                            setRetailers(list);
+                          }}
+                          className="w-full text-xs p-2 bg-white border border-line rounded"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* SECTION 5: SERVICE CENTRES */}
           <section id="sec-centres" className="bg-white border border-line rounded-[4px] p-6 md:p-8 shadow-sm space-y-6 scroll-mt-24">
             <div className="flex items-center justify-between border-b border-line pb-4 flex-wrap gap-2">
               <div>
                 <h2 className="font-fraunces text-lg font-bold text-navy-deep">
-                  4. Flagship Stores & Service Centres ({serviceCentres.length})
+                  5. Flagship Stores & Service Centres ({serviceCentres.length})
                 </h2>
                 <p className="text-xs text-slate-custom mt-1">
                   Official repair, RMA collection, and in-person diagnostics locations.
@@ -975,10 +1118,135 @@ export function BrandSubmissionEditor({
             </div>
           </section>
 
-          {/* SECTION 5: APPROVAL HISTORY */}
+          {/* SECTION 6: LOCAL PAKISTAN TEAM */}
+          <section id="sec-team" className="bg-white border border-line rounded-[4px] p-6 md:p-8 shadow-sm space-y-6 scroll-mt-24">
+            <div className="flex items-center justify-between border-b border-line pb-4 flex-wrap gap-2">
+              <div>
+                <h2 className="font-fraunces text-lg font-bold text-navy-deep">
+                  6. Local Pakistan Team & Key Representatives ({team.length})
+                </h2>
+                <p className="text-xs text-slate-custom mt-1">
+                  Country managers, sales directors, and technical support leads based in Pakistan.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setTeam([
+                    ...team,
+                    { name: "", designation: "Country Manager - Pakistan", email: "", phone: "", linkedIn: "", photoUrl: "" }
+                  ])
+                }
+                className="px-3.5 py-1.5 bg-amber hover:bg-amber-deep text-navy-deep font-bold text-xs rounded-[3px] inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
+              >
+                <Plus className="w-3.5 h-3.5" /> Add Team Member
+              </button>
+            </div>
+
+            {team.length === 0 ? (
+              <p className="text-xs text-slate-custom italic py-2">
+                No team members listed yet. Click &quot;Add Team Member&quot; above to list key representatives in Pakistan.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {team.map((member, idx) => (
+                  <div key={idx} className="p-4 bg-paper border border-line rounded-[3px] space-y-3 relative">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[11px] font-bold text-amber-deep uppercase tracking-wider">
+                        Team Member #{idx + 1}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setTeam(team.filter((_, i) => i !== idx))}
+                        className="text-danger hover:text-red-700 text-xs font-semibold cursor-pointer flex items-center gap-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Remove
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-navy-deep mb-1">Full Name *</label>
+                        <input
+                          type="text"
+                          value={member.name || ""}
+                          placeholder="e.g. Engr. Ahmad Khan"
+                          onChange={(e) => {
+                            const list = [...team];
+                            list[idx].name = e.target.value;
+                            setTeam(list);
+                          }}
+                          className="w-full text-xs p-2 bg-white border border-line rounded font-semibold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-navy-deep mb-1">Designation / Role *</label>
+                        <input
+                          type="text"
+                          value={member.designation || ""}
+                          placeholder="e.g. Head of Technical Support"
+                          onChange={(e) => {
+                            const list = [...team];
+                            list[idx].designation = e.target.value;
+                            setTeam(list);
+                          }}
+                          className="w-full text-xs p-2 bg-white border border-line rounded"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-navy-deep mb-1">Official Email</label>
+                        <input
+                          type="email"
+                          value={member.email || ""}
+                          placeholder="ahmad@brand.com"
+                          onChange={(e) => {
+                            const list = [...team];
+                            list[idx].email = e.target.value;
+                            setTeam(list);
+                          }}
+                          className="w-full text-xs p-2 bg-white border border-line rounded"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-navy-deep mb-1">Phone / WhatsApp</label>
+                        <input
+                          type="text"
+                          value={member.phone || ""}
+                          placeholder="+92 300 0000000"
+                          onChange={(e) => {
+                            const list = [...team];
+                            list[idx].phone = e.target.value;
+                            setTeam(list);
+                          }}
+                          className="w-full text-xs p-2 bg-white border border-line rounded"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-[11px] font-semibold text-navy-deep mb-1">LinkedIn Profile URL</label>
+                        <input
+                          type="url"
+                          value={member.linkedIn || ""}
+                          placeholder="https://linkedin.com/in/..."
+                          onChange={(e) => {
+                            const list = [...team];
+                            list[idx].linkedIn = e.target.value;
+                            setTeam(list);
+                          }}
+                          className="w-full text-xs p-2 bg-white border border-line rounded"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* SECTION 7: APPROVAL HISTORY */}
           <section id="sec-history" className="bg-white border border-line rounded-[4px] p-6 md:p-8 shadow-sm space-y-4 scroll-mt-24">
             <h2 className="font-fraunces text-lg font-bold text-navy-deep border-b border-line pb-3">
-              5. Submission & Approval Audit History
+              7. Submission & Approval Audit History
             </h2>
             {approvalHistory.length === 0 ? (
               <p className="text-xs text-slate-custom italic py-2">
@@ -995,7 +1263,7 @@ export function BrandSubmissionEditor({
                       </span>
                       {item.note && (
                         <p className="text-xs text-ink/80 mt-1 bg-cream p-2 rounded border border-line">
-                          "{item.note}"
+                          &quot;{item.note}&quot;
                         </p>
                       )}
                     </div>
