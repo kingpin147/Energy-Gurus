@@ -12,13 +12,13 @@ export function useR2Upload() {
     ): Promise<{ publicUrl: string; key: string }> => {
         // 1. Pre-flight Client-Side Validations
         const ALLOWED_FOLDERS = [
-            "epc-logos", "epc-projects", "epc-portfolios", "epc-portfolio", "epc-documents",
+            "epc-logos", "epc-photos", "epc-projects", "epc-portfolios", "epc-portfolio", "epc-documents", "epc-brand-certs", "epc-team",
             "brand-logos", "brand-gallery", "brand-documents", "brand-team", "brand-proofs",
             "product-images", "product-datasheets", "product-manuals",
             "podcast-thumbnails", "uploads",
             "project-images", "project-videos",
             "live-qa-thumbnails", "expert-photos", "epc-reviews", "review-proofs",
-            "news-cover", "news-authors", "news-images", "ad-banners", "team"
+            "news-cover", "news-covers", "news-authors", "news-images", "ad-banners", "ad-banners-mobile", "team"
         ];
 
         if (!ALLOWED_FOLDERS.includes(folder)) {
