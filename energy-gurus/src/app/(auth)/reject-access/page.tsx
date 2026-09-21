@@ -24,6 +24,9 @@ function RejectAccessContent() {
     if (error === "removed") {
         title = "Account Removed";
         message = "You are no longer part of organization.";
+    } else if (error === "deactivated") {
+        title = "Account Deactivated";
+        message = "Your account has been deactivated by an administrator. Please contact support if you believe this is an error.";
     }
 
     return (

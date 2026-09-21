@@ -1,11 +1,9 @@
 import { db } from "@/db";
-import { users, brands, epcInstallers } from "@/db/schema";
+import { users, brands, epcInstallers, invitations } from "@/db/schema";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users as UsersIcon, ShieldAlert, Power, PowerOff, User as UserIcon } from "lucide-react";
-import { toggleUserStatus } from "@/lib/actions/users";
-import { invitations } from "@/db/schema";
+import { Users as UsersIcon, ShieldAlert, User as UserIcon } from "lucide-react";
 import { ListSort } from "@/components/shared/list-sort";
 import { ListSearch } from "@/components/shared/list-search";
 import { eq, asc, desc, like, or, and } from "drizzle-orm";
@@ -14,6 +12,7 @@ import { BulkInvite } from "@/components/dashboard/bulk-invite";
 import { SingleInvite } from "@/components/dashboard/single-invite";
 import { PendingInvitations } from "@/components/dashboard/pending-invitations";
 import { DeleteUserButton } from "@/components/dashboard/delete-user-button";
+import { UserStatusButton } from "@/components/dashboard/user-status-button";
 import { createClerkClient } from "@clerk/nextjs/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -227,18 +226,12 @@ export default async function UserManagementPage({
                                                     <td className="p-6">
                                                         <div className="flex items-center justify-end gap-2">
                                                             {!isSuperAdmin && (user.role === 'epc' || user.role === 'brand') && (
-                                                                <form action={toggleUserStatus.bind(null, user.id)}>
-                                                                    <Button
-                                                                        variant={user.isActive ? "outline" : "default"}
-                                                                        size="sm"
-                                                                        className={`h-9 px-4 rounded-xl gap-2 font-bold ${user.isActive ? "text-green-600 border-green-200 hover:bg-green-100" : "bg-red-600 hover:bg-red-700 text-white"}`}
-                                                                    >
-                                                                        {user.isActive ? <Power className="w-4 h-4" /> : <PowerOff className="w-4 h-4" />}
-                                                                        {user.isActive ? "Active" : "Inactive"}
-                                                                    </Button>
-                                                                </form>
+                                                                <UserStatusButton
+                                                                    userId={user.id}
+                                                                    initialActive={user.isActive}
+                                                                    userName={user.name || user.email}
+                                                                />
                                                             )}
-
 
                                                             {!isSuperAdmin && (userRole === 'super-admin' || (userRole === 'admin' && user.role !== 'admin' && user.role !== 'super-admin')) && (
                                                                 <DeleteUserButton

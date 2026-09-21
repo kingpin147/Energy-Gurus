@@ -163,8 +163,10 @@ export async function toggleUserStatus(userId: string) {
         }
     }
 
-    await db.update(users).set({ isActive: !user.isActive }).where(eq(users.id, userId));
+    const newStatus = !user.isActive;
+    await db.update(users).set({ isActive: newStatus }).where(eq(users.id, userId));
 
+    revalidatePath("/dashboard/users");
     revalidatePath("/", "layout");
 
     try {
@@ -181,4 +183,6 @@ export async function toggleUserStatus(userId: string) {
     } catch (e) {
         console.error("Failed to clear profile caches:", e);
     }
+
+    return { success: true, isActive: newStatus };
 }

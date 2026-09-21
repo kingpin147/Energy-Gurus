@@ -78,6 +78,9 @@ export async function isUserAllowed(email: string, clerkId?: string, name?: stri
     // 1. Check if they are already in the users table
     const [dbUser] = await db.select().from(users).where(eq(users.email, lowerEmail));
     if (dbUser) {
+        if (!dbUser.isActive) {
+            return false;
+        }
         if (clerkId && dbUser.clerkId !== clerkId) {
             await db.update(users).set({ clerkId }).where(eq(users.id, dbUser.id));
         }
