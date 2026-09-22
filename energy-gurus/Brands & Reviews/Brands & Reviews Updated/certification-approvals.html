@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certification Approvals — EnergyGurus.Online Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #0F2A47; --navy-deep: #0A1D33;
+    --amber: #E0A73B; --amber-deep: #B9832A;
+    --cream: #F7F4EC; --paper: #FFFFFF; --ink: #1E2A36; --ink-soft: #55636E;
+    --line: #E3DFD3; --good: #3E7D5A; --good-bg: #E8F2EC;
+    --warn: #B9832A; --warn-bg: #FBF0DA; --danger: #B4453C; --danger-bg: #F8E9E7;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--cream);color:var(--ink);font-family:'IBM Plex Sans', sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Fraunces', serif;color:var(--navy-deep);margin:0;}
+  a{color:inherit;}
+
+  .adminbar{background:var(--navy-deep);color:#EFE9DA;padding:10px 0;}
+  .adminbar .wrap{display:flex;align-items:center;justify-content:space-between;max-width:1080px;margin:0 auto;padding:0 28px;}
+  .adminbar .mark{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;}
+  .adminbar .mark svg{width:15px;height:15px;}
+  .adminbar .crumbs{font-size:13px;color:#B9C3CC;}
+  .adminbar .crumbs a{color:#DCE3E8;text-decoration:none;}
+  .adminbar .crumbs a:hover{text-decoration:underline;}
+
+  .page-head{background:var(--paper);border-bottom:1px solid var(--line);padding:24px 0;}
+  .page-head .wrap{max-width:1080px;margin:0 auto;padding:0 28px;}
+  .page-head h1{font-size:22px;font-weight:600;}
+  .page-head p{font-size:13.5px;color:var(--ink-soft);margin-top:6px;max-width:70ch;}
+
+  .tabbar{background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;}
+  .tabbar .wrap{max-width:1080px;margin:0 auto;padding:0 28px;display:flex;gap:4px;}
+  .tab{background:none;border:none;font-size:13.5px;font-weight:600;color:var(--ink-soft);padding:13px 16px;cursor:pointer;border-bottom:3px solid transparent;}
+  .tab.active{color:var(--navy-deep);border-bottom-color:var(--amber-deep);}
+  .tab .badge{display:inline-block;margin-left:6px;background:var(--danger);color:#fff;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:100px;}
+
+  .content{max-width:1080px;margin:0 auto;padding:28px;}
+  .queue-panel{display:none;flex-direction:column;gap:16px;}
+  .queue-panel.active{display:flex;}
+
+  .cert-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:22px;}
+  .cert-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--line);}
+  .cert-who{display:flex;align-items:center;gap:12px;}
+  .cert-avatar{width:42px;height:42px;border-radius:50%;background:var(--cream);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--navy-deep);flex-shrink:0;}
+  .cert-installer-name{font-size:15px;font-weight:600;color:var(--navy-deep);}
+  .cert-meta{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .brand-chip{
+    display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;
+    background:var(--cream);border:1px solid var(--line);padding:6px 12px 6px 6px;border-radius:100px;
+  }
+  .brand-chip-mark{width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:10px;}
+
+  .cert-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  .cert-detail dt{font-size:11.5px;color:var(--ink-soft);}
+  .cert-detail dd{margin:3px 0 0;font-size:13.5px;font-weight:600;color:var(--ink);}
+
+  .brand-approval-note{
+    background:var(--good-bg);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px;
+    font-size:12.5px;color:var(--ink);display:flex;gap:8px;align-items:flex-start;
+  }
+  .brand-approval-note svg{width:14px;height:14px;color:var(--good);flex-shrink:0;margin-top:2px;}
+
+  .proof-line{
+    display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--navy-deep);
+    background:var(--cream);border:1px solid var(--line);padding:5px 10px;border-radius:var(--radius);margin-bottom:16px;
+  }
+  .proof-line svg{width:13px;height:13px;flex-shrink:0;}
+  .no-proof{font-size:12px;color:var(--ink-soft);font-style:italic;margin-bottom:16px;display:block;}
+
+  .impact-note{
+    font-size:12px;color:var(--ink-soft);background:var(--cream);border-radius:var(--radius);
+    padding:10px 12px;margin-bottom:16px;
+  }
+
+  .cert-actions{display:flex;gap:10px;padding-top:16px;border-top:1px solid var(--line);}
+  .rbtn{font-size:13px;font-weight:600;padding:9px 16px;border-radius:var(--radius);border:1px solid transparent;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+  .rbtn svg{width:14px;height:14px;}
+  .rbtn-approve{background:var(--good);color:#fff;}
+  .rbtn-approve:hover{background:#356b4c;}
+  .rbtn-reject{background:transparent;border-color:var(--line);color:var(--danger);}
+  .rbtn-reject:hover{border-color:var(--danger);background:var(--danger-bg);}
+
+  .reject-panel{display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);}
+  .reject-panel.open{display:block;}
+  .reject-panel textarea{width:100%;border:1px solid var(--line);border-radius:var(--radius);padding:9px 11px;font-family:inherit;font-size:13px;min-height:64px;resize:vertical;margin-bottom:10px;}
+  .reject-panel .rbtn-confirm{background:var(--danger);color:#fff;}
+  .reject-panel .rbtn-confirm:hover{background:#96382f;}
+  .reject-panel .rbtn-cancel{background:transparent;border-color:var(--line);color:var(--ink-soft);}
+
+  .status-pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:100px;}
+  .status-approved{background:var(--good-bg);color:var(--good);}
+  .status-rejected{background:var(--danger-bg);color:var(--danger);}
+  .rejected-reason{font-size:12.5px;color:var(--danger);background:var(--danger-bg);border-radius:var(--radius);padding:8px 12px;margin-top:10px;}
+
+  .empty-state{text-align:center;padding:60px 20px;color:var(--ink-soft);}
+  .empty-state svg{width:32px;height:32px;color:var(--line);margin-bottom:14px;}
+  .empty-state p{font-size:13.5px;}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--navy-deep);color:#fff;font-size:13px;font-weight:600;padding:12px 20px;
+    border-radius:var(--radius);box-shadow:0 8px 24px rgba(10,29,51,0.3);
+    opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;z-index:50;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="adminbar">
+  <div class="wrap">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 7" stroke="#E0A73B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      EnergyGurus.Online — Admin
+    </div>
+    <div class="crumbs"><a href="#">Installers</a> &nbsp;/&nbsp; Certification Approvals</div>
+  </div>
+</div>
+
+<header class="page-head">
+  <div class="wrap">
+    <h1>Certification Approvals</h1>
+    <p>The final step in the certification pipeline. Everything here has already been approved by the brand — your job is to confirm it's genuine (spot-check proof, cross-reference with the brand if needed) and assign it to the installer's live profile. Confirming here also recalculates the installer's overall tier (Silver/Gold/Diamond/Platinum).</p>
+  </div>
+</header>
+
+<nav class="tabbar">
+  <div class="wrap">
+    <button class="tab active" data-panel="pending">Awaiting Final Approval <span class="badge">2</span></button>
+    <button class="tab" data-panel="approved">Confirmed</button>
+    <button class="tab" data-panel="rejected">Rejected</button>
+  </div>
+</nav>
+
+<main class="content">
+
+  <!-- AWAITING FINAL APPROVAL -->
+  <div class="queue-panel active" id="pending">
+
+    <div class="cert-card">
+      <div class="cert-top">
+        <div class="cert-who">
+          <div class="cert-avatar">ST</div>
+          <div>
+            <div class="cert-installer-name">SolarTech Engineering</div>
+            <div class="cert-meta">Lahore · currently Gold tier (3 confirmed certifications)</div>
+          </div>
+        </div>
+        <div class="brand-chip"><div class="brand-chip-mark">S</div>Solis</div>
+      </div>
+
+      <div class="cert-detail-grid">
+        <div class="cert-detail"><dt>Claimed certified since</dt><dd>2024</dd></div>
+        <div class="cert-detail"><dt>Would move installer to</dt><dd>Gold (4 confirmed, still within 3–4 range)</dd></div>
+      </div>
+
+      <div class="brand-approval-note">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span><b>Approved by Solis</b> on Sep 4, 2026 — "Confirmed, installer completed our onboarding training in Q1 2024."</span>
+      </div>
+
+      <div class="proof-line">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4M12 3l7 4v5c0 5-3.5 8.5-7 9-3.5-.5-7-4-7-9V7l7-4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        certificate-solis.pdf attached by installer
+      </div>
+
+      <div class="cert-actions">
+        <button class="rbtn rbtn-approve" onclick="approveCert(this)"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Confirm &amp; Publish</button>
+        <button class="rbtn rbtn-reject" onclick="toggleReject(this)">Reject</button>
+      </div>
+      <div class="reject-panel">
+        <textarea placeholder="Reason for rejection (sent to both the installer and Solis)"></textarea>
+        <div style="display:flex;gap:8px;">
+          <button class="rbtn rbtn-confirm" onclick="rejectCert(this)">Confirm Rejection</button>
+          <button class="rbtn rbtn-cancel" onclick="toggleReject(this)">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cert-card">
+      <div class="cert-top">
+        <div class="cert-who">
+          <div class="cert-avatar">MS</div>
+          <div>
+            <div class="cert-installer-name">Meridian Solar Works</div>
+            <div class="cert-meta">Multan · currently Silver tier (2 confirmed certifications)</div>
+          </div>
+        </div>
+        <div class="brand-chip"><div class="brand-chip-mark" style="background:#7A4A1C;">L</div>LONGi</div>
+      </div>
+
+      <div class="cert-detail-grid">
+        <div class="cert-detail"><dt>Claimed certified since</dt><dd>2023</dd></div>
+        <div class="cert-detail"><dt>Would move installer to</dt><dd>Gold (3 confirmed, entering 3–4 range)</dd></div>
+      </div>
+
+      <div class="brand-approval-note">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span><b>Approved by LONGi</b> on Sep 8, 2026 — no additional note provided.</span>
+      </div>
+
+      <span class="no-proof">No document attached — installer noted "trained directly by regional rep." Brand approved anyway; worth a closer look before confirming.</span>
+
+      <div class="cert-actions">
+        <button class="rbtn rbtn-approve" onclick="approveCert(this)"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Confirm &amp; Publish</button>
+        <button class="rbtn rbtn-reject" onclick="toggleReject(this)">Reject</button>
+      </div>
+      <div class="reject-panel">
+        <textarea placeholder="Reason for rejection (sent to both the installer and LONGi)">No supporting document was provided, and this is a tier-changing certification. Please resubmit with a certificate, training record, or purchase history we can verify independently of the brand's approval.</textarea>
+        <div style="display:flex;gap:8px;">
+          <button class="rbtn rbtn-confirm" onclick="rejectCert(this)">Confirm Rejection</button>
+          <button class="rbtn rbtn-cancel" onclick="toggleReject(this)">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CONFIRMED -->
+  <div class="queue-panel" id="approved">
+    <div class="cert-card">
+      <div class="cert-top">
+        <div class="cert-who">
+          <div class="cert-avatar">ST</div>
+          <div>
+            <div class="cert-installer-name">SolarTech Engineering</div>
+            <div class="cert-meta">Lahore · confirmed Sep 1, 2026</div>
+          </div>
+        </div>
+        <div class="brand-chip"><div class="brand-chip-mark" style="background:#1F2937;">H</div>Huawei</div>
+      </div>
+      <div class="cert-actions" style="border-top:none;padding-top:0;">
+        <span class="status-pill status-approved">
+          <svg viewBox="0 0 24 24" fill="none" style="width:11px;height:11px;"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Live on installer's profile
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- REJECTED -->
+  <div class="queue-panel" id="rejected">
+    <div class="cert-card">
+      <div class="cert-top">
+        <div class="cert-who">
+          <div class="cert-avatar">BF</div>
+          <div>
+            <div class="cert-installer-name">Bright Future Solar</div>
+            <div class="cert-meta">Islamabad · rejected Sep 5, 2026</div>
+          </div>
+        </div>
+        <div class="brand-chip"><div class="brand-chip-mark" style="background:#4A3B7A;">S</div>Solis</div>
+      </div>
+      <div class="cert-actions" style="border-top:none;padding-top:0;">
+        <span class="status-pill status-rejected">
+          <svg viewBox="0 0 24 24" fill="none" style="width:11px;height:11px;"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Rejected
+        </span>
+      </div>
+      <div class="rejected-reason">Sent to installer and Solis: "The uploaded certificate's serial number doesn't match Solis's training records for this date. Please have Solis resend directly or provide a corrected document."</div>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.queue-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.panel).classList.add('active');
+    });
+  });
+
+  function showToast(msg){
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+
+  function updatePendingBadge(){
+    const count = document.querySelectorAll('#pending .cert-card').length;
+    const badge = document.querySelector('.tab[data-panel="pending"] .badge');
+    if (count > 0) { badge.style.display = ''; badge.textContent = count; }
+    else { badge.style.display = 'none'; }
+    if (count === 0) {
+      document.getElementById('pending').innerHTML = `
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <p>No certifications waiting on final approval.</p>
+        </div>`;
+    }
+  }
+
+  function approveCert(btn){
+    const card = btn.closest('.cert-card');
+    const name = card.querySelector('.cert-installer-name').textContent;
+    const brand = card.querySelector('.brand-chip').textContent.trim();
+    card.remove();
+    updatePendingBadge();
+    showToast(`${name} × ${brand} confirmed — now live, tier recalculated`);
+  }
+
+  function toggleReject(btn){
+    btn.closest('.cert-card').querySelector('.reject-panel').classList.toggle('open');
+  }
+
+  function rejectCert(btn){
+    const card = btn.closest('.cert-card');
+    const name = card.querySelector('.cert-installer-name').textContent;
+    const reason = card.querySelector('.reject-panel textarea').value.trim();
+    if (!reason) { alert('Please add a reason — it goes to both the installer and the brand.'); return; }
+    card.remove();
+    updatePendingBadge();
+    showToast(`${name}'s certification rejected — reason sent to both parties`);
+  }
+</script>
+
+</body>
+</html>

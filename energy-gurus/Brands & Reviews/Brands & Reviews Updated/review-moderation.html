@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Review Moderation — EnergyGurus.Online Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #0F2A47;
+    --navy-deep: #0A1D33;
+    --amber: #E0A73B;
+    --amber-deep: #B9832A;
+    --cream: #F7F4EC;
+    --paper: #FFFFFF;
+    --ink: #1E2A36;
+    --ink-soft: #55636E;
+    --line: #E3DFD3;
+    --good: #3E7D5A;
+    --good-bg: #E8F2EC;
+    --warn: #B9832A;
+    --warn-bg: #FBF0DA;
+    --danger: #B4453C;
+    --danger-bg: #F8E9E7;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:'Fraunces', serif;color:var(--navy-deep);margin:0;}
+  a{color:inherit;}
+
+  .adminbar{background:var(--navy-deep);color:#EFE9DA;padding:10px 0;}
+  .adminbar .wrap{display:flex;align-items:center;justify-content:space-between;max-width:1080px;margin:0 auto;padding:0 28px;}
+  .adminbar .mark{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;}
+  .adminbar .mark svg{width:15px;height:15px;}
+  .adminbar .crumbs{font-size:13px;color:#B9C3CC;}
+  .adminbar .crumbs a{color:#DCE3E8;text-decoration:none;}
+  .adminbar .crumbs a:hover{text-decoration:underline;}
+
+  .page-head{background:var(--paper);border-bottom:1px solid var(--line);padding:24px 0;}
+  .page-head .wrap{max-width:1080px;margin:0 auto;padding:0 28px;}
+  .page-head h1{font-size:22px;font-weight:600;}
+  .page-head p{font-size:13.5px;color:var(--ink-soft);margin-top:6px;max-width:64ch;}
+
+  .tabbar{background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;}
+  .tabbar .wrap{max-width:1080px;margin:0 auto;padding:0 28px;display:flex;gap:4px;}
+  .tab{
+    background:none;border:none;font-size:13.5px;font-weight:600;color:var(--ink-soft);
+    padding:13px 16px;cursor:pointer;border-bottom:3px solid transparent;
+  }
+  .tab.active{color:var(--navy-deep);border-bottom-color:var(--amber-deep);}
+  .tab .badge{
+    display:inline-block;margin-left:6px;background:var(--danger);color:#fff;
+    font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:100px;
+  }
+
+  .content{max-width:1080px;margin:0 auto;padding:28px;}
+  .queue-panel{display:none;flex-direction:column;gap:16px;}
+  .queue-panel.active{display:flex;}
+
+  .review-card{
+    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;
+  }
+  .review-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:10px;}
+  .review-who{display:flex;align-items:center;gap:10px;}
+  .review-avatar{
+    width:36px;height:36px;border-radius:50%;background:var(--cream);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--navy-deep);
+    flex-shrink:0;
+  }
+  .review-name{font-size:14px;font-weight:600;color:var(--navy-deep);}
+  .review-meta{font-size:12px;color:var(--ink-soft);margin-top:1px;}
+  .review-stars{color:var(--amber-deep);font-size:14px;}
+
+  .brand-tag{
+    font-size:11px;font-weight:600;background:var(--cream);border:1px solid var(--line);
+    padding:3px 10px;border-radius:100px;color:var(--ink);white-space:nowrap;
+  }
+
+  .review-text{font-size:13.5px;color:var(--ink);line-height:1.6;margin:10px 0 14px;}
+
+  .review-proof{
+    display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--navy-deep);
+    background:var(--cream);border:1px solid var(--line);padding:5px 10px;border-radius:var(--radius);
+    margin-bottom:14px;
+  }
+  .review-proof svg{width:13px;height:13px;flex-shrink:0;}
+  .no-proof{font-size:12px;color:var(--ink-soft);font-style:italic;margin-bottom:14px;display:block;}
+
+  .review-actions{display:flex;gap:10px;padding-top:14px;border-top:1px solid var(--line);}
+  .rbtn{
+    font-size:13px;font-weight:600;padding:9px 16px;border-radius:var(--radius);
+    border:1px solid transparent;cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+  }
+  .rbtn svg{width:14px;height:14px;}
+  .rbtn-approve{background:var(--good);color:#fff;}
+  .rbtn-approve:hover{background:#356b4c;}
+  .rbtn-reject{background:transparent;border-color:var(--line);color:var(--danger);}
+  .rbtn-reject:hover{border-color:var(--danger);background:var(--danger-bg);}
+  .rbtn-verify{background:transparent;border-color:var(--line);color:var(--navy-deep);}
+  .rbtn-verify:hover{border-color:var(--amber-deep);}
+
+  .reject-panel{display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);}
+  .reject-panel.open{display:block;}
+  .reject-panel textarea{
+    width:100%;border:1px solid var(--line);border-radius:var(--radius);padding:9px 11px;
+    font-family:inherit;font-size:13px;min-height:64px;resize:vertical;margin-bottom:10px;
+  }
+  .reject-panel .rbtn-confirm{background:var(--danger);color:#fff;}
+  .reject-panel .rbtn-confirm:hover{background:#96382f;}
+  .reject-panel .rbtn-cancel{background:transparent;border-color:var(--line);color:var(--ink-soft);}
+
+  .status-pill{
+    display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;
+    padding:4px 10px;border-radius:100px;
+  }
+  .status-approved{background:var(--good-bg);color:var(--good);}
+  .status-rejected{background:var(--danger-bg);color:var(--danger);}
+
+  .rejected-reason{
+    font-size:12.5px;color:var(--danger);background:var(--danger-bg);border-radius:var(--radius);
+    padding:8px 12px;margin-top:10px;
+  }
+
+  .empty-state{
+    text-align:center;padding:60px 20px;color:var(--ink-soft);
+  }
+  .empty-state svg{width:32px;height:32px;color:var(--line);margin-bottom:14px;}
+  .empty-state p{font-size:13.5px;}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--navy-deep);color:#fff;font-size:13px;font-weight:600;
+    padding:12px 20px;border-radius:var(--radius);box-shadow:0 8px 24px rgba(10,29,51,0.3);
+    opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;z-index:50;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="adminbar">
+  <div class="wrap">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 7" stroke="#E0A73B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      EnergyGurus.Online — Admin
+    </div>
+    <div class="crumbs"><a href="#">Brands</a> &nbsp;/&nbsp; Review Moderation</div>
+  </div>
+</div>
+
+<header class="page-head">
+  <div class="wrap">
+    <h1>Review Moderation</h1>
+    <p>Customer reviews submitted across all brand pages. Approve to publish, or reject with a reason sent back to the reviewer. Nothing appears on a brand's public page until it's approved here.</p>
+  </div>
+</header>
+
+<nav class="tabbar">
+  <div class="wrap">
+    <button class="tab active" data-panel="pending">Pending <span class="badge">3</span></button>
+    <button class="tab" data-panel="approved">Approved</button>
+    <button class="tab" data-panel="rejected">Rejected</button>
+  </div>
+</nav>
+
+<main class="content">
+
+  <!-- PENDING -->
+  <div class="queue-panel active" id="pending">
+
+    <div class="review-card">
+      <div class="review-top">
+        <div class="review-who">
+          <div class="review-avatar">AR</div>
+          <div>
+            <div class="review-name">Ahmed Raza</div>
+            <div class="review-meta">Lahore · submitted 2 hours ago</div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <span class="brand-tag">Growatt</span>
+          <div class="review-stars" style="margin-top:6px;">★★★★★</div>
+        </div>
+      </div>
+      <p class="review-text">System has run without a hiccup since commissioning. Our installer said the monitoring app makes fault diagnosis much faster than the previous brand we used. Product: WIT 100H Commercial Cabinet.</p>
+      <div class="review-proof">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4M12 3l7 4v5c0 5-3.5 8.5-7 9-3.5-.5-7-4-7-9V7l7-4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Proof attached — installation photo.jpg
+      </div>
+      <div class="review-actions">
+        <button class="rbtn rbtn-approve" onclick="approveReview(this)"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Approve &amp; Publish</button>
+        <button class="rbtn rbtn-reject" onclick="toggleReject(this)">Reject</button>
+      </div>
+      <div class="reject-panel">
+        <textarea placeholder="Reason for rejection (sent to the reviewer, e.g. 'Review doesn't mention a specific product or experience')"></textarea>
+        <div style="display:flex;gap:8px;">
+          <button class="rbtn rbtn-confirm" onclick="rejectReview(this)">Confirm Rejection</button>
+          <button class="rbtn rbtn-cancel" onclick="toggleReject(this)">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-card">
+      <div class="review-top">
+        <div class="review-who">
+          <div class="review-avatar">SM</div>
+          <div>
+            <div class="review-name">Sana Malik</div>
+            <div class="review-meta">Islamabad · submitted 1 day ago</div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <span class="brand-tag">Growatt</span>
+          <div class="review-stars" style="margin-top:6px;">★★★★☆</div>
+        </div>
+      </div>
+      <p class="review-text">Good inverter, WiFi module dropped connection a couple of times in the first month but support sorted it remotely. Would recommend. Product: MIN 6000TL-X.</p>
+      <span class="no-proof">No proof of purchase attached — can still be approved, just won't carry a Verified badge.</span>
+      <div class="review-actions">
+        <button class="rbtn rbtn-approve" onclick="approveReview(this)"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Approve &amp; Publish</button>
+        <button class="rbtn rbtn-reject" onclick="toggleReject(this)">Reject</button>
+      </div>
+      <div class="reject-panel">
+        <textarea placeholder="Reason for rejection (sent to the reviewer)"></textarea>
+        <div style="display:flex;gap:8px;">
+          <button class="rbtn rbtn-confirm" onclick="rejectReview(this)">Confirm Rejection</button>
+          <button class="rbtn rbtn-cancel" onclick="toggleReject(this)">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-card">
+      <div class="review-top">
+        <div class="review-who">
+          <div class="review-avatar">UK</div>
+          <div>
+            <div class="review-name">Usman Khalid</div>
+            <div class="review-meta">Faisalabad · submitted 2 days ago</div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <span class="brand-tag">Huawei</span>
+          <div class="review-stars" style="margin-top:6px;">★☆☆☆☆</div>
+        </div>
+      </div>
+      <p class="review-text">worst company dont buy from them my system broke down and nobody responded contact your competitor number if you want help lol</p>
+      <span class="no-proof">No proof of purchase attached.</span>
+      <div class="review-actions">
+        <button class="rbtn rbtn-approve" onclick="approveReview(this)"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Approve &amp; Publish</button>
+        <button class="rbtn rbtn-reject" onclick="toggleReject(this)">Reject</button>
+      </div>
+      <div class="reject-panel">
+        <textarea placeholder="Reason for rejection (sent to the reviewer)">Reviews can't name or direct customers to a competitor. You're welcome to resubmit describing your own experience with the product and support you received.</textarea>
+        <div style="display:flex;gap:8px;">
+          <button class="rbtn rbtn-confirm" onclick="rejectReview(this)">Confirm Rejection</button>
+          <button class="rbtn rbtn-cancel" onclick="toggleReject(this)">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- APPROVED -->
+  <div class="queue-panel" id="approved">
+    <div class="review-card">
+      <div class="review-top">
+        <div class="review-who">
+          <div class="review-avatar">FH</div>
+          <div>
+            <div class="review-name">Farhan Hassan</div>
+            <div class="review-meta">Lahore · approved Sep 10, 2026</div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <span class="brand-tag">Growatt</span>
+          <div class="review-stars" style="margin-top:6px;">★★★★★</div>
+        </div>
+      </div>
+      <p class="review-text">Great after-sales support, technician arrived within a day of my complaint. Highly recommend the WIT series for commercial setups.</p>
+      <div class="review-actions" style="border-top:none;padding-top:0;">
+        <span class="status-pill status-approved">
+          <svg viewBox="0 0 24 24" fill="none" style="width:11px;height:11px;"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Live on Growatt's profile
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- REJECTED -->
+  <div class="queue-panel" id="rejected">
+    <div class="review-card">
+      <div class="review-top">
+        <div class="review-who">
+          <div class="review-avatar">ZT</div>
+          <div>
+            <div class="review-name">Zainab Tariq</div>
+            <div class="review-meta">Karachi · rejected Sep 8, 2026</div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <span class="brand-tag">LONGi</span>
+          <div class="review-stars" style="margin-top:6px;">★★☆☆☆</div>
+        </div>
+      </div>
+      <p class="review-text">panels came with scratches, also my cousin's shop got a better price than the retailer near me not fair</p>
+      <div class="review-actions" style="border-top:none;padding-top:0;">
+        <span class="status-pill status-rejected">
+          <svg viewBox="0 0 24 24" fill="none" style="width:11px;height:11px;"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Rejected
+        </span>
+      </div>
+      <div class="rejected-reason">Sent to reviewer: "This reads more like a pricing complaint than a product review — pricing varies by retailer and isn't something a review can fairly reflect on the brand. Happy to have you resubmit focused on the product itself."</div>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.queue-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.panel).classList.add('active');
+    });
+  });
+
+  function showToast(msg){
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  function updatePendingBadge(){
+    const count = document.querySelectorAll('#pending .review-card').length;
+    const badge = document.querySelector('.tab[data-panel="pending"] .badge');
+    if (count > 0) { badge.style.display = ''; badge.textContent = count; }
+    else { badge.style.display = 'none'; }
+    if (count === 0) {
+      document.getElementById('pending').innerHTML = `
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <p>No reviews waiting on moderation.</p>
+        </div>`;
+    }
+  }
+
+  function approveReview(btn){
+    const card = btn.closest('.review-card');
+    const name = card.querySelector('.review-name').textContent;
+    card.remove();
+    updatePendingBadge();
+    showToast(`${name}'s review approved and published`);
+  }
+
+  function toggleReject(btn){
+    const panel = btn.closest('.review-card').querySelector('.reject-panel');
+    panel.classList.toggle('open');
+  }
+
+  function rejectReview(btn){
+    const card = btn.closest('.review-card');
+    const name = card.querySelector('.review-name').textContent;
+    const reason = card.querySelector('.reject-panel textarea').value.trim();
+    if (!reason) {
+      alert('Please add a reason — it gets sent to the reviewer.');
+      return;
+    }
+    card.remove();
+    updatePendingBadge();
+    showToast(`${name}'s review rejected — reason sent`);
+  }
+</script>
+
+</body>
+</html>

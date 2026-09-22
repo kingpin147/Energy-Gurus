@@ -7,6 +7,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { redis, CACHE_KEYS } from "@/lib/redis";
 import { getUserRole } from "@/lib/roles";
+import { reviewSubmissionSchema } from "@/lib/validations/schemas";
 
 export async function submitReview(formData: FormData) {
     try {
@@ -40,13 +41,25 @@ export async function submitReview(formData: FormData) {
             authorId = existingUser.id;
         }
 
-        const targetId = formData.get("targetId") as string;
-        const targetType = formData.get("targetType") as "epc" | "brand";
-        const rating = parseInt(formData.get("rating") as string) || 5;
-        const comment = formData.get("comment") as string;
-        const reviewerName = (formData.get("reviewerName") as string || formData.get("authorName") as string)?.trim();
-        const authorEmail = (formData.get("authorEmail") as string)?.trim();
-        const proofUrl = (formData.get("proofUrl") as string)?.trim() || null;
+        const rawData = {
+            targetId: formData.get("targetId") as string,
+            targetType: formData.get("targetType") as "epc" | "brand",
+            rating: formData.get("rating"),
+            comment: formData.get("comment") as string,
+            reviewerName: (formData.get("reviewerName") as string || formData.get("authorName") as string)?.trim() || "",
+            authorEmail: (formData.get("authorEmail") as string)?.trim() || "",
+            city: (formData.get("city") as string)?.trim() || null,
+            productUsed: (formData.get("productUsed") as string)?.trim() || null,
+            proofUrl: (formData.get("proofUrl") as string)?.trim() || null,
+        };
+
+        const validated = reviewSubmissionSchema.safeParse(rawData);
+        if (!validated.success) {
+            const firstError = validated.error.issues[0]?.message || "Validation failed";
+            return { success: false, message: firstError };
+        }
+
+        const { targetId, targetType, rating, comment, reviewerName, authorEmail, city, productUsed, proofUrl } = validated.data;
 
         if (reviewerName && clerkId) {
             await db.update(users)
@@ -64,6 +77,8 @@ export async function submitReview(formData: FormData) {
             targetType,
             rating,
             comment,
+            city,
+            productUsed,
             status: initialStatus,
             proofUrl,
             authorName: reviewerName,

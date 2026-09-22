@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add / Edit Installer — EnergyGurus.Online Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #0F2A47; --navy-deep: #0A1D33;
+    --amber: #E0A73B; --amber-deep: #B9832A;
+    --cream: #F7F4EC; --paper: #FFFFFF; --ink: #1E2A36; --ink-soft: #55636E;
+    --line: #E3DFD3; --good: #3E7D5A; --good-bg: #E8F2EC;
+    --warn: #B9832A; --warn-bg: #FBF0DA; --danger: #B4453C; --danger-bg: #F8E9E7;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--cream);color:var(--ink);font-family:'IBM Plex Sans', sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Fraunces', serif;color:var(--navy-deep);margin:0;}
+  a{color:inherit;}
+  input,select,textarea{font-family:inherit;}
+
+  .adminbar{background:var(--navy-deep);color:#EFE9DA;padding:10px 0;}
+  .adminbar .wrap{display:flex;align-items:center;justify-content:space-between;max-width:1180px;margin:0 auto;padding:0 28px;}
+  .adminbar .mark{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;}
+  .adminbar .mark svg{width:15px;height:15px;}
+  .adminbar .crumbs{font-size:13px;color:#B9C3CC;}
+  .adminbar .crumbs a{color:#DCE3E8;text-decoration:none;}
+  .adminbar .crumbs a:hover{text-decoration:underline;}
+
+  .statusbar{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--line);padding:16px 0;}
+  .statusbar .wrap{max-width:1180px;margin:0 auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+  .statusbar h1{font-size:21px;font-weight:600;}
+  .statusbar .meta{font-size:12.5px;color:var(--ink-soft);margin-top:3px;}
+  .status-pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:100px;}
+  .status-pending{background:var(--warn-bg);color:var(--warn);}
+  .status-live{background:var(--good-bg);color:var(--good);}
+  .status-pill svg{width:12px;height:12px;}
+  .status-left{display:flex;align-items:center;gap:12px;}
+  .actions{display:flex;gap:10px;}
+  .btn{font-size:13.5px;font-weight:600;padding:10px 18px;border-radius:var(--radius);border:1px solid transparent;cursor:pointer;white-space:nowrap;}
+  .btn-amber{background:var(--amber);color:var(--navy-deep);}
+  .btn-amber:hover{background:#eab857;}
+  .btn-ghost{background:transparent;border-color:var(--line);color:var(--ink);}
+  .btn-ghost:hover{border-color:#c9c4b3;}
+  .btn-navy{background:var(--navy);color:#fff;}
+  .btn-navy:hover{background:var(--navy-deep);}
+
+  .layout{max-width:1180px;margin:0 auto;padding:28px;display:grid;grid-template-columns:220px 1fr;gap:32px;align-items:start;}
+  .sidenav{position:sticky;top:88px;display:flex;flex-direction:column;gap:2px;}
+  .sidenav a{font-size:13.5px;font-weight:500;color:var(--ink-soft);padding:9px 12px;border-radius:var(--radius);text-decoration:none;border-left:3px solid transparent;}
+  .sidenav a:hover{color:var(--ink);background:#FBFAF6;}
+  .sidenav a.on{color:var(--navy-deep);font-weight:600;border-left-color:var(--amber);background:#FBFAF6;}
+  .sidenav .count{float:right;font-size:11px;background:var(--cream);border:1px solid var(--line);padding:1px 7px;border-radius:100px;color:var(--ink-soft);}
+  .sidenav a.locked{color:#B9B4A3;pointer-events:none;}
+  .sidenav a .lock-icon{display:none;width:11px;height:11px;vertical-align:-1px;margin-left:4px;}
+  .sidenav a.locked .lock-icon{display:inline;}
+
+  .main{display:flex;flex-direction:column;gap:22px;}
+  .panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:26px;scroll-margin-top:90px;position:relative;}
+  .panel-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--line);}
+  .panel-head h2{font-size:18px;font-weight:600;}
+  .panel-head p{font-size:13px;color:var(--ink-soft);margin-top:4px;max-width:60ch;}
+
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field.full{grid-column:1 / -1;}
+  .field label{font-size:12.5px;font-weight:600;color:var(--ink);}
+  .field .hint{font-size:11.5px;color:var(--ink-soft);font-weight:400;}
+  .field input[type=text], .field input[type=number], .field input[type=url], .field input[type=email], .field select, .field textarea{
+    border:1px solid var(--line);border-radius:var(--radius);padding:9px 11px;font-size:13.5px;background:#FEFEFC;color:var(--ink);
+  }
+  .field textarea{resize:vertical;min-height:80px;}
+
+  .checkbox-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .cbox{display:flex;align-items:center;gap:7px;font-size:13px;}
+  .cbox input{accent-color:var(--amber-deep);}
+
+  .upload-box{border:1.5px dashed var(--line);border-radius:var(--radius);padding:18px;text-align:center;font-size:12.5px;color:var(--ink-soft);cursor:pointer;background:#FDFCF9;}
+  .upload-box:hover{border-color:var(--amber-deep);color:var(--ink);}
+  .upload-box svg{width:20px;height:20px;margin-bottom:6px;color:var(--amber-deep);}
+  .upload-spec{font-size:11px;color:var(--ink-soft);margin-top:5px;line-height:1.4;}
+
+  .rep-list{display:flex;flex-direction:column;gap:14px;}
+  .rep-item{border:1px solid var(--line);border-radius:var(--radius);padding:16px;background:#FDFCF9;}
+  .rep-item-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .rep-item-head .idx{font-size:12px;font-weight:600;color:var(--amber-deep);text-transform:uppercase;letter-spacing:.3px;}
+  .rep-remove{background:none;border:none;color:var(--danger);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;}
+  .rep-remove svg{width:13px;height:13px;}
+  .rep-duplicate{background:none;border:none;color:var(--navy-deep);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;margin-right:14px;}
+  .rep-duplicate svg{width:13px;height:13px;}
+  .rep-duplicate:hover{color:var(--amber-deep);}
+  .pick-map-btn{
+    display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+    background:var(--cream);border:1px solid var(--line);color:var(--navy-deep);
+    font-size:12.5px;font-weight:600;padding:9px 12px;border-radius:var(--radius);cursor:pointer;
+  }
+  .pick-map-btn:hover{border-color:var(--amber-deep);}
+  .pick-map-btn svg{width:14px;height:14px;flex-shrink:0;color:var(--amber-deep);}
+  .add-row-btn{display:inline-flex;align-items:center;gap:6px;background:none;border:1.5px dashed var(--line);color:var(--navy-deep);font-size:13px;font-weight:600;padding:11px 16px;border-radius:var(--radius);cursor:pointer;margin-top:6px;width:100%;justify-content:center;}
+  .add-row-btn:hover{border-color:var(--amber-deep);background:#FDFAF3;}
+  .add-row-btn svg{width:14px;height:14px;}
+
+  .directory-search{display:flex;gap:10px;margin-bottom:14px;}
+  .directory-search input{flex:1;border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;font-size:13.5px;}
+  .picked-list{display:flex;flex-direction:column;gap:8px;}
+  .picked-row{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;background:#FDFCF9;}
+  .picked-main{display:flex;align-items:center;gap:10px;}
+  .picked-mark{width:30px;height:30px;border-radius:var(--radius);background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:12px;flex-shrink:0;}
+  .picked-main .pname{font-size:13.5px;font-weight:600;color:var(--navy-deep);}
+  .picked-main .pcity{font-size:12px;color:var(--ink-soft);}
+  .picked-actions{display:flex;align-items:center;gap:10px;}
+  .tier-select{border:1px solid var(--line);border-radius:var(--radius);padding:6px 8px;font-size:12.5px;}
+
+  .section-divider{border:none;border-top:1px solid var(--line);margin:18px 0;}
+
+  .approval-log{display:flex;flex-direction:column;gap:10px;margin-top:6px;}
+  .log-row{display:flex;gap:10px;font-size:12.5px;color:var(--ink-soft);}
+  .log-dot{width:7px;height:7px;border-radius:50%;background:var(--line);margin-top:5px;flex-shrink:0;}
+  .log-dot.ok{background:var(--good);}
+  .log-dot.pend{background:var(--amber-deep);}
+  .log-row b{color:var(--ink);}
+
+  .lock-notice{display:none;text-align:center;padding:40px 20px;color:var(--ink-soft);}
+  .locked-section .panel-head, .locked-section .rep-list, .locked-section .add-row-btn,
+  .locked-section .field-row, .locked-section .directory-search, .locked-section .picked-list{display:none !important;}
+  .locked-section .lock-notice{display:block;}
+  .lock-notice svg{width:26px;height:26px;color:var(--line);margin-bottom:12px;}
+  .lock-notice p{font-size:13.5px;max-width:42ch;margin:0 auto;}
+
+  .tier-option{border:1px solid var(--line);border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;gap:8px;cursor:pointer;}
+  .tier-option.selected{border-color:var(--amber-deep);background:#FEFAF0;}
+  .tier-option h3{font-size:15px;font-weight:600;}
+  .tier-option ul{margin:0;padding-left:18px;font-size:12.5px;color:var(--ink-soft);line-height:1.7;}
+
+  /* Two-stage certification approval track */
+  .cert-status-track{display:flex;align-items:center;gap:0;flex-wrap:wrap;}
+  .track-step{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);white-space:nowrap;}
+  .track-step.done{color:var(--good);font-weight:600;}
+  .track-dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+  .track-step.done .track-dot{background:var(--good);}
+  .track-line{width:28px;height:2px;background:var(--line);margin:0 4px;}
+  .track-line.done{background:var(--good);}
+
+  .cert-status{font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;white-space:nowrap;}
+  .cert-status-live{background:var(--good-bg);color:var(--good);}
+  .cert-status-eg{background:var(--warn-bg);color:var(--warn);}
+  .cert-status-brand{background:#EEF0F2;color:#54606A;}
+  .cert-status-rejected{background:var(--danger-bg);color:var(--danger);}
+
+  @media (max-width:900px){
+    .layout{grid-template-columns:1fr;}
+    .sidenav{position:static;flex-direction:row;overflow-x:auto;}
+    .field-row{grid-template-columns:1fr;}
+    .checkbox-grid{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="adminbar">
+  <div class="wrap">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 7" stroke="#E0A73B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      EnergyGurus.Online — Admin
+    </div>
+    <div class="crumbs"><a href="#">Installers</a> &nbsp;/&nbsp; <a href="#">All Installers</a> &nbsp;/&nbsp; SolarTech Engineering</div>
+  </div>
+</div>
+
+<div class="statusbar">
+  <div class="wrap">
+    <div class="status-left">
+      <div>
+        <h1>SolarTech Engineering</h1>
+        <div class="meta">Last saved 6 minutes ago · Editing as Aafaaq Ali Khan</div>
+      </div>
+      <span class="status-pill status-live">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Live — Gold Verified
+      </span>
+    </div>
+    <div class="actions">
+      <button class="btn btn-ghost">Preview Draft</button>
+      <button class="btn btn-navy">Save Draft</button>
+      <button class="btn btn-amber">Submit for Review</button>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:12px;">
+    <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);background:var(--cream);border:1px solid var(--line);border-radius:var(--radius);padding:9px 14px;">
+      <svg viewBox="0 0 24 24" fill="none" style="width:14px;height:14px;color:var(--good);flex-shrink:0;"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M8 12.5l2.5 2.5L16 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span><b style="color:var(--ink);">Live on the public profile:</b> the version approved Jul 14, 2026, including the current Gold tier. Edits here stay in draft until approved — a site visit audit is required before any tier upgrade goes live.</span>
+      <button onclick="toggleNewInstallerDemo(this)" style="margin-left:auto;background:none;border:1px solid var(--line);border-radius:100px;padding:5px 12px;font-size:11.5px;font-weight:600;color:var(--navy-deep);cursor:pointer;white-space:nowrap;">Preview: first-time application</button>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="sidenav" id="sidenav">
+    <a href="#sec-basic" class="on">Basic Info</a>
+    <a href="#sec-location" data-lockable>Location</a>
+    <a href="#sec-contact" data-lockable>Contact</a>
+    <a href="#sec-specialties" data-lockable>Specialties &amp; Brands</a>
+    <a href="#sec-certifications" data-lockable>Certifications &amp; Documents</a>
+    <a href="#sec-team" data-lockable>Team <span class="count">2</span></a>
+    <a href="#sec-projects" data-lockable>Projects <span class="count">4</span></a>
+    <a href="#sec-tier" data-lockable>Verification Tier</a>
+    <a href="#sec-history">Approval History</a>
+  </nav>
+
+  <div class="main">
+
+    <!-- BASIC INFO -->
+    <section class="panel" id="sec-basic">
+      <div class="panel-head">
+        <div>
+          <h2>Basic Info</h2>
+          <p>Core identity shown at the top of the public installer profile.</p>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Company / installer name</label><input type="text" value="SolarTech Engineering"></div>
+        <div class="field"><label>Owner / primary contact person</label><input type="text" value="Tariq Mahmood"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Firm type</label>
+          <select>
+            <option>Sole Proprietorship</option>
+            <option>Partnership</option>
+            <option selected>Private Limited</option>
+            <option>Public Limited</option>
+          </select>
+        </div>
+        <div class="field"><label>Established</label><input type="text" value="2016"></div>
+      </div>
+      <div class="field-row">
+        <div class="field full"><label>Incorporation certificate <span class="hint">optional — required for Private/Public Limited firms</span></label><div class="upload-box" style="padding:12px;"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin:0;"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="upload-spec">PDF only, max 5MB — SECP incorporation certificate</div></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Technical team size</label>
+          <select>
+            <option>1-5</option>
+            <option>6-10</option>
+            <option selected>11-20</option>
+            <option>21-30</option>
+            <option>30 and above</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field full"><label>About / bio</label><textarea>SolarTech Engineering has been installing residential and commercial solar systems across Lahore since 2016. The team specializes in hybrid inverter setups and battery retrofits.</textarea></div>
+      </div>
+      <div class="field-row" style="margin-bottom:0;">
+        <div class="field"><label>Logo / profile photo</label><div class="upload-box"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><div>Drop photo or click to upload</div></div><div class="upload-spec">JPG/PNG, square 400×400px, max 2MB</div></div>
+      </div>
+
+      <hr class="section-divider">
+
+      <h3 style="font-size:15px;font-weight:600;margin-bottom:4px;">Social media links</h3>
+      <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;">Shown as icon links on your public profile. Leave any platform blank if you're not on it.</p>
+      <div class="field-row">
+        <div class="field"><label>Facebook</label><input type="url" placeholder="https://facebook.com/..."></div>
+        <div class="field"><label>Instagram</label><input type="url" placeholder="https://instagram.com/..."></div>
+      </div>
+      <div class="field-row" style="margin-bottom:0;">
+        <div class="field"><label>LinkedIn</label><input type="url" placeholder="https://linkedin.com/company/..."></div>
+        <div class="field"><label>YouTube <span class="hint">optional — project walkthroughs</span></label><input type="url" placeholder="https://youtube.com/@..."></div>
+      </div>
+    </section>
+
+    <!-- LOCATION -->
+    <section class="panel" id="sec-location">
+      <div class="lock-notice">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="1.6"/></svg>
+        <p>Complete and submit Basic Info first. This section unlocks once your application is approved for the first time.</p>
+      </div>
+      <div class="panel-head">
+        <div>
+          <h2>Location</h2>
+          <p>Add every office you operate from — head office, branch offices — and the cities/areas each one serves.</p>
+        </div>
+      </div>
+      <div class="rep-list" id="office-list">
+        <div class="rep-item">
+          <div class="rep-item-head"><span class="idx">Office 1</span><div style="display:flex;align-items:center;"><button class="rep-duplicate" type="button"><svg viewBox="0 0 24 24" fill="none"><rect x="8" y="8" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M16 8V5.5A1.5 1.5 0 0014.5 4h-9A1.5 1.5 0 004 5.5v9A1.5 1.5 0 005.5 16H8" stroke="currentColor" stroke-width="1.6"/></svg> Duplicate</button><button class="rep-remove"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Remove</button></div></div>
+          <div class="field-row">
+            <div class="field"><label>Office label</label><input type="text" value="Head Office"></div>
+            <div class="field"><label>Region covered</label><input type="text" value="Lahore &amp; surrounding"></div>
+          </div>
+          <div class="field-row">
+            <div class="field full"><label>Office address</label><input type="text" value="Model Town, Lahore, Punjab"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Latitude</label><input type="text" value="31.4805" inputmode="decimal"></div>
+            <div class="field"><label>Longitude</label><input type="text" value="74.3286" inputmode="decimal"></div>
+            <div class="field" style="justify-content:flex-end;"><label>&nbsp;</label><button class="pick-map-btn" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.6"/></svg> Pick on map</button></div>
+          </div>
+          <div class="field-row" style="margin-bottom:0;">
+            <div class="field full"><label>Service areas <span class="hint">comma separated — shown on your profile and used for "Find an Installer" search</span></label><input type="text" value="Lahore, Kasur, Sheikhupura"></div>
+          </div>
+        </div>
+      </div>
+      <button class="add-row-btn" data-target="office-list"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Add another office</button>
+    </section>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="panel" id="sec-contact">
+      <div class="lock-notice">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="1.6"/></svg>
+        <p>Complete and submit Basic Info first. This section unlocks once your application is approved for the first time.</p>
+      </div>
+      <div class="panel-head">
+        <div>
+          <h2>Contact</h2>
+          <p>How customers and EnergyGurus reach you.</p>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Phone</label><input type="text" value="+92 300 1234567"></div>
+        <div class="field"><label>WhatsApp</label><input type="text" value="+92 300 1234567"></div>
+      </div>
+      <div class="field-row">
+        <div class="field full"><label>WhatsApp default message <span class="hint">optional</span></label><input type="text" placeholder="e.g. Hi, I'd like a quote for a solar installation"></div>
+      </div>
+      <div class="field-row" style="margin-bottom:0;">
+        <div class="field"><label>Email</label><input type="email" value="info@solartech.pk"></div>
+        <div class="field"><label>Website <span class="hint">optional</span></label><input type="url" placeholder="https://"></div>
+      </div>
+    </section>
+
+    <!-- SPECIALTIES & BRANDS -->
+    <section class="panel" id="sec-specialties">
+      <div class="lock-notice">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="1.6"/></svg>
+        <p>Complete and submit Basic Info first. This section unlocks once your application is approved for the first time.</p>
+      </div>
+      <div class="panel-head">
+        <div>
+          <h2>Specialties &amp; Certified Brands</h2>
+          <p>What kind of systems you install, and which brands you're certified for.</p>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field full">
+          <label>System types installed</label>
+          <div class="checkbox-grid">
+            <label class="cbox"><input type="checkbox" checked> Residential</label>
+            <label class="cbox"><input type="checkbox" checked> Commercial</label>
+            <label class="cbox"><input type="checkbox"> Industrial</label>
+            <label class="cbox"><input type="checkbox"> Agriculture</label>
+          </div>
+        </div>
+      </div>
+      <hr class="section-divider">
+      <h3 style="font-size:15px;font-weight:600;margin-bottom:4px;">My Certifications</h3>
+      <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;">Submit certification details yourself, with proof. Each one goes to the brand for approval first, then to EnergyGurus for final confirmation — nothing appears on your public profile until both approve.</p>
+
+      <div class="cert-status-track">
+        <div class="track-step"><span class="track-dot"></span>You submit</div>
+        <div class="track-line"></div>
+        <div class="track-step"><span class="track-dot"></span>Brand approves</div>
+        <div class="track-line"></div>
+        <div class="track-step"><span class="track-dot"></span>EnergyGurus confirms</div>
+        <div class="track-line"></div>
+        <div class="track-step"><span class="track-dot"></span>Live on profile</div>
+      </div>
+
+      <div class="rep-list" id="cert-list" style="margin-top:18px;">
+        <div class="rep-item">
+          <div class="rep-item-head"><span class="idx">Certification 1</span><span class="cert-status cert-status-live">Live — Gold, rated 4.7 ★ by Growatt</span></div>
+          <div class="field-row">
+            <div class="field"><label>Brand</label><input type="text" value="Growatt"></div>
+            <div class="field"><label>Certified since</label><input type="text" value="2021"></div>
+          </div>
+          <div class="field-row" style="margin-bottom:0;">
+            <div class="field full"><label>Certification proof</label><div class="upload-box" style="padding:12px;"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin:0;"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="upload-spec">certificate-growatt.pdf attached</div></div>
+          </div>
+        </div>
+
+        <div class="rep-item">
+          <div class="rep-item-head"><span class="idx">Certification 2</span><span class="cert-status cert-status-live">Live — Silver, rated 4.3 ★ by Huawei</span></div>
+          <div class="field-row">
+            <div class="field"><label>Brand</label><input type="text" value="Huawei"></div>
+            <div class="field"><label>Certified since</label><input type="text" value="2022"></div>
+          </div>
+          <div class="field-row" style="margin-bottom:0;">
+            <div class="field full"><label>Certification proof</label><div class="upload-box" style="padding:12px;"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin:0;"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="upload-spec">certificate-huawei.pdf attached</div></div>
+          </div>
+        </div>
+
+        <div class="rep-item">
+          <div class="rep-item-head"><span class="idx">Certification 3</span><span class="cert-status cert-status-live">Live — Gold, rated 4.9 ★ by LONGi</span></div>
+          <div class="field-row">
+            <div class="field"><label>Brand</label><input type="text" value="LONGi"></div>
+            <div class="field"><label>Certified since</label><input type="text" value="2023"></div>
+          </div>
+          <div class="field-row" style="margin-bottom:0;">
+            <div class="field full"><label>Certification proof</label><div class="upload-box" style="padding:12px;"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin:0;"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="upload-spec">certificate-longi.pdf attached</div></div>
+          </div>
+        </div>
+
+        <div class="rep-item">
+          <div class="rep-item-head"><span class="idx">Certification 4</span><span class="cert-status cert-status-eg">Pending EnergyGurus final approval</span></div>
+          <div class="field-row">
+            <div class="field"><label>Brand</label><input type="text" value="Solis"></div>
+            <div class="field"><label>Certified since <span class="hint">your claim</span></label><input type="text" value="2024"></div>
+          </div>
+          <div class="field-row" style="margin-bottom:0;">
+            <div class="field full"><label>Certification proof</label><div class="upload-box" style="padding:12px;"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin:0;"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="upload-spec">certificate-solis.pdf attached — approved by Solis on Sep 4, 2026, now with EnergyGurus</div></div>
+          </div>
+        </div>
+
+        <div class="rep-item">
+          <div class="rep-item-head"><span class="idx">Certification 5</span><span class="cert-status cert-status-rejected">Rejected by brand</span></div>
+          <div class="field-row">
+            <div class="field"><label>Brand</label><input type="text" value="Jinko Solar"></div>
+            <div class="field"><label>Certified since</label><input type="text" value="2020"></div>
+          </div>
+          <div class="field-row" style="margin-bottom:0;">
+            <div class="field full"><label>Certification proof</label><div class="upload-box" style="padding:12px;"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin:0;"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="upload-spec">Jinko Solar responded: "No record of this installer in our certified partner list."</div></div>
+          </div>
+        </div>
+      </div>
+      <button class="add-row-btn" data-target="cert-list"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Submit a new certification</button>
+    </section>
+
+    <!-- CERTIFICATIONS & DOCUMENTS -->
+    <section class="panel" id="sec-certifications">
+      <div class="lock-notice">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="1.6"/></svg>
+        <p>Complete and submit Basic Info first. This section unlocks once your application is approved for the first time.</p>
+      </div>
+      <div class="panel-head">
+        <div>
+          <h2>Certifications &amp; Documents</h2>
+          <p>Regulatory licences EnergyGurus verifies against AEDB/PEC records before approval.</p>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>AEDB Licence number</label><input type="text" value="AEDB-2021-3841"></div>
+        <div class="field"><label>AEDB Licence document</label><div class="upload-box" style="padding:12px;"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin:0;"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="upload-spec">PDF only, max 5MB</div></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>PEC Licence number</label><input type="text" value="PEC-C-19207"></div>
+        <div class="field"><label>PEC Licence document</label><div class="upload-box" style="padding:12px;"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin:0;"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="upload-spec">PDF only, max 5MB</div></div>
+      </div>
+
+      <hr class="section-divider">
+
+      <h3 style="font-size:15px;font-weight:600;margin-bottom:4px;">Association memberships <span class="hint">optional</span></h3>
+      <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;">Type in the association's name yourself and attach the membership certificate — not limited to a fixed list.</p>
+      <div class="rep-list" id="association-list">
+        <div class="rep-item">
+          <div class="rep-item-head"><span class="idx">Association 1</span><button class="rep-remove"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Remove</button></div>
+          <div class="field-row" style="margin-bottom:0;">
+            <div class="field"><label>Association name</label><input type="text" value="Pakistan Solar Association" placeholder="Type the association's name"></div>
+            <div class="field"><label>Membership certificate</label><div class="upload-box" style="padding:12px;"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin:0;"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="upload-spec">PDF only, max 5MB</div></div>
+          </div>
+        </div>
+      </div>
+      <button class="add-row-btn" data-target="association-list"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Add another association</button>
+    </section>
+
+    <!-- TEAM -->
+    <section class="panel" id="sec-team">
+      <div class="lock-notice">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="1.6"/></svg>
+        <p>Complete and submit Basic Info first. This section unlocks once your application is approved for the first time.</p>
+      </div>
+      <div class="panel-head">
+        <div>
+          <h2>Team <span class="hint">optional</span></h2>
+          <p>Key technicians customers might meet on-site.</p>
+        </div>
+      </div>
+      <div class="rep-list" id="team-list">
+        <div class="rep-item">
+          <div class="rep-item-head"><span class="idx">Team Member 1</span><button class="rep-remove"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Remove</button></div>
+          <div class="field-row">
+            <div class="field"><label>Name</label><input type="text" value="Tariq Mahmood"></div>
+            <div class="field"><label>Role</label><input type="text" value="Owner &amp; Lead Technician"></div>
+          </div>
+          <div class="field-row" style="margin-bottom:0;">
+            <div class="field"><label>Photo <span class="hint">optional</span></label><div class="upload-box" style="padding:12px;"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin:0;"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="upload-spec">JPG/PNG, square 400×400px, max 2MB. Falls back to initials if left blank.</div></div>
+            <div class="field"><label>LinkedIn profile <span class="hint">optional</span></label><input type="url" value="https://linkedin.com/in/tariq-mahmood-solartech"></div>
+          </div>
+        </div>
+        <div class="rep-item">
+          <div class="rep-item-head"><span class="idx">Team Member 2</span><button class="rep-remove"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Remove</button></div>
+          <div class="field-row">
+            <div class="field"><label>Name</label><input type="text" value="Waseem Abbas"></div>
+            <div class="field"><label>Role</label><input type="text" value="Site Supervisor"></div>
+          </div>
+          <div class="field-row" style="margin-bottom:0;">
+            <div class="field"><label>Photo <span class="hint">optional</span></label><div class="upload-box" style="padding:12px;"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin:0;"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="upload-spec">JPG/PNG, square 400×400px, max 2MB. Falls back to initials if left blank.</div></div>
+            <div class="field"><label>LinkedIn profile <span class="hint">optional</span></label><input type="url" placeholder="https://linkedin.com/in/..."></div>
+          </div>
+        </div>
+      </div>
+      <button class="add-row-btn" data-target="team-list"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Add team member</button>
+    </section>
+
+    <!-- PROJECTS -->
+    <section class="panel" id="sec-projects">
+      <div class="lock-notice">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="1.6"/></svg>
+        <p>Complete and submit Basic Info first. This section unlocks once your application is approved for the first time.</p>
+      </div>
+      <div class="panel-head">
+        <div>
+          <h2>Projects</h2>
+          <p>Completed installations shown on your profile's Projects tab.</p>
+        </div>
+      </div>
+      <div class="rep-list" id="project-list">
+        <div class="rep-item">
+          <div class="rep-item-head"><span class="idx">Project 1</span><div style="display:flex;align-items:center;"><button class="rep-duplicate" type="button"><svg viewBox="0 0 24 24" fill="none"><rect x="8" y="8" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M16 8V5.5A1.5 1.5 0 0014.5 4h-9A1.5 1.5 0 004 5.5v9A1.5 1.5 0 005.5 16H8" stroke="currentColor" stroke-width="1.6"/></svg> Duplicate</button><button class="rep-remove"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Remove</button></div></div>
+          <div class="field-row">
+            <div class="field"><label>Project title</label><input type="text" value="Rooftop system for textile unit — Kot Lakhpat"></div>
+            <div class="field"><label>Location</label><input type="text" value="Lahore"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>System size</label><input type="text" value="15 kW"></div>
+            <div class="field"><label>System type</label><select><option>Residential</option><option selected>Commercial</option><option>Industrial</option><option>Agriculture</option></select></div>
+            <div class="field"><label>Completion date</label><input type="text" value="2026-08"></div>
+          </div>
+          <div class="field-row" style="margin-bottom:0;">
+            <div class="field full"><label>Description</label><input type="text" value="Growatt hybrid inverters with battery backup for a garment manufacturing facility, sized to offset peak daytime load."></div>
+          </div>
+          <div class="field-row">
+            <div class="field full"><label>Project photos <span class="hint">multiple allowed</span></label><div class="upload-box" style="padding:12px;"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin:0;"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><div>Drop photos or click to upload — add as many as you like</div></div><div class="upload-spec">JPG/PNG only, 1600×900px (16:9) recommended, max 5MB each</div></div>
+          </div>
+        </div>
+      </div>
+      <button class="add-row-btn" data-target="project-list"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Add project</button>
+    </section>
+
+    <!-- VERIFICATION TIER -->
+    <section class="panel" id="sec-tier">
+      <div class="lock-notice">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="1.6"/></svg>
+        <p>Complete and submit Basic Info first. This section unlocks once your application is approved for the first time.</p>
+      </div>
+      <div class="panel-head">
+        <div>
+          <h2>Verification Tier</h2>
+          <p>Your tier isn't something you select — it's calculated from your confirmed brand certifications (the "Live" ones above), once the baseline audit requirements are met. It updates automatically as certifications are approved.</p>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;background:var(--good-bg);border:1px solid #CFE4D8;border-radius:var(--radius);padding:12px 16px;margin-bottom:20px;">
+        <svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;color:var(--good);flex-shrink:0;"><path d="M4 12.5l5.5 5.5L20 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="font-size:13px;color:var(--ink);"><b>Current tier: Gold</b> — based on 3 confirmed certifications (Growatt, Huawei, LONGi). Solis is pending EnergyGurus' final approval and Jinko Solar was rejected; if Solis is confirmed you'll still be within Gold (3–4) until a 5th is added.</span>
+      </div>
+      <div class="field-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:0;">
+        <div class="tier-option">
+          <h3>Silver</h3>
+          <ul>
+            <li>Independent site visit audit</li>
+            <li>Site photos and customer testimonials</li>
+            <li>1–2 brand certifications</li>
+          </ul>
+        </div>
+        <div class="tier-option selected">
+          <h3>Gold</h3>
+          <ul>
+            <li>All of Silver's requirements</li>
+            <li>3–4 brand certifications</li>
+          </ul>
+        </div>
+        <div class="tier-option">
+          <h3>Diamond</h3>
+          <ul>
+            <li>All of Gold's requirements</li>
+            <li>5–6 brand certifications</li>
+          </ul>
+        </div>
+        <div class="tier-option">
+          <h3>Platinum</h3>
+          <ul>
+            <li>All of Diamond's requirements</li>
+            <li>7–8 brand certifications</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- APPROVAL HISTORY -->
+    <section class="panel" id="sec-history">
+      <div class="panel-head">
+        <div>
+          <h2>Approval History</h2>
+          <p>Submission and review activity for this installer.</p>
+        </div>
+      </div>
+      <div class="approval-log">
+        <div class="log-row"><span class="log-dot ok"></span> <span><b>Approved — Gold tier confirmed</b> by Admin — Jul 14, 2026, after site visit audit.</span></div>
+        <div class="log-row"><span class="log-dot pend"></span> <span><b>Submitted for review</b> by Tariq Mahmood — Jul 2, 2026.</span></div>
+        <div class="log-row"><span class="log-dot ok"></span> <span><b>Application created</b> by Tariq Mahmood — Jun 20, 2026.</span></div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+  // sidenav scroll-spy + smooth scroll
+  const links = document.querySelectorAll('.sidenav a[href^="#"]');
+  const sections = [...links].map(l => document.querySelector(l.getAttribute('href')));
+  links.forEach(l => l.addEventListener('click', e=>{
+    e.preventDefault();
+    document.querySelector(l.getAttribute('href')).scrollIntoView({behavior:'smooth'});
+  }));
+  window.addEventListener('scroll', () => {
+    let current = sections[0];
+    sections.forEach(s => { if (s && window.scrollY + 110 >= s.offsetTop) current = s; });
+    links.forEach(l => l.classList.toggle('on', l.getAttribute('href') === '#' + current.id));
+  });
+
+  // add-row buttons: clone last item in target list
+  document.querySelectorAll('.add-row-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const list = document.getElementById(btn.dataset.target);
+      const items = list.querySelectorAll('.rep-item');
+      const clone = items[items.length - 1].cloneNode(true);
+      clone.querySelectorAll('input[type=text], input[type=email], input[type=url]').forEach(i => i.value = '');
+      const idx = clone.querySelector('.idx');
+      if (idx) idx.textContent = idx.textContent.replace(/\d+/, items.length + 1);
+      list.appendChild(clone);
+      attachRemove(clone);
+      attachDuplicateButtons(clone);
+    });
+  });
+  function attachRemove(scope){
+    scope.querySelectorAll('.rep-remove').forEach(btn => {
+      btn.addEventListener('click', () => btn.closest('.rep-item, .picked-row').remove());
+    });
+  }
+  attachRemove(document);
+
+  function attachDuplicateButtons(scope){
+    scope.querySelectorAll('.rep-duplicate').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.rep-item');
+        const clone = item.cloneNode(true);
+        item.querySelectorAll('input, select, textarea').forEach((el, i) => {
+          clone.querySelectorAll('input, select, textarea')[i].value = el.value;
+        });
+        const idx = clone.querySelector('.idx');
+        if (idx) {
+          const baseLabel = idx.textContent.replace(/\s*\d+.*$/, '').trim();
+          idx.textContent = baseLabel + ' ' + (item.parentElement.querySelectorAll('.rep-item').length + 1) + ' (copy)';
+        }
+        item.after(clone);
+        attachRemove(clone);
+        attachDuplicateButtons(clone);
+        clone.scrollIntoView({behavior:'smooth', block:'center'});
+      });
+    });
+  }
+  attachDuplicateButtons(document);
+
+  // Tier option selection
+  document.querySelectorAll('.tier-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.tier-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+    });
+  });
+
+  // First-time application demo: locks everything past Basic Info
+  let newInstallerDemoOn = false;
+  function toggleNewInstallerDemo(btn){
+    newInstallerDemoOn = !newInstallerDemoOn;
+    ['sec-location','sec-contact','sec-specialties','sec-certifications','sec-team','sec-projects','sec-tier'].forEach(id => {
+      document.getElementById(id).classList.toggle('locked-section', newInstallerDemoOn);
+    });
+    document.querySelectorAll('.sidenav a[data-lockable]').forEach(a => a.classList.toggle('locked', newInstallerDemoOn));
+    btn.textContent = newInstallerDemoOn ? 'Back to full form' : 'Preview: first-time application';
+  }
+</script>
+
+</body>
+</html>

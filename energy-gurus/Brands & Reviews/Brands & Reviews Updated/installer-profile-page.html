@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SolarTech Engineering — Installer Profile | EnergyGurus.Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #0F2A47; --navy-deep: #0A1D33;
+    --amber: #E0A73B; --amber-deep: #B9832A;
+    --cream: #F7F4EC; --paper: #FFFFFF; --ink: #1E2A36; --ink-soft: #55636E;
+    --line: #E3DFD3; --good: #3E7D5A; --good-bg: #E8F2EC; --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--cream);color:var(--ink);font-family:'IBM Plex Sans', sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,h4{font-family:'Fraunces', serif;color:var(--navy-deep);margin:0;}
+  a{color:inherit;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px;}
+
+  .sitebar{background:var(--navy-deep);color:#EFE9DA;font-size:13px;padding:9px 0;}
+  .sitebar .wrap{display:flex;align-items:center;justify-content:space-between;}
+  .sitebar .mark{display:flex;align-items:center;gap:8px;font-weight:600;}
+  .sitebar .mark svg{width:16px;height:16px;flex-shrink:0;}
+  .sitebar .crumbs{color:#B9C3CC;}
+  .sitebar .crumbs a{color:#DCE3E8;text-decoration:none;}
+  .sitebar .crumbs a:hover{text-decoration:underline;}
+
+  .header{
+    background:var(--navy);
+    background-image: radial-gradient(1200px 240px at 85% -40%, rgba(224,167,59,0.16), transparent 60%);
+    color:#fff;padding:40px 0 0;
+  }
+  .header-top{display:flex;gap:28px;align-items:flex-start;padding-bottom:28px;border-bottom:1px solid rgba(255,255,255,0.14);}
+  .avatar-lg{
+    width:88px;height:88px;border-radius:50%;background:#fff;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces', serif;font-weight:700;font-size:28px;color:var(--navy);
+    border:3px solid rgba(224,167,59,0.5);
+  }
+  .header-info{flex:1;min-width:0;}
+  .name-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .header-info h1{font-size:28px;font-weight:600;}
+  .tier-pill{
+    display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;
+    background:rgba(224,167,59,0.16);border:1px solid rgba(224,167,59,0.55);color:var(--amber);
+    padding:4px 10px 4px 8px;border-radius:100px;white-space:nowrap;
+  }
+  .tier-pill svg{width:13px;height:13px;}
+  .loc-line{color:#C7D0D8;font-size:14px;margin-top:8px;display:flex;align-items:center;gap:6px;}
+  .loc-line svg{width:14px;height:14px;flex-shrink:0;}
+
+  .rating-row{display:flex;gap:32px;margin-top:22px;flex-wrap:wrap;}
+  .rating-block .stars{color:var(--amber);font-size:16px;}
+  .rating-block .num{font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:#fff;display:inline-block;margin-right:4px;}
+  .rating-block .lbl{font-size:12px;color:#9FADB8;margin-top:3px;}
+  .rating-divider{width:1px;background:rgba(255,255,255,0.15);}
+
+  .header-actions{display:flex;flex-direction:column;gap:10px;flex-shrink:0;}
+  .btn{font-family:inherit;font-size:13.5px;font-weight:600;padding:11px 20px;border-radius:var(--radius);border:1px solid transparent;cursor:pointer;text-align:center;white-space:nowrap;text-decoration:none;display:inline-block;}
+  .btn-amber{background:var(--amber);color:var(--navy-deep);}
+  .btn-amber:hover{background:#eab857;}
+  .btn-outline{background:transparent;border-color:rgba(255,255,255,0.4);color:#fff;}
+  .btn-outline:hover{border-color:#fff;}
+  .btn-ghost{background:transparent;border-color:var(--line);color:var(--ink);}
+  .btn-navy{background:var(--navy);color:#fff;}
+  .btn-navy:hover{background:var(--navy-deep);}
+
+  .tabbar{background:var(--navy);border-top:1px solid rgba(255,255,255,0.06);}
+  .tabbar .wrap{display:flex;gap:2px;overflow-x:auto;}
+  .tab{background:none;border:none;font-size:14px;font-weight:500;color:#A9B6BF;padding:15px 18px 13px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;}
+  .tab:hover{color:#fff;}
+  .tab.active{color:#fff;border-bottom-color:var(--amber);font-weight:600;}
+
+  .content{padding:36px 0 70px;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .grid-2{display:grid;grid-template-columns:1.5fr 1fr;gap:28px;align-items:start;}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:24px;}
+  .card + .card{margin-top:20px;}
+  .card h2{font-size:18px;font-weight:600;margin-bottom:12px;}
+  .about-text{font-size:14.5px;line-height:1.7;color:var(--ink);}
+
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .team-grid-people{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+  .office-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+  .chip{background:var(--cream);border:1px solid var(--line);font-size:12.5px;color:var(--ink);padding:5px 11px;border-radius:100px;}
+
+  .facts{display:grid;grid-template-columns:1fr 1fr;gap:16px 20px;margin-top:16px;}
+  .fact dt{font-size:12px;color:var(--ink-soft);}
+  .fact dd{margin:3px 0 0;font-size:14px;font-weight:600;color:var(--navy-deep);}
+
+  .contact-line{display:flex;gap:10px;font-size:13.5px;color:var(--ink);padding:7px 0;border-bottom:1px dashed var(--line);}
+  .contact-line:last-child{border-bottom:none;}
+  .contact-line svg{width:15px;height:15px;flex-shrink:0;margin-top:1px;color:var(--amber-deep);}
+
+  /* Certifications */
+  .cert-brand-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line);}
+  .cert-brand-row:last-child{border-bottom:none;}
+  .cert-brand-main{display:flex;align-items:center;gap:12px;}
+  .cert-brand-mark{width:38px;height:38px;border-radius:var(--radius);background:var(--navy);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:14px;color:#fff;flex-shrink:0;}
+  .cert-brand-name{font-size:14px;font-weight:600;color:var(--navy-deep);}
+  .cert-brand-since{font-size:12px;color:var(--ink-soft);}
+  .tier-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:100px;}
+  .tier-gold{background:#FBF0DA;color:#96701A;}
+  .tier-silver{background:#EEF0F2;color:#54606A;}
+
+  .licence-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);}
+  .licence-row:last-child{border-bottom:none;}
+  .licence-name{font-size:14px;font-weight:600;color:var(--navy-deep);}
+  .licence-num{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+  .verified-check{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--good);}
+  .verified-check svg{width:14px;height:14px;}
+
+  /* EnergyGurus team rating */
+  .eg-rating-card{background:var(--navy);color:#fff;border-radius:var(--radius);padding:22px;}
+  .eg-rating-card h3{color:#fff;font-size:16px;font-weight:600;margin-bottom:4px;}
+  .eg-rating-card p{font-size:12.5px;color:#B9C3CC;margin:0 0 16px;max-width:48ch;}
+  .eg-score-row{display:flex;align-items:center;gap:16px;}
+  .eg-score{font-family:'Fraunces',serif;font-size:34px;font-weight:600;color:var(--amber);}
+  .eg-score-sub{font-size:12px;color:#9FADB8;}
+  .eg-checklist{margin-top:16px;display:flex;flex-direction:column;gap:8px;}
+  .eg-check-item{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#DCE3E8;}
+  .eg-check-item svg{width:14px;height:14px;color:var(--amber);flex-shrink:0;}
+
+  /* Projects */
+  .project-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+  .project-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+  .project-media{height:150px;background:linear-gradient(135deg, var(--navy), var(--navy-deep));position:relative;}
+  .project-size-tag{position:absolute;bottom:10px;left:10px;background:rgba(255,255,255,0.92);color:var(--navy-deep);font-size:11px;font-weight:600;padding:3px 9px;border-radius:100px;}
+  .project-body{padding:16px;}
+  .project-body h4{font-size:14.5px;font-weight:600;margin-bottom:4px;}
+  .project-meta{font-size:12px;color:var(--amber-deep);font-weight:600;margin-bottom:6px;}
+  .project-body p{font-size:13px;color:var(--ink-soft);line-height:1.55;margin:0;}
+
+  /* Reviews */
+  .review-summary{display:flex;gap:32px;align-items:center;flex-wrap:wrap;padding-bottom:22px;margin-bottom:22px;border-bottom:1px solid var(--line);}
+  .review-item{padding-bottom:20px;border-bottom:1px solid var(--line);}
+  .review-item:last-child{border-bottom:none;padding-bottom:0;}
+  .review-item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .reviewer-name{font-size:13.5px;font-weight:600;color:var(--navy-deep);}
+  .review-stars-sm{color:var(--amber-deep);font-size:13px;}
+
+  /* Request a quote modal */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,29,51,0.55);z-index:100;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--paper);border-radius:var(--radius);max-width:520px;width:100%;padding:28px;box-shadow:0 20px 60px rgba(10,29,51,0.3);}
+  .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+  .modal-close{background:none;border:none;cursor:pointer;color:var(--ink-soft);}
+  .modal-close svg{width:18px;height:18px;display:block;}
+  .rfield{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+  .rfield label{font-size:12.5px;font-weight:600;color:var(--ink);}
+  .rfield input, .rfield select, .rfield textarea{border:1px solid var(--line);border-radius:var(--radius);padding:9px 11px;font-size:13.5px;font-family:inherit;background:#FEFEFC;color:var(--ink);}
+  .rfield textarea{min-height:80px;resize:vertical;}
+  .rfield-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+
+  @media (max-width:820px){
+    .grid-2{grid-template-columns:1fr;}
+    .facts{grid-template-columns:1fr;}
+    .header-top{flex-direction:column;}
+    .header-actions{flex-direction:row;}
+    .project-grid{grid-template-columns:1fr;}
+    .team-grid-people{grid-template-columns:1fr;}
+    .office-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="sitebar">
+  <div class="wrap">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 7" stroke="#E0A73B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      EnergyGurus.Online
+    </div>
+    <div class="crumbs"><a href="#">Find an Installer</a> &nbsp;/&nbsp; SolarTech Engineering</div>
+  </div>
+</div>
+
+<header class="header">
+  <div class="wrap">
+    <div class="header-top">
+      <div class="avatar-lg">ST</div>
+      <div class="header-info">
+        <div class="name-row">
+          <h1>SolarTech Engineering</h1>
+          <span class="tier-pill">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Gold — Verified Installer
+          </span>
+        </div>
+        <div class="loc-line">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.5"/></svg>
+          Model Town, Lahore, Punjab · serving Lahore, Kasur, Sheikhupura
+        </div>
+        <div class="rating-row">
+          <div class="rating-block">
+            <div><span class="num">4.8</span><span class="stars">★★★★★</span></div>
+            <div class="lbl">Customer rating · 96 reviews</div>
+          </div>
+          <div class="rating-divider"></div>
+          <div class="rating-block">
+            <div><span class="num">9.1</span><span style="color:#9FADB8;font-size:13px;">/10</span></div>
+            <div class="lbl">EnergyGurus team rating</div>
+          </div>
+          <div class="rating-divider"></div>
+          <div class="rating-block">
+            <div><span class="num">4.6</span><span class="stars">★★★★★</span></div>
+            <div class="lbl">Brand rating · avg. of 3 brands</div>
+          </div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-amber" onclick="document.getElementById('quoteModal').classList.add('open')">Request a Quote</button>
+        <a href="#" class="btn btn-outline">Message on WhatsApp</a>
+      </div>
+    </div>
+  </div>
+  <nav class="tabbar">
+    <div class="wrap">
+      <button class="tab active" data-tab="profile">Profile</button>
+      <button class="tab" data-tab="team">Team</button>
+      <button class="tab" data-tab="offices">Offices &amp; Outlets</button>
+      <button class="tab" data-tab="certifications">Certifications</button>
+      <button class="tab" data-tab="projects">Projects</button>
+      <button class="tab" data-tab="reviews">Reviews</button>
+    </div>
+  </nav>
+</header>
+
+<main class="content">
+  <div class="wrap">
+
+    <!-- PROFILE -->
+    <section class="panel active" id="profile">
+      <div class="grid-2">
+        <div>
+          <div class="card">
+            <h2>About</h2>
+            <p class="about-text">SolarTech Engineering has been installing residential and commercial solar systems across Lahore since 2016. The team specializes in hybrid inverter setups and battery retrofits, with an in-house technical team handling everything from site survey to commissioning and after-sales maintenance.</p>
+            <div class="chip-row">
+              <span class="chip">Residential</span>
+              <span class="chip">Commercial</span>
+              <span class="chip">Battery Retrofits</span>
+              <span class="chip">O&amp;M Contracts</span>
+            </div>
+            <div class="facts">
+              <div class="fact"><dt>Firm type</dt><dd>Private Limited</dd></div>
+              <div class="fact"><dt>Established</dt><dd>2016</dd></div>
+              <div class="fact"><dt>Technical team size</dt><dd>11-20</dd></div>
+              <div class="fact"><dt>Service areas</dt><dd>Lahore, Kasur, Sheikhupura</dd></div>
+              <div class="fact"><dt>Response time</dt><dd>Under 24 hours</dd></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <h3 style="font-size:15px;font-weight:600;margin-bottom:12px;">Contact</h3>
+            <div class="contact-line"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h3l2 5-2 1a11 11 0 005 5l1-2 5 2v3a2 2 0 01-2 2C10 21 3 14 3 7a2 2 0 012-2z" stroke="currentColor" stroke-width="1.5"/></svg> +92 300 1234567</div>
+            <div class="contact-line"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 7l9 6 9-6" stroke="currentColor" stroke-width="1.5"/></svg> info@solartech.pk</div>
+            <a href="https://wa.me/923001234567" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:12.5px;font-weight:600;color:#2E7D5C;text-decoration:none;">
+              <svg viewBox="0 0 24 24" fill="none" style="width:15px;height:15px;"><path d="M20.5 11.5a8.5 8.5 0 10-3.8 7.1L21 20l-1.4-3.8a8.4 8.4 0 001-4.7z" stroke="currentColor" stroke-width="1.6"/></svg>
+              Chat on WhatsApp
+            </a>
+            <div style="display:flex;gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line);">
+              <a href="#" aria-label="Facebook" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--navy-deep);"><svg viewBox="0 0 24 24" fill="none" style="width:14px;height:14px;"><path d="M14 9h2V6h-2c-1.7 0-3 1.3-3 3v2H9v3h2v6h3v-6h2l1-3h-3v-1.5c0-.3.2-.5.5-.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></a>
+              <a href="#" aria-label="Instagram" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--navy-deep);"><svg viewBox="0 0 24 24" fill="none" style="width:14px;height:14px;"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
+              <a href="#" aria-label="LinkedIn" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--navy-deep);"><svg viewBox="0 0 24 24" fill="none" style="width:14px;height:14px;"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10v6M8 7.5v.01M12 16v-4c0-1.1.9-2 2-2s2 .9 2 2v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TEAM -->
+    <section class="panel" id="team">
+      <div class="section-head" style="margin-bottom:20px;">
+        <h2 style="font-size:19px;font-weight:600;">Team</h2>
+        <p style="font-size:13.5px;color:var(--ink-soft);margin-top:4px;">The people customers are likely to meet on-site or deal with directly.</p>
+      </div>
+      <div class="team-grid-people">
+        <div class="card" style="display:flex;align-items:center;gap:14px;">
+          <div class="avatar-lg" style="width:56px;height:56px;font-size:18px;">TM</div>
+          <div>
+            <div style="display:flex;align-items:center;gap:7px;">
+              <span style="font-size:15px;font-weight:600;color:var(--navy-deep);">Tariq Mahmood</span>
+              <a href="#" aria-label="LinkedIn profile" style="color:var(--navy-deep);opacity:.6;"><svg viewBox="0 0 24 24" fill="none" style="width:14px;height:14px;"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10v6M8 7.5v.01M12 16v-4c0-1.1.9-2 2-2s2 .9 2 2v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
+            </div>
+            <div style="font-size:12.5px;color:var(--ink-soft);margin-top:2px;">Owner &amp; Lead Technician</div>
+          </div>
+        </div>
+        <div class="card" style="display:flex;align-items:center;gap:14px;">
+          <div class="avatar-lg" style="width:56px;height:56px;font-size:18px;">WA</div>
+          <div>
+            <span style="font-size:15px;font-weight:600;color:var(--navy-deep);">Waseem Abbas</span>
+            <div style="font-size:12.5px;color:var(--ink-soft);margin-top:2px;">Site Supervisor</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OFFICES & OUTLETS -->
+    <section class="panel" id="offices">
+      <div class="section-head" style="margin-bottom:20px;">
+        <h2 style="font-size:19px;font-weight:600;">Offices &amp; Outlets</h2>
+        <p style="font-size:13.5px;color:var(--ink-soft);margin-top:4px;">Every location this installer operates from, and the areas each one serves.</p>
+      </div>
+      <div class="office-grid">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <h3 style="font-size:15px;font-weight:600;">Head Office</h3>
+            <a href="https://maps.google.com/?q=31.4805,74.3286" style="font-size:11.5px;font-weight:600;color:var(--amber-deep);text-decoration:none;">View on map</a>
+          </div>
+          <div class="contact-line"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.5"/></svg> Model Town, Lahore, Punjab</div>
+          <div class="contact-line"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h3l2 5-2 1a11 11 0 005 5l1-2 5 2v3a2 2 0 01-2 2C10 21 3 14 3 7a2 2 0 012-2z" stroke="currentColor" stroke-width="1.5"/></svg> +92 300 1234567</div>
+          <div class="chip-row" style="margin-top:12px;">
+            <span class="chip">Lahore</span>
+            <span class="chip">Kasur</span>
+            <span class="chip">Sheikhupura</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CERTIFICATIONS -->
+    <section class="panel" id="certifications">
+      <div class="grid-2">
+        <div class="card">
+          <h2>Certified Brands</h2>
+          <p style="font-size:13px;color:var(--ink-soft);margin-bottom:6px;">Brands this installer is certified to sell and install. Tier and rating are both set by the brand — not self-reported.</p>
+          <div class="cert-brand-row">
+            <div class="cert-brand-main"><div class="cert-brand-mark">G</div><div><div class="cert-brand-name">Growatt</div><div class="cert-brand-since">Certified since 2021</div></div></div>
+            <div style="text-align:right;"><span class="tier-badge tier-gold">Gold — Verified</span><div style="font-size:11.5px;color:var(--amber-deep);font-weight:600;margin-top:4px;">Rated by Growatt: 4.7 ★</div></div>
+          </div>
+          <div class="cert-brand-row">
+            <div class="cert-brand-main"><div class="cert-brand-mark" style="background:#1F2937;">H</div><div><div class="cert-brand-name">Huawei</div><div class="cert-brand-since">Certified since 2022</div></div></div>
+            <div style="text-align:right;"><span class="tier-badge tier-silver">Silver — Verified</span><div style="font-size:11.5px;color:var(--amber-deep);font-weight:600;margin-top:4px;">Rated by Huawei: 4.3 ★</div></div>
+          </div>
+          <div class="cert-brand-row">
+            <div class="cert-brand-main"><div class="cert-brand-mark" style="background:#7A4A1C;">L</div><div><div class="cert-brand-name">LONGi</div><div class="cert-brand-since">Certified since 2023</div></div></div>
+            <div style="text-align:right;"><span class="tier-badge tier-gold">Gold — Verified</span><div style="font-size:11.5px;color:var(--amber-deep);font-weight:600;margin-top:4px;">Rated by LONGi: 4.9 ★</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Regulatory Licences</h2>
+          <div class="licence-row">
+            <div><div class="licence-name">AEDB Licence</div><div class="licence-num">No. AEDB-2021-3841</div></div>
+            <span class="verified-check"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Verified</span>
+          </div>
+          <div class="licence-row">
+            <div><div class="licence-name">PEC Licence</div><div class="licence-num">No. PEC-C-19207</div></div>
+            <span class="verified-check"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Verified</span>
+          </div>
+          <div class="licence-row">
+            <div><div class="licence-name">Pakistan Solar Association</div><div class="licence-num">Association membership certificate</div></div>
+            <span class="verified-check"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Verified</span>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:20px;">
+          <h2>Ratings</h2>
+          <div class="licence-row">
+            <div class="licence-name">Rating by Customer</div>
+            <span style="color:var(--amber-deep);font-weight:600;font-size:14px;">4.8 ★ <span style="color:var(--ink-soft);font-weight:400;font-size:12px;">(96 reviews)</span></span>
+          </div>
+          <div class="licence-row">
+            <div class="licence-name">Rating by EnergyGurus Team</div>
+            <span style="color:var(--amber-deep);font-weight:600;font-size:14px;">9.1 <span style="color:var(--ink-soft);font-weight:400;font-size:12px;">/ 10</span></span>
+          </div>
+          <div class="licence-row">
+            <div class="licence-name">Rating by Brands</div>
+            <span style="color:var(--amber-deep);font-weight:600;font-size:14px;">4.6 ★ <span style="color:var(--ink-soft);font-weight:400;font-size:12px;">(avg. of 3)</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section class="panel" id="projects">
+      <div class="project-grid">
+        <div class="project-card">
+          <div class="project-media"><span class="project-size-tag">15 kW · Commercial</span></div>
+          <div class="project-body">
+            <h4>Rooftop system for textile unit — Kot Lakhpat</h4>
+            <div class="project-meta">Aug 2026 · Lahore</div>
+            <p>Growatt hybrid inverters with battery backup for a garment manufacturing facility, sized to offset peak daytime load.</p>
+          </div>
+        </div>
+        <div class="project-card">
+          <div class="project-media"><span class="project-size-tag">8 kW · Residential</span></div>
+          <div class="project-body">
+            <h4>Hybrid retrofit — DHA Phase 5</h4>
+            <div class="project-meta">Jun 2026 · Lahore</div>
+            <p>Added battery storage to an existing grid-tied system to reduce reliance on the grid during outages.</p>
+          </div>
+        </div>
+        <div class="project-card">
+          <div class="project-media"><span class="project-size-tag">25 kW · Commercial</span></div>
+          <div class="project-body">
+            <h4>Warehouse solar installation — Sundar Estate</h4>
+            <div class="project-meta">Mar 2026 · Lahore</div>
+            <p>Full rooftop array with LONGi bifacial panels, commissioned in under three weeks.</p>
+          </div>
+        </div>
+        <div class="project-card">
+          <div class="project-media"><span class="project-size-tag">5 kW · Residential</span></div>
+          <div class="project-body">
+            <h4>New home solar setup — Kasur</h4>
+            <div class="project-meta">Jan 2026 · Kasur</div>
+            <p>First-time solar adopter, single-phase Growatt inverter with net billing setup.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REVIEWS -->
+    <section class="panel" id="reviews">
+      <div class="grid-2">
+        <div>
+          <div class="card">
+            <h2>Customer Reviews</h2>
+            <div class="review-summary">
+              <div style="text-align:center;">
+                <div style="font-family:'Fraunces',serif;font-size:34px;font-weight:600;color:var(--navy-deep);line-height:1;">4.8</div>
+                <div style="color:var(--amber-deep);font-size:14px;margin-top:4px;">★★★★★</div>
+                <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">96 reviews</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:18px;">
+              <div class="review-item">
+                <div class="review-item-top">
+                  <div><div class="reviewer-name">Bilal Aslam</div><div class="review-stars-sm">★★★★★</div></div>
+                  <div style="font-size:11.5px;color:var(--ink-soft);">3 weeks ago</div>
+                </div>
+                <p style="font-size:13.5px;color:var(--ink);margin-top:8px;line-height:1.6;">Professional crew, finished the installation in 2 days as promised. Explained the monitoring app clearly before leaving.</p>
+              </div>
+              <div class="review-item">
+                <div class="review-item-top">
+                  <div><div class="reviewer-name">Hina Yousaf</div><div class="review-stars-sm">★★★★☆</div></div>
+                  <div style="font-size:11.5px;color:var(--ink-soft);">2 months ago</div>
+                </div>
+                <p style="font-size:13.5px;color:var(--ink);margin-top:8px;line-height:1.6;">Good work overall, follow-up on a minor wiring issue took a few days longer than expected but was resolved.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="eg-rating-card">
+            <h3>EnergyGurus Team Rating</h3>
+            <p>Based on our own site visit audit and licence verification — independent of customer reviews.</p>
+            <div class="eg-score-row">
+              <div class="eg-score">9.1</div>
+              <div class="eg-score-sub">out of 10<br>last audited Jul 2026</div>
+            </div>
+            <div class="eg-checklist">
+              <div class="eg-check-item"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Licences verified against AEDB/PEC records</div>
+              <div class="eg-check-item"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Site visit audit completed on 2 active installations</div>
+              <div class="eg-check-item"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Workmanship and cable management rated above standard</div>
+              <div class="eg-check-item"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Customer testimonial videos verified as genuine</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:20px;">
+            <h2 style="font-size:16px;">Reviewed by Brands</h2>
+            <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:16px;">Written feedback from brands this installer is certified with — separate from customer reviews and the EnergyGurus audit.</p>
+            <div style="display:flex;flex-direction:column;gap:16px;">
+              <div style="padding-bottom:16px;border-bottom:1px solid var(--line);">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div style="display:flex;align-items:center;gap:8px;"><div class="cert-brand-mark" style="width:26px;height:26px;font-size:11px;">G</div><span style="font-size:13.5px;font-weight:600;color:var(--navy-deep);">Growatt</span></div>
+                  <span style="color:var(--amber-deep);font-size:13px;">★★★★★</span>
+                </div>
+                <p style="font-size:13px;color:var(--ink);margin-top:8px;line-height:1.6;">Consistently strong installation quality and fast response to support tickets. One of our top-performing certified partners in Punjab.</p>
+              </div>
+              <div style="padding-bottom:16px;border-bottom:1px solid var(--line);">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div style="display:flex;align-items:center;gap:8px;"><div class="cert-brand-mark" style="width:26px;height:26px;font-size:11px;background:#1F2937;">H</div><span style="font-size:13.5px;font-weight:600;color:var(--navy-deep);">Huawei</span></div>
+                  <span style="color:var(--amber-deep);font-size:13px;">★★★★☆</span>
+                </div>
+                <p style="font-size:13px;color:var(--ink);margin-top:8px;line-height:1.6;">Good technical competency on FusionSolar installs. Occasional delays in submitting commissioning documentation.</p>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div style="display:flex;align-items:center;gap:8px;"><div class="cert-brand-mark" style="width:26px;height:26px;font-size:11px;background:#7A4A1C;">L</div><span style="font-size:13.5px;font-weight:600;color:var(--navy-deep);">LONGi</span></div>
+                  <span style="color:var(--amber-deep);font-size:13px;">★★★★★</span>
+                </div>
+                <p style="font-size:13px;color:var(--ink);margin-top:8px;line-height:1.6;">Excellent workmanship on large commercial rooftop arrays. Highly recommended for bifacial panel installations.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- REQUEST A QUOTE MODAL -->
+<div class="modal-overlay" id="quoteModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 style="font-size:19px;font-weight:600;">Request a Quote</h2>
+      <button class="modal-close" onclick="document.getElementById('quoteModal').classList.remove('open')">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <p style="font-size:13px;color:var(--ink-soft);margin-bottom:18px;">Sent directly to SolarTech Engineering. They typically respond within 24 hours.</p>
+    <div class="rfield-row">
+      <div class="rfield"><label>Your name</label><input type="text" placeholder="e.g. Ahmed Raza"></div>
+      <div class="rfield"><label>Phone number</label><input type="text" placeholder="03XX XXXXXXX"></div>
+    </div>
+    <div class="rfield-row">
+      <div class="rfield"><label>City</label><input type="text" placeholder="e.g. Lahore"></div>
+      <div class="rfield"><label>System type</label>
+        <select>
+          <option>Residential</option>
+          <option>Commercial</option>
+          <option>Industrial</option>
+          <option>Agriculture</option>
+        </select>
+      </div>
+    </div>
+    <div class="rfield">
+      <label>Monthly electricity bill or estimated system size <span style="font-weight:400;color:var(--ink-soft);">optional</span></label>
+      <input type="text" placeholder="e.g. Rs 25,000/month or 5 kW">
+    </div>
+    <div class="rfield">
+      <label>Message <span style="font-weight:400;color:var(--ink-soft);">optional</span></label>
+      <textarea placeholder="Anything specific you'd like the installer to know"></textarea>
+    </div>
+    <div class="rfield-row" style="margin-top:6px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="document.getElementById('quoteModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-amber" style="flex:1;" onclick="alert('Quote request sent to SolarTech Engineering.'); document.getElementById('quoteModal').classList.remove('open');">Send Request</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.tab).classList.add('active');
+    });
+  });
+  document.getElementById('quoteModal').addEventListener('click', (e) => {
+    if (e.target.id === 'quoteModal') e.target.classList.remove('open');
+  });
+</script>
+
+</body>
+</html>

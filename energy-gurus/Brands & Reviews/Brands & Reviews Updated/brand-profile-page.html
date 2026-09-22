@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Growatt — Brand Profile | EnergyGurus.Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #0F2A47;
+    --navy-deep: #0A1D33;
+    --amber: #E0A73B;
+    --amber-deep: #B9832A;
+    --cream: #F7F4EC;
+    --paper: #FFFFFF;
+    --ink: #1E2A36;
+    --ink-soft: #55636E;
+    --line: #E3DFD3;
+    --good: #3E7D5A;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{
+    font-family:'Fraunces', serif;
+    color:var(--navy-deep);
+    margin:0;
+  }
+  a{color:inherit;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px;}
+
+  /* ---- Top brand bar (site identity, minimal) ---- */
+  .sitebar{
+    background:var(--navy-deep);
+    color:#EFE9DA;
+    font-size:13px;
+    padding:9px 0;
+  }
+  .sitebar .wrap{display:flex;align-items:center;justify-content:space-between;}
+  .sitebar .mark{display:flex;align-items:center;gap:8px;font-weight:600;letter-spacing:.2px;}
+  .sitebar .mark svg{width:16px;height:16px;flex-shrink:0;}
+  .sitebar .crumbs{color:#B9C3CC;}
+  .sitebar .crumbs a{color:#DCE3E8;text-decoration:none;}
+  .sitebar .crumbs a:hover{text-decoration:underline;}
+
+  /* ---- Brand header ---- */
+  .header{
+    background:var(--navy);
+    background-image: radial-gradient(1200px 240px at 85% -40%, rgba(224,167,59,0.16), transparent 60%);
+    color:#fff;
+    padding:44px 0 0;
+  }
+  .header-top{
+    display:flex;
+    gap:28px;
+    align-items:flex-start;
+    padding-bottom:30px;
+    border-bottom:1px solid rgba(255,255,255,0.14);
+  }
+  .brandmark{
+    width:92px;height:92px;
+    background:#fff;
+    border-radius:var(--radius);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:30px;
+    color:var(--navy);
+  }
+  .header-info{flex:1;min-width:0;}
+  .header-info .name-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .header-info h1{font-size:32px;font-weight:600;}
+  .verified-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    background:rgba(224,167,59,0.16);
+    border:1px solid rgba(224,167,59,0.55);
+    color:var(--amber);
+    font-size:12.5px;font-weight:600;
+    padding:4px 10px 4px 8px;
+    border-radius:100px;
+    white-space:nowrap;
+  }
+  .verified-pill svg{width:13px;height:13px;}
+  .tagline{color:#C7D0D8;font-size:15px;margin-top:8px;max-width:56ch;}
+  .header-stats{
+    display:flex;gap:34px;margin-top:22px;flex-wrap:wrap;
+  }
+  .hstat .num{font-family:'Fraunces', serif;font-size:21px;font-weight:600;color:#fff;}
+  .hstat .lbl{font-size:12.5px;color:#9FADB8;margin-top:2px;}
+  .header-actions{
+    display:flex;flex-direction:column;gap:10px;flex-shrink:0;
+  }
+  .btn{
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:13.5px;font-weight:600;
+    padding:10px 18px;
+    border-radius:var(--radius);
+    border:1px solid transparent;
+    cursor:pointer;
+    text-align:center;
+    white-space:nowrap;
+    text-decoration:none;
+    display:inline-block;
+  }
+  .btn-amber{background:var(--amber);color:var(--navy-deep);}
+  .btn-amber:hover{background:#eab857;}
+  .btn-outline{background:transparent;border-color:rgba(255,255,255,0.4);color:#fff;}
+  .btn-outline:hover{border-color:#fff;}
+  .btn-ghost{background:transparent;border-color:var(--line);color:var(--ink);}
+  .btn-ghost:hover{border-color:#c9c4b3;}
+  .btn-navy{background:var(--navy);color:#fff;}
+  .btn-navy:hover{background:var(--navy-deep);}
+
+  /* ---- Tabs ---- */
+  .tabbar{
+    background:var(--navy);
+    border-top:1px solid rgba(255,255,255,0.06);
+  }
+  .tabbar .wrap{display:flex;gap:2px;overflow-x:auto;}
+  .tab{
+    background:none;border:none;
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:14px;font-weight:500;
+    color:#A9B6BF;
+    padding:15px 18px 13px;
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+    white-space:nowrap;
+    transition:color .15s ease;
+  }
+  .tab:hover{color:#fff;}
+  .tab.active{
+    color:#fff;
+    border-bottom-color:var(--amber);
+    font-weight:600;
+  }
+
+  /* ---- Content area ---- */
+  .content{padding:40px 0 80px;}
+  .panel{display:none;}
+  .panel.active{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+  .section-head{margin-bottom:20px;}
+  .section-head h2{font-size:21px;font-weight:600;}
+  .section-head p{color:var(--ink-soft);font-size:14.5px;margin-top:5px;max-width:62ch;}
+
+  /* Profile tab */
+  .grid-2{display:grid;grid-template-columns:1.5fr 1fr;gap:32px;align-items:start;}
+  .card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:24px;
+  }
+  .about-text{color:var(--ink);font-size:15px;line-height:1.7;}
+  .facts{
+    display:grid;grid-template-columns:1fr 1fr;gap:18px 22px;margin-top:22px;
+  }
+  .fact dt{font-size:12px;color:var(--ink-soft);text-transform:none;letter-spacing:.2px;}
+  .fact dd{margin:3px 0 0;font-size:14.5px;font-weight:600;color:var(--navy-deep);}
+  .fact a{color:var(--navy-deep);text-decoration:underline;text-decoration-color:var(--line);}
+
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .chip{
+    background:var(--cream);
+    border:1px solid var(--line);
+    font-size:12.5px;color:var(--ink);
+    padding:5px 11px;border-radius:100px;
+  }
+
+  .social-row{display:flex;gap:10px;margin-top:20px;}
+  .social-row a{
+    width:34px;height:34px;border-radius:50%;
+    border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--navy-deep);
+  }
+  .social-row svg{width:15px;height:15px;}
+
+  .side-card + .side-card{margin-top:20px;}
+  .side-card h3{font-size:15px;font-weight:600;margin-bottom:12px;}
+  .contact-line{display:flex;gap:10px;font-size:13.5px;color:var(--ink);padding:7px 0;border-bottom:1px dashed var(--line);}
+  .contact-line:last-child{border-bottom:none;}
+  .contact-line svg{width:15px;height:15px;flex-shrink:0;margin-top:1px;color:var(--amber-deep);}
+
+  .projects-list{margin-top:14px;display:flex;flex-direction:column;gap:14px;}
+  .project-item{display:flex;gap:14px;padding-bottom:14px;border-bottom:1px solid var(--line);}
+  .project-item:last-child{border:none;padding-bottom:0;}
+  .project-thumb{
+    width:64px;height:48px;background:var(--navy);border-radius:2px;flex-shrink:0;
+    background-image: linear-gradient(135deg, var(--navy), var(--navy-deep));
+  }
+  .project-item h4{font-size:14px;font-weight:600;}
+  .project-item p{margin:3px 0 0;font-size:13px;color:var(--ink-soft);}
+
+  .team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:22px;}
+  .team-col h4{
+    font-size:12.5px;font-weight:600;color:var(--amber-deep);
+    text-transform:uppercase;letter-spacing:.4px;margin-bottom:12px;
+    padding-bottom:8px;border-bottom:2px solid var(--line);
+  }
+  .team-person{display:flex;gap:10px;align-items:flex-start;margin-bottom:14px;}
+  .team-person .name-row{display:flex;align-items:center;gap:6px;}
+  .team-person .li-link{color:var(--navy-deep);opacity:.55;flex-shrink:0;}
+  .team-person .li-link:hover{opacity:1;}
+  .team-person .li-link svg{width:13px;height:13px;display:block;}
+  .avatar{
+    width:36px;height:36px;border-radius:50%;background:var(--cream);
+    border:1px solid var(--line);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:600;color:var(--navy-deep);
+  }
+  .team-person .name{font-size:13.5px;font-weight:600;color:var(--ink);}
+  .team-person .role{font-size:12px;color:var(--ink-soft);}
+
+  /* Directory-style tabs (distributors/installers/retailers/service centres) */
+  .toolbar{
+    display:flex;gap:12px;align-items:center;margin-bottom:20px;flex-wrap:wrap;
+  }
+  .search-input{
+    flex:1;min-width:220px;
+    padding:10px 14px;border:1px solid var(--line);border-radius:var(--radius);
+    font-family:inherit;font-size:14px;background:var(--paper);
+  }
+  .filter-select{
+    padding:10px 14px;border:1px solid var(--line);border-radius:var(--radius);
+    font-family:inherit;font-size:14px;background:var(--paper);color:var(--ink);
+  }
+
+  .entity-list{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--paper);}
+  .entity-row{
+    display:grid;grid-template-columns:1.8fr 1.2fr 1fr 1fr auto;
+    gap:16px;align-items:center;
+    padding:18px 22px;
+    border-bottom:1px solid var(--line);
+  }
+  .entity-row:last-child{border-bottom:none;}
+  .entity-row:hover{background:#FBFAF6;}
+  .entity-main .ename{font-size:15px;font-weight:600;color:var(--navy-deep);}
+  .entity-main .esub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+  .col-lbl{font-size:11px;color:var(--ink-soft);display:block;margin-bottom:2px;}
+  .col-val{font-size:13.5px;color:var(--ink);font-weight:500;}
+  .tier-badge{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:12px;font-weight:600;padding:3px 10px;border-radius:100px;
+  }
+  .tier-gold{background:#FBF0DA;color:#96701A;}
+  .tier-silver{background:#EEF0F2;color:#54606A;}
+  .rating{font-size:13.5px;color:var(--ink);}
+  .rating .stars{color:var(--amber-deep);}
+  .row-action{
+    font-size:13px;font-weight:600;color:var(--navy-deep);
+    text-decoration:none;white-space:nowrap;
+  }
+  .row-action:hover{text-decoration:underline;}
+
+  /* Service centre cards */
+  .centre-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+  .centre-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:22px;}
+  .centre-card h3{font-size:16px;font-weight:600;margin-bottom:4px;}
+  .centre-city{font-size:12.5px;color:var(--amber-deep);font-weight:600;margin-bottom:14px;}
+  .centre-addr{font-size:13.5px;color:var(--ink-soft);margin-bottom:14px;line-height:1.6;}
+  .service-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+  .stag{font-size:11.5px;background:var(--cream);border:1px solid var(--line);padding:3px 9px;border-radius:100px;color:var(--ink);}
+  .centre-foot{display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1px dashed var(--line);}
+  .hours{font-size:12.5px;color:var(--ink-soft);}
+
+  /* Products tab */
+  /* News & Updates */
+  .news-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+  .news-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;}
+  .news-media{
+    height:150px;background:var(--navy);
+    background-image: linear-gradient(135deg, var(--navy), var(--navy-deep));
+    position:relative;display:flex;align-items:flex-end;padding:12px;
+  }
+  .news-tag{
+    font-size:11px;font-weight:600;letter-spacing:.2px;
+    background:rgba(255,255,255,0.92);color:var(--navy-deep);
+    padding:4px 10px;border-radius:100px;
+  }
+  .news-body{padding:18px;display:flex;flex-direction:column;gap:6px;}
+  .news-meta{font-size:11.5px;color:var(--amber-deep);font-weight:600;}
+  .news-body h3{font-size:15px;font-weight:600;line-height:1.35;}
+  .news-body p{font-size:13px;color:var(--ink-soft);line-height:1.55;margin:0;}
+
+  .product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .product-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;}
+  .product-media{
+    height:140px;background:var(--navy);
+    background-image: linear-gradient(135deg, var(--navy), var(--navy-deep));
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+  }
+  .product-cat{
+    position:absolute;top:10px;left:10px;
+    font-size:10.5px;font-weight:600;letter-spacing:.2px;
+    background:rgba(255,255,255,0.9);color:var(--navy-deep);
+    padding:3px 9px;border-radius:100px;
+  }
+  .product-body{padding:18px;display:flex;flex-direction:column;flex:1;}
+  .product-body h3{font-size:15px;font-weight:600;margin-bottom:4px;}
+  .product-sub{font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;}
+  .spec-list{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-bottom:16px;}
+  .spec-list div{font-size:12px;color:var(--ink-soft);}
+  .spec-list b{display:block;font-size:13px;color:var(--ink);font-weight:600;}
+  .product-actions{display:flex;gap:8px;margin-top:auto;padding-top:14px;border-top:1px solid var(--line);}
+  .pbtn{
+    flex:1;text-align:center;font-size:12.5px;font-weight:600;
+    padding:9px 8px;border-radius:var(--radius);text-decoration:none;
+    display:flex;align-items:center;justify-content:center;gap:5px;
+  }
+  .pbtn svg{width:13px;height:13px;flex-shrink:0;}
+  .pbtn-price{background:var(--amber);color:var(--navy-deep);}
+  .pbtn-price:hover{background:#eab857;}
+  .pbtn-sheet{background:var(--cream);color:var(--ink);border:1px solid var(--line);}
+  .pbtn-sheet:hover{background:#EFEADC;}
+
+  .empty-note{
+    background:var(--paper);border:1px dashed var(--line);border-radius:var(--radius);
+    padding:30px;text-align:center;color:var(--ink-soft);font-size:13.5px;
+  }
+
+  /* Write a Review modal */
+  .review-modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(10,29,51,0.55);
+    z-index:100;align-items:flex-start;justify-content:center;
+    padding:40px 20px;overflow-y:auto;
+  }
+  .review-modal-overlay.open{display:flex;}
+  .review-modal{
+    background:var(--paper);border-radius:var(--radius);max-width:560px;width:100%;
+    padding:28px;box-shadow:0 20px 60px rgba(10,29,51,0.3);
+  }
+  .review-modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+  .review-modal-close{background:none;border:none;cursor:pointer;color:var(--ink-soft);padding:4px;}
+  .review-modal-close svg{width:18px;height:18px;display:block;}
+  .review-modal-close:hover{color:var(--ink);}
+
+  .rfield{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+  .rfield label{font-size:12.5px;font-weight:600;color:var(--ink);}
+  .rfield .hint{font-weight:400;color:var(--ink-soft);}
+  .rfield input, .rfield select, .rfield textarea{
+    border:1px solid var(--line);border-radius:var(--radius);padding:9px 11px;
+    font-size:13.5px;font-family:inherit;background:#FEFEFC;color:var(--ink);
+  }
+  .rfield textarea{min-height:90px;resize:vertical;}
+  .rfield-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+
+  .star-picker{display:flex;gap:4px;}
+  .star-picker button{
+    background:none;border:none;font-size:28px;line-height:1;cursor:pointer;
+    color:var(--line);padding:0;
+  }
+  .star-picker button.filled{color:var(--amber-deep);}
+
+  @media (max-width:820px){
+    .grid-2{grid-template-columns:1fr;}
+    .team-grid{grid-template-columns:1fr;}
+    .facts{grid-template-columns:1fr;}
+    .header-top{flex-direction:column;}
+    .header-actions{flex-direction:row;}
+    .centre-grid{grid-template-columns:1fr;}
+    .entity-row{grid-template-columns:1fr;row-gap:6px;}
+    .row-action{justify-self:start;}
+    .product-grid{grid-template-columns:1fr;}
+    .news-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="sitebar">
+  <div class="wrap">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 7" stroke="#E0A73B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      EnergyGurus.Online
+    </div>
+    <div class="crumbs"><a href="#">Brands</a> &nbsp;/&nbsp; Growatt</div>
+  </div>
+</div>
+
+<header class="header">
+  <div class="wrap">
+    <div class="header-top">
+      <div class="brandmark">G</div>
+      <div class="header-info">
+        <div class="name-row">
+          <h1>Growatt</h1>
+          <span class="verified-pill">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Verified Brand
+          </span>
+        </div>
+        <p class="tagline">Global inverter and energy storage manufacturer, distributed in Pakistan through an authorized channel partner network.</p>
+        <div class="header-stats">
+          <div class="hstat"><div class="num">2010</div><div class="lbl">Founded</div></div>
+          <div class="hstat"><div class="num">50+</div><div class="lbl">Countries served</div></div>
+          <div class="hstat"><div class="num">17 GW+</div><div class="lbl">Inverter capacity</div></div>
+          <div class="hstat"><div class="num">4.6 / 5</div><div class="lbl">Customer rating</div></div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="#" class="btn btn-amber">Request a Quote</a>
+        <a href="#" class="btn btn-outline">View Products</a>
+      </div>
+    </div>
+  </div>
+  <nav class="tabbar">
+    <div class="wrap">
+      <button class="tab active" data-tab="profile">Profile</button>
+      <button class="tab" data-tab="news">News &amp; Updates</button>
+      <button class="tab" data-tab="products">Products</button>
+      <button class="tab" data-tab="distributors">Distributors</button>
+      <button class="tab" data-tab="retailers">Retailers</button>
+      <button class="tab" data-tab="centres">Stores &amp; CSS</button>
+      <button class="tab" data-tab="installers">Certified Installers</button>
+    </div>
+  </nav>
+</header>
+
+<main class="content">
+  <div class="wrap">
+
+    <!-- PROFILE -->
+    <section class="panel active" id="profile">
+      <div class="grid-2">
+        <div>
+          <div class="card">
+            <h2 style="font-size:19px;font-weight:600;margin-bottom:14px;">About Growatt</h2>
+            <p class="about-text">Growatt designs and manufactures string inverters, hybrid inverters, and residential and commercial energy storage systems, with a product range spanning off-grid, on-grid, and hybrid solar applications. The company operates manufacturing facilities across multiple sites and supports installers and distributors through regional technical and after-sales teams.</p>
+            <div class="facts">
+              <div class="fact"><dt>Headquarters</dt><dd>Shenzhen, China</dd></div>
+              <div class="fact"><dt>Country of origin</dt><dd>China</dd></div>
+              <div class="fact"><dt>Website</dt><dd><a href="#">growatt.com</a></dd></div>
+              <div class="fact"><dt>Global locations</dt><dd>Germany, USA, Brazil, India, Pakistan +12 more</dd></div>
+              <div class="fact"><dt>Manufacturing facilities</dt><dd>3 facilities, China</dd></div>
+              <div class="fact"><dt>Product categories</dt><dd>Solar Panels, Inverters, Batteries</dd></div>
+              <div class="fact"><dt>After-sales support</dt><dd>Regional service centres</dd></div>
+            </div>
+            <div class="chip-row">
+              <span class="chip">On-grid Inverters</span>
+              <span class="chip">Hybrid Inverters</span>
+              <span class="chip">Low Voltage Batteries</span>
+              <span class="chip">High Voltage Batteries</span>
+              <span class="chip">Off-grid Systems</span>
+            </div>
+            <div class="social-row">
+              <a href="#" aria-label="Website"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18" stroke="currentColor" stroke-width="1.6"/></svg></a>
+              <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10v6M8 7.5v.01M12 16v-4c0-1.1.9-2 2-2s2 .9 2 2v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
+              <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none"><path d="M14 9h2V6h-2c-1.7 0-3 1.3-3 3v2H9v3h2v6h3v-6h2l1-3h-3v-1.5c0-.3.2-.5.5-.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></a>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:22px;">
+            <h2 style="font-size:19px;font-weight:600;margin-bottom:4px;">Key Worldwide Projects</h2>
+            <div class="projects-list">
+              <div class="project-item">
+                <div class="project-thumb"></div>
+                <div><h4>120 MW Utility-Scale Plant — Rajasthan, India</h4><p>Hybrid inverter deployment across a multi-phase solar farm rollout.</p></div>
+              </div>
+              <div class="project-item">
+                <div class="project-thumb"></div>
+                <div><h4>Residential Storage Rollout — Bavaria, Germany</h4><p>8,000+ home battery installations supporting a regional self-consumption programme.</p></div>
+              </div>
+              <div class="project-item">
+                <div class="project-thumb"></div>
+                <div><h4>Commercial Rooftop Portfolio — São Paulo, Brazil</h4><p>String inverter deployment across 40 commercial rooftop sites.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card side-card">
+            <h3>Offices</h3>
+            <div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px dashed var(--line);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+                <div style="font-size:13px;font-weight:600;color:var(--navy-deep);">Regional Office — Pakistan</div>
+                <a href="https://maps.google.com/?q=31.5204,74.3587" style="font-size:11.5px;font-weight:600;color:var(--amber-deep);text-decoration:none;">View on map</a>
+              </div>
+              <div class="contact-line"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.5"/></svg> Lahore, PK</div>
+              <div class="contact-line"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h3l2 5-2 1a11 11 0 005 5l1-2 5 2v3a2 2 0 01-2 2C10 21 3 14 3 7a2 2 0 012-2z" stroke="currentColor" stroke-width="1.5"/></svg> +92 42 111 000 111</div>
+              <div class="contact-line"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 7l9 6 9-6" stroke="currentColor" stroke-width="1.5"/></svg> service.pk@growatt.com</div>
+              <a href="https://wa.me/923001112222?text=Hi%2C%20I%20need%20after-sales%20support%20for%20my%20Growatt%20system" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:12.5px;font-weight:600;color:#2E7D5C;text-decoration:none;">
+                <svg viewBox="0 0 24 24" fill="none" style="width:15px;height:15px;"><path d="M20.5 11.5a8.5 8.5 0 10-3.8 7.1L21 20l-1.4-3.8a8.4 8.4 0 001-4.7z" stroke="currentColor" stroke-width="1.6"/></svg>
+                Chat on WhatsApp
+              </a>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+                <div style="font-size:13px;font-weight:600;color:var(--navy-deep);">Head Office — Global</div>
+                <a href="https://maps.google.com/?q=22.5431,114.0579" style="font-size:11.5px;font-weight:600;color:var(--amber-deep);text-decoration:none;">View on map</a>
+              </div>
+              <div class="contact-line"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.5"/></svg> Shenzhen, China</div>
+            </div>
+          </div>
+
+          <div class="card side-card">
+            <h3>Manufacturing Facility</h3>
+            <div class="project-thumb" style="width:100%;height:120px;margin-bottom:12px;"></div>
+            <p style="font-size:13px;color:var(--ink-soft);">Shenzhen production facility — primary manufacturing site for hybrid inverters and battery packs.</p>
+          </div>
+
+          <div class="card side-card">
+            <h3>Annual Manufacturing Capacity</h3>
+            <div class="contact-line"><span style="flex:1;">Solar Panels</span> <b>5 GW</b></div>
+            <div class="contact-line"><span style="flex:1;">Inverters</span> <b>17 GW</b></div>
+            <div class="contact-line"><span style="flex:1;">Batteries</span> <b>2 GWh</b></div>
+            <div class="contact-line"><span style="flex:1;">BESS</span> <b>3 GWh</b></div>
+            <div class="contact-line"><span style="flex:1;">Breakers</span> <b>10M units</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:22px;">
+        <h2 style="font-size:19px;font-weight:600;margin-bottom:2px;">Local Team</h2>
+        <p style="font-size:13.5px;color:var(--ink-soft);">Regional contacts supporting installers and distributors in Pakistan.</p>
+        <div class="team-grid">
+          <div class="team-col">
+            <h4>Sales Team</h4>
+            <div class="team-person"><div class="avatar">HA</div><div><div class="name-row"><span class="name">Hassan Ali</span><a class="li-link" href="#" aria-label="LinkedIn profile"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10v6M8 7.5v.01M12 16v-4c0-1.1.9-2 2-2s2 .9 2 2v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a></div><div class="role">Regional Sales Manager</div></div></div>
+            <div class="team-person"><div class="avatar">MB</div><div><div class="name-row"><span class="name">Maryam Bilal</span></div><div class="role">Channel Partnerships</div></div></div>
+          </div>
+          <div class="team-col">
+            <h4>Technical Team</h4>
+            <div class="team-person"><div class="avatar">FK</div><div><div class="name-row"><span class="name">Faisal Khan</span><a class="li-link" href="#" aria-label="LinkedIn profile"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10v6M8 7.5v.01M12 16v-4c0-1.1.9-2 2-2s2 .9 2 2v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a></div><div class="role">Technical Support Lead</div></div></div>
+            <div class="team-person"><div class="avatar">SR</div><div><div class="name-row"><span class="name">Sana Riaz</span></div><div class="role">Field Applications Engineer</div></div></div>
+          </div>
+          <div class="team-col">
+            <h4>After-Sales Team</h4>
+            <div class="team-person"><div class="avatar">UT</div><div><div class="name-row"><span class="name">Usman Tariq</span></div><div class="role">Warranty &amp; Service Lead</div></div></div>
+            <div class="team-person"><div class="avatar">AN</div><div><div class="name-row"><span class="name">Ayesha Nadeem</span></div><div class="role">Customer Care</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:22px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;margin-bottom:20px;">
+          <div>
+            <h2 style="font-size:19px;font-weight:600;margin-bottom:4px;">Customer Reviews</h2>
+            <p style="font-size:13.5px;color:var(--ink-soft);">From customers who've bought or had this brand's products installed.</p>
+          </div>
+          <button class="btn btn-amber" onclick="document.getElementById('reviewModal').classList.add('open')">Write a Review</button>
+        </div>
+
+        <div style="display:flex;gap:32px;align-items:center;flex-wrap:wrap;padding-bottom:22px;margin-bottom:22px;border-bottom:1px solid var(--line);">
+          <div style="text-align:center;">
+            <div style="font-family:'Fraunces',serif;font-size:38px;font-weight:600;color:var(--navy-deep);line-height:1;">4.6</div>
+            <div style="color:var(--amber-deep);font-size:15px;margin-top:4px;">★★★★★</div>
+            <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">128 reviews</div>
+          </div>
+          <div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:5px;">
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-soft);"><span style="width:14px;">5</span><div style="flex:1;height:6px;background:var(--cream);border-radius:100px;overflow:hidden;"><div style="width:78%;height:100%;background:var(--amber);"></div></div><span style="width:28px;text-align:right;">78%</span></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-soft);"><span style="width:14px;">4</span><div style="flex:1;height:6px;background:var(--cream);border-radius:100px;overflow:hidden;"><div style="width:14%;height:100%;background:var(--amber);"></div></div><span style="width:28px;text-align:right;">14%</span></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-soft);"><span style="width:14px;">3</span><div style="flex:1;height:6px;background:var(--cream);border-radius:100px;overflow:hidden;"><div style="width:5%;height:100%;background:var(--amber);"></div></div><span style="width:28px;text-align:right;">5%</span></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-soft);"><span style="width:14px;">2</span><div style="flex:1;height:6px;background:var(--cream);border-radius:100px;overflow:hidden;"><div style="width:2%;height:100%;background:var(--amber);"></div></div><span style="width:28px;text-align:right;">2%</span></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-soft);"><span style="width:14px;">1</span><div style="flex:1;height:6px;background:var(--cream);border-radius:100px;overflow:hidden;"><div style="width:1%;height:100%;background:var(--amber);"></div></div><span style="width:28px;text-align:right;">1%</span></div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <div style="padding-bottom:20px;border-bottom:1px solid var(--line);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+              <div>
+                <div style="font-size:13.5px;font-weight:600;color:var(--navy-deep);">Ahmed Raza</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
+                  <span style="color:var(--amber-deep);font-size:13px;">★★★★★</span>
+                  <span style="font-size:12px;color:var(--ink-soft);">Lahore · WIT 100H Commercial Cabinet</span>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:11px;font-weight:600;color:var(--good);background:var(--good-bg,#E8F2EC);padding:3px 9px;border-radius:100px;">Verified Installation</span>
+                <span style="font-size:11.5px;color:var(--ink-soft);">2 weeks ago</span>
+              </div>
+            </div>
+            <p style="font-size:13.5px;color:var(--ink);margin-top:10px;line-height:1.6;">System has run without a hiccup since commissioning. Our installer said the monitoring app makes fault diagnosis much faster than the previous brand we used.</p>
+          </div>
+          <div style="padding-bottom:20px;border-bottom:1px solid var(--line);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+              <div>
+                <div style="font-size:13.5px;font-weight:600;color:var(--navy-deep);">Sana Malik</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
+                  <span style="color:var(--amber-deep);font-size:13px;">★★★★☆</span>
+                  <span style="font-size:12px;color:var(--ink-soft);">Islamabad · MIN 6000TL-X</span>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:11.5px;color:var(--ink-soft);">1 month ago</span>
+              </div>
+            </div>
+            <p style="font-size:13.5px;color:var(--ink);margin-top:10px;line-height:1.6;">Good inverter, WiFi module dropped connection a couple of times in the first month but support sorted it remotely. Would recommend.</p>
+          </div>
+        </div>
+
+        <button style="display:block;margin:18px auto 0;background:none;border:none;font-size:13px;font-weight:600;color:var(--navy-deep);cursor:pointer;text-decoration:underline;text-decoration-color:var(--line);">Show all 128 reviews</button>
+      </div>
+    </section>
+
+    <!-- NEWS & UPDATES -->
+    <section class="panel" id="news">
+      <div class="section-head">
+        <h2>News &amp; Updates</h2>
+        <p>Announcements, launches, and events from Growatt in Pakistan.</p>
+      </div>
+      <div class="toolbar">
+        <input class="search-input" placeholder="Search updates">
+        <select class="filter-select"><option>All types</option><option>Product Launch</option><option>Inauguration</option><option>Outlet Opening</option><option>Event</option><option>Announcement</option></select>
+      </div>
+      <div class="news-grid">
+        <div class="news-card">
+          <div class="news-media"><span class="news-tag">Product Launch</span></div>
+          <div class="news-body">
+            <div class="news-meta">Sep 2, 2026 · Lahore, Punjab</div>
+            <h3>Growatt launches WIT 100H commercial storage cabinet in Pakistan</h3>
+            <p>The utility-scale battery cabinet is now available through EY Enterprise / Salman Traders, targeting commercial and industrial self-consumption projects.</p>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="news-media"><span class="news-tag">Outlet Opening</span></div>
+          <div class="news-body">
+            <div class="news-meta">Aug 14, 2026 · Karachi, Sindh</div>
+            <h3>New Growatt service centre opens on Shahrah-e-Faisal</h3>
+            <p>The Karachi service centre adds warranty claims and repair drop-off support for customers across Sindh.</p>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="news-media"><span class="news-tag">Inauguration</span></div>
+          <div class="news-body">
+            <div class="news-meta">Jul 20, 2026 · Lahore, Punjab</div>
+            <h3>Growatt flagship store inaugurated in Gulberg III</h3>
+            <p>The new flagship store on Main Boulevard Gulberg offers live product demos and on-site technical consultations.</p>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="news-media"><span class="news-tag">Event</span></div>
+          <div class="news-body">
+            <div class="news-meta">Jun 5, 2026 · Islamabad, ICT</div>
+            <h3>Growatt installer training day draws 60+ certified partners</h3>
+            <p>A one-day technical workshop covering hybrid inverter commissioning and the new WIT series storage lineup.</p>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="news-media"><span class="news-tag">Announcement</span></div>
+          <div class="news-body">
+            <div class="news-meta">May 28, 2026 · Nationwide</div>
+            <h3>Extended replacement warranty announced for residential batteries</h3>
+            <p>Growatt has extended the replacement warranty on its residential battery range from 5 to 7 years, effective for all units sold from June 2026.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section class="panel" id="products">
+      <div class="section-head">
+        <h2>Products</h2>
+        <p>Growatt's panel, inverter, battery, and breaker range available through EnergyGurus-listed distributors and installers.</p>
+      </div>
+      <div class="toolbar">
+        <input class="search-input" placeholder="Search by model or type">
+        <select class="filter-select"><option>All categories</option><option>Solar Panels</option><option>Inverters</option><option>Batteries</option><option>BESS</option><option>Breakers</option></select>
+        <select class="filter-select"><option>All types</option><option>High Voltage</option><option>Low Voltage</option></select>
+      </div>
+      <div class="product-grid">
+        <div class="product-card">
+          <div class="product-media"><span class="product-cat">Solar Panel</span></div>
+          <div class="product-body">
+            <h3>GNM-585M</h3>
+            <div class="product-sub">TOPCon Bifacial Module</div>
+            <div class="spec-list">
+              <div>Wattage<b>585 W</b></div>
+              <div>Efficiency<b>22.6%</b></div>
+              <div>Degradation<b>0.4%/yr</b></div>
+              <div>Warranty<b>30 yrs perf.</b></div>
+            </div>
+            <div class="product-actions">
+              <a href="#" class="pbtn pbtn-price"><svg viewBox="0 0 24 24" fill="none"><path d="M20.5 11.5a8.5 8.5 0 10-3.8 7.1L21 20l-1.4-3.8a8.4 8.4 0 001-4.7z" stroke="currentColor" stroke-width="1.6"/></svg> Click for Price</a>
+              <a href="#" class="pbtn pbtn-sheet">Datasheet</a>
+            </div>
+            <a href="#" style="display:block;text-align:center;margin-top:8px;font-size:11.5px;font-weight:600;color:var(--ink-soft);text-decoration:underline;text-decoration-color:var(--line);">Warranty terms &amp; conditions</a>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-media"><span class="product-cat">Inverter</span></div>
+          <div class="product-body">
+            <h3>MIN 6000TL-X</h3>
+            <div class="product-sub">Single Phase Hybrid Inverter</div>
+            <div class="spec-list">
+              <div>Size<b>6 kW</b></div>
+              <div>Phase<b>Single</b></div>
+              <div>Protection<b>IP65</b></div>
+              <div>Warranty<b>10 yrs</b></div>
+            </div>
+            <div class="product-actions">
+              <a href="#" class="pbtn pbtn-price"><svg viewBox="0 0 24 24" fill="none"><path d="M20.5 11.5a8.5 8.5 0 10-3.8 7.1L21 20l-1.4-3.8a8.4 8.4 0 001-4.7z" stroke="currentColor" stroke-width="1.6"/></svg> Click for Price</a>
+              <a href="#" class="pbtn pbtn-sheet">Datasheet</a>
+            </div>
+            <a href="#" style="display:block;text-align:center;margin-top:8px;font-size:11.5px;font-weight:600;color:var(--ink-soft);text-decoration:underline;text-decoration-color:var(--line);">Warranty terms &amp; conditions</a>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-media"><span class="product-cat">Battery</span></div>
+          <div class="product-body">
+            <h3>APX 5.0</h3>
+            <div class="product-sub">Low Voltage Lithium Battery</div>
+            <div class="spec-list">
+              <div>Size<b>5 kWh</b></div>
+              <div>Type<b>Low Voltage</b></div>
+              <div>Protection<b>IP54</b></div>
+              <div>Warranty<b>10 yrs</b></div>
+            </div>
+            <div class="product-actions">
+              <a href="#" class="pbtn pbtn-price"><svg viewBox="0 0 24 24" fill="none"><path d="M20.5 11.5a8.5 8.5 0 10-3.8 7.1L21 20l-1.4-3.8a8.4 8.4 0 001-4.7z" stroke="currentColor" stroke-width="1.6"/></svg> Click for Price</a>
+              <a href="#" class="pbtn pbtn-sheet">Datasheet</a>
+            </div>
+            <a href="#" style="display:block;text-align:center;margin-top:8px;font-size:11.5px;font-weight:600;color:var(--ink-soft);text-decoration:underline;text-decoration-color:var(--line);">Warranty terms &amp; conditions</a>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-media"><span class="product-cat">BESS</span></div>
+          <div class="product-body">
+            <h3>WIT 100H Commercial Cabinet</h3>
+            <div class="product-sub">Utility-Scale Outdoor Container</div>
+            <div class="spec-list">
+              <div>Capacity<b>215 kWh</b></div>
+              <div>Power<b>100 kW</b></div>
+              <div>Chemistry<b>LFP</b></div>
+              <div>Warranty<b>10 yrs</b></div>
+            </div>
+            <div class="product-actions">
+              <a href="#" class="pbtn pbtn-price"><svg viewBox="0 0 24 24" fill="none"><path d="M20.5 11.5a8.5 8.5 0 10-3.8 7.1L21 20l-1.4-3.8a8.4 8.4 0 001-4.7z" stroke="currentColor" stroke-width="1.6"/></svg> Click for Price</a>
+              <a href="#" class="pbtn pbtn-sheet">Datasheet</a>
+            </div>
+            <a href="#" style="display:block;text-align:center;margin-top:8px;font-size:11.5px;font-weight:600;color:var(--ink-soft);text-decoration:underline;text-decoration-color:var(--line);">Warranty terms &amp; conditions</a>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-media"><span class="product-cat">Breaker</span></div>
+          <div class="product-body">
+            <h3>DC MCB-63A</h3>
+            <div class="product-sub">DC Miniature Circuit Breaker</div>
+            <div class="spec-list">
+              <div>Pole<b>2</b></div>
+              <div>Voltage<b>1000V</b></div>
+              <div>Amp<b>63A</b></div>
+              <div>Imax<b>60kA</b></div>
+            </div>
+            <div class="product-actions">
+              <a href="#" class="pbtn pbtn-price"><svg viewBox="0 0 24 24" fill="none"><path d="M20.5 11.5a8.5 8.5 0 10-3.8 7.1L21 20l-1.4-3.8a8.4 8.4 0 001-4.7z" stroke="currentColor" stroke-width="1.6"/></svg> Click for Price</a>
+              <a href="#" class="pbtn pbtn-sheet">Datasheet</a>
+            </div>
+            <a href="#" style="display:block;text-align:center;margin-top:8px;font-size:11.5px;font-weight:600;color:var(--ink-soft);text-decoration:underline;text-decoration-color:var(--line);">Warranty terms &amp; conditions</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AUTHORIZED DISTRIBUTORS -->
+    <section class="panel" id="distributors">
+      <div class="section-head">
+        <h2>Authorized Distributors</h2>
+        <p>Companies authorized by Growatt to import, stock, and distribute inverters and batteries in Pakistan.</p>
+      </div>
+      <div class="toolbar">
+        <input class="search-input" placeholder="Search by company or city">
+        <select class="filter-select"><option>All regions</option><option>Punjab</option><option>Sindh</option><option>KPK</option></select>
+      </div>
+      <div class="entity-list">
+        <div class="entity-row">
+          <div class="entity-main"><div class="ename">EY Enterprise / Salman Traders (ReadSolar)</div><div class="esub">12-B, Model Town, Lahore, Punjab</div></div>
+          <div><span class="col-lbl">Region</span><span class="col-val">Nationwide</span></div>
+          <div><span class="col-lbl">Since</span><span class="col-val">2025</span></div>
+          <div><span class="col-lbl">Status</span><span class="tier-badge tier-gold">Authorized</span></div>
+          <div style="display:flex;gap:14px;">
+            <a href="https://maps.google.com/?q=31.4805,74.3286" class="row-action">Map</a>
+            <a href="#" class="row-action">View Profile</a>
+          </div>
+        </div>
+        <div class="entity-row">
+          <div class="entity-main"><div class="ename">Solar Vision Traders</div><div class="esub">Shop 4, Regal Trade Square, Saddar, Karachi</div></div>
+          <div><span class="col-lbl">Region</span><span class="col-val">Sindh</span></div>
+          <div><span class="col-lbl">Since</span><span class="col-val">2023</span></div>
+          <div><span class="col-lbl">Status</span><span class="tier-badge tier-gold">Authorized</span></div>
+          <div style="display:flex;gap:14px;">
+            <a href="https://maps.google.com/?q=24.8546,67.0210" class="row-action">Map</a>
+            <a href="#" class="row-action">View Profile</a>
+          </div>
+        </div>
+        <div class="entity-row">
+          <div class="entity-main"><div class="ename">Al-Fateh Power Solutions</div><div class="esub">Ring Road, Hayatabad, Peshawar</div></div>
+          <div><span class="col-lbl">Region</span><span class="col-val">KPK</span></div>
+          <div><span class="col-lbl">Since</span><span class="col-val">2022</span></div>
+          <div><span class="col-lbl">Status</span><span class="tier-badge tier-gold">Authorized</span></div>
+          <div style="display:flex;gap:14px;">
+            <a href="https://maps.google.com/?q=34.0083,71.5115" class="row-action">Map</a>
+            <a href="#" class="row-action">View Profile</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CERTIFIED RETAILERS -->
+    <section class="panel" id="retailers">
+      <div class="section-head">
+        <h2>Authorized Retailers</h2>
+        <p>Retail outlets authorized to sell genuine Growatt products directly to customers.</p>
+      </div>
+      <div class="toolbar">
+        <input class="search-input" placeholder="Search by shop or market">
+        <select class="filter-select"><option>All cities</option><option>Lahore</option><option>Karachi</option><option>Faisalabad</option></select>
+      </div>
+      <div class="entity-list">
+        <div class="entity-row">
+          <div class="entity-main"><div class="ename">Hall Road Solar Mart</div><div class="esub">Hall Road, Lahore</div></div>
+          <div><span class="col-lbl">Type</span><span class="col-val">Retail Shop</span></div>
+          <div><span class="col-lbl">Since</span><span class="col-val">2021</span></div>
+          <div><span class="col-lbl">Status</span><span class="tier-badge tier-silver">Authorized</span></div>
+          <div style="display:flex;gap:14px;">
+            <a href="https://maps.google.com/?q=31.5656,74.3095" class="row-action">Map</a>
+            <a href="#" class="row-action">View Details</a>
+          </div>
+        </div>
+        <div class="entity-row">
+          <div class="entity-main"><div class="ename">Power House Electronics</div><div class="esub">Electric Market, Karachi</div></div>
+          <div><span class="col-lbl">Type</span><span class="col-val">Retail Shop</span></div>
+          <div><span class="col-lbl">Since</span><span class="col-val">2020</span></div>
+          <div><span class="col-lbl">Status</span><span class="tier-badge tier-silver">Authorized</span></div>
+          <div style="display:flex;gap:14px;">
+            <a href="https://maps.google.com/?q=24.8608,67.0104" class="row-action">Map</a>
+            <a href="#" class="row-action">View Details</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FLAGSHIP STORES / SERVICE CENTRES -->
+    <section class="panel" id="centres">
+      <div class="section-head">
+        <h2>Flagship Stores &amp; Customer Service Centres</h2>
+        <p>Brand-operated locations for product demonstrations, warranty claims, and technical support.</p>
+      </div>
+      <div class="centre-grid">
+        <div class="centre-card">
+          <h3>Growatt Flagship Store — Lahore</h3>
+          <div class="centre-city">Gulberg III, Lahore</div>
+          <div class="centre-addr">Plot 14, Main Boulevard Gulberg, Lahore, Punjab</div>
+          <div class="service-tags">
+            <span class="stag">Product Display</span>
+            <span class="stag">Warranty Claims</span>
+            <span class="stag">Technical Support</span>
+          </div>
+          <div class="centre-foot">
+            <span class="hours">Mon–Sat, 10am–7pm</span>
+            <a href="https://maps.google.com/?q=31.5087,74.3453" class="row-action">Get Directions</a>
+          </div>
+        </div>
+        <div class="centre-card">
+          <h3>Growatt Service Centre — Karachi</h3>
+          <div class="centre-city">Shahrah-e-Faisal, Karachi</div>
+          <div class="centre-addr">Suite 5, Business Plaza, Shahrah-e-Faisal, Karachi, Sindh</div>
+          <div class="service-tags">
+            <span class="stag">Warranty Claims</span>
+            <span class="stag">Repair Drop-off</span>
+          </div>
+          <div class="centre-foot">
+            <span class="hours">Mon–Sat, 10am–6pm</span>
+            <a href="https://maps.google.com/?q=24.8546,67.0642" class="row-action">Get Directions</a>
+          </div>
+        </div>
+        <div class="centre-card">
+          <h3>Growatt Service Centre — Islamabad</h3>
+          <div class="centre-city">Blue Area, Islamabad</div>
+          <div class="centre-addr">Office 302, Blue Area Business Centre, Islamabad, ICT</div>
+          <div class="service-tags">
+            <span class="stag">Warranty Claims</span>
+            <span class="stag">Technical Support</span>
+          </div>
+          <div class="centre-foot">
+            <span class="hours">Mon–Fri, 9am–5pm</span>
+            <a href="https://maps.google.com/?q=33.7104,73.0563" class="row-action">Get Directions</a>
+          </div>
+        </div>
+        <div class="centre-card">
+          <h3>Growatt Service Centre — Faisalabad</h3>
+          <div class="centre-city">D-Ground, Faisalabad</div>
+          <div class="centre-addr">Shop 12, D-Ground Commercial Area, Faisalabad, Punjab</div>
+          <div class="service-tags">
+            <span class="stag">Repair Drop-off</span>
+          </div>
+          <div class="centre-foot">
+            <span class="hours">Mon–Sat, 10am–6pm</span>
+            <a href="https://maps.google.com/?q=31.4181,73.0776" class="row-action">Get Directions</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CERTIFIED INSTALLERS -->
+    <section class="panel" id="installers">
+      <div class="section-head">
+        <h2>Certified Installers</h2>
+        <p>Installers verified by EnergyGurus and certified by Growatt to sell and install their product range.</p>
+      </div>
+      <div class="toolbar">
+        <input class="search-input" placeholder="Search by installer or city">
+        <select class="filter-select"><option>All cities</option><option>Lahore</option><option>Karachi</option><option>Islamabad</option></select>
+        <select class="filter-select"><option>All tiers</option><option>Gold</option><option>Silver</option></select>
+      </div>
+      <div class="entity-list">
+        <div class="entity-row">
+          <div class="entity-main"><div class="ename">SolarTech Engineering</div><div class="esub">Lahore, Punjab</div></div>
+          <div><span class="col-lbl">Rating</span><span class="rating"><span class="stars">★★★★★</span> 4.8</span></div>
+          <div></div>
+          <div><span class="col-lbl">Tier</span><span class="tier-badge tier-gold">Gold — Verified</span></div>
+          <a href="#" class="row-action">View Profile</a>
+        </div>
+        <div class="entity-row">
+          <div class="entity-main"><div class="ename">GreenVolt Installers</div><div class="esub">Karachi, Sindh</div></div>
+          <div><span class="col-lbl">Rating</span><span class="rating"><span class="stars">★★★★☆</span> 4.4</span></div>
+          <div></div>
+          <div><span class="col-lbl">Tier</span><span class="tier-badge tier-silver">Silver — Verified</span></div>
+          <a href="#" class="row-action">View Profile</a>
+        </div>
+        <div class="entity-row">
+          <div class="entity-main"><div class="ename">Bright Future Solar</div><div class="esub">Islamabad, ICT</div></div>
+          <div><span class="col-lbl">Rating</span><span class="rating"><span class="stars">★★★★★</span> 4.9</span></div>
+          <div></div>
+          <div><span class="col-lbl">Tier</span><span class="tier-badge tier-gold">Gold — Verified</span></div>
+          <a href="#" class="row-action">View Profile</a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+
+<!-- WRITE A REVIEW MODAL -->
+<div class="review-modal-overlay" id="reviewModal">
+  <div class="review-modal">
+    <div class="review-modal-head">
+      <h2 style="font-size:19px;font-weight:600;">Write a Review</h2>
+      <button class="review-modal-close" onclick="closeReviewModal()">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div id="reviewFormView">
+      <p style="font-size:13px;color:var(--ink-soft);margin-bottom:18px;">Share your experience with Growatt products. Reviews are checked by EnergyGurus before they go live, to keep this trustworthy for other buyers.</p>
+
+      <div class="rfield">
+        <label>Overall rating</label>
+        <div class="star-picker" id="starPicker">
+          <button type="button" data-star="1" aria-label="1 star">★</button>
+          <button type="button" data-star="2" aria-label="2 stars">★</button>
+          <button type="button" data-star="3" aria-label="3 stars">★</button>
+          <button type="button" data-star="4" aria-label="4 stars">★</button>
+          <button type="button" data-star="5" aria-label="5 stars">★</button>
+        </div>
+      </div>
+
+      <div class="rfield-row">
+        <div class="rfield"><label>Your name</label><input type="text" id="revName" placeholder="e.g. Ahmed Raza"></div>
+        <div class="rfield"><label>City</label><input type="text" id="revCity" placeholder="e.g. Lahore"></div>
+      </div>
+
+      <div class="rfield">
+        <label>Product used <span class="hint">optional</span></label>
+        <select id="revProduct">
+          <option value="">Select a product</option>
+          <option>GNM-585M — Solar Panel</option>
+          <option>MIN 6000TL-X — Inverter</option>
+          <option>APX 5.0 — Battery</option>
+          <option>WIT 100H Commercial Cabinet — BESS</option>
+          <option>DC MCB-63A — Breaker</option>
+          <option>Other / not sure</option>
+        </select>
+      </div>
+
+      <div class="rfield">
+        <label>Your review</label>
+        <textarea id="revText" placeholder="What was your experience with this brand's product and after-sales support?"></textarea>
+      </div>
+
+      <div class="rfield">
+        <label>Proof of purchase or installation <span class="hint">optional — helps your review get a Verified badge</span></label>
+        <div class="upload-box" style="padding:12px;">
+          <svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin:0;"><path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div>Drop a receipt, invoice, or installation photo</div>
+        </div>
+      </div>
+
+      <div class="rfield-row" style="margin-top:6px;">
+        <button class="btn btn-ghost" type="button" onclick="closeReviewModal()" style="flex:1;">Cancel</button>
+        <button class="btn btn-amber" type="button" onclick="submitReview()" style="flex:1;">Submit for Review</button>
+      </div>
+    </div>
+
+    <div id="reviewSuccessView" style="display:none;text-align:center;padding:20px 0 8px;">
+      <svg viewBox="0 0 24 24" fill="none" style="width:40px;height:40px;color:var(--good);margin-bottom:14px;"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"/><path d="M8 12.5l2.5 2.5L16 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <h3 style="font-size:16px;font-weight:600;margin-bottom:8px;">Thanks — your review is submitted</h3>
+      <p style="font-size:13.5px;color:var(--ink-soft);max-width:38ch;margin:0 auto 20px;">It's pending moderation and will appear on this page once EnergyGurus approves it, usually within 1–2 business days.</p>
+      <button class="btn btn-navy" onclick="closeReviewModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let selectedStars = 0;
+  const starButtons = document.querySelectorAll('#starPicker button');
+  starButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedStars = parseInt(btn.dataset.star, 10);
+      starButtons.forEach(b => b.classList.toggle('filled', parseInt(b.dataset.star,10) <= selectedStars));
+    });
+  });
+
+  function closeReviewModal(){
+    document.getElementById('reviewModal').classList.remove('open');
+    // reset for next time
+    document.getElementById('reviewFormView').style.display = 'block';
+    document.getElementById('reviewSuccessView').style.display = 'none';
+  }
+
+  function submitReview(){
+    // In production this would POST to the reviews API with status "pending_moderation"
+    // and only appear publicly once an EnergyGurus admin approves it.
+    document.getElementById('reviewFormView').style.display = 'none';
+    document.getElementById('reviewSuccessView').style.display = 'block';
+  }
+
+  document.getElementById('reviewModal').addEventListener('click', (e) => {
+    if (e.target.id === 'reviewModal') closeReviewModal();
+  });
+</script>
+
+</body>
+</html>

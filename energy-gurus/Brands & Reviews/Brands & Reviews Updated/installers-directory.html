@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find an Installer — EnergyGurus.Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #0F2A47; --navy-deep: #0A1D33;
+    --amber: #E0A73B; --amber-deep: #B9832A;
+    --cream: #F7F4EC; --paper: #FFFFFF; --ink: #1E2A36; --ink-soft: #55636E;
+    --line: #E3DFD3; --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--cream);color:var(--ink);font-family:'IBM Plex Sans', sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Fraunces', serif;color:var(--navy-deep);margin:0;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 28px;}
+
+  .sitebar{background:var(--navy-deep);color:#EFE9DA;padding:14px 0;}
+  .sitebar .wrap{display:flex;align-items:center;justify-content:space-between;}
+  .sitebar .mark{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px;}
+  .sitebar .mark svg{width:17px;height:17px;flex-shrink:0;}
+  .sitebar nav{display:flex;gap:26px;font-size:13.5px;}
+  .sitebar nav a{color:#C7D0D8;}
+  .sitebar nav a.on, .sitebar nav a:hover{color:#fff;}
+
+  .page-head{
+    background:var(--navy);
+    background-image: radial-gradient(1200px 220px at 85% -40%, rgba(224,167,59,0.14), transparent 60%);
+    color:#fff;padding:40px 0 32px;
+  }
+  .page-head h1{font-size:30px;font-weight:600;}
+  .page-head p{color:#C7D0D8;font-size:14.5px;margin-top:8px;max-width:56ch;}
+
+  .toolbar{background:var(--paper);border-bottom:1px solid var(--line);padding:16px 0;position:sticky;top:0;z-index:10;}
+  .toolbar .wrap{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .search-input{flex:1;min-width:200px;padding:10px 14px;border:1px solid var(--line);border-radius:var(--radius);font-size:14px;font-family:inherit;background:#FEFEFC;}
+  .locate-btn{
+    display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border:1px solid var(--line);
+    border-radius:var(--radius);background:var(--cream);font-size:13px;font-weight:600;color:var(--navy-deep);cursor:pointer;white-space:nowrap;
+  }
+  .locate-btn svg{width:14px;height:14px;color:var(--amber-deep);}
+  .filter-select{padding:10px 14px;border:1px solid var(--line);border-radius:var(--radius);font-size:13.5px;font-family:inherit;background:#FEFEFC;color:var(--ink);}
+  .cert-pills{display:flex;gap:8px;flex-wrap:wrap;}
+  .cert-pill{font-size:13px;font-weight:600;padding:8px 15px;border-radius:100px;border:1px solid var(--line);background:var(--paper);color:var(--ink-soft);cursor:pointer;}
+  .cert-pill.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+
+  .content{padding:32px 0 70px;}
+  .result-count{font-size:13px;color:var(--ink-soft);margin-bottom:18px;}
+  .installer-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+
+  .installer-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:22px;display:flex;flex-direction:column;transition:box-shadow .15s ease, border-color .15s ease;}
+  .installer-card:hover{border-color:#D8D2C0;box-shadow:0 6px 20px rgba(15,42,71,0.07);}
+  .installer-card.featured{border-color:var(--amber-deep);box-shadow:0 6px 20px rgba(185,131,42,0.12);}
+
+  .ic-top{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;}
+  .ic-avatar{width:52px;height:52px;border-radius:50%;flex-shrink:0;background:var(--navy);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:18px;color:#fff;}
+  .ic-name-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+  .ic-name{font-size:15.5px;font-weight:600;color:var(--navy-deep);}
+  .ic-tier{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:100px;}
+  .ic-tier-gold{background:#FBF0DA;color:var(--amber-deep);}
+  .ic-tier-silver{background:#EEF0F2;color:#54606A;}
+  .ic-tier-diamond{background:#E3EEF7;color:#2F6690;}
+  .ic-tier-platinum{background:#EDEAF5;color:#5B4B96;}
+  .ic-loc{font-size:12.5px;color:var(--ink-soft);margin-top:3px;}
+
+  .ic-cert-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+  .ic-cert-chip{font-size:11px;background:var(--cream);border:1px solid var(--line);padding:3px 9px;border-radius:100px;color:var(--ink);}
+
+  .ic-stats{display:flex;gap:18px;margin-bottom:16px;padding-top:14px;border-top:1px solid var(--line);}
+  .ic-stat .num{font-size:14px;font-weight:600;color:var(--navy-deep);}
+  .ic-stat .lbl{font-size:10.5px;color:var(--ink-soft);margin-top:1px;}
+
+  .ic-actions{margin-top:auto;display:flex;gap:8px;}
+  .ic-btn{flex:1;text-align:center;font-size:12.5px;font-weight:600;padding:9px;border-radius:var(--radius);}
+  .ic-btn-quote{background:var(--amber);color:var(--navy-deep);}
+  .ic-btn-quote:hover{background:#eab857;}
+  .ic-btn-profile{background:var(--cream);color:var(--navy-deep);border:1px solid var(--line);}
+  .ic-btn-profile:hover{background:#EFEADC;}
+
+  @media (max-width:820px){
+    .installer-grid{grid-template-columns:1fr;}
+    .sitebar nav{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="sitebar">
+  <div class="wrap">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 7" stroke="#E0A73B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      EnergyGurus.Online
+    </div>
+    <nav>
+      <a href="#">About Us</a>
+      <a href="#">Monitoring</a>
+      <a href="#">Brands</a>
+      <a href="#" class="on">Find an Installer</a>
+      <a href="#">Podcast</a>
+      <a href="#">News</a>
+    </nav>
+  </div>
+</div>
+
+<header class="page-head">
+  <div class="wrap">
+    <h1>Find an Installer</h1>
+    <p>Certified installers verified through licence checks and independent site visit audits — not just customer reviews.</p>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="wrap">
+    <input class="search-input" placeholder="Search by address or area, e.g. Model Town, Lahore">
+    <button class="locate-btn" id="locateBtn">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.6"/></svg>
+      Use My Location
+    </button>
+    <select class="filter-select" id="ratingFilter">
+      <option value="0">Any rating</option>
+      <option value="4.5">4.5+ ★</option>
+      <option value="4">4+ ★</option>
+      <option value="3.5">3.5+ ★</option>
+    </select>
+  </div>
+</div>
+
+<main class="content">
+  <div class="wrap">
+    <div class="result-count" id="resultCount">5 verified installers</div>
+    <div class="installer-grid" id="installerGrid">
+
+      <a href="installer-profile-page.html" class="installer-card featured" data-rating="4.8" data-eg-rating="9.1" data-brand-rating="4.6" data-tier="Gold">
+        <div class="ic-top">
+          <div class="ic-avatar">ST</div>
+          <div>
+            <div class="ic-name-row"><span class="ic-name">SolarTech Engineering</span><span class="ic-tier ic-tier-gold">Gold</span></div>
+            <div class="ic-loc">Model Town, Lahore</div>
+          </div>
+        </div>
+        <div class="ic-cert-row">
+          <span class="ic-cert-chip">AEDB Licence</span>
+          <span class="ic-cert-chip">PEC Licence</span>
+          <span class="ic-cert-chip">Growatt Certified</span>
+        </div>
+        <div class="ic-stats">
+          <div class="ic-stat"><div class="num">4.8 ★</div><div class="lbl">Rating by Customer</div></div>
+          <div class="ic-stat"><div class="num">9.1/10</div><div class="lbl">Rating by EnergyGurus Team</div></div>
+          <div class="ic-stat"><div class="num">4.6 ★</div><div class="lbl">Rating by Brands</div></div>
+        </div>
+        <div class="ic-actions">
+          <span class="ic-btn ic-btn-quote">Request Quote</span>
+          <span class="ic-btn ic-btn-profile">View Profile</span>
+        </div>
+      </a>
+
+      <a href="#" class="installer-card" data-rating="4.4" data-eg-rating="7.8" data-brand-rating="4.1" data-tier="Silver">
+        <div class="ic-top">
+          <div class="ic-avatar" style="background:#3E5C4A;">GV</div>
+          <div>
+            <div class="ic-name-row"><span class="ic-name">GreenVolt Installers</span><span class="ic-tier ic-tier-silver">Silver</span></div>
+            <div class="ic-loc">Gulshan-e-Iqbal, Karachi</div>
+          </div>
+        </div>
+        <div class="ic-cert-row">
+          <span class="ic-cert-chip">AEDB Licence</span>
+          <span class="ic-cert-chip">Huawei Certified</span>
+        </div>
+        <div class="ic-stats">
+          <div class="ic-stat"><div class="num">4.4 ★</div><div class="lbl">Rating by Customer</div></div>
+          <div class="ic-stat"><div class="num">7.8/10</div><div class="lbl">Rating by EnergyGurus Team</div></div>
+          <div class="ic-stat"><div class="num">4.1 ★</div><div class="lbl">Rating by Brands</div></div>
+        </div>
+        <div class="ic-actions">
+          <span class="ic-btn ic-btn-quote">Request Quote</span>
+          <span class="ic-btn ic-btn-profile">View Profile</span>
+        </div>
+      </a>
+
+      <a href="#" class="installer-card" data-rating="4.9" data-eg-rating="9.4" data-brand-rating="4.8" data-tier="Platinum">
+        <div class="ic-top">
+          <div class="ic-avatar" style="background:#4A3B7A;">BF</div>
+          <div>
+            <div class="ic-name-row"><span class="ic-name">Bright Future Solar</span><span class="ic-tier ic-tier-platinum">Platinum</span></div>
+            <div class="ic-loc">Blue Area, Islamabad</div>
+          </div>
+        </div>
+        <div class="ic-cert-row">
+          <span class="ic-cert-chip">AEDB Licence</span>
+          <span class="ic-cert-chip">PEC Licence</span>
+          <span class="ic-cert-chip">LONGi Certified</span>
+        </div>
+        <div class="ic-stats">
+          <div class="ic-stat"><div class="num">4.9 ★</div><div class="lbl">Rating by Customer</div></div>
+          <div class="ic-stat"><div class="num">9.4/10</div><div class="lbl">Rating by EnergyGurus Team</div></div>
+          <div class="ic-stat"><div class="num">4.8 ★</div><div class="lbl">Rating by Brands</div></div>
+        </div>
+        <div class="ic-actions">
+          <span class="ic-btn ic-btn-quote">Request Quote</span>
+          <span class="ic-btn ic-btn-profile">View Profile</span>
+        </div>
+      </a>
+
+      <a href="#" class="installer-card" data-rating="4.1" data-eg-rating="7.2" data-brand-rating="3.9" data-tier="Silver">
+        <div class="ic-top">
+          <div class="ic-avatar" style="background:#8A2E2E;">MS</div>
+          <div>
+            <div class="ic-name-row"><span class="ic-name">Meridian Solar Works</span><span class="ic-tier ic-tier-silver">Silver</span></div>
+            <div class="ic-loc">Cantt, Multan</div>
+          </div>
+        </div>
+        <div class="ic-cert-row">
+          <span class="ic-cert-chip">PEC Licence</span>
+          <span class="ic-cert-chip">Growatt Certified</span>
+        </div>
+        <div class="ic-stats">
+          <div class="ic-stat"><div class="num">4.1 ★</div><div class="lbl">Rating by Customer</div></div>
+          <div class="ic-stat"><div class="num">7.2/10</div><div class="lbl">Rating by EnergyGurus Team</div></div>
+          <div class="ic-stat"><div class="num">3.9 ★</div><div class="lbl">Rating by Brands</div></div>
+        </div>
+        <div class="ic-actions">
+          <span class="ic-btn ic-btn-quote">Request Quote</span>
+          <span class="ic-btn ic-btn-profile">View Profile</span>
+        </div>
+      </a>
+
+      <a href="#" class="installer-card" data-rating="4.6" data-eg-rating="8.6" data-brand-rating="4.4" data-tier="Diamond">
+        <div class="ic-top">
+          <div class="ic-avatar" style="background:#1F2937;">PS</div>
+          <div>
+            <div class="ic-name-row"><span class="ic-name">Punjab Solar Co.</span><span class="ic-tier ic-tier-diamond">Diamond</span></div>
+            <div class="ic-loc">Susan Road, Faisalabad</div>
+          </div>
+        </div>
+        <div class="ic-cert-row">
+          <span class="ic-cert-chip">AEDB Licence</span>
+          <span class="ic-cert-chip">PEC Licence</span>
+          <span class="ic-cert-chip">Huawei Certified</span>
+        </div>
+        <div class="ic-stats">
+          <div class="ic-stat"><div class="num">4.6 ★</div><div class="lbl">Rating by Customer</div></div>
+          <div class="ic-stat"><div class="num">8.6/10</div><div class="lbl">Rating by EnergyGurus Team</div></div>
+          <div class="ic-stat"><div class="num">4.4 ★</div><div class="lbl">Rating by Brands</div></div>
+        </div>
+        <div class="ic-actions">
+          <span class="ic-btn ic-btn-quote">Request Quote</span>
+          <span class="ic-btn ic-btn-profile">View Profile</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</main>
+
+<script>
+  const cards = Array.from(document.querySelectorAll('.installer-card'));
+  const ratingFilter = document.getElementById('ratingFilter');
+  const resultCount = document.getElementById('resultCount');
+
+  function applyFilters(){
+    const minRating = parseFloat(ratingFilter.value);
+    let visible = 0;
+    cards.forEach(card => {
+      const rating = parseFloat(card.dataset.rating);
+      const show = rating >= minRating;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    resultCount.textContent = `${visible} verified installer${visible === 1 ? '' : 's'}`;
+  }
+
+  ratingFilter.addEventListener('change', applyFilters);
+
+  document.getElementById('locateBtn').addEventListener('click', () => {
+    if (!navigator.geolocation) { alert('Location services are not available in this browser.'); return; }
+    const btn = document.getElementById('locateBtn');
+    btn.textContent = 'Locating...';
+    navigator.geolocation.getCurrentPosition(
+      () => { btn.textContent = 'Location found'; setTimeout(() => btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.6"/></svg> Use My Location', 1800); },
+      () => { btn.textContent = 'Location unavailable'; setTimeout(() => btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.6"/></svg> Use My Location', 1800); }
+    );
+  });
+</script>
+
+</body>
+</html>

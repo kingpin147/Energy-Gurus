@@ -6,12 +6,14 @@ import { useR2Upload } from "@/lib/hooks/use-r2-upload";
 import { submitReview } from "@/lib/actions/reviews";
 import { toast } from "sonner";
 
-export function BrandReviewModal({ brandId, brandName }: { brandId: string; brandName: string }) {
+export function BrandReviewModal({ brandId, brandName, products = [] }: { brandId: string; brandName: string; products?: any[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewerName, setReviewerName] = useState("");
   const [authorEmail, setAuthorEmail] = useState("");
+  const [city, setCity] = useState("");
+  const [productUsed, setProductUsed] = useState("");
   const [comment, setComment] = useState("");
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,6 +42,8 @@ export function BrandReviewModal({ brandId, brandName }: { brandId: string; bran
       formData.append("comment", comment);
       formData.append("reviewerName", reviewerName);
       formData.append("authorEmail", authorEmail);
+      formData.append("city", city);
+      formData.append("productUsed", productUsed);
       if (proofUrl) {
         formData.append("proofUrl", proofUrl);
       }
@@ -50,6 +54,8 @@ export function BrandReviewModal({ brandId, brandName }: { brandId: string; bran
         setIsOpen(false);
         setComment("");
         setProofFile(null);
+        setCity("");
+        setProductUsed("");
       } else {
         toast.error(res.message || "Failed to submit review.");
       }
@@ -127,7 +133,7 @@ export function BrandReviewModal({ brandId, brandName }: { brandId: string; bran
                 </div>
               </div>
 
-              {/* Name & Email Row */}
+              {/* Name & City Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-navy-deep mb-1">
@@ -136,12 +142,29 @@ export function BrandReviewModal({ brandId, brandName }: { brandId: string; bran
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Asad Ullah"
+                    placeholder="e.g. Ahmed Raza"
                     value={reviewerName}
                     onChange={(e) => setReviewerName(e.target.value)}
                     className="w-full text-xs p-2.5 bg-paper border border-line rounded-[3px] text-ink focus:border-amber focus:outline-none"
                   />
                 </div>
+                <div>
+                  <label className="block text-xs font-semibold text-navy-deep mb-1">
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Lahore, Karachi, Islamabad"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full text-xs p-2.5 bg-paper border border-line rounded-[3px] text-ink focus:border-amber focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Email & Product Used */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-navy-deep mb-1">
                     Email Address
@@ -154,6 +177,34 @@ export function BrandReviewModal({ brandId, brandName }: { brandId: string; bran
                     onChange={(e) => setAuthorEmail(e.target.value)}
                     className="w-full text-xs p-2.5 bg-paper border border-line rounded-[3px] text-ink focus:border-amber focus:outline-none"
                   />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-navy-deep mb-1">
+                    Product Used <span className="text-[10px] text-slate-custom font-normal">(Optional)</span>
+                  </label>
+                  {products.length > 0 ? (
+                    <select
+                      value={productUsed}
+                      onChange={(e) => setProductUsed(e.target.value)}
+                      className="w-full text-xs p-2.5 bg-paper border border-line rounded-[3px] text-ink focus:border-amber focus:outline-none"
+                    >
+                      <option value="">Select a product model</option>
+                      {products.map((p) => (
+                        <option key={p.id || p.name} value={p.name}>
+                          {p.name} {p.category ? `(${p.category})` : ""}
+                        </option>
+                      ))}
+                      <option value="Other / Not Listed">Other / Not Listed</option>
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      placeholder="e.g. MIN 6000TL-X"
+                      value={productUsed}
+                      onChange={(e) => setProductUsed(e.target.value)}
+                      className="w-full text-xs p-2.5 bg-paper border border-line rounded-[3px] text-ink focus:border-amber focus:outline-none"
+                    />
+                  )}
                 </div>
               </div>
 
