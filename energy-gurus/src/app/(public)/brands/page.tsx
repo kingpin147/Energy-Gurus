@@ -11,6 +11,8 @@ import { CategoryTabs } from "@/components/brands/CategoryTabs";
 import { DirectoryFilters } from "@/components/brands/DirectoryFilters";
 import type { Metadata } from "next";
 
+import { slugify } from "@/lib/utils/slug";
+
 export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = "https://www.energygurus.online";
   const title = "Brands Directory — Solar Manufacturers & Equipment | EnergyGurus";
@@ -74,6 +76,7 @@ const getBrandsDirectoryData = unstable_cache(
       const brandsData = await db
         .select({
           id: brands.id,
+          slug: brands.slug,
           brandName: brands.brandName,
           categories: brands.categories,
           countryHead: brands.countryHead,
@@ -264,7 +267,7 @@ export default async function BrandsDirectoryPage({
 
                     {/* Brand Name & Tagline */}
                     <TrackedLink
-                      href={`/brands/${brand.id}` as any}
+                      href={`/brands/${brand.slug || slugify(brand.brandName) || brand.id}` as any}
                       eventName="brand_profile_click"
                       eventProperties={{ brandId: brand.id, brandName: brand.brandName }}
                       className="block group-hover:text-amber-deep transition-colors"
@@ -315,7 +318,7 @@ export default async function BrandsDirectoryPage({
                   <div className="mt-5 pt-3.5 border-t border-line flex items-center justify-between gap-3">
                     <CompareToggle id={brand.id} name={brand.brandName} type="brand" />
                     <TrackedLink
-                      href={`/brands/${brand.id}` as any}
+                      href={`/brands/${brand.slug || slugify(brand.brandName) || brand.id}` as any}
                       className="inline-flex items-center gap-1.5 text-xs font-bold text-navy-deep hover:text-amber-deep transition-colors"
                       eventName="brand_view_details"
                       eventProperties={{ brandId: brand.id }}

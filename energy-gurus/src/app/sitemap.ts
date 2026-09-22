@@ -3,6 +3,7 @@ import { db } from '@/db';
 import { epcInstallers, brands, users, epcOffices, epcProjects, products, podcasts, news } from '@/db/schema';
 import { eq, and, sql, desc, or, lte } from 'drizzle-orm';
 import { getEpcCompleteness, getBrandCompleteness } from '@/lib/utils/completeness';
+import { slugify } from '@/lib/utils/slug';
 
 const BASE_URL = 'https://www.energygurus.online';
 
@@ -14,6 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 1. Core static routes for all locales (Always return these)
   const staticPaths = [
     '',
+    '/installers',
     '/epcs',
     '/epcs/compare',
     '/brands',
@@ -37,7 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${BASE_URL}${path}`,
       lastModified: new Date(),
       changeFrequency: path === '' || path === '/news' ? 'daily' : 'weekly',
-      priority: path === '' ? 1.0 : path === '/epcs' || path === '/brands' || path === '/news' ? 0.9 : 0.8
+      priority: path === '' ? 1.0 : path === '/installers' || path === '/epcs' || path === '/brands' || path === '/news' ? 0.9 : 0.8
     });
   }
 
@@ -46,6 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const activeInstallers = await db
       .select({
         id: epcInstallers.id,
+        slug: epcInstallers.slug,
         companyName: epcInstallers.companyName,
         ceoName: epcInstallers.ceoName,
         sectors: epcInstallers.sectors,
@@ -65,14 +68,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       return score >= 50;
     });
 
-    // 2. Dynamic EPC profile pages
+    // 2. Dynamic Installer / EPC profile pages with clean SEO slugs
     for (const installer of validInstallers) {
-      const path = `/epcs/${installer.id}`;
+      const slug = installer.slug || slugify(installer.companyName) || installer.id;
       sitemapEntries.push({
-        url: `${BASE_URL}${path}`,
+        url: `${BASE_URL}/installers/${slug}`,
         lastModified: new Date(),
         changeFrequency: 'weekly',
-        priority: 0.7
+        priority: 0.8
       });
     }
 
@@ -80,6 +83,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const activeBrands = await db
       .select({
         id: brands.id,
+        slug: brands.slug,
         brandName: brands.brandName,
         countryHead: brands.countryHead,
         customerCareHead: brands.customerCareHead,
@@ -100,14 +104,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       return score >= 50;
     });
 
-    // 3. Dynamic Brand profile pages
+    // 3. Dynamic Brand profile pages with clean SEO slugs
     for (const brand of validBrands) {
-      const path = `/brands/${brand.id}`;
+      const slug = brand.slug || slugify(brand.brandName) || brand.id;
       sitemapEntries.push({
-        url: `${BASE_URL}${path}`,
+        url: `${BASE_URL}/brands/${slug}`,
         lastModified: new Date(),
         changeFrequency: 'weekly',
-        priority: 0.7
+        priority: 0.8
       });
     }
 

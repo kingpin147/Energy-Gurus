@@ -10,6 +10,8 @@ import { TrackedLink } from "@/components/shared/AnalyticsTracker";
 import { InstallerFilters } from "@/components/shared/installer-filters";
 import type { Metadata } from "next";
 
+import { slugify } from "@/lib/utils/slug";
+
 export async function generateMetadata({ params }: { params: Promise<{ }> }): Promise<Metadata> {
   const baseUrl = "https://www.energygurus.online";
   const title = "Best & Top Solar Installers in Pakistan | Verified Directory";
@@ -24,10 +26,10 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
       "verified solar EPC installers",
       "solar directory Pakistan",
     ],
-    alternates: { canonical: `${baseUrl}/epcs` },
+    alternates: { canonical: `${baseUrl}/installers` },
     openGraph: {
       title, description,
-      url: `${baseUrl}/epcs`,
+      url: `${baseUrl}/installers`,
       siteName: "EnergyGurus",
       locale: "en_US",
       type: "website",
@@ -63,6 +65,7 @@ const getInstallers = unstable_cache(
     const rawInstallers = await db
       .select({
         id: epcInstallers.id,
+        slug: epcInstallers.slug,
         companyName: epcInstallers.companyName,
         ceoName: epcInstallers.ceoName,
         sectors: epcInstallers.sectors,
@@ -98,13 +101,19 @@ const getInstallers = unstable_cache(
     });
 
     let filtered = mapped.filter((inst) => inst.score >= 40);
-    if (minRating) filtered = filtered.filter((i) => (i.avgRating || 0) >= minRating);
-    if (maxRating) filtered = filtered.filter((i) => (i.avgRating || 0) <= maxRating);
+
+    if (minRating !== undefined && minRating > 0) {
+      filtered = filtered.filter((i) => (i.avgRating || 0) >= minRating);
+    }
+
+    if (maxRating !== undefined && maxRating > 0) {
+      filtered = filtered.filter((i) => (i.avgRating || 0) <= maxRating);
+    }
 
     return filtered;
   },
-  ["epc-installers-list-v6"],
-  { revalidate: 3600, tags: ["epcs"] }
+  ['epcs-list'],
+  { revalidate: 3600, tags: ['epcs'] }
 );
 
 function renderStars(rating: number) {
@@ -117,18 +126,17 @@ export default async function EpcListingPage({
 }: {
   searchParams: Promise<{ sort?: string; q?: string; minRating?: string; maxRating?: string; certs?: string }>;
 }) {
-  const { sort = "top-rated", q = "", minRating, maxRating, certs } = await searchParams;
+  const params = await searchParams;
+  const sort = params.sort || "newest";
+  const q = params.q || "";
+  const minRating = params.minRating ? parseFloat(params.minRating) : undefined;
+  const maxRating = params.maxRating ? parseFloat(params.maxRating) : undefined;
+  const certs = params.certs || "";
 
-  const installers = await getInstallers(
-    sort,
-    q,
-    minRating ? parseFloat(minRating) : undefined,
-    maxRating ? parseFloat(maxRating) : undefined,
-    certs
-  );
+  const installers = await getInstallers(sort, q, minRating, maxRating, certs);
 
   return (
-    <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 min-h-screen">
+    <div className="min-h-screen bg-[#f5f4ef] text-ink relative">
       <AdBanner placement="skyscraper_left" targetPage="epcs" />
       <AdBanner placement="skyscraper_right" targetPage="epcs" />
 
@@ -167,10 +175,12 @@ export default async function EpcListingPage({
             const yearsInBusiness = Math.max(1, new Date().getFullYear() - new Date(installer.createdAt).getFullYear());
             const locationText = installer.primaryCity ? `Serving ${installer.primaryCity}` : "Serving Pakistan";
 
+            const slug = installer.slug || slugify(installer.companyName) || installer.id;
+
             return (
               <TrackedLink
                 key={installer.id}
-                href={`/epcs/${installer.id}` as any}
+                href={`/installers/${slug}` as any}
                 className="installer-card"
                 eventName="epc_profile_view"
                 eventProperties={{ epcId: installer.id, companyName: installer.companyName }}

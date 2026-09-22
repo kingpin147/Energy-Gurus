@@ -13,32 +13,47 @@ export default async function CertificationApprovalsPage() {
     redirect("/dashboard");
   }
 
-  // Fetch all certifications with installer details
-  const allCerts = await db
-    .select({
-      id: installerCertifications.id,
-      installerId: installerCertifications.installerId,
-      brandId: installerCertifications.brandId,
-      brandName: installerCertifications.brandName,
-      certifiedSince: installerCertifications.certifiedSince,
-      proofUrl: installerCertifications.proofUrl,
-      brandRating: installerCertifications.brandRating,
-      brandStatus: installerCertifications.brandStatus,
-      brandApprovedAt: installerCertifications.brandApprovedAt,
-      brandNotes: installerCertifications.brandNotes,
-      adminStatus: installerCertifications.adminStatus,
-      adminApprovedAt: installerCertifications.adminApprovedAt,
-      adminNotes: installerCertifications.adminNotes,
-      status: installerCertifications.status,
-      createdAt: installerCertifications.createdAt,
-      installerName: epcInstallers.companyName,
-      installerCity: epcInstallers.city,
-      installerTier: epcInstallers.tier,
-      installerLogo: epcInstallers.logoUrl
-    })
-    .from(installerCertifications)
-    .innerJoin(epcInstallers, eq(installerCertifications.installerId, epcInstallers.id))
-    .orderBy(desc(installerCertifications.createdAt));
+  let formattedCerts: any[] = [];
+
+  try {
+    // Fetch all certifications with installer details safely
+    const rawCerts = await db
+      .select({
+        id: installerCertifications.id,
+        installerId: installerCertifications.installerId,
+        brandId: installerCertifications.brandId,
+        brandName: installerCertifications.brandName,
+        certifiedSince: installerCertifications.certifiedSince,
+        proofUrl: installerCertifications.proofUrl,
+        brandRating: installerCertifications.brandRating,
+        brandStatus: installerCertifications.brandStatus,
+        brandApprovedAt: installerCertifications.brandApprovedAt,
+        brandNotes: installerCertifications.brandNotes,
+        adminStatus: installerCertifications.adminStatus,
+        adminApprovedAt: installerCertifications.adminApprovedAt,
+        adminNotes: installerCertifications.adminNotes,
+        status: installerCertifications.status,
+        createdAt: installerCertifications.createdAt,
+        installerName: epcInstallers.companyName,
+        installerCity: epcInstallers.city,
+        installerTier: epcInstallers.tier,
+        installerLogo: epcInstallers.logoUrl
+      })
+      .from(installerCertifications)
+      .leftJoin(epcInstallers, eq(installerCertifications.installerId, epcInstallers.id))
+      .orderBy(desc(installerCertifications.createdAt));
+
+    formattedCerts = rawCerts.map((c) => ({
+      ...c,
+      installerName: c.installerName || "Solar Installer",
+      createdAt: c.createdAt ? new Date(c.createdAt).toISOString() : new Date().toISOString(),
+      brandApprovedAt: c.brandApprovedAt ? new Date(c.brandApprovedAt).toISOString() : null,
+      adminApprovedAt: c.adminApprovedAt ? new Date(c.adminApprovedAt).toISOString() : null,
+    }));
+  } catch (error) {
+    console.error("Error fetching certifications for moderation:", error);
+    formattedCerts = [];
+  }
 
   return (
     <div className="min-h-screen bg-cream text-ink">
@@ -60,7 +75,7 @@ export default async function CertificationApprovalsPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 md:px-10 py-8">
-        <CertificationModerationClient certifications={allCerts} />
+        <CertificationModerationClient certifications={formattedCerts} />
       </div>
     </div>
   );

@@ -1,12 +1,30 @@
 import { db } from "@/db";
 import { brands, products, reviews, news, users } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, or, ilike } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { redis, CACHE_KEYS } from "@/lib/redis";
 import { BrandProfileView } from "@/components/brands/BrandProfileView";
 import { auth } from "@clerk/nextjs/server";
 import { getUserRole } from "@/lib/roles";
+import { isUUID, slugify } from "@/lib/utils/slug";
+
+async function getBrandByParam(param: string) {
+  const decoded = decodeURIComponent(param).trim();
+  if (isUUID(decoded)) {
+    const [brand] = await db.select().from(brands).where(eq(brands.id, decoded));
+    if (brand) return brand;
+  }
+
+  // Look up by slug or case-insensitive brandName
+  const normalizedName = decoded.replace(/-/g, " ");
+  const [brandBySlug] = await db
+    .select()
+    .from(brands)
+    .where(or(eq(brands.slug, decoded), ilike(brands.brandName, normalizedName), ilike(brands.brandName, decoded)));
+
+  return brandBySlug || null;
+}
 
 export async function generateMetadata({
   params
@@ -14,19 +32,17 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-  if (!uuidRegex.test(id)) return {};
-
-  const baseUrl = "https://www.energygurus.online";
-  const [brand] = await db.select().from(brands).where(eq(brands.id, id));
+  const brand = await getBrandByParam(id);
 
   if (!brand) return {};
 
+  const baseUrl = "https://www.energygurus.online";
+  const slug = brand.slug || slugify(brand.brandName);
   const title = `${brand.brandName} — Brand Profile & Products | EnergyGurus`;
   const description =
     brand.about?.slice(0, 160) ||
     `Explore ${brand.brandName}'s solar inverters, solar panels, technical datasheets, and authorized distributors in Pakistan.`;
-  const url = `${baseUrl}/brands/${id}`;
+  const url = `${baseUrl}/brands/${slug}`;
 
   return {
     title,
@@ -62,11 +78,8 @@ export async function generateMetadata({
 export default async function BrandProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-  if (!uuidRegex.test(id)) return notFound();
-
-  // Fetch brand
-  const [brand] = await db.select().from(brands).where(eq(brands.id, id));
+  // Fetch brand by slug or UUID
+  const brand = await getBrandByParam(id);
   if (!brand) return notFound();
 
   // If brand is not live, only allow brand owner or admin to preview
@@ -84,7 +97,7 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
   const brandProducts = await db
     .select()
     .from(products)
-    .where(eq(products.brandId, id))
+    .where(eq(products.brandId, brand.id))
     .orderBy(desc(products.createdAt));
 
   // Fetch approved reviews
@@ -106,7 +119,7 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
     })
     .from(reviews)
     .leftJoin(users, eq(reviews.authorId, users.id))
-    .where(and(eq(reviews.targetId, id), eq(reviews.targetType, "brand"), eq(reviews.status, "approved")))
+    .where(and(eq(reviews.targetId, brand.id), eq(reviews.targetType, "brand"), eq(reviews.status, "approved")))
     .orderBy(desc(reviews.createdAt));
 
   // Fetch brand news

@@ -22,6 +22,9 @@ import { redis, CACHE_KEYS } from "@/lib/redis";
 import { InferSelectModel } from "drizzle-orm";
 import { InstallerQuoteForm } from "@/components/forms/installer-quote-form";
 
+import { isUUID, slugify } from "@/lib/utils/slug";
+import { or, ilike } from "drizzle-orm";
+
 type EpcInstaller = InferSelectModel<typeof epcInstallers>;
 type EpcOffice = InferSelectModel<typeof epcOffices>;
 type EpcProject = InferSelectModel<typeof epcProjects>;
@@ -29,11 +32,29 @@ type EpcProject = InferSelectModel<typeof epcProjects>;
 interface EpcProfileData {
   installer: EpcInstaller;
   offices: EpcOffice[];
-
   projects: EpcProject[];
   rating: number | null;
   count: number;
   isActive: boolean;
+}
+
+async function getInstallerByParam(param: string) {
+  const decoded = decodeURIComponent(param).trim();
+  if (isUUID(decoded)) {
+    const installer = await db.query.epcInstallers.findFirst({
+      where: eq(epcInstallers.id, decoded),
+      with: { user: true }
+    });
+    if (installer) return installer;
+  }
+
+  const normalizedName = decoded.replace(/-/g, " ");
+  const installerBySlug = await db.query.epcInstallers.findFirst({
+    where: or(eq(epcInstallers.slug, decoded), ilike(epcInstallers.companyName, normalizedName), ilike(epcInstallers.companyName, decoded)),
+    with: { user: true }
+  });
+
+  return installerBySlug || null;
 }
 
 export async function generateMetadata({
@@ -42,19 +63,15 @@ export async function generateMetadata({
   params: Promise<{ id: string; locale?: string }>;
 }): Promise<Metadata> {
   const { id, locale = "en" } = await params;
-  const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-  if (!uuidRegex.test(id)) return {};
-
-  const baseUrl = "https://www.energygurus.online";
-  const installer = await db.query.epcInstallers.findFirst({
-    where: eq(epcInstallers.id, id)
-    });
+  const installer = await getInstallerByParam(id);
 
   if (!installer) return {};
 
+  const baseUrl = "https://www.energygurus.online";
+  const slug = installer.slug || slugify(installer.companyName);
   const title = `${installer.companyName} | Verified Solar EPC | EnergyGurus`;
   const description = installer.about?.slice(0, 160) || `Learn more about ${installer.companyName}, a certified solar installer providing high-quality energy solutions.`;
-  const url = `${baseUrl}/epcs/${id}`;
+  const url = `${baseUrl}/installers/${slug}`;
 
   return {
     title,
@@ -102,25 +119,20 @@ export default async function EpcProfilePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const installer = await getInstallerByParam(id);
 
-  const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-  if (!uuidRegex.test(id)) return notFound();
+  if (!installer || !(installer as any).user?.isActive) return notFound();
 
-  const cacheKey = CACHE_KEYS.EPC_DETAILS(id);
+  const realId = installer.id;
+  const cacheKey = CACHE_KEYS.EPC_DETAILS(realId);
 
   let profileData: EpcProfileData | null = await redis.get<EpcProfileData>(cacheKey);
 
   if (!profileData) {
-    const installer = await db.query.epcInstallers.findFirst({
-      where: eq(epcInstallers.id, id),
-      with: { user: true }
-    });
 
-    if (!installer || !(installer as any).user?.isActive) notFound();
-
-    const offices = await db.select().from(epcOffices).where(eq(epcOffices.epcId, id));
-    const projects = await db.select().from(epcProjects).where(eq(epcProjects.epcId, id));
-    const { rating, count } = await getProfileRating(id);
+    const offices = await db.select().from(epcOffices).where(eq(epcOffices.epcId, realId));
+    const projects = await db.select().from(epcProjects).where(eq(epcProjects.epcId, realId));
+    const { rating, count } = await getProfileRating(realId);
 
     profileData = { installer, offices, projects, rating, count, isActive: (installer as any).user?.isActive || false };
     await redis.set(cacheKey, profileData, { ex: 3600 });
@@ -128,7 +140,7 @@ export default async function EpcProfilePage({
 
   if (!profileData || !profileData.isActive) return notFound();
 
-  const { installer, offices, projects, rating, count } = profileData;
+  const { offices, projects, rating, count } = profileData;
 
   const { score } = getEpcCompleteness(installer, offices.length, projects.length);
   if (score < 50) notFound();

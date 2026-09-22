@@ -24,6 +24,7 @@ export const users = pgTable('users', {
 export const epcInstallers = pgTable('epc_installers', {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  slug: text('slug'),
   companyName: text('company_name').notNull(),
   ceoName: text('ceo_name'),
   designation: text('designation'),
@@ -67,6 +68,7 @@ export const epcInstallers = pgTable('epc_installers', {
   updatedAt: timestamp('updated_at').defaultNow().notNull()
     }, (table) => ({
   userIdIdx: index('epc_installers_user_id_idx').on(table.userId),
+  slugIdx: index('epc_installers_slug_idx').on(table.slug),
   createdAtIdx: index('epc_installers_created_at_idx').on(table.createdAt)
     }));
 
@@ -114,6 +116,7 @@ export const epcProjects = pgTable('epc_projects', {
 export const brands = pgTable('brands', {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  slug: text('slug'),
   brandName: text('brand_name').notNull(),
   tagline: text('tagline'),
   categories: jsonb('categories').$type<string[]>().default([]),

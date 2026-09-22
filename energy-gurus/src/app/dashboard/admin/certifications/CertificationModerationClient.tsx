@@ -15,13 +15,13 @@ interface CertificationItem {
   proofUrl?: string | null;
   brandRating?: string | null;
   brandStatus: string;
-  brandApprovedAt?: Date | null;
+  brandApprovedAt?: string | Date | null;
   brandNotes?: string | null;
   adminStatus: string;
-  adminApprovedAt?: Date | null;
+  adminApprovedAt?: string | Date | null;
   adminNotes?: string | null;
   status: string;
-  createdAt: Date;
+  createdAt: string | Date;
   installerName: string;
   installerCity?: string | null;
   installerTier?: string | null;

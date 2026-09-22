@@ -1,52 +1,40 @@
-import { db } from "@/db";
-import { news } from "@/db/schema";
-import { eq, and, ne } from "drizzle-orm";
-
 /**
- * Converts a string title into a clean, URL-friendly slug.
- * e.g., "Choosing the right Installer or Company" -> "choosing-the-right-installer-or-company"
+ * Generates an SEO-friendly slug from any string
+ * e.g., "Growatt Solar (Pakistan)" -> "growatt-solar-pakistan"
  */
 export function slugify(text: string): string {
+  if (!text) return "";
   return text
     .toString()
     .toLowerCase()
     .trim()
-    // Replace accented characters with standard latin characters
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    // Replace non-alphanumeric characters with hyphens
-    .replace(/[^a-z0-9\s-]/g, "")
-    // Replace multiple spaces or hyphens with a single hyphen
-    .replace(/[\s-]+/g, "-")
-    // Remove leading and trailing hyphens
-    .replace(/^-+|-+$/g, "");
+    .normalize("NFD") // separate accent from letter
+    .replace(/[\u0300-\u036f]/g, "") // remove accents
+    .replace(/[^a-z0-9\s-]/g, "") // remove non-alphanumeric except spaces and hyphens
+    .replace(/[\s_]+/g, "-") // replace spaces and underscores with a single hyphen
+    .replace(/^-+|-+$/g, ""); // remove leading/trailing hyphens
 }
 
-/**
- * Generates a unique slug for a news article by checking existing database records.
- * If a duplicate exists, appends numeric suffixes like "-1", "-2".
- */
-export async function generateUniqueNewsSlug(title: string, currentArticleId?: string): Promise<string> {
-  const baseSlug = slugify(title) || "news-article";
-  let candidateSlug = baseSlug;
-  let counter = 1;
+export function isUUID(str: string): boolean {
+  return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(str);
+}
+
+export async function generateUniqueNewsSlug(title: string, currentId?: string): Promise<string> {
+  const { db } = await import("@/db");
+  const { news } = await import("@/db/schema");
+  const { eq } = await import("drizzle-orm");
+
+  const baseSlug = slugify(title) || "news";
+  let candidate = baseSlug;
+  let count = 1;
 
   while (true) {
-    const existing = await db
-      .select({ id: news.id, slug: news.slug })
-      .from(news)
-      .where(
-        currentArticleId
-          ? and(eq(news.slug, candidateSlug), ne(news.id, currentArticleId))
-          : eq(news.slug, candidateSlug)
-      )
-      .limit(1);
-
-    if (existing.length === 0) {
-      return candidateSlug;
+    const existing = await db.select({ id: news.id }).from(news).where(eq(news.slug, candidate)).limit(1);
+    if (existing.length === 0 || (currentId && existing[0].id === currentId)) {
+      return candidate;
     }
-
-    candidateSlug = `${baseSlug}-${counter}`;
-    counter++;
+    candidate = `${baseSlug}-${count}`;
+    count++;
   }
 }
+
