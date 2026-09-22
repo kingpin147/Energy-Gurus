@@ -21,6 +21,7 @@ import { getProfileRating, getTeamRating } from "@/lib/actions/reviews";
 import { redis, CACHE_KEYS } from "@/lib/redis";
 import { InferSelectModel } from "drizzle-orm";
 import { InstallerQuoteForm } from "@/components/forms/installer-quote-form";
+import { TrackedInteraction } from "@/components/shared/AnalyticsTracker";
 
 import { isUUID, slugify } from "@/lib/utils/slug";
 import { or, ilike } from "drizzle-orm";
@@ -281,38 +282,84 @@ export default async function EpcProfilePage({
 
             <div className="social-row">
               {websiteUrl !== "#" && (
-                <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="social-btn">
+                <TrackedInteraction
+                  as="a"
+                  href={websiteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-btn"
+                  eventName="epc_website_click"
+                  eventProperties={{ epcId: installer.id, companyName: installer.companyName, url: websiteUrl }}
+                >
                   <Globe />
-                </a>
+                </TrackedInteraction>
               )}
               {facebookUrl !== "#" && (
-                <a href={facebookUrl} target="_blank" rel="noopener noreferrer" className="social-btn">
+                <TrackedInteraction
+                  as="a"
+                  href={facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-btn"
+                  eventName="epc_social_click"
+                  eventProperties={{ epcId: installer.id, companyName: installer.companyName, platform: "Facebook", url: facebookUrl }}
+                >
                   <Facebook />
-                </a>
+                </TrackedInteraction>
               )}
               {instagramUrl !== "#" && (
-                <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="social-btn">
+                <TrackedInteraction
+                  as="a"
+                  href={instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-btn"
+                  eventName="epc_social_click"
+                  eventProperties={{ epcId: installer.id, companyName: installer.companyName, platform: "Instagram", url: instagramUrl }}
+                >
                   <Instagram />
-                </a>
+                </TrackedInteraction>
               )}
               {linkedinUrl !== "#" && (
-                <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" className="social-btn">
+                <TrackedInteraction
+                  as="a"
+                  href={linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-btn"
+                  eventName="epc_social_click"
+                  eventProperties={{ epcId: installer.id, companyName: installer.companyName, platform: "LinkedIn", url: linkedinUrl }}
+                >
                   <Linkedin />
-                </a>
+                </TrackedInteraction>
               )}
               {youtubeUrl !== "#" && (
-                <a href={youtubeUrl} target="_blank" rel="noopener noreferrer" className="social-btn">
+                <TrackedInteraction
+                  as="a"
+                  href={youtubeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-btn"
+                  eventName="epc_social_click"
+                  eventProperties={{ epcId: installer.id, companyName: installer.companyName, platform: "YouTube", url: youtubeUrl }}
+                >
                   <Youtube />
-                </a>
+                </TrackedInteraction>
               )}
             </div>
           </div>
 
           {/* Profile CTA */}
           <div className="profile-actions">
-            <a href="#quote" className="btn-primary">
+            <TrackedInteraction
+              as="a"
+              href="#quote"
+              className="btn-primary"
+              eventName="epc_contact_click"
+              eventProperties={{ epcId: installer.id, companyName: installer.companyName }}
+            >
               Request a Quote
-            </a>
+            </TrackedInteraction>
           </div>
         </div>
 

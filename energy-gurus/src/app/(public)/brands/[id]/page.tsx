@@ -110,6 +110,8 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
       status: reviews.status,
       proofUrl: reviews.proofUrl,
       authorName: reviews.authorName,
+      city: reviews.city,
+      productUsed: reviews.productUsed,
       isVerifiedPurchase: reviews.isVerifiedPurchase,
       createdAt: reviews.createdAt,
       author: {
