@@ -7,6 +7,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { users } from "@/db/schema";
 import { generateUniqueNewsSlug } from "@/lib/utils/slug";
+import { getUserRole } from "@/lib/roles";
 
 export async function createNews(formData: FormData) {
     try {
@@ -43,7 +44,12 @@ export async function createNews(formData: FormData) {
         }
 
         const isNowOrPast = finalPublishedAt ? finalPublishedAt <= new Date() : false;
-        const isPublished = isPublishedImmediate || isNowOrPast;
+        const role = await getUserRole();
+        let isPublished = false;
+        if (role === "admin" || role === "super-admin") {
+            isPublished = isPublishedImmediate || isNowOrPast;
+        }
+        
         const slug = await generateUniqueNewsSlug(title);
 
         await db.insert(news).values({
@@ -112,7 +118,12 @@ export async function updateNews(id: string, formData: FormData) {
         }
 
         const isNowOrPast = finalPublishedAt ? finalPublishedAt <= new Date() : false;
-        const isPublished = isPublishedImmediate || isNowOrPast;
+        const role = await getUserRole();
+        let isPublished = false;
+        if (role === "admin" || role === "super-admin") {
+            isPublished = isPublishedImmediate || isNowOrPast;
+        }
+        
         const slug = await generateUniqueNewsSlug(title, id);
 
         await db.update(news).set({

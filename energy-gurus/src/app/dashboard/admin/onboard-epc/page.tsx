@@ -1,9 +1,10 @@
 import { EpcOnboardingForm } from "@/components/forms/epc-onboarding-form";
 import { EpcTableClient } from "@/components/dashboard/epc-table-client";
+import { EpcModerationQueue } from "@/components/dashboard/EpcModerationQueue";
 import { getAllEpcInstallers } from "@/lib/actions/admin-epc-actions";
 import { getUserRole } from "@/lib/roles";
 import { redirect } from "next/navigation";
-import { Briefcase, Building2, CheckCircle2, Award, UserPlus } from "lucide-react";
+import { Briefcase, Building2, CheckCircle2, Award, UserPlus, ShieldCheck } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default async function OnboardEpcPage() {
@@ -86,6 +87,9 @@ export default async function OnboardEpcPage() {
                         <TabsTrigger value="table" className="rounded-lg text-sm font-bold px-5 py-2.5 gap-2">
                             <Building2 className="w-4 h-4" /> Onboarded Installers ({totalInstallers})
                         </TabsTrigger>
+                        <TabsTrigger value="moderation" className="rounded-lg text-sm font-bold px-5 py-2.5 gap-2">
+                            <ShieldCheck className="w-4 h-4" /> Moderation Queue
+                        </TabsTrigger>
                         <TabsTrigger value="onboard" className="rounded-lg text-sm font-bold px-5 py-2.5 gap-2">
                             <UserPlus className="w-4 h-4" /> Onboard New EPC
                         </TabsTrigger>
@@ -94,6 +98,10 @@ export default async function OnboardEpcPage() {
 
                 <TabsContent value="table" className="focus:outline-none">
                     <EpcTableClient initialEpcs={epcInstallers} />
+                </TabsContent>
+
+                <TabsContent value="moderation" className="focus:outline-none">
+                    <EpcModerationQueue epcs={epcInstallers as any} />
                 </TabsContent>
 
                 <TabsContent value="onboard" className="focus:outline-none">

@@ -23,6 +23,14 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
     throw new Error("Insufficient permissions");
   }
 
+  // Prevent brands from editing if the profile is already live
+  if (role === "brand") {
+    const [existingBrand] = await db.select().from(brands).where(eq(brands.userId, user.id));
+    if (existingBrand && existingBrand.status === "live") {
+      throw new Error("Profile is live. Edit rights are only available with the admin.");
+    }
+  }
+
   const isFormData = data instanceof FormData;
 
   let repsData: any[] = [];

@@ -44,6 +44,8 @@ export async function getAllEpcInstallers() {
       about: epcInstallers.about,
       team: epcInstallers.team,
       licenceDocuments: epcInstallers.licenceDocuments,
+      status: epcInstallers.status,
+      adminFeedback: epcInstallers.adminFeedback,
       createdAt: epcInstallers.createdAt,
       userIsActive: users.isActive,
       userEmail: users.email,
@@ -330,5 +332,59 @@ export async function deleteEpcInstallerAction(epcId: string, userId: string) {
   } catch (error: any) {
     console.error("Error deleting EPC installer:", error);
     return { success: false, message: error?.message || "Failed to delete EPC installer" };
+  }
+}
+
+export async function adminUpdateEpcStatusAction(epcId: string, status: "draft" | "pending_review" | "changes_requested" | "live", adminFeedback?: string) {
+  const role = await getUserRole();
+  if (role !== "super-admin" && role !== "admin") {
+    return { success: false, message: "Unauthorized access" };
+  }
+
+  try {
+    const [epc] = await db
+      .select()
+      .from(epcInstallers)
+      .where(eq(epcInstallers.id, epcId));
+
+    if (!epc) {
+      return { success: false, message: "EPC Installer not found" };
+    }
+
+    const { userId } = await auth();
+
+    const approvalHistory = Array.isArray(epc.approvalHistory) ? epc.approvalHistory : [];
+    approvalHistory.push({
+      date: new Date().toISOString(),
+      action: `Status changed to ${status}`,
+      note: adminFeedback || undefined,
+      user: userId || "admin",
+    });
+
+    await db
+      .update(epcInstallers)
+      .set({
+        status,
+        adminFeedback: adminFeedback || null,
+        approvalHistory,
+        updatedAt: new Date(),
+      })
+      .where(eq(epcInstallers.id, epcId));
+
+    try {
+      await redis.del(CACHE_KEYS.EPC_DETAILS(epcId));
+      await redis.del(CACHE_KEYS.EPCS_LIST);
+    } catch (e) {
+      console.warn("Redis cache error:", e);
+    }
+
+    revalidatePath("/dashboard/admin/onboard-epc");
+    revalidatePath("/epcs");
+    revalidatePath("/", "layout");
+
+    return { success: true, message: `EPC Installer status updated to ${status}` };
+  } catch (error: any) {
+    console.error("Error updating EPC installer status:", error);
+    return { success: false, message: error?.message || "Failed to update status" };
   }
 }

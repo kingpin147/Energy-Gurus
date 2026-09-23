@@ -62,8 +62,16 @@ export const epcInstallers = pgTable('epc_installers', {
   egRating: text('eg_rating').default('9.0'),
   memberships: jsonb('memberships').$type<{ name: string; certUrl?: string }[]>().default([]),
   auditStatus: jsonb('audit_status').$type<{ auditCompleted: boolean; auditDate?: string; auditorName?: string; notes?: string }>().default({ auditCompleted: false }),
-  status: text('status').$type<'draft' | 'pending_review' | 'changes_requested' | 'live'>().default('live'),
+  status: text('status').$type<'draft' | 'pending_review' | 'changes_requested' | 'live'>().default('draft'),
+  adminFeedback: text('admin_feedback'),
   approvalHistory: jsonb('approval_history').$type<{ date: string; action: string; note?: string; user?: string }[]>().default([]),
+  egTeamRatings: jsonb('eg_team_ratings').$type<{
+    physicalVerification: number;
+    officeVisited: number;
+    siteVisited: number;
+    projectsVerified: number;
+    afterSalesSystem: number;
+  }>(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
     }, (table) => ({
@@ -144,7 +152,7 @@ export const brands = pgTable('brands', {
   founded: text('founded'),
   headquarters: text('headquarters'),
   countryOfOrigin: text('country_of_origin'),
-  status: text('status').$type<'draft' | 'pending_review' | 'changes_requested' | 'live'>().default('live'),
+  status: text('status').$type<'draft' | 'pending_review' | 'changes_requested' | 'live'>().default('draft'),
   adminFeedback: text('admin_feedback'),
   approvalHistory: jsonb('approval_history').$type<{ date: string; action: string; note?: string; user?: string }[]>().default([]),
   distributors: jsonb('distributors').$type<{ name: string; city: string; territory: string; contactPerson: string; phone: string; email: string; address: string; mapUrl?: string; since?: string; status?: string }[]>().default([]),
@@ -274,6 +282,11 @@ export const installerCertifications = pgTable('installer_certifications', {
   adminApprovedAt: timestamp('admin_approved_at'),
   adminNotes: text('admin_notes'),
   status: text('status').$type<'draft' | 'pending_brand' | 'pending_admin' | 'live' | 'rejected'>().default('pending_brand').notNull(),
+  brandRatings: jsonb('brand_ratings').$type<{
+    installationQuality: number;
+    afterSalesQuality: number;
+    trainingParticipation: number;
+  }>(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
 }, (table) => ({
