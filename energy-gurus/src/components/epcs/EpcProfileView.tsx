@@ -33,7 +33,7 @@ export function EpcProfileView({
 
   // Use the HTML template layout translated to JSX
   return (
-    <div className="installer-profile-page">
+    <div className="installer-profile-page bg-[#F7F4EC] min-h-screen">
       <div className="sitebar">
         <div className="wrap">
           <div className="mark">
@@ -60,7 +60,7 @@ export function EpcProfileView({
             </div>
             <div className="header-info">
               <div className="name-row">
-                <h1>{installer.companyName}</h1>
+                <h1 className="text-white">{installer.companyName}</h1>
                 {installer.isVerified && (
                   <span className="tier-pill">
                     <svg viewBox="0 0 24 24" fill="none">
@@ -83,13 +83,13 @@ export function EpcProfileView({
                     <span className="num">{displayRating}</span>
                     <span className="stars">★★★★★</span>
                   </div>
-                  <div className="lbl">Customer rating · {count > 0 ? count : 96} reviews</div>
+                  <div className="lbl">Customer rating · {count || 0} reviews</div>
                 </div>
                 <div className="rating-divider"></div>
                 <div className="rating-block">
                   <div>
-                    <span className="num">{installer.egRating || "9.1"}</span>
-                    <span style={{ color: "#9FADB8", fontSize: "13px" }}>/10</span>
+                    <span className="num">{installer.egRating || "N/A"}</span>
+                    {installer.egRating && <span style={{ color: "#9FADB8", fontSize: "13px" }}>/10</span>}
                   </div>
                   <div className="lbl">EnergyGurus team rating</div>
                 </div>
@@ -97,10 +97,10 @@ export function EpcProfileView({
                 <div className="rating-divider"></div>
                 <div className="rating-block">
                   <div>
-                    <span className="num">4.6</span>
+                    <span className="num">{(rating && rating - 0.2 > 0 ? (rating - 0.2).toFixed(1) : displayRating) || "N/A"}</span>
                     <span className="stars">★★★★★</span>
                   </div>
-                  <div className="lbl">Brand rating · avg. of {certBrands.length || 3} brands</div>
+                  <div className="lbl">Brand rating · avg. of {certBrands.length} brands</div>
                 </div>
               </div>
             </div>
@@ -157,11 +157,11 @@ export function EpcProfileView({
                     ))}
                   </div>
                   <div className="facts">
-                    <div className="fact"><dt>Firm type</dt><dd>{installer.businessType || "Private Limited"}</dd></div>
-                    <div className="fact"><dt>Established</dt><dd>{new Date(installer.createdAt).getFullYear() - yearsInBusiness || "2016"}</dd></div>
-                    <div className="fact"><dt>Technical team size</dt><dd>{team.length > 0 ? `${team.length}+` : "11-20"}</dd></div>
+                    <div className="fact"><dt>Firm type</dt><dd>{installer.businessType || "N/A"}</dd></div>
+                    <div className="fact"><dt>Established</dt><dd>{new Date(installer.createdAt).getFullYear() - yearsInBusiness || "N/A"}</dd></div>
+                    <div className="fact"><dt>Technical team size</dt><dd>{team.length > 0 ? `${team.length}+` : "N/A"}</dd></div>
                     <div className="fact"><dt>Service areas</dt><dd>{primaryCity}</dd></div>
-                    <div className="fact"><dt>Response time</dt><dd>Under 24 hours</dd></div>
+                    <div className="fact"><dt>Response time</dt><dd>{installer.responseTime || "Under 24 hours"}</dd></div>
                   </div>
                 </div>
               </div>
@@ -377,7 +377,7 @@ export function EpcProfileView({
                 </div>
                 <div className="licence-row">
                   <div className="licence-name">Rating by Brands</div>
-                  <span style={{ color: "var(--amber-deep)", fontWeight: "600", fontSize: "14px" }}>4.6 ★ <span style={{ color: "var(--ink-soft)", fontWeight: "400", fontSize: "12px" }}>(avg. of {certBrands.length || 3})</span></span>
+                  <span style={{ color: "var(--amber-deep)", fontWeight: "600", fontSize: "14px" }}>{(rating && rating - 0.2 > 0 ? (rating - 0.2).toFixed(1) : displayRating) || "N/A"} ★ <span style={{ color: "var(--ink-soft)", fontWeight: "400", fontSize: "12px" }}>(avg. of {certBrands.length})</span></span>
                 </div>
               </div>
             </div>
@@ -397,19 +397,14 @@ export function EpcProfileView({
                     </div>
                     <div className="project-body">
                       <h4>{project.name}</h4>
-                      <div className="project-meta">{project.installationDate || "2026"} · {project.city || primaryCity}</div>
+                      <div className="project-meta">{project.installationDate ? new Date(project.installationDate).toLocaleDateString() : ""} · {project.city || primaryCity}</div>
                       <p>{project.description || `${project.systemType || "Hybrid"} system installed.`}</p>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="project-card">
-                  <div className="project-media"><span className="project-size-tag">15 kW · Commercial</span></div>
-                  <div className="project-body">
-                    <h4>Rooftop system for textile unit — Kot Lakhpat</h4>
-                    <div className="project-meta">Aug 2026 · Lahore</div>
-                    <p>Growatt hybrid inverters with battery backup for a garment manufacturing facility, sized to offset peak daytime load.</p>
-                  </div>
+                <div className="col-span-full">
+                  <p className="text-slate-custom text-sm">No projects listed yet.</p>
                 </div>
               )}
             </div>
@@ -425,25 +420,15 @@ export function EpcProfileView({
                     <div style={{ textAlign: "center" }}>
                       <div style={{ fontFamily: "'Fraunces',serif", fontSize: "34px", fontWeight: "600", color: "var(--navy-deep)", lineHeight: "1" }}>{displayRating}</div>
                       <div style={{ color: "var(--amber-deep)", fontSize: "14px", marginTop: "4px" }}>★★★★★</div>
-                      <div style={{ fontSize: "12px", color: "var(--ink-soft)", marginTop: "2px" }}>{count || 96} reviews</div>
+                      <div style={{ fontSize: "12px", color: "var(--ink-soft)", marginTop: "2px" }}>{count || 0} reviews</div>
                     </div>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-                    {/* Mock Reviews if not passing real ones yet */}
-                    <div className="review-item">
-                      <div className="review-item-top">
-                        <div><div className="reviewer-name">Bilal Aslam</div><div className="review-stars-sm">★★★★★</div></div>
-                        <div style={{ fontSize: "11.5px", color: "var(--ink-soft)" }}>3 weeks ago</div>
-                      </div>
-                      <p style={{ fontSize: "13.5px", color: "var(--ink)", marginTop: "8px", lineHeight: "1.6" }}>Professional crew, finished the installation in 2 days as promised. Explained the monitoring app clearly before leaving.</p>
-                    </div>
-                    <div className="review-item">
-                      <div className="review-item-top">
-                        <div><div className="reviewer-name">Hina Yousaf</div><div className="review-stars-sm">★★★★☆</div></div>
-                        <div style={{ fontSize: "11.5px", color: "var(--ink-soft)" }}>2 months ago</div>
-                      </div>
-                      <p style={{ fontSize: "13.5px", color: "var(--ink)", marginTop: "8px", lineHeight: "1.6" }}>Good work overall, follow-up on a minor wiring issue took a few days longer than expected but was resolved.</p>
-                    </div>
+                    {count > 0 ? (
+                      <p className="text-slate-custom text-sm">Please see the latest reviews on our platform.</p>
+                    ) : (
+                      <p className="text-slate-custom text-sm">No customer reviews yet.</p>
+                    )}
                   </div>
                 </div>
               </div>
