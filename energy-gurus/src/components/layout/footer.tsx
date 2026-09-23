@@ -27,7 +27,7 @@ export function Footer() {
                         </a>
                     </div>
                 </div>
-                
+
                 <div className="flex gap-14 flex-wrap">
                     <div className="flex flex-col gap-2.5">
                         <Link href="/about" className="text-paper/60 hover:text-white transition-colors">About Us</Link>
@@ -41,7 +41,7 @@ export function Footer() {
                     </div>
                 </div>
             </div>
-            
+
             <div className="max-w-[1180px] mx-auto px-5 md:px-8 mt-12 border-t border-paper/12 pt-5 text-[0.78rem]">
                 © {new Date().getFullYear()} EnergyGurus.online — All rights reserved.
             </div>

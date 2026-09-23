@@ -33,8 +33,8 @@ export function EpcProfileView({
 
   // Use the HTML template layout translated to JSX
   return (
-    <div className="installer-profile-page bg-[#12213A] min-h-screen">
-      <div className="sitebar">
+    <div className="installer-profile-page bg-[#F7F4EC] min-h-screen">
+      <div className="sitebar bg-ink">
         <div className="wrap">
 
           <div className="crumbs">
@@ -43,7 +43,7 @@ export function EpcProfileView({
         </div>
       </div>
 
-      <header className="header">
+      <header className="header bg-ink">
         <div className="wrap">
           <div className="header-top">
             <div className="avatar-lg bg-white p-2">
@@ -122,7 +122,7 @@ export function EpcProfileView({
             </div>
           </div>
         </div>
-        <nav className="tabbar">
+        <nav className="tabbar bg-ink">
           <div className="wrap">
             <button className={`tab ${activeTab === "profile" ? "active" : ""}`} onClick={() => setActiveTab("profile")}>Profile</button>
             <button className={`tab ${activeTab === "team" ? "active" : ""}`} onClick={() => setActiveTab("team")}>Team</button>
@@ -392,7 +392,7 @@ export function EpcProfileView({
                     </div>
                     <div className="project-body">
                       <h4>{project.name}</h4>
-                      <div className="project-meta">{project.installationDate ? new Date(project.installationDate).toLocaleDateString() : ""} · {project.city || primaryCity}</div>
+                      <div className="project-meta">{project.installationDate ? new Date(project.installationDate).toISOString().split('T')[0] : ""} · {project.city || primaryCity}</div>
                       <p>{project.description || `${project.systemType || "Hybrid"} system installed.`}</p>
                     </div>
                   </div>
