@@ -16,12 +16,15 @@ async function getBrandByParam(param: string) {
     if (brand) return brand;
   }
 
-  // Look up by slug or case-insensitive brandName
-  const normalizedName = decoded.replace(/-/g, " ");
+  const fuzzyName = `%${decoded.replace(/-/g, "%")}%`;
   const [brandBySlug] = await db
     .select()
     .from(brands)
-    .where(or(eq(brands.slug, decoded), ilike(brands.brandName, normalizedName), ilike(brands.brandName, decoded)));
+    .where(or(
+      eq(brands.slug, decoded),
+      ilike(brands.brandName, fuzzyName),
+      ilike(brands.brandName, decoded)
+    ));
 
   return brandBySlug || null;
 }

@@ -1,0 +1,160 @@
+
+  :root{
+    --navy: #0F2A47; --navy-deep: #0A1D33;
+    --amber: #E0A73B; --amber-deep: #B9832A;
+    --cream: #F7F4EC; --paper: #FFFFFF; --ink: #1E2A36; --ink-soft: #55636E;
+    --line: #E3DFD3; --good: #3E7D5A; --good-bg: #E8F2EC; --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  html, body {margin:0;padding:0;}
+  body {background:var(--cream);color:var(--ink);font-family:'IBM Plex Sans', sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .installer-profile-page h1, .installer-profile-page h2, .installer-profile-page h3, .installer-profile-page h4 {font-family:'Fraunces', serif;color:var(--navy-deep);margin:0;}
+  a{color:inherit;}
+  .installer-profile-page .wrap {max-width:1080px;margin:0 auto;padding:0 28px;}
+
+  .installer-profile-page .sitebar {background:var(--navy-deep);color:#EFE9DA;font-size:13px;padding:9px 0;}
+  .installer-profile-page .sitebar .wrap {display:flex;align-items:center;justify-content:space-between;}
+  .installer-profile-page .sitebar .mark {display:flex;align-items:center;gap:8px;font-weight:600;}
+  .installer-profile-page .sitebar .mark svg {width:16px;height:16px;flex-shrink:0;}
+  .installer-profile-page .sitebar .crumbs {color:#B9C3CC;}
+  .installer-profile-page .sitebar .crumbs a {color:#DCE3E8;text-decoration:none;}
+  .installer-profile-page .sitebar .crumbs a:hover {text-decoration:underline;}
+
+  .installer-profile-page .header {
+    background:var(--navy);
+    background-image: radial-gradient(1200px 240px at 85% -40%, rgba(224,167,59,0.16), transparent 60%);
+    color:#fff;padding:40px 0 0;
+  }
+  .installer-profile-page .header-top {display:flex;gap:28px;align-items:flex-start;padding-bottom:28px;border-bottom:1px solid rgba(255,255,255,0.14);}
+  .installer-profile-page .avatar-lg {
+    width:88px;height:88px;border-radius:50%;background:#fff;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces', serif;font-weight:700;font-size:28px;color:var(--navy);
+    border:3px solid rgba(224,167,59,0.5);
+  }
+  .installer-profile-page .header-info {flex:1;min-width:0;}
+  .installer-profile-page .name-row {display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .installer-profile-page .header-info h1 {font-size:28px;font-weight:600;}
+  .installer-profile-page .tier-pill {
+    display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;
+    background:rgba(224,167,59,0.16);border:1px solid rgba(224,167,59,0.55);color:var(--amber);
+    padding:4px 10px 4px 8px;border-radius:100px;white-space:nowrap;
+  }
+  .installer-profile-page .tier-pill svg {width:13px;height:13px;}
+  .installer-profile-page .loc-line {color:#C7D0D8;font-size:14px;margin-top:8px;display:flex;align-items:center;gap:6px;}
+  .installer-profile-page .loc-line svg {width:14px;height:14px;flex-shrink:0;}
+
+  .installer-profile-page .rating-row {display:flex;gap:32px;margin-top:22px;flex-wrap:wrap;}
+  .installer-profile-page .rating-block .stars {color:var(--amber);font-size:16px;}
+  .installer-profile-page .rating-block .num {font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:#fff;display:inline-block;margin-right:4px;}
+  .installer-profile-page .rating-block .lbl {font-size:12px;color:#9FADB8;margin-top:3px;}
+  .installer-profile-page .rating-divider {width:1px;background:rgba(255,255,255,0.15);}
+
+  .installer-profile-page .header-actions {display:flex;flex-direction:column;gap:10px;flex-shrink:0;}
+  .installer-profile-page .btn {font-family:inherit;font-size:13.5px;font-weight:600;padding:11px 20px;border-radius:var(--radius);border:1px solid transparent;cursor:pointer;text-align:center;white-space:nowrap;text-decoration:none;display:inline-block;}
+  .installer-profile-page .btn-amber {background:var(--amber);color:var(--navy-deep);}
+  .installer-profile-page .btn-amber:hover {background:#eab857;}
+  .installer-profile-page .btn-outline {background:transparent;border-color:rgba(255,255,255,0.4);color:#fff;}
+  .installer-profile-page .btn-outline:hover {border-color:#fff;}
+  .installer-profile-page .btn-ghost {background:transparent;border-color:var(--line);color:var(--ink);}
+  .installer-profile-page .btn-navy {background:var(--navy);color:#fff;}
+  .installer-profile-page .btn-navy:hover {background:var(--navy-deep);}
+
+  .installer-profile-page .tabbar {background:var(--navy);border-top:1px solid rgba(255,255,255,0.06);}
+  .installer-profile-page .tabbar .wrap {display:flex;gap:2px;overflow-x:auto;}
+  .installer-profile-page .tab {background:none;border:none;font-size:14px;font-weight:500;color:#A9B6BF;padding:15px 18px 13px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;}
+  .installer-profile-page .tab:hover {color:#fff;}
+  .installer-profile-page .tab.active {color:#fff;border-bottom-color:var(--amber);font-weight:600;}
+
+  .installer-profile-page .content {padding:36px 0 70px;}
+  .installer-profile-page .panel {display:none;}
+  .installer-profile-page .panel.active {display:block;}
+
+  .installer-profile-page .grid-2 {display:grid;grid-template-columns:1.5fr 1fr;gap:28px;align-items:start;}
+  .installer-profile-page .card {background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:24px;}
+  .installer-profile-page .card + .card {margin-top:20px;}
+  .installer-profile-page .card h2 {font-size:18px;font-weight:600;margin-bottom:12px;}
+  .installer-profile-page .about-text {font-size:14.5px;line-height:1.7;color:var(--ink);}
+
+  .installer-profile-page .chip-row {display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .installer-profile-page .team-grid-people {display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+  .installer-profile-page .office-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+  .installer-profile-page .chip {background:var(--cream);border:1px solid var(--line);font-size:12.5px;color:var(--ink);padding:5px 11px;border-radius:100px;}
+
+  .installer-profile-page .facts {display:grid;grid-template-columns:1fr 1fr;gap:16px 20px;margin-top:16px;}
+  .installer-profile-page .fact dt {font-size:12px;color:var(--ink-soft);}
+  .installer-profile-page .fact dd {margin:3px 0 0;font-size:14px;font-weight:600;color:var(--navy-deep);}
+
+  .installer-profile-page .contact-line {display:flex;gap:10px;font-size:13.5px;color:var(--ink);padding:7px 0;border-bottom:1px dashed var(--line);}
+  .installer-profile-page .contact-line:last-child {border-bottom:none;}
+  .installer-profile-page .contact-line svg {width:15px;height:15px;flex-shrink:0;margin-top:1px;color:var(--amber-deep);}
+
+  /* Certifications */
+  .installer-profile-page .cert-brand-row {display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line);}
+  .installer-profile-page .cert-brand-row:last-child {border-bottom:none;}
+  .installer-profile-page .cert-brand-main {display:flex;align-items:center;gap:12px;}
+  .installer-profile-page .cert-brand-mark {width:38px;height:38px;border-radius:var(--radius);background:var(--navy);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:14px;color:#fff;flex-shrink:0;}
+  .installer-profile-page .cert-brand-name {font-size:14px;font-weight:600;color:var(--navy-deep);}
+  .installer-profile-page .cert-brand-since {font-size:12px;color:var(--ink-soft);}
+  .installer-profile-page .tier-badge {display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:100px;}
+  .installer-profile-page .tier-gold {background:#FBF0DA;color:#96701A;}
+  .installer-profile-page .tier-silver {background:#EEF0F2;color:#54606A;}
+
+  .installer-profile-page .licence-row {display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);}
+  .installer-profile-page .licence-row:last-child {border-bottom:none;}
+  .installer-profile-page .licence-name {font-size:14px;font-weight:600;color:var(--navy-deep);}
+  .installer-profile-page .licence-num {font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+  .installer-profile-page .verified-check {display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--good);}
+  .installer-profile-page .verified-check svg {width:14px;height:14px;}
+
+  /* EnergyGurus team rating */
+  .installer-profile-page .eg-rating-card {background:var(--navy);color:#fff;border-radius:var(--radius);padding:22px;}
+  .installer-profile-page .eg-rating-card h3 {color:#fff;font-size:16px;font-weight:600;margin-bottom:4px;}
+  .installer-profile-page .eg-rating-card p {font-size:12.5px;color:#B9C3CC;margin:0 0 16px;max-width:48ch;}
+  .installer-profile-page .eg-score-row {display:flex;align-items:center;gap:16px;}
+  .installer-profile-page .eg-score {font-family:'Fraunces',serif;font-size:34px;font-weight:600;color:var(--amber);}
+  .installer-profile-page .eg-score-sub {font-size:12px;color:#9FADB8;}
+  .installer-profile-page .eg-checklist {margin-top:16px;display:flex;flex-direction:column;gap:8px;}
+  .installer-profile-page .eg-check-item {display:flex;align-items:center;gap:8px;font-size:12.5px;color:#DCE3E8;}
+  .installer-profile-page .eg-check-item svg {width:14px;height:14px;color:var(--amber);flex-shrink:0;}
+
+  /* Projects */
+  .installer-profile-page .project-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+  .installer-profile-page .project-card {background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+  .installer-profile-page .project-media {height:150px;background:linear-gradient(135deg, var(--navy), var(--navy-deep));position:relative;}
+  .installer-profile-page .project-size-tag {position:absolute;bottom:10px;left:10px;background:rgba(255,255,255,0.92);color:var(--navy-deep);font-size:11px;font-weight:600;padding:3px 9px;border-radius:100px;}
+  .installer-profile-page .project-body {padding:16px;}
+  .installer-profile-page .project-body h4 {font-size:14.5px;font-weight:600;margin-bottom:4px;}
+  .installer-profile-page .project-meta {font-size:12px;color:var(--amber-deep);font-weight:600;margin-bottom:6px;}
+  .installer-profile-page .project-body p {font-size:13px;color:var(--ink-soft);line-height:1.55;margin:0;}
+
+  /* Reviews */
+  .installer-profile-page .review-summary {display:flex;gap:32px;align-items:center;flex-wrap:wrap;padding-bottom:22px;margin-bottom:22px;border-bottom:1px solid var(--line);}
+  .installer-profile-page .review-item {padding-bottom:20px;border-bottom:1px solid var(--line);}
+  .installer-profile-page .review-item:last-child {border-bottom:none;padding-bottom:0;}
+  .installer-profile-page .review-item-top {display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .installer-profile-page .reviewer-name {font-size:13.5px;font-weight:600;color:var(--navy-deep);}
+  .installer-profile-page .review-stars-sm {color:var(--amber-deep);font-size:13px;}
+
+  /* Request a quote modal */
+  .installer-profile-page .modal-overlay {display:none;position:fixed;inset:0;background:rgba(10,29,51,0.55);z-index:100;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;}
+  .installer-profile-page .modal-overlay.open {display:flex;}
+  .installer-profile-page .modal {background:var(--paper);border-radius:var(--radius);max-width:520px;width:100%;padding:28px;box-shadow:0 20px 60px rgba(10,29,51,0.3);}
+  .installer-profile-page .modal-head {display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+  .installer-profile-page .modal-close {background:none;border:none;cursor:pointer;color:var(--ink-soft);}
+  .installer-profile-page .modal-close svg {width:18px;height:18px;display:block;}
+  .installer-profile-page .rfield {display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+  .installer-profile-page .rfield label {font-size:12.5px;font-weight:600;color:var(--ink);}
+  .installer-profile-page .rfield input, .installer-profile-page .rfield select, .installer-profile-page .rfield textarea {border:1px solid var(--line);border-radius:var(--radius);padding:9px 11px;font-size:13.5px;font-family:inherit;background:#FEFEFC;color:var(--ink);}
+  .installer-profile-page .rfield textarea {min-height:80px;resize:vertical;}
+  .installer-profile-page .rfield-row {display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+
+  @media (max-width:820px){
+    .installer-profile-page .grid-2 {grid-template-columns:1fr;}
+    .installer-profile-page .facts {grid-template-columns:1fr;}
+    .installer-profile-page .header-top {flex-direction:column;}
+    .installer-profile-page .header-actions {flex-direction:row;}
+    .installer-profile-page .project-grid {grid-template-columns:1fr;}
+    .installer-profile-page .team-grid-people {grid-template-columns:1fr;}
+    .installer-profile-page .office-grid {grid-template-columns:1fr;}
+  }
