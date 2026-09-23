@@ -33,15 +33,10 @@ export function EpcProfileView({
 
   // Use the HTML template layout translated to JSX
   return (
-    <div className="installer-profile-page bg-[#F7F4EC] min-h-screen">
+    <div className="installer-profile-page bg-[#12213A] min-h-screen">
       <div className="sitebar">
         <div className="wrap">
-          <div className="mark">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path d="M4 12.5l5.5 5.5L20 7" stroke="#E0A73B" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            EnergyGurus.Online
-          </div>
+
           <div className="crumbs">
             <Link href="/epcs">Find an Installer</Link> &nbsp;/&nbsp; {installer.companyName}
           </div>
