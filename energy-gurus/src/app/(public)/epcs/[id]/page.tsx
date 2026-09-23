@@ -188,7 +188,7 @@ export default async function EpcProfilePage({
   const portfolioFallback = photos.length > 0 ? photos : projects.flatMap((project) => project.images || []);
 
   return (
-    <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 min-h-screen">
+    <div className="installer-profile-page font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 min-h-screen">
       
       {/* Breadcrumb */}
       <div className="max-w-[1180px] mx-auto px-5 md:px-8 pt-5 text-[0.84rem] text-slate-custom">
