@@ -65,11 +65,16 @@ export const metadata: Metadata = {
   publisher: "EnergyGurus",
   icons: {
     icon: [
-      { url: "/logo-icon.svg", type: "image/svg+xml", sizes: "any" },
-      { url: "/favicon.ico", sizes: "48x48" }
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/icon-96x96.png", sizes: "96x96", type: "image/png" },
+      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/logo-icon.svg", type: "image/svg+xml", sizes: "any" }
     ],
     shortcut: "/favicon.ico",
-    apple: "/logo-icon.svg"
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }
+    ]
   },
   openGraph: {
     type: "website",

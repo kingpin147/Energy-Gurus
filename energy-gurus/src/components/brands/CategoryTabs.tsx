@@ -34,25 +34,27 @@ export function CategoryTabs({ activeCategory }: { activeCategory: string }) {
   );
 
   return (
-    <div className="flex gap-2 flex-wrap items-center overflow-x-auto pb-2 scrollbar-none">
-      {BRAND_CATEGORY_TABS.map((tab) => {
-        const isActive = activeCategory === tab.value;
-        return (
-          <button
-            key={tab.value}
-            type="button"
-            onClick={() => setCategory(tab.value)}
-            className={[
-              "px-4 py-2 text-xs md:text-sm font-semibold rounded-full border transition-all cursor-pointer whitespace-nowrap shadow-sm",
-              isActive
-                ? "bg-ink border-ink text-white shadow-sm"
-                : "bg-white border-line text-slate-custom hover:border-amber hover:text-ink hover:bg-paper/50",
-            ].join(" ")}
-          >
-            {tab.label}
-          </button>
-        );
-      })}
+    <div className="bg-[#fbfaf6] border-b border-line/60 py-3.5">
+      <div className="max-w-[1180px] mx-auto px-5 md:px-8 flex gap-2 flex-wrap items-center justify-center overflow-x-auto scrollbar-none">
+        {BRAND_CATEGORY_TABS.map((tab) => {
+          const isActive = activeCategory === tab.value;
+          return (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => setCategory(tab.value)}
+              className={[
+                "px-4 py-2 text-xs md:text-sm font-semibold rounded-full border transition-all cursor-pointer whitespace-nowrap shadow-sm",
+                isActive
+                  ? "bg-ink border-ink text-white shadow-sm"
+                  : "bg-white border-line text-slate-custom hover:border-amber hover:text-ink hover:bg-paper/50",
+              ].join(" ")}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
