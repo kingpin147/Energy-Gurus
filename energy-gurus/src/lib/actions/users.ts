@@ -6,7 +6,6 @@ import { eq, or } from "drizzle-orm";
 import { clerkClient as createClerkClient, auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { getUserRole } from "@/lib/roles";
-import { redis, CACHE_KEYS } from "@/lib/redis";
 import { deleteFile, extractKeyFromUrl } from "@/lib/r2";
 
 const adminWhitelist = ["nomiking0072012@gmail.com", "energygurusonline@gmail.com"];
@@ -96,17 +95,6 @@ export async function deleteUser(userId: string) {
     await db.delete(brands).where(eq(brands.userId, userId));
     await db.delete(epcInstallers).where(eq(epcInstallers.userId, userId));
 
-    // Clear Redis Caches
-    try {
-        const keysToDelete: string[] = [CACHE_KEYS.BRANDS_LIST, CACHE_KEYS.EPCS_LIST];
-        if (brand) keysToDelete.push(CACHE_KEYS.BRAND_DETAILS(brand.id));
-        if (epc) keysToDelete.push(CACHE_KEYS.EPC_DETAILS(epc.id));
-
-        await redis.del(...keysToDelete);
-    } catch (e) {
-        console.error("Failed to clear profile caches during deletion:", e);
-    }
-
     // Delete from DB
     await db.delete(users).where(eq(users.id, userId));
 
@@ -168,21 +156,6 @@ export async function toggleUserStatus(userId: string) {
 
     revalidatePath("/dashboard/users");
     revalidatePath("/", "layout");
-
-    try {
-        const [brand] = await db.select({ id: brands.id }).from(brands).where(eq(brands.userId, userId));
-        const [epc] = await db.select({ id: epcInstallers.id }).from(epcInstallers).where(eq(epcInstallers.userId, userId));
-
-        const keysToDelete: string[] = [];
-        if (brand) keysToDelete.push(CACHE_KEYS.BRAND_DETAILS(brand.id));
-        if (epc) keysToDelete.push(CACHE_KEYS.EPC_DETAILS(epc.id));
-
-        if (keysToDelete.length > 0) {
-            await redis.del(...keysToDelete);
-        }
-    } catch (e) {
-        console.error("Failed to clear profile caches:", e);
-    }
 
     return { success: true, isActive: newStatus };
 }

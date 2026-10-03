@@ -5,7 +5,6 @@ import { epcInstallers, epcOffices, epcProjects, users, reviews } from "@/db/sch
 import { eq, desc } from "drizzle-orm";
 import { getUserRole } from "@/lib/roles";
 import { revalidatePath } from "next/cache";
-import { redis, CACHE_KEYS } from "@/lib/redis";
 import { deleteUser } from "@/lib/actions/users";
 import { auth } from "@clerk/nextjs/server";
 import { deleteFile, extractKeyFromUrl } from "@/lib/r2";
@@ -238,14 +237,6 @@ export async function adminUpdateEpcInstaller(epcId: string, data: {
       }
     }
 
-    // Invalidate caches
-    try {
-      await redis.del(CACHE_KEYS.EPC_DETAILS(epcId));
-      await redis.del(CACHE_KEYS.EPCS_LIST);
-    } catch (e) {
-      console.warn("Redis cache error:", e);
-    }
-
     revalidatePath("/dashboard/admin/onboard-epc");
     revalidatePath("/epcs");
     revalidatePath("/", "layout");
@@ -253,7 +244,7 @@ export async function adminUpdateEpcInstaller(epcId: string, data: {
     return { success: true, message: "EPC Installer updated successfully" };
   } catch (error: any) {
     console.error("Error updating EPC installer:", error);
-    return { success: false, message: error?.message || "Failed to update EPC installer" };
+    return { success: false, message: "Failed to update EPC installer. Please try again." };
   }
 }
 
@@ -299,14 +290,6 @@ export async function deleteEpcInstallerAction(epcId: string, userId: string) {
     await db.delete(epcProjects).where(eq(epcProjects.epcId, epcId));
     await db.delete(epcInstallers).where(eq(epcInstallers.id, epcId));
 
-    // Clear Redis Caches
-    try {
-      await redis.del(CACHE_KEYS.EPC_DETAILS(epcId));
-      await redis.del(CACHE_KEYS.EPCS_LIST);
-    } catch (e) {
-      console.warn("Redis cache deletion error:", e);
-    }
-
     // 3. Check linked user before deleting user account
     if (userId) {
       const [linkedUser] = await db.select().from(users).where(eq(users.id, userId));
@@ -331,7 +314,7 @@ export async function deleteEpcInstallerAction(epcId: string, userId: string) {
     return { success: true, message: "EPC Installer profile deleted successfully" };
   } catch (error: any) {
     console.error("Error deleting EPC installer:", error);
-    return { success: false, message: error?.message || "Failed to delete EPC installer" };
+    return { success: false, message: "Failed to delete EPC installer. Please try again." };
   }
 }
 
@@ -371,13 +354,6 @@ export async function adminUpdateEpcStatusAction(epcId: string, status: "draft" 
       })
       .where(eq(epcInstallers.id, epcId));
 
-    try {
-      await redis.del(CACHE_KEYS.EPC_DETAILS(epcId));
-      await redis.del(CACHE_KEYS.EPCS_LIST);
-    } catch (e) {
-      console.warn("Redis cache error:", e);
-    }
-
     revalidatePath("/dashboard/admin/onboard-epc");
     revalidatePath("/epcs");
     revalidatePath("/", "layout");
@@ -385,6 +361,6 @@ export async function adminUpdateEpcStatusAction(epcId: string, status: "draft" 
     return { success: true, message: `EPC Installer status updated to ${status}` };
   } catch (error: any) {
     console.error("Error updating EPC installer status:", error);
-    return { success: false, message: error?.message || "Failed to update status" };
+    return { success: false, message: "Failed to update status. Please try again." };
   }
 }

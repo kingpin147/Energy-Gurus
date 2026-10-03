@@ -82,6 +82,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ uploadUrl, key, publicUrl: getPublicUrl(key) });
     } catch (error: any) {
         console.error("R2 Upload Error:", error);
-        return new NextResponse(error?.message || "Internal Error", { status: 500 });
+        return new NextResponse("Failed to process file upload. Please try again.", { status: 500 });
     }
 }

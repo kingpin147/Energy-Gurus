@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import { eq, and, not } from "drizzle-orm";
 import { getUserRole } from "@/lib/roles";
 
+import { liveQuestionSchema } from "@/lib/validations/schemas";
+
 async function checkAdmin() {
     const role = await getUserRole();
     if (role !== 'super-admin' && role !== 'admin') {
@@ -13,19 +15,27 @@ async function checkAdmin() {
     }
 }
 
-export async function submitLiveQuestion(formData: FormData) {
-    const sessionId = formData.get("sessionId") as string;
-    const userName = formData.get("userName") as string;
-    const question = formData.get("question") as string;
+export async function submitLiveQuestion(formData: FormData): Promise<void> {
+    const rawData = {
+        sessionId: formData.get("sessionId") as string,
+        userName: (formData.get("userName") as string)?.trim(),
+        question: (formData.get("question") as string)?.trim(),
+    };
 
-    if (!sessionId || !userName || !question) return;
+    const validated = liveQuestionSchema.safeParse(rawData);
+    if (!validated.success) {
+        console.warn("Invalid live question input:", validated.error.issues[0]?.message);
+        return;
+    }
+
+    const { sessionId, userName, question } = validated.data;
 
     try {
         await db.insert(liveQaQuestions).values({
             sessionId,
             userName,
             question
-    });
+        });
         revalidatePath("/live-qa", "page");
     } catch (error) {
         console.error("Failed to submit question:", error);

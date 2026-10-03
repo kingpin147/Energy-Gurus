@@ -67,7 +67,7 @@ export async function submitCertificationAction(formData: FormData) {
     };
   } catch (error: any) {
     console.error("[submitCertificationAction Error]:", error);
-    return { success: false, message: error?.message || "Failed to submit certification" };
+    return { success: false, message: "Failed to submit certification. Please try again." };
   }
 }
 
@@ -104,7 +104,7 @@ export async function brandApproveCertificationAction(certId: string, notes: str
     return { success: true, message: "Approved by Brand. Transferred to EnergyGurus for final confirmation." };
   } catch (error: any) {
     console.error("[brandApproveCertificationAction Error]:", error);
-    return { success: false, message: error?.message || "Failed to approve certification" };
+    return { success: false, message: "Failed to approve certification. Please try again." };
   }
 }
 
@@ -175,7 +175,7 @@ export async function adminConfirmCertificationAction(certId: string, adminNotes
     };
   } catch (error: any) {
     console.error("[adminConfirmCertificationAction Error]:", error);
-    return { success: false, message: error?.message || "Failed to confirm certification" };
+    return { success: false, message: "Failed to confirm certification. Please try again." };
   }
 }
 
@@ -229,6 +229,6 @@ export async function rejectCertificationAction(certId: string, reason: string, 
     return { success: true, message: "Certification rejected with feedback note." };
   } catch (error: any) {
     console.error("[rejectCertificationAction Error]:", error);
-    return { success: false, message: error?.message || "Failed to reject certification" };
+    return { success: false, message: "Failed to reject certification. Please try again." };
   }
 }

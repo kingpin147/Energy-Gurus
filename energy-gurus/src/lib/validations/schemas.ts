@@ -184,3 +184,72 @@ export const installerProfileSchema = z.object({
 });
 
 export type InstallerProfileInput = z.infer<typeof installerProfileSchema>;
+
+/**
+ * Inquiry Submission Schema
+ */
+export const inquirySubmissionSchema = z.object({
+  receiverId: z.string().uuid("Invalid recipient ID"),
+  message: z.string().min(2, "Message must be at least 2 characters").max(5000, "Message cannot exceed 5000 characters"),
+  guestName: z.string().max(100).optional().nullable().or(z.literal("")),
+  guestEmail: z.string().email("Invalid email address").optional().nullable().or(z.literal("")),
+  guestPhone: z.string().max(50).optional().nullable().or(z.literal("")),
+  inquiryType: z.enum(["client", "support"]).default("client"),
+});
+
+export type InquirySubmissionInput = z.infer<typeof inquirySubmissionSchema>;
+
+/**
+ * Support Message Schema
+ */
+export const supportMessageSchema = z.object({
+  senderEmail: z.string().email("Invalid email address"),
+  senderName: z.string().min(1, "Name is required").max(100),
+  senderPhone: z.string().max(50).optional().nullable().or(z.literal("")),
+  subject: z.string().min(2, "Subject must be at least 2 characters").max(200, "Subject cannot exceed 200 characters"),
+  message: z.string().min(5, "Message must be at least 5 characters").max(5000, "Message cannot exceed 5000 characters"),
+  category: z.string().max(50).optional().nullable().or(z.literal("")),
+});
+
+export type SupportMessageInput = z.infer<typeof supportMessageSchema>;
+
+/**
+ * Live QA Question Schema
+ */
+export const liveQuestionSchema = z.object({
+  sessionId: z.string().uuid("Invalid session ID"),
+  userName: z.string().min(2, "Name must be at least 2 characters").max(100, "Name cannot exceed 100 characters"),
+  question: z.string().min(5, "Question must be at least 5 characters").max(1000, "Question cannot exceed 1000 characters"),
+});
+
+export type LiveQuestionInput = z.infer<typeof liveQuestionSchema>;
+
+/**
+ * Ad Banner Schema
+ */
+export const adBannerSchema = z.object({
+  title: z.string().min(2, "Title must be at least 2 characters").max(150),
+  targetUrl: z.string().url("Target URL must be a valid web URL"),
+  placement: z.enum([
+    "leaderboard_top",
+    "leaderboard_bottom",
+    "skyscraper_left",
+    "skyscraper_right",
+    "in_list",
+    "custom",
+  ]),
+  targetPage: z.enum([
+    "home",
+    "brands",
+    "epcs",
+    "news",
+    "monitoring",
+    "podcast",
+    "global",
+  ]).default("global"),
+  startDate: z.string().optional().nullable(),
+  endDate: z.string().optional().nullable(),
+  isActive: z.boolean().default(true),
+});
+
+export type AdBannerInput = z.infer<typeof adBannerSchema>;

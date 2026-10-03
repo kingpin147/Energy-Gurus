@@ -39,9 +39,10 @@ export async function getPostHogTrends(eventName: string, properties?: Record<st
       headers: {
         'Authorization': `Bearer ${personal_api_key}`,
         'Content-Type': 'application/json'
-    },
+      },
       body: JSON.stringify(queryPayload),
-      next: { revalidate: 3600 }
+      next: { revalidate: 3600 },
+      signal: AbortSignal.timeout(8000)
     });
 
     if (!response.ok) {
@@ -135,14 +136,15 @@ export async function getPostHogTable(type: 'brand' | 'epc', sort: string = 'eng
       headers: {
         'Authorization': `Bearer ${personal_api_key}`,
         'Content-Type': 'application/json'
-    },
+      },
       body: JSON.stringify({
         "query": {
           "kind": "HogQLQuery",
           "query": hogQL
         }
       }),
-      next: { revalidate: 3600 }
+      next: { revalidate: 3600 },
+      signal: AbortSignal.timeout(8000)
     });
 
     if (!response.ok) {

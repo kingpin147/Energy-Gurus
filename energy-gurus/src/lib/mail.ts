@@ -1,12 +1,15 @@
 const RETRYABLE_STATUS_CODES = [429, 502, 503, 504];
 const RETRY_DELAY_MS = 1000;
+const API_TIMEOUT_MS = 8000;
 
 async function fetchWithRetry(url: string, options: RequestInit): Promise<Response> {
-  const response = await fetch(url, options);
+  const signal = options.signal || AbortSignal.timeout(API_TIMEOUT_MS);
+  const response = await fetch(url, { ...options, signal });
   if (!response.ok && RETRYABLE_STATUS_CODES.includes(response.status)) {
     console.warn(`Brevo API returned ${response.status}, retrying in ${RETRY_DELAY_MS}ms...`);
     await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
-    return fetch(url, options);
+    const retrySignal = AbortSignal.timeout(API_TIMEOUT_MS);
+    return fetch(url, { ...options, signal: retrySignal });
   }
   return response;
 }
