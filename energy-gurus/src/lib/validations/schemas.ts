@@ -253,3 +253,56 @@ export const adBannerSchema = z.object({
 });
 
 export type AdBannerInput = z.infer<typeof adBannerSchema>;
+
+/**
+ * Writer Profile Validation Schema
+ */
+export const writerProfileSchema = z.object({
+  name: z.string().min(2, "Author display name must be at least 2 characters").max(100),
+  designation: z.string().max(100).optional().nullable().or(z.literal("")),
+  pictureUrl: z.string().url("Picture URL must be valid").optional().nullable().or(z.literal("")),
+  bio: z.string().min(20, "Author short bio must be at least 50 words").max(2000),
+  linkedin: z.string().optional().nullable().or(z.literal("")),
+  facebook: z.string().optional().nullable().or(z.literal("")),
+  instagram: z.string().optional().nullable().or(z.literal("")),
+  twitter: z.string().optional().nullable().or(z.literal("")),
+  tiktok: z.string().optional().nullable().or(z.literal("")),
+}).refine((data) => {
+  const handles = [data.linkedin, data.facebook, data.instagram, data.twitter, data.tiktok].filter(
+    (h) => typeof h === "string" && h.trim().length > 0
+  );
+  return handles.length >= 2;
+}, {
+  message: "At least 2 social media handles (LinkedIn, Facebook, Instagram, X/Twitter, or TikTok) are required.",
+  path: ["linkedin"]
+});
+
+export type WriterProfileInput = z.infer<typeof writerProfileSchema>;
+
+/**
+ * News Article Validation Schema
+ */
+export const newsArticleSchema = z.object({
+  title: z.string().min(3, "Title must be at least 3 characters").max(250, "Title cannot exceed 250 characters"),
+  excerpt: z.string().min(10, "Excerpt must be at least 10 characters").max(500, "Excerpt cannot exceed 500 characters"),
+  content: z.string().min(20, "Article content must be at least 20 characters"),
+  category: z.string().min(2, "Category is required").max(100),
+  featuredImage: z.string().url("Featured image must be a valid URL").optional().nullable().or(z.literal("")),
+  tags: z.string().optional().nullable().or(z.literal("")),
+  isPublished: z.boolean().optional().default(false),
+});
+
+export type NewsArticleInput = z.infer<typeof newsArticleSchema>;
+
+/**
+ * Invitation Validation Schema
+ */
+export const invitationSchema = z.object({
+  email: z.string().email("Please provide a valid email address"),
+  role: z.enum(["admin", "epc", "brand", "writer"], {
+    message: "Role must be 'admin', 'epc', 'brand', or 'writer'",
+  }),
+});
+
+export type InvitationInput = z.infer<typeof invitationSchema>;
+

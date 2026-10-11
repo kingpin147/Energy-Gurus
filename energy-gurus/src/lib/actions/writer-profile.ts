@@ -6,6 +6,8 @@ import { eq, desc } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { getUserRole } from "@/lib/roles";
 import { revalidatePath } from "next/cache";
+import { writerProfileSchema } from "@/lib/validations/schemas";
+import { sanitizeDbError } from "@/lib/utils/errors";
 
 export async function getCurrentWriterProfile() {
   try {
@@ -41,45 +43,32 @@ export async function saveWriterProfile(formData: FormData) {
       return { success: false, message: "Only article writers or admins can manage writer profiles." };
     }
 
-    const name = (formData.get("name") as string)?.trim();
-    const designation = (formData.get("designation") as string)?.trim() || "";
-    const pictureUrl = (formData.get("pictureUrl") as string)?.trim() || "";
-    const bio = (formData.get("bio") as string)?.trim() || "";
+    const rawData = {
+      name: (formData.get("name") as string)?.trim() || "",
+      designation: (formData.get("designation") as string)?.trim() || "",
+      pictureUrl: (formData.get("pictureUrl") as string)?.trim() || "",
+      bio: (formData.get("bio") as string)?.trim() || "",
+      linkedin: (formData.get("linkedin") as string)?.trim() || "",
+      facebook: (formData.get("facebook") as string)?.trim() || "",
+      instagram: (formData.get("instagram") as string)?.trim() || "",
+      twitter: (formData.get("twitter") as string)?.trim() || "",
+      tiktok: (formData.get("tiktok") as string)?.trim() || "",
+    };
 
-    // Social Handles
-    const linkedin = (formData.get("linkedin") as string)?.trim() || "";
-    const facebook = (formData.get("facebook") as string)?.trim() || "";
-    const instagram = (formData.get("instagram") as string)?.trim() || "";
-    const twitter = (formData.get("twitter") as string)?.trim() || "";
-    const tiktok = (formData.get("tiktok") as string)?.trim() || "";
-
-    if (!name) {
-      return { success: false, message: "Author / Writer display name is required." };
+    const validated = writerProfileSchema.safeParse(rawData);
+    if (!validated.success) {
+      const firstError = validated.error.issues[0]?.message || "Validation failed";
+      return { success: false, message: firstError };
     }
 
-    // Validation: 50 to 100-word short intro
+    const { name, designation, pictureUrl, bio, linkedin, facebook, instagram, twitter, tiktok } = validated.data;
+
+    // Strict 50 to 100-word intro check
     const words = bio ? bio.split(/\s+/).filter(Boolean) : [];
     if (words.length < 50 || words.length > 100) {
       return {
         success: false,
         message: `Your short intro must be between 50 and 100 words. (Currently: ${words.length} words)`
-      };
-    }
-
-    // Validation: At least 2 social handles are mandatory
-    const socialEntries = [
-      { key: "linkedin", value: linkedin },
-      { key: "facebook", value: facebook },
-      { key: "instagram", value: instagram },
-      { key: "twitter", value: twitter },
-      { key: "tiktok", value: tiktok }
-    ];
-
-    const filledSocials = socialEntries.filter((s) => s.value.length > 0);
-    if (filledSocials.length < 2) {
-      return {
-        success: false,
-        message: "At least 2 social media handles are required (LinkedIn, Facebook, Instagram, X/Twitter, or TikTok)."
       };
     }
 
@@ -149,9 +138,9 @@ export async function saveWriterProfile(formData: FormData) {
       success: true,
       message: "Profile submitted successfully! It is now pending admin review before you can publish articles."
     };
-  } catch (error: any) {
-    console.error("Error saving writer profile:", error);
-    return { success: false, message: error?.message || "Failed to save profile." };
+  } catch (error) {
+    const cleanMessage = sanitizeDbError(error, "Failed to save profile. Please try again.");
+    return { success: false, message: cleanMessage };
   }
 }
 
@@ -206,8 +195,8 @@ export async function adminUpdateWriterProfileStatusAction(
     revalidatePath("/dashboard/news");
 
     return { success: true, message: `Writer profile status updated to ${newStatus}.` };
-  } catch (error: any) {
-    console.error("Admin review writer profile error:", error);
-    return { success: false, message: error?.message || "Failed to update profile status." };
+  } catch (error) {
+    const cleanMessage = sanitizeDbError(error, "Failed to update profile status.");
+    return { success: false, message: cleanMessage };
   }
 }

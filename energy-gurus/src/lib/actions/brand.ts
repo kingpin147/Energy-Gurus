@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { deleteFile, extractKeyFromUrl } from "@/lib/r2";
 import { clerkClient as createClerkClient } from "@clerk/nextjs/server";
+import { sanitizeDbError } from "@/lib/utils/errors";
 
 export async function updateBrandProfile(data: FormData | Partial<typeof brands.$inferInsert>) {
   const { userId: clerkId } = await auth();
@@ -165,8 +166,9 @@ export async function submitBrandForReviewAction(brandId: string) {
     revalidatePath("/dashboard/brand", "page");
 
     return { success: true, message: "Profile submitted for admin review!" };
-  } catch (e: any) {
-    return { success: false, message: e?.message || "Failed to submit for review" };
+  } catch (e) {
+    const cleanMsg = sanitizeDbError(e, "Failed to submit for review. Please try again.");
+    return { success: false, message: cleanMsg };
   }
 }
 
@@ -218,8 +220,9 @@ export async function adminUpdateBrandStatusAction(
     revalidatePath("/dashboard/moderation", "page");
 
     return { success: true, message: `Brand status updated to ${newStatus}` };
-  } catch (e: any) {
-    return { success: false, message: e?.message || "Failed to update brand status" };
+  } catch (e) {
+    const cleanMsg = sanitizeDbError(e, "Failed to update brand status.");
+    return { success: false, message: cleanMsg };
   }
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { BrandModerationQueue } from "@/components/dashboard/BrandModerationQueue";
 import { WriterModerationQueue, WriterModerationItem } from "@/components/dashboard/writer-moderation-queue";
 import { ArticleModerationQueue, ArticleModerationItem } from "@/components/dashboard/article-moderation-queue";
@@ -13,7 +14,24 @@ interface ModerationPortalTabsProps {
 }
 
 export function ModerationPortalTabs({ brands, writers, articles }: ModerationPortalTabsProps) {
-  const [activeTab, setActiveTab] = useState<"brands" | "writers" | "articles">("brands");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const initialTab = searchParams.get("tab");
+  const defaultTab = initialTab === "articles" ? "articles" : initialTab === "writers" ? "writers" : "brands";
+  const [activeTab, setActiveTab] = useState<"brands" | "writers" | "articles">(defaultTab);
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "articles" || tabParam === "writers" || tabParam === "brands") {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (tab: "brands" | "writers" | "articles") => {
+    setActiveTab(tab);
+    router.replace(`/dashboard/moderation?tab=${tab}`, { scroll: false });
+  };
 
   const pendingBrands = brands.filter((b) => b.status === "pending_review").length;
   const pendingWriters = writers.filter((w) => w.status === "pending_review").length;
@@ -24,7 +42,7 @@ export function ModerationPortalTabs({ brands, writers, articles }: ModerationPo
       {/* Moderation Navigation Tabs */}
       <div className="flex flex-wrap items-center gap-3 border-b border-line pb-4">
         <button
-          onClick={() => setActiveTab("brands")}
+          onClick={() => handleTabChange("brands")}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm transition-all ${
             activeTab === "brands"
               ? "bg-amber text-ink shadow-md shadow-amber/20"
@@ -41,7 +59,7 @@ export function ModerationPortalTabs({ brands, writers, articles }: ModerationPo
         </button>
 
         <button
-          onClick={() => setActiveTab("writers")}
+          onClick={() => handleTabChange("writers")}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm transition-all ${
             activeTab === "writers"
               ? "bg-amber text-ink shadow-md shadow-amber/20"
@@ -58,7 +76,7 @@ export function ModerationPortalTabs({ brands, writers, articles }: ModerationPo
         </button>
 
         <button
-          onClick={() => setActiveTab("articles")}
+          onClick={() => handleTabChange("articles")}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm transition-all ${
             activeTab === "articles"
               ? "bg-amber text-ink shadow-md shadow-amber/20"

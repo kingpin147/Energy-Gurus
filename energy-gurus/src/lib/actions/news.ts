@@ -7,6 +7,8 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { generateUniqueNewsSlug } from "@/lib/utils/slug";
 import { getUserRole } from "@/lib/roles";
+import { newsArticleSchema } from "@/lib/validations/schemas";
+import { sanitizeDbError } from "@/lib/utils/errors";
 
 export async function getMyWriterArticles() {
   try {
@@ -45,15 +47,25 @@ export async function createNews(formData: FormData) {
       return { success: false, message: "Unauthorized. Only verified writers and admins can create articles." };
     }
 
-    const title = (formData.get("title") as string)?.trim();
-    const content = (formData.get("content") as string)?.trim();
-    const category = (formData.get("category") as string)?.trim();
-    const imageUrl = (formData.get("imageUrl") as string)?.trim();
+    const title = (formData.get("title") as string)?.trim() || "";
+    const content = (formData.get("content") as string)?.trim() || "";
+    const category = (formData.get("category") as string)?.trim() || "";
+    const imageUrl = (formData.get("imageUrl") as string)?.trim() || "";
     const isPublishedImmediate = formData.get("isPublished") === "true";
     const publishedAtStr = formData.get("publishedAt") as string;
 
-    if (!title || !content || !category) {
-      return { success: false, message: "Missing required fields (title, category, or content)." };
+    const validated = newsArticleSchema.safeParse({
+      title,
+      content,
+      category,
+      featuredImage: imageUrl || undefined,
+      excerpt: content.replace(/<[^>]*>/g, '').slice(0, 160) || "Article overview",
+      isPublished: isPublishedImmediate,
+    });
+
+    if (!validated.success) {
+      const firstError = validated.error.issues[0]?.message || "Validation failed";
+      return { success: false, message: firstError };
     }
 
     let authorName = "Energy Gurus Team";
@@ -163,9 +175,9 @@ export async function createNews(formData: FormData) {
         ? "Article published live successfully."
         : "Article saved as draft."
     };
-  } catch (error: any) {
-    console.error("Failed to create news article:", error);
-    return { success: false, message: error?.message || "Failed to create article." };
+  } catch (error) {
+    const cleanMessage = sanitizeDbError(error, "Failed to create article. Please try again.");
+    return { success: false, message: cleanMessage };
   }
 }
 
@@ -189,15 +201,25 @@ export async function updateNews(id: string, formData: FormData) {
       return { success: false, message: "Unauthorized. You can only edit your own articles." };
     }
 
-    const title = (formData.get("title") as string)?.trim();
-    const content = (formData.get("content") as string)?.trim();
-    const category = (formData.get("category") as string)?.trim();
-    const imageUrl = (formData.get("imageUrl") as string)?.trim();
+    const title = (formData.get("title") as string)?.trim() || "";
+    const content = (formData.get("content") as string)?.trim() || "";
+    const category = (formData.get("category") as string)?.trim() || "";
+    const imageUrl = (formData.get("imageUrl") as string)?.trim() || "";
     const isPublishedImmediate = formData.get("isPublished") === "true";
     const publishedAtStr = formData.get("publishedAt") as string;
 
-    if (!title || !content || !category) {
-      return { success: false, message: "Missing required fields" };
+    const validated = newsArticleSchema.safeParse({
+      title,
+      content,
+      category,
+      featuredImage: imageUrl || undefined,
+      excerpt: content.replace(/<[^>]*>/g, '').slice(0, 160) || "Article overview",
+      isPublished: isPublishedImmediate,
+    });
+
+    if (!validated.success) {
+      const firstError = validated.error.issues[0]?.message || "Validation failed";
+      return { success: false, message: firstError };
     }
 
     const slug = await generateUniqueNewsSlug(title, id);
@@ -287,9 +309,9 @@ export async function updateNews(id: string, formData: FormData) {
 
       return { success: true, message: "News article updated successfully" };
     }
-  } catch (error: any) {
-    console.error("Failed to update news article:", error);
-    return { success: false, message: error?.message || "Failed to update article" };
+  } catch (error) {
+    const cleanMessage = sanitizeDbError(error, "Failed to update article. Please try again.");
+    return { success: false, message: cleanMessage };
   }
 }
 
@@ -356,9 +378,9 @@ export async function adminReviewArticleAction(
           ? "Feedback sent to author for revisions."
           : "Article unpublished."
     };
-  } catch (error: any) {
-    console.error("Admin review article error:", error);
-    return { success: false, message: error?.message || "Failed to review article." };
+  } catch (error) {
+    const cleanMessage = sanitizeDbError(error, "Failed to review article. Please try again.");
+    return { success: false, message: cleanMessage };
   }
 }
 

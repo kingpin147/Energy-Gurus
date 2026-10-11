@@ -7,34 +7,46 @@ import { createClerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { getUserRole } from "@/lib/roles";
 import { sendInvitationEmail } from "@/lib/mail";
+import { invitationSchema } from "@/lib/validations/schemas";
+import { sanitizeDbError } from "@/lib/utils/errors";
 
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
 export async function createInvitation(email: string, role: UserRole) {
-    const currentRole = await getUserRole();
-
-    if (currentRole !== 'super-admin' && currentRole !== 'admin') {
-        throw new Error("Unauthorized");
-    }
-
-    await db.insert(invitations).values({
-        email: email.toLowerCase(),
-        role
-    }).onConflictDoUpdate({
-        target: invitations.email,
-        set: { role }
-    });
-
-    let emailSent = false;
     try {
-        await sendInvitationEmail(email, role);
-        emailSent = true;
-    } catch (e: any) {
-        console.error("Failed to send invitation email:", e?.message || e);
-    }
+        const currentRole = await getUserRole();
 
-    revalidatePath("/dashboard/users", "layout");
-    return { emailSent };
+        if (currentRole !== 'super-admin' && currentRole !== 'admin') {
+            return { success: false, message: "Unauthorized. Admin access required." };
+        }
+
+        const validated = invitationSchema.safeParse({ email, role });
+        if (!validated.success) {
+            return { success: false, message: validated.error.issues[0]?.message || "Invalid invitation data" };
+        }
+
+        await db.insert(invitations).values({
+            email: validated.data.email.toLowerCase(),
+            role: validated.data.role
+        }).onConflictDoUpdate({
+            target: invitations.email,
+            set: { role: validated.data.role }
+        });
+
+        let emailSent = false;
+        try {
+            await sendInvitationEmail(validated.data.email, validated.data.role);
+            emailSent = true;
+        } catch (e) {
+            console.error("Failed to send invitation email:", e);
+        }
+
+        revalidatePath("/dashboard/users", "layout");
+        return { success: true, emailSent };
+    } catch (error) {
+        const cleanMsg = sanitizeDbError(error, "Failed to create invitation.");
+        return { success: false, message: cleanMsg };
+    }
 }
 
 export async function checkAndApplyInvitation(userId: string, email: string) {

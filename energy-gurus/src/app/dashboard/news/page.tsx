@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { news } from "@/db/schema";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Newspaper, Plus } from "lucide-react";
+import { Newspaper, Plus, ShieldCheck } from "lucide-react";
 import { desc } from "drizzle-orm";
 import { getUserRole } from "@/lib/roles";
 import Link from "next/link";
@@ -29,11 +29,18 @@ export default async function NewsManagementPage() {
                         <p className="text-slate-custom text-sm md:text-base">Manage, edit, search, and schedule news articles across the platform.</p>
                     </div>
                 </div>
-                <Button asChild className="rounded-xl h-11 px-6 font-bold bg-amber text-ink hover:bg-amber/90">
-                    <Link href="/dashboard/news/new">
-                        <Plus className="w-4 h-4 mr-2" /> Create Article
-                    </Link>
-                </Button>
+                <div className="flex items-center gap-3">
+                    <Button asChild variant="outline" className="rounded-xl h-11 px-5 font-bold border-line hover:bg-paper">
+                        <Link href="/dashboard/moderation?tab=articles">
+                            <ShieldCheck className="w-4 h-4 mr-2 text-amber" /> Review Writer Submissions
+                        </Link>
+                    </Button>
+                    <Button asChild className="rounded-xl h-11 px-6 font-bold bg-amber text-ink hover:bg-amber/90">
+                        <Link href="/dashboard/news/new">
+                            <Plus className="w-4 h-4 mr-2" /> Create Article
+                        </Link>
+                    </Button>
+                </div>
             </div>
 
             {/* Compact Table Hub with Search, Filters, and Pagination */}

@@ -30,7 +30,7 @@ export default function Sidebar({ role }: { role: UserRole }) {
     const adminLinks = [
         { href: "/dashboard", icon: <LayoutDashboard className="w-4 h-4" />, label: "Overview" },
         { href: "/dashboard/admin/onboard-epc", icon: <Briefcase className="w-4 h-4" />, label: "EPC Installers & Onboarding" },
-        { href: "/dashboard/moderation", icon: <ShieldCheck className="w-4 h-4" />, label: "Brand Submissions Moderation" },
+        { href: "/dashboard/moderation", icon: <ShieldCheck className="w-4 h-4" />, label: "Submissions & Moderation" },
         { href: "/dashboard/admin/certifications", icon: <ShieldCheck className="w-4 h-4" />, label: "Certification Approvals" },
         { href: "/dashboard/content", icon: <Video className="w-4 h-4" />, label: "Content (Podcast/QA)" },
         { href: "/dashboard/news", icon: <FileText className="w-4 h-4" />, label: "News Management" },

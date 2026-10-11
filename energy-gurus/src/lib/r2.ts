@@ -39,7 +39,7 @@ export async function deleteFile(key: string) {
         Bucket: bucketName,
         Key: key
     });
-    return await r2Client.send(command);
+    return await r2Client.send(command, { abortSignal: AbortSignal.timeout(10000) });
 }
 
 export function getPublicUrl(key: string) {

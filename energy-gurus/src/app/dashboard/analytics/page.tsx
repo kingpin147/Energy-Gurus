@@ -4,25 +4,52 @@ import { Building2, Briefcase, MousePointerClick, Globe, Facebook, Twitter, Link
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ListSort } from "@/components/shared/list-sort";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { db } from "@/db";
+import { inquiries, reviews } from "@/db/schema";
+import { count } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
 export default async function AnalyticsPage({
   searchParams
-    }: {
+}: {
   searchParams: Promise<{ epcSort?: string; brandSort?: string }>;
 }) {
   const { epcSort, brandSort } = await searchParams;
 
-  // Fetch trends for overview cards
-  const brandViews = await getPostHogTrends('brand_portfolio_view');
-  const brandWebsiteClicks = await getPostHogTrends('brand_website_click');
-  const epcProfileViews = await getPostHogTrends('epc_profile_view');
-  const contactClicks = await getPostHogTrends('brand_contact_click');
+  // Parallel non-blocking fetching for all external PostHog and DB queries
+  const [
+    brandViewsResult,
+    brandWebsiteClicksResult,
+    epcProfileViewsResult,
+    contactClicksResult,
+    brandTableResult,
+    epcTableResult,
+    totalInquiriesResult,
+    totalReviewsResult,
+  ] = await Promise.allSettled([
+    getPostHogTrends('brand_portfolio_view'),
+    getPostHogTrends('brand_website_click'),
+    getPostHogTrends('epc_profile_view'),
+    getPostHogTrends('brand_contact_click'),
+    getPostHogTable('brand', brandSort || 'engagement'),
+    getPostHogTable('epc', epcSort || 'engagement'),
+    db.select({ count: count() }).from(inquiries),
+    db.select({ count: count() }).from(reviews),
+  ]);
 
-  // Fetch detailed tables with sort
-  const brandTable = await getPostHogTable('brand', brandSort || 'engagement');
-  const epcTable = await getPostHogTable('epc', epcSort || 'engagement');
+  const brandViews = brandViewsResult.status === "fulfilled" ? brandViewsResult.value : null;
+  const brandWebsiteClicks = brandWebsiteClicksResult.status === "fulfilled" ? brandWebsiteClicksResult.value : null;
+  const epcProfileViews = epcProfileViewsResult.status === "fulfilled" ? epcProfileViewsResult.value : null;
+  const contactClicks = contactClicksResult.status === "fulfilled" ? contactClicksResult.value : null;
+  const brandTable = brandTableResult.status === "fulfilled" ? brandTableResult.value : null;
+  const epcTable = epcTableResult.status === "fulfilled" ? epcTableResult.value : null;
+
+  const dbInquiriesCount = totalInquiriesResult.status === "fulfilled" ? totalInquiriesResult.value[0]?.count || 0 : 0;
+  const dbReviewsCount = totalReviewsResult.status === "fulfilled" ? totalReviewsResult.value[0]?.count || 0 : 0;
+
+  // Use PostHog stream count, or fallback to real DB activity if events are pending
+  const directContactsCount = Math.max(contactClicks?.result?.[0]?.count || 0, dbInquiriesCount);
 
   const stats = [
     {
@@ -38,10 +65,10 @@ export default async function AnalyticsPage({
       description: "Total profile views"
     },
     {
-      title: "Direct Contacts",
-      value: contactClicks?.result?.[0]?.count || 0,
+      title: "Direct Contacts & Leads",
+      value: directContactsCount,
       icon: <MousePointerClick className="w-4 h-4 text-amber" />,
-      description: "Clicks on contact buttons"
+      description: "Contact clicks & inquiries"
     },
     {
       title: "Website Referrals",

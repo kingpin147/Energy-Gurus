@@ -144,11 +144,14 @@ export async function getPostHogTable(type: 'brand' | 'epc', sort: string = 'eng
         }
       }),
       next: { revalidate: 3600 },
-      signal: AbortSignal.timeout(8000)
+      signal: AbortSignal.timeout(12000)
     });
 
     if (!response.ok) {
       console.error('PostHog Table Error:', await response.text());
+      if (activeEntities && activeEntities.size > 0) {
+        return Array.from(activeEntities).slice(0, 20).map(name => [name, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+      }
       return null;
     }
 
@@ -156,14 +159,19 @@ export async function getPostHogTable(type: 'brand' | 'epc', sort: string = 'eng
     const results = data.results;
 
     // 2. Filter results based on active status in our DB
-    if (!activeEntities) return results?.slice(0, 20); // Fallback if DB check fails
-    
-    return results
-      ?.filter((row: any) => activeEntities.has(row[0]))
-      ?.slice(0, 20); // Maintain the limit of 20 top results
+    const filteredResults = results?.filter((row: any) => !activeEntities || activeEntities.has(row[0])) || [];
 
+    // 3. If PostHog has no click events yet, fallback to active registered entities so the table is never blank
+    if (filteredResults.length === 0 && activeEntities && activeEntities.size > 0) {
+      return Array.from(activeEntities).slice(0, 20).map(name => [name, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    }
+
+    return filteredResults.slice(0, 20);
   } catch (error) {
     console.error('Failed to fetch PostHog table:', error);
+    if (activeEntities && activeEntities.size > 0) {
+      return Array.from(activeEntities).slice(0, 20).map(name => [name, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    }
     return null;
   }
 }
