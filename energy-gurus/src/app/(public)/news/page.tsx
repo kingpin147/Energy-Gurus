@@ -1,7 +1,6 @@
 import { db } from "@/db";
 import { news } from "@/db/schema";
-import { eq, desc, and, or, isNull, isNotNull, lte, sql } from "drizzle-orm";
-import { unstable_cache } from "next/cache";
+import { eq, desc, and, or, isNull, lte, sql } from "drizzle-orm";
 import Link from "next/link";
 import { AdBanner } from "@/components/shared/AdBanner";
 import { format } from "date-fns";
@@ -10,53 +9,71 @@ import { NewsFilters } from "@/components/news/news-filters";
 import { cleanArticleExcerpt } from "@/components/news/formatted-markdown";
 import type { Metadata } from "next";
 
-export async function generateMetadata({ searchParams }: { searchParams: Promise<{ category?: string }> }): Promise<Metadata> {
-    const { category } = await searchParams;
-    const cleanCategory = (category || "All").trim();
-    const isFiltered = cleanCategory.toLowerCase() !== "all";
-    const baseUrl = "https://www.energygurus.online";
-    
-    const title = isFiltered 
-        ? `${cleanCategory} - Solar News & Updates | EnergyGurus`
-        : "Solar News & Industry Updates in Pakistan | EnergyGurus";
+function formatDateSafe(dateVal: Date | string | null | undefined): string {
+    if (!dateVal) return "";
+    try {
+        const d = new Date(dateVal);
+        return isNaN(d.getTime()) ? "" : format(d, "MMM d, yyyy");
+    } catch {
+        return "";
+    }
+}
+
+export async function generateMetadata({ searchParams }: { searchParams?: Promise<{ category?: string }> }): Promise<Metadata> {
+    try {
+        const resolvedParams = searchParams ? await searchParams : {};
+        const category = resolvedParams?.category;
+        const cleanCategory = (category || "All").trim();
+        const isFiltered = cleanCategory.toLowerCase() !== "all";
+        const baseUrl = "https://www.energygurus.online";
         
-    const description = isFiltered
-        ? `Stay updated with the latest ${cleanCategory} in Pakistan's solar sector, policy reforms, and market developments.`
-        : "Stay up to date with the latest from Pakistan's solar industry, net metering policies, technology breakthroughs, and project updates.";
+        const title = isFiltered 
+            ? `${cleanCategory} - Solar News & Updates | EnergyGurus`
+            : "Solar News & Industry Updates in Pakistan | EnergyGurus";
+            
+        const description = isFiltered
+            ? `Stay updated with the latest ${cleanCategory} in Pakistan's solar sector, policy reforms, and market developments.`
+            : "Stay up to date with the latest from Pakistan's solar industry, net metering policies, technology breakthroughs, and project updates.";
 
-    const url = isFiltered ? `${baseUrl}/news?category=${encodeURIComponent(cleanCategory)}` : `${baseUrl}/news`;
+        const url = isFiltered ? `${baseUrl}/news?category=${encodeURIComponent(cleanCategory)}` : `${baseUrl}/news`;
 
-    return {
-        title,
-        description,
-        keywords: [
-            "best solar panels in Pakistan",
-            "solar inverter price in Pakistan",
-            "Pakistan solar news",
-            "net metering policy Pakistan",
-            "solar industry updates Pakistan",
-            "solar technology breakthroughs",
-            "EnergyGurus news",
-        ],
-        alternates: {
-            canonical: url,
-        },
-        openGraph: {
+        return {
             title,
             description,
-            url,
-            siteName: "EnergyGurus",
-            locale: "en_US",
-            type: "website",
-            images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "EnergyGurus Solar News & Updates" }],
-        },
-        twitter: {
-            card: "summary_large_image",
-            title,
-            description,
-            images: [`${baseUrl}/new_hero_banner.jpg`],
-        },
-    };
+            keywords: [
+                "best solar panels in Pakistan",
+                "solar inverter price in Pakistan",
+                "Pakistan solar news",
+                "net metering policy Pakistan",
+                "solar industry updates Pakistan",
+                "solar technology breakthroughs",
+                "EnergyGurus news",
+            ],
+            alternates: {
+                canonical: url,
+            },
+            openGraph: {
+                title,
+                description,
+                url,
+                siteName: "EnergyGurus",
+                locale: "en_US",
+                type: "website",
+                images: [{ url: `${baseUrl}/new_hero_banner.jpg`, width: 1200, height: 630, alt: "EnergyGurus Solar News & Updates" }],
+            },
+            twitter: {
+                card: "summary_large_image",
+                title,
+                description,
+                images: [`${baseUrl}/new_hero_banner.jpg`],
+            },
+        };
+    } catch {
+        return {
+            title: "Solar News & Industry Updates in Pakistan | EnergyGurus",
+            description: "Stay up to date with the latest from Pakistan's solar industry, policy changes, and technological breakthroughs.",
+        };
+    }
 }
 
 const DEFAULT_CATEGORIES = [
@@ -70,60 +87,58 @@ const DEFAULT_CATEGORIES = [
 ];
 
 async function getNews(category: string = "All") {
-    const cleanCategory = (category || "All").trim();
-    const isAll = cleanCategory.toLowerCase() === "all";
-    const cacheKey = `news-list-v4-${cleanCategory.toLowerCase()}`;
+    try {
+        const cleanCategory = (category || "All").trim();
+        const isAll = cleanCategory.toLowerCase() === "all";
+        const now = new Date();
 
-    return unstable_cache(
-        async () => {
-            const now = new Date();
-            // An article is ONLY visible publicly if it has been formally approved and published (isPublished = true)
-            let conditions = [
-                eq(news.isPublished, true),
-                or(
-                    isNull(news.publishedAt),
-                    lte(news.publishedAt, now)
-                )
-            ];
-            
-            if (!isAll) {
-                conditions.push(
-                    sql`LOWER(TRIM(${news.category})) = LOWER(${cleanCategory})`
-                );
-            }
+        let conditions = [
+            eq(news.isPublished, true),
+            or(
+                isNull(news.publishedAt),
+                lte(news.publishedAt, now)
+            )
+        ];
+        
+        if (!isAll) {
+            conditions.push(
+                sql`LOWER(TRIM(${news.category})) = LOWER(${cleanCategory})`
+            );
+        }
 
-            const articles = await db.select().from(news)
-                .where(and(...conditions))
-                .orderBy(desc(news.publishedAt));
+        const articles = await db.select().from(news)
+            .where(and(...conditions))
+            .orderBy(desc(news.publishedAt));
 
-            // Fetch distinct categories from database to dynamically display custom categories
-            const distinctCats = await db.selectDistinct({ category: news.category }).from(news);
-            const dbCategories = distinctCats
-                .map(c => c.category?.trim())
-                .filter(Boolean) as string[];
+        // Fetch distinct categories from database to dynamically display all categories
+        const distinctCats = await db.selectDistinct({ category: news.category }).from(news);
+        const dbCategories = distinctCats
+            .map(c => c.category?.trim())
+            .filter(Boolean) as string[];
 
-            const categorySet = new Set(["All", ...DEFAULT_CATEGORIES, ...dbCategories]);
-            const categoriesList = Array.from(categorySet);
+        const categorySet = new Set(["All", ...DEFAULT_CATEGORIES, ...dbCategories]);
+        const categoriesList = Array.from(categorySet);
 
-            return { articles, categoriesList };
-        },
-        [cacheKey],
-        { revalidate: 30, tags: ['news'] }
-    )();
+        return { articles, categoriesList };
+    } catch (error) {
+        console.error("Failed to load news articles from database:", error);
+        return { articles: [], categoriesList: ["All", ...DEFAULT_CATEGORIES] };
+    }
 }
 
 export default async function NewsPage({
     searchParams
 }: {
-    searchParams: Promise<{ category?: string }>;
+    searchParams?: Promise<{ category?: string }>;
 }) {
-    const { category = "All" } = await searchParams;
-    const cleanCategory = (category || "All").trim();
+    const resolvedParams = searchParams ? await searchParams : {};
+    const category = resolvedParams?.category || "All";
+    const cleanCategory = category.trim();
     const isAll = cleanCategory.toLowerCase() === "all";
 
     const { articles, categoriesList } = await getNews(cleanCategory);
     
-    // Featured is the first article if category is "All", otherwise show all matching articles in the grid
+    // Featured is the first article if viewing "All", otherwise show all matching articles in the grid
     const featured = isAll && articles.length > 0 ? articles[0] : null;
     const gridArticles = isAll ? articles.slice(1) : articles;
 
@@ -156,9 +171,9 @@ export default async function NewsPage({
                 <div className="max-w-[1180px] mx-auto px-5 md:px-8">
                     
                     {/* Dynamic Filters */}
-                    <NewsFilters currentCategory={category} categories={categoriesList} />
+                    <NewsFilters currentCategory={cleanCategory} categories={categoriesList} />
 
-                    {/* Featured Article */}
+                    {/* Featured Article (Hero for "All" tab) */}
                     {featured && (
                         <div className="grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-10 items-center mb-14">
                             <Link href={`/news/${featured.slug || featured.id}`} className="rounded-[8px] overflow-hidden border border-line block relative group shadow-sm bg-slate-50">
@@ -184,7 +199,7 @@ export default async function NewsPage({
                                         {cleanArticleExcerpt(featured.content, 180)}
                                     </p>
                                     <div className="font-ibm-plex-mono text-[0.78rem] text-slate-custom mb-[18px]">
-                                        {featured.publishedAt ? format(featured.publishedAt, "MMM d, yyyy") : ""}
+                                        {formatDateSafe(featured.publishedAt)}
                                     </div>
                                     <span className="text-[0.88rem] font-semibold text-ink group-hover:text-amber transition-colors flex items-center gap-1">
                                         Read Full Article <span className="text-amber">→</span>
@@ -221,7 +236,7 @@ export default async function NewsPage({
                                             {cleanArticleExcerpt(article.content, 140)}
                                         </p>
                                         <div className="font-ibm-plex-mono text-[0.76rem] text-slate-custom mt-3.5">
-                                            {article.publishedAt ? format(article.publishedAt, "MMM d, yyyy") : ""}
+                                            {formatDateSafe(article.publishedAt)}
                                         </div>
                                     </Link>
                                 </div>
