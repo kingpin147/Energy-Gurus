@@ -52,7 +52,7 @@ export function SingleInvite() {
                     </div>
                     <div className="space-y-3">
                         <label className="text-xs font-bold uppercase tracking-widest opacity-60">Assign Role</label>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                             <label className="cursor-pointer">
                                 <input type="radio" name="role" value="epc" className="peer sr-only" defaultChecked disabled={isPending} />
                                 <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-amber text-ink peer-checked:text-white peer-checked:border-amber hover:bg-paper transition-colors">
@@ -63,6 +63,12 @@ export function SingleInvite() {
                                 <input type="radio" name="role" value="brand" className="peer sr-only" disabled={isPending} />
                                 <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-amber text-ink peer-checked:text-white peer-checked:border-amber hover:bg-paper transition-colors">
                                     Solar Brand
+                                </div>
+                            </label>
+                            <label className="cursor-pointer">
+                                <input type="radio" name="role" value="writer" className="peer sr-only" disabled={isPending} />
+                                <div className="p-3 border rounded-xl text-sm font-bold text-center peer-checked:bg-amber text-ink peer-checked:text-white peer-checked:border-amber hover:bg-paper transition-colors">
+                                    Article Writer
                                 </div>
                             </label>
                             <label className="cursor-pointer">

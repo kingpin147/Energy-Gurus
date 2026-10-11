@@ -17,7 +17,8 @@ import {
     Inbox,
     HeadphonesIcon,
     MousePointerClick,
-    Star
+    Star,
+    User
 } from "lucide-react";
 import { UserRole } from "@/db/schema";
 
@@ -53,11 +54,21 @@ export default function Sidebar({ role }: { role: UserRole }) {
         { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings" },
     ];
 
+    const writerLinks = [
+        { href: "/dashboard", icon: <LayoutDashboard className="w-4 h-4" />, label: "Writer Overview" },
+        { href: "/dashboard/writer", icon: <User className="w-4 h-4" />, label: "My Author Profile" },
+        { href: "/dashboard/writer/articles", icon: <FileText className="w-4 h-4" />, label: "My Articles" },
+        { href: "/dashboard/support", icon: <HeadphonesIcon className="w-4 h-4" />, label: "Contact Support" },
+        { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings" },
+    ];
+
     const links = role === 'super-admin' || role === 'admin'
         ? adminLinks
         : role === 'brand'
             ? brandLinks
-            : epcLinks;
+            : role === 'writer'
+                ? writerLinks
+                : epcLinks;
 
 
     return (

@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 export function BulkInvite() {
   const [isPending, startTransition] = useTransition();
   const [dragActive, setDragActive] = useState(false);
-  const [parsedInvites, setParsedInvites] = useState<{ email: string; role: "epc" | "brand" | "admin" }[]>([]);
+  const [parsedInvites, setParsedInvites] = useState<{ email: string; role: "epc" | "brand" | "admin" | "writer" }[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const router = useRouter();
@@ -34,7 +34,7 @@ export function BulkInvite() {
         throw new Error("The CSV file is empty");
       }
 
-      const invites: { email: string; role: "epc" | "brand" | "admin" }[] = [];
+      const invites: { email: string; role: "epc" | "brand" | "admin" | "writer" }[] = [];
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       
       // Determine if first row is a header
@@ -60,7 +60,7 @@ export function BulkInvite() {
         
         // Parse role, default to epc
         let rawRole = (cells[roleIndex] || "epc").toLowerCase() as any;
-        if (!["epc", "brand", "admin"].includes(rawRole)) {
+        if (!["epc", "brand", "admin", "writer"].includes(rawRole)) {
           rawRole = "epc";
         }
 
@@ -142,7 +142,7 @@ export function BulkInvite() {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-xs text-slate-custom">
-          Upload a CSV with column headers <code className="bg-paper/40 px-1 py-0.5 rounded font-bold">email</code> and optional <code className="bg-paper/40 px-1 py-0.5 rounded font-bold">role</code> (epc, brand, or admin).
+          Upload a CSV with column headers <code className="bg-paper/40 px-1 py-0.5 rounded font-bold">email</code> and optional <code className="bg-paper/40 px-1 py-0.5 rounded font-bold">role</code> (epc, brand, writer, or admin).
         </p>
 
         <div

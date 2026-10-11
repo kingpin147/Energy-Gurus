@@ -4,12 +4,15 @@ import * as React from "react";
 import { Upload, Image as ImageIcon, FileText, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import { toast } from "sonner";
+
 interface UploadZoneProps extends React.InputHTMLAttributes<HTMLInputElement> {
   onUpload: (file: File) => Promise<void>;
   isUploading?: boolean;
   value?: string;
   title?: string;
   description?: string;
+  maxSizeMB?: number;
 }
 
 export function UploadZone({
@@ -17,7 +20,8 @@ export function UploadZone({
   isUploading,
   value,
   title = "Click to upload",
-  description = "PDF or image, up to 10MB each",
+  description = "PNG, JPG, or WEBP up to 10MB",
+  maxSizeMB = 10,
   accept,
   className,
   ...props
@@ -26,8 +30,16 @@ export function UploadZone({
 
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && onUpload) {
-      await onUpload(file);
+    if (file) {
+      const maxBytes = maxSizeMB * 1024 * 1024;
+      if (file.size > maxBytes) {
+        toast.error(`Image exceeds maximum allowed size of ${maxSizeMB} MB. Please upload a smaller image.`);
+        if (e.target) e.target.value = "";
+        return;
+      }
+      if (onUpload) {
+        await onUpload(file);
+      }
     }
   };
 

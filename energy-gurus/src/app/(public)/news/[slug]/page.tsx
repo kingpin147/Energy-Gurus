@@ -1,11 +1,23 @@
 import { db } from "@/db";
-import { news, users } from "@/db/schema";
-import { eq, or } from "drizzle-orm";
+import { news, users, writerProfiles } from "@/db/schema";
+import { eq, or, and, isNull, lte } from "drizzle-orm";
 import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import { AdBanner } from "@/components/shared/AdBanner";
 import { format } from "date-fns";
-import { ArrowLeft, Newspaper, Mail, Linkedin, Building, Briefcase } from "lucide-react";
+import {
+    ArrowLeft,
+    Newspaper,
+    Mail,
+    Linkedin,
+    Facebook,
+    Instagram,
+    Twitter,
+    Music,
+    Building,
+    Briefcase,
+    ShieldCheck
+} from "lucide-react";
 import { unstable_cache } from "next/cache";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ShareButtons } from "@/components/news/share-buttons";
@@ -31,7 +43,7 @@ const getNewsArticle = unstable_cache(
     async (slugOrId: string) => {
         const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(slugOrId);
 
-        const condition = isUuid
+        const identifierCondition = isUuid
             ? or(eq(news.slug, slugOrId), eq(news.id, slugOrId))
             : eq(news.slug, slugOrId);
 
@@ -45,22 +57,37 @@ const getNewsArticle = unstable_cache(
                 imageUrl: news.imageUrl,
                 isPublished: news.isPublished,
                 publishedAt: news.publishedAt,
+                authorId: news.authorId,
                 authorName: news.authorName,
                 authorPictureUrl: news.authorPictureUrl,
                 authorDesignation: news.authorDesignation,
                 authorOrganization: news.authorOrganization,
                 authorLinkedIn: news.authorLinkedIn,
+                authorFacebook: news.authorFacebook,
+                authorInstagram: news.authorInstagram,
+                authorTwitter: news.authorTwitter,
+                authorTiktok: news.authorTiktok,
+                authorBio: news.authorBio,
                 authorEmail: news.authorEmail,
+                userRole: users.role,
                 userName: users.name,
+                userEmail: users.email,
+                writerName: writerProfiles.name,
+                writerPictureUrl: writerProfiles.pictureUrl,
+                writerDesignation: writerProfiles.designation,
+                writerBio: writerProfiles.bio,
+                writerSocialLinks: writerProfiles.socialLinks,
+                writerStatus: writerProfiles.status,
             })
             .from(news)
             .leftJoin(users, eq(news.authorId, users.id))
-            .where(condition)
+            .leftJoin(writerProfiles, eq(users.id, writerProfiles.userId))
+            .where(identifierCondition)
             .limit(1);
         
         return result[0];
     },
-    ['news-article-detail-v5'],
+    ['news-article-detail-v6'],
     { revalidate: 60, tags: ['news'] }
 );
 
@@ -68,7 +95,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const { slug } = await params;
     const article = await getNewsArticle(slug);
 
-    const isLive = article && (article.isPublished || (article.publishedAt && new Date(article.publishedAt) <= new Date()));
+    const now = new Date();
+    const isLive = article && article.isPublished && (!article.publishedAt || new Date(article.publishedAt) <= now);
     if (!article || !isLive) {
         return {
             title: "News Article Not Found",
@@ -81,7 +109,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const title = `${article.title} | EnergyGurus News`;
     const description = extractExcerpt(article.content, 160);
     const url = `${baseUrl}/news/${targetSlug}`;
-    const authorName = article.authorName || article.userName || "EnergyGurus";
+    
+    const isAdmin = article.userRole === "admin" || article.userRole === "super-admin";
+    const authorName = isAdmin ? "EnergyGurus Editorial" : (article.writerName || article.authorName || "EnergyGurus");
     const imageUrl = article.imageUrl || `${baseUrl}/new_hero_banner.jpg`;
 
     return {
@@ -103,9 +133,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         openGraph: {
             title,
             description,
-            type: "article",
             url,
             siteName: "EnergyGurus",
+            locale: "en_US",
+            type: "article",
             publishedTime: article.publishedAt ? new Date(article.publishedAt).toISOString() : undefined,
             authors: [authorName],
             images: [
@@ -114,7 +145,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
                     width: 1200,
                     height: 630,
                     alt: article.title,
-                }
+                },
             ],
         },
         twitter: {
@@ -126,11 +157,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
 }
 
-export default async function NewsDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function NewsArticlePage({
+    params
+}: {
+    params: Promise<{ slug: string }>;
+}) {
     const { slug } = await params;
     const article = await getNewsArticle(slug);
 
-    const isLive = article && (article.isPublished || (article.publishedAt && new Date(article.publishedAt) <= new Date()));
+    const now = new Date();
+    // Strictly require isPublished === true to prevent unapproved draft/writer posts from leaking
+    const isLive = article && article.isPublished && (!article.publishedAt || new Date(article.publishedAt) <= now);
 
     if (!article || !isLive) {
         notFound();
@@ -141,8 +178,40 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
         permanentRedirect(`/news/${article.slug}`);
     }
 
-    const displayName = article.authorName || article.userName || "Energy Gurus";
-    const hasAuthorMetadata = Boolean(article.authorName || article.authorDesignation || article.authorOrganization || article.authorPictureUrl || article.authorLinkedIn || article.authorEmail);
+    // Determine author profile: Admin vs Writer
+    const isAdmin = article.userRole === "admin" || article.userRole === "super-admin";
+
+    let displayName = "Energy Gurus Team";
+    let displayDesignation = "Official Publication";
+    let displayPictureUrl: string | null = null;
+    let displayBio: string | null = "Official renewable energy news, policy insights, and technology breakthroughs published by the EnergyGurus editorial team.";
+    let displayLinkedIn: string | null = null;
+    let displayFacebook: string | null = null;
+    let displayInstagram: string | null = null;
+    let displayTwitter: string | null = null;
+    let displayTiktok: string | null = null;
+    let displayEmail: string | null = "contact@energygurus.online";
+
+    if (isAdmin) {
+        displayName = "Energy Gurus Team";
+        displayDesignation = "Official Editorial Team";
+        displayPictureUrl = null;
+        displayBio = "Official renewable energy news, policy insights, and technology breakthroughs published by the EnergyGurus editorial team.";
+        displayLinkedIn = "https://linkedin.com/company/energygurus";
+        displayEmail = "contact@energygurus.online";
+    } else {
+        // Contributing Writer
+        displayName = article.writerName || article.authorName || article.userName || "Contributing Writer";
+        displayDesignation = article.writerDesignation || article.authorDesignation || "Contributing Columnist";
+        displayPictureUrl = article.writerPictureUrl || article.authorPictureUrl || null;
+        displayBio = article.writerBio || article.authorBio || null;
+        displayLinkedIn = article.authorLinkedIn || article.writerSocialLinks?.linkedin || null;
+        displayFacebook = article.authorFacebook || article.writerSocialLinks?.facebook || null;
+        displayInstagram = article.authorInstagram || article.writerSocialLinks?.instagram || null;
+        displayTwitter = article.authorTwitter || article.writerSocialLinks?.twitter || null;
+        displayTiktok = article.authorTiktok || article.writerSocialLinks?.tiktok || null;
+        displayEmail = article.authorEmail || article.userEmail || null;
+    }
 
     return (
         <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 min-h-screen">
@@ -173,16 +242,23 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
                         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-b border-line py-4 text-sm text-slate-custom font-ibm-plex-mono">
                             <div className="flex items-center gap-2.5">
                                 <Avatar className="h-8 w-8 border border-line">
-                                    <AvatarImage src={article.authorPictureUrl || undefined} />
+                                    <AvatarImage src={displayPictureUrl || undefined} />
                                     <AvatarFallback className="bg-amber/10 text-amber font-bold text-xs">
                                         {displayName.substring(0, 2).toUpperCase()}
                                     </AvatarFallback>
                                 </Avatar>
-                                <span className="font-semibold text-ink">By {displayName}</span>
+                                <span className="font-semibold text-ink">
+                                    {isAdmin ? "By Energy Gurus" : `By ${displayName}`}
+                                </span>
+                                {!isAdmin && (
+                                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
+                                        Writer
+                                    </span>
+                                )}
                             </div>
                             <div className="flex items-center gap-4">
                                 <div className="hidden sm:block w-1 h-1 rounded-full bg-slate-300"></div>
-                                <div>{article.publishedAt ? format(article.publishedAt, "MMMM d, yyyy 'at' h:mm a") : ""}</div>
+                                <div>{article.publishedAt ? format(new Date(article.publishedAt), "MMMM d, yyyy 'at' h:mm a") : ""}</div>
                             </div>
                         </div>
                     </header>
@@ -207,40 +283,42 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
                     {/* Formatted Article Content */}
                     <FormattedMarkdown content={article.content} className="mb-14" />
 
-                    {/* AUTHOR DETAILS CARD (renders if author metadata exists) */}
-                    <div className="bg-white border border-line rounded-2xl p-6 md:p-8 space-y-4 shadow-sm">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-line pb-4">
+                    {/* AUTHOR DETAILS CARD (Accurately distinguishes Admin vs Writer) */}
+                    <div className="bg-white border border-line rounded-3xl p-6 md:p-8 space-y-6 shadow-sm">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-line pb-6">
                             <div className="flex items-center gap-4">
-                                <Avatar className="h-16 w-16 border-2 border-line rounded-2xl shrink-0 shadow-sm">
-                                    <AvatarImage src={article.authorPictureUrl || undefined} />
+                                <Avatar className="h-16 w-16 border-2 border-line rounded-2xl shrink-0 shadow-sm overflow-hidden">
+                                    <AvatarImage src={displayPictureUrl || undefined} />
                                     <AvatarFallback className="bg-amber/10 text-amber font-bold text-xl">
                                         {displayName.substring(0, 2).toUpperCase()}
                                     </AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <h4 className="font-space-grotesk font-bold text-lg text-ink">{displayName}</h4>
-                                    {article.authorDesignation && (
-                                        <p className="text-xs text-slate-custom font-medium flex items-center gap-1.5 mt-0.5">
-                                            <Briefcase className="w-3.5 h-3.5 text-amber" /> {article.authorDesignation}
-                                        </p>
-                                    )}
-                                    {article.authorOrganization && (
-                                        <p className="text-xs text-slate-custom font-medium flex items-center gap-1.5 mt-0.5">
-                                            <Building className="w-3.5 h-3.5 text-slate-custom" /> {article.authorOrganization}
-                                        </p>
-                                    )}
-                                    {!hasAuthorMetadata && (
-                                        <p className="text-xs text-slate-custom font-medium mt-0.5">
-                                            Official Publication by Energy Gurus Team
+                                    <div className="flex items-center gap-2">
+                                        <h4 className="font-space-grotesk font-bold text-lg text-ink">{displayName}</h4>
+                                        {isAdmin ? (
+                                            <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                                                <ShieldCheck className="w-3 h-3 text-blue-600" /> Official Editorial
+                                            </span>
+                                        ) : (
+                                            <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
+                                                Verified Writer
+                                            </span>
+                                        )}
+                                    </div>
+                                    {displayDesignation && (
+                                        <p className="text-xs text-slate-custom font-medium flex items-center gap-1.5 mt-1">
+                                            <Briefcase className="w-3.5 h-3.5 text-amber" /> {displayDesignation}
                                         </p>
                                     )}
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2 self-end sm:self-center">
-                                {article.authorLinkedIn && (
+                            {/* Social Handles / Action Badges */}
+                            <div className="flex flex-wrap items-center gap-2 self-start sm:self-center">
+                                {displayLinkedIn && (
                                     <a
-                                        href={article.authorLinkedIn}
+                                        href={displayLinkedIn.startsWith("http") ? displayLinkedIn : `https://${displayLinkedIn}`}
                                         target="_blank"
                                         rel="noreferrer"
                                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-600 text-xs font-bold hover:bg-blue-100 transition-colors"
@@ -248,19 +326,71 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
                                         <Linkedin className="w-3.5 h-3.5" /> LinkedIn
                                     </a>
                                 )}
-                                {article.authorEmail && (
+                                {displayFacebook && (
                                     <a
-                                        href={`mailto:${article.authorEmail}`}
+                                        href={displayFacebook.startsWith("http") ? displayFacebook : `https://${displayFacebook}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 text-xs font-bold hover:bg-blue-100 transition-colors"
+                                    >
+                                        <Facebook className="w-3.5 h-3.5" /> Facebook
+                                    </a>
+                                )}
+                                {displayInstagram && (
+                                    <a
+                                        href={displayInstagram.startsWith("http") ? displayInstagram : `https://${displayInstagram}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-pink-50 text-pink-600 text-xs font-bold hover:bg-pink-100 transition-colors"
+                                    >
+                                        <Instagram className="w-3.5 h-3.5" /> Instagram
+                                    </a>
+                                )}
+                                {displayTwitter && (
+                                    <a
+                                        href={displayTwitter.startsWith("http") ? displayTwitter : `https://${displayTwitter}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-900 text-xs font-bold hover:bg-slate-200 transition-colors"
+                                    >
+                                        <Twitter className="w-3.5 h-3.5" /> X (Twitter)
+                                    </a>
+                                )}
+                                {displayTiktok && (
+                                    <a
+                                        href={displayTiktok.startsWith("http") ? displayTiktok : `https://${displayTiktok}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-900 text-xs font-bold hover:bg-slate-200 transition-colors"
+                                    >
+                                        <Music className="w-3.5 h-3.5" /> TikTok
+                                    </a>
+                                )}
+                                {displayEmail && (
+                                    <a
+                                        href={`mailto:${displayEmail}`}
                                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition-colors"
                                     >
-                                        <Mail className="w-3.5 h-3.5" /> Email
+                                        <Mail className="w-3.5 h-3.5" /> Contact
                                     </a>
                                 )}
                             </div>
                         </div>
 
+                        {/* Author Bio (50-100 words short intro) */}
+                        {displayBio && (
+                            <div className="bg-paper/40 p-4 rounded-2xl border border-line">
+                                <p className="text-xs font-bold uppercase tracking-wider text-slate-custom mb-1.5">
+                                    About the Author
+                                </p>
+                                <p className="text-sm text-graphite leading-relaxed">
+                                    {displayBio}
+                                </p>
+                            </div>
+                        )}
+
                         {/* Article Share Bar in Card */}
-                        <div className="flex items-center justify-between pt-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
                             <span className="text-xs font-semibold text-slate-custom">Enjoyed this article? Share with your network:</span>
                             <ShareButtons title={article.title} />
                         </div>

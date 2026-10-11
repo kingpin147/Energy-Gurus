@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, BarChart3, Battery, Sun, AlertTriangle, Users, MessageSquare, Package, ShieldCheck } from "lucide-react";
+import { Activity, BarChart3, Battery, Sun, AlertTriangle, Users, MessageSquare, Package, ShieldCheck, FileText } from "lucide-react";
 import { getUserRole } from "@/lib/roles";
 import { db } from "@/db";
-import { users, inquiries, epcInstallers, brands, products } from "@/db/schema";
+import { users, inquiries, epcInstallers, brands, products, writerProfiles, news } from "@/db/schema";
 import { eq, sql, and } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
@@ -70,6 +70,32 @@ export default async function Dashboard() {
             { title: "Global Inquiries", value: globalInquiries[0].count.toString(), unit: "Total platform", icon: <MessageSquare className="w-4 h-4 text-blue-500" /> },
             { title: "System Health", value: "99.9%", unit: "Operational", icon: <Activity className="w-4 h-4 text-green-500" /> },
         ];
+    } else if (role === 'writer') {
+        title = "Writer Desk";
+        subtitle = "Write, manage, and submit renewable energy articles for editorial approval.";
+        const [user] = clerkId ? await db.select().from(users).where(eq(users.clerkId, clerkId)) : [];
+        if (!user) {
+            stats = [
+                { title: "Welcome", value: "—", unit: "Setting up your writer profile…", icon: <Activity className="w-4 h-4 text-amber" /> },
+            ];
+        } else {
+            const [profile] = await db.select().from(writerProfiles).where(eq(writerProfiles.userId, user.id));
+            const articleStats = await db.select({
+                total: sql<number>`count(*)`,
+                published: sql<number>`count(*) filter (where is_published = true)`,
+                pending: sql<number>`count(*) filter (where is_published = false and status = 'pending_review')`
+            }).from(news).where(eq(news.authorId, user.id));
+
+            const profileStatus = profile?.status || 'draft';
+            const formattedStatus = profileStatus === 'approved' ? 'Verified' : profileStatus === 'pending_review' ? 'In Review' : 'Needs Setup';
+
+            stats = [
+                { title: "Profile Status", value: formattedStatus, unit: profileStatus === 'approved' ? "Approved to write" : "Admin review required", icon: <ShieldCheck className="w-4 h-4 text-purple-600" /> },
+                { title: "Total Articles", value: (articleStats[0]?.total ?? 0).toString(), unit: "Written posts", icon: <FileText className="w-4 h-4 text-amber" /> },
+                { title: "Published", value: (articleStats[0]?.published ?? 0).toString(), unit: "Live on platform", icon: <Activity className="w-4 h-4 text-green-500" /> },
+                { title: "Pending Review", value: (articleStats[0]?.pending ?? 0).toString(), unit: "Awaiting approval", icon: <AlertTriangle className="w-4 h-4 text-orange-500" /> },
+            ];
+        }
     } else {
         // Fallback: redirect unknown roles to access-denied
         stats = [
@@ -192,6 +218,12 @@ export default async function Dashboard() {
                             <>
                                 <Link href="/dashboard/users" className="w-full h-[52px] bg-white/5 border border-white/10 hover:border-amber rounded-[3px] text-left px-4 flex items-center text-[0.9rem] font-semibold transition-colors">Manage System Users</Link>
                                 <Link href="/dashboard/inbox" className="w-full h-[52px] bg-white/5 border border-white/10 hover:border-amber rounded-[3px] text-left px-4 flex items-center text-[0.9rem] font-semibold transition-colors">Platform Lead Inbox</Link>
+                            </>
+                        )}
+                        {role === 'writer' && (
+                            <>
+                                <Link href="/dashboard/writer" className="w-full h-[52px] bg-white/5 border border-white/10 hover:border-amber rounded-[3px] text-left px-4 flex items-center text-[0.9rem] font-semibold transition-colors">My Author Profile</Link>
+                                <Link href="/dashboard/writer/articles" className="w-full h-[52px] bg-white/5 border border-white/10 hover:border-amber rounded-[3px] text-left px-4 flex items-center text-[0.9rem] font-semibold transition-colors">Write & Manage Articles</Link>
                             </>
                         )}
 

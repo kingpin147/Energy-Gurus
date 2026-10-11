@@ -217,7 +217,9 @@ export default async function UserManagementPage({
                                                             className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${displayRole === 'super-admin' ? 'bg-red-50 text-red-600 border-red-100' :
                                                                 displayRole === 'admin' ? 'bg-blue-50 text-blue-600 border-blue-100' :
                                                                     displayRole === 'epc' ? 'bg-green-50 text-green-600 border-green-100' :
-                                                                        'bg-paper/50 text-slate-custom border-transparent'
+                                                                        displayRole === 'brand' ? 'bg-amber/15 text-amber-900 border-amber/30' :
+                                                                            displayRole === 'writer' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                                                                                'bg-paper/50 text-slate-custom border-transparent'
                                                                 }`}
                                                         >
                                                             {displayRole.replace('-', ' ')}
@@ -225,7 +227,7 @@ export default async function UserManagementPage({
                                                     </td>
                                                     <td className="p-6">
                                                         <div className="flex items-center justify-end gap-2">
-                                                            {!isSuperAdmin && (user.role === 'epc' || user.role === 'brand') && (
+                                                            {!isSuperAdmin && (user.role === 'epc' || user.role === 'brand' || user.role === 'writer') && (
                                                                 <UserStatusButton
                                                                     userId={user.id}
                                                                     initialActive={user.isActive}

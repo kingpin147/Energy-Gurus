@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { news } from "@/db/schema";
-import { eq, desc, and, or, isNotNull, lte } from "drizzle-orm";
+import { eq, desc, and, or, isNull, isNotNull, lte } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import Link from "next/link";
 import { AdBanner } from "@/components/shared/AdBanner";
@@ -67,11 +67,12 @@ const DEFAULT_CATEGORIES = [
 const getNews = unstable_cache(
     async (category?: string) => {
         const now = new Date();
-        // Post is visible if manually published OR if scheduled publish date/time has arrived
+        // An article is ONLY visible publicly if it has been formally approved and published (isPublished = true)
         let conditions = [
+            eq(news.isPublished, true),
             or(
-                eq(news.isPublished, true),
-                and(isNotNull(news.publishedAt), lte(news.publishedAt, now))
+                isNull(news.publishedAt),
+                lte(news.publishedAt, now)
             )
         ];
         

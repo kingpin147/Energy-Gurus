@@ -43,6 +43,13 @@
       "when": 1790153565809,
       "tag": "0005_mushy_the_leader",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791732619623,
+      "tag": "0006_clumsy_stryfe",
+      "breakpoints": true
     }
   ]
 }

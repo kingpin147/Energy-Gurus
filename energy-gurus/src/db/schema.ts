@@ -4,7 +4,7 @@ import { relations } from 'drizzle-orm';
 // ... (existing code) ...
 
 
-export const userRoleEnum = ['super-admin', 'admin', 'epc', 'brand'] as const;
+export const userRoleEnum = ['super-admin', 'admin', 'epc', 'brand', 'writer'] as const;
 export type UserRole = (typeof userRoleEnum)[number];
 
 export const users = pgTable('users', {
@@ -379,6 +379,10 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     fields: [users.id],
     references: [brands.userId]
     }),
+  writerProfile: one(writerProfiles, {
+    fields: [users.id],
+    references: [writerProfiles.userId]
+    }),
   notifications: many(notifications)
     }));
 
@@ -421,6 +425,38 @@ export const monitoringRequests = pgTable('monitoring_requests', {
   updatedAt: timestamp('updated_at').defaultNow().notNull()
     });
 
+export const writerProfiles = pgTable('writer_profiles', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull().unique(),
+  name: text('name').notNull(),
+  pictureUrl: text('picture_url'),
+  designation: text('designation'),
+  bio: text('bio'), // 50 to 100-word short intro
+  socialLinks: jsonb('social_links').$type<{
+    linkedin?: string;
+    facebook?: string;
+    instagram?: string;
+    twitter?: string;
+    tiktok?: string;
+  }>().default({}),
+  status: text('status').$type<'draft' | 'pending_review' | 'changes_requested' | 'approved'>().default('draft').notNull(),
+  adminFeedback: text('admin_feedback'),
+  approvalHistory: jsonb('approval_history').$type<{ date: string; action: string; note?: string; user?: string }[]>().default([]),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+}, (table) => ({
+  userIdIdx: index('writer_profiles_user_id_idx').on(table.userId),
+  statusIdx: index('writer_profiles_status_idx').on(table.status),
+  createdAtIdx: index('writer_profiles_created_at_idx').on(table.createdAt)
+}));
+
+export const writerProfilesRelations = relations(writerProfiles, ({ one }) => ({
+  user: one(users, {
+    fields: [writerProfiles.userId],
+    references: [users.id]
+  })
+}));
+
 export const news = pgTable('news', {
   id: uuid('id').defaultRandom().primaryKey(),
   slug: text('slug').unique(),
@@ -434,14 +470,22 @@ export const news = pgTable('news', {
   authorDesignation: text('author_designation'),
   authorOrganization: text('author_organization'),
   authorLinkedIn: text('author_linkedin'),
+  authorFacebook: text('author_facebook'),
+  authorInstagram: text('author_instagram'),
+  authorTwitter: text('author_twitter'),
+  authorTiktok: text('author_tiktok'),
+  authorBio: text('author_bio'),
   authorEmail: text('author_email'),
   isPublished: boolean('is_published').default(false).notNull(),
+  status: text('status').$type<'draft' | 'pending_review' | 'changes_requested' | 'published'>().default('draft').notNull(),
+  adminFeedback: text('admin_feedback'),
   publishedAt: timestamp('published_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
 }, (table) => ({
   authorIdIdx: index('news_author_id_idx').on(table.authorId),
   slugIdx: index('news_slug_idx').on(table.slug),
+  statusIdx: index('news_status_idx').on(table.status),
   createdAtIdx: index('news_created_at_idx').on(table.createdAt)
 }));
 

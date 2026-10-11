@@ -89,6 +89,10 @@ export function NewsForm({ initialData }: NewsFormProps) {
   const { uploadFile, isUploading } = useR2Upload();
 
   const handleCoverUpload = async (file: File) => {
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image exceeds maximum allowed size of 10 MB. Please upload a smaller image.");
+      return;
+    }
     try {
       const { publicUrl } = await uploadFile(file, "news-covers");
       setImageUrl(publicUrl);
@@ -99,6 +103,10 @@ export function NewsForm({ initialData }: NewsFormProps) {
   };
 
   const handleAuthorPicUpload = async (file: File) => {
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image exceeds maximum allowed size of 10 MB. Please upload a smaller image.");
+      return;
+    }
     try {
       const { publicUrl } = await uploadFile(file, "news-authors");
       setAuthorPictureUrl(publicUrl);

@@ -20,19 +20,22 @@ export async function sendInvitationEmail(toEmail: string, role: string): Promis
   const roleLabels: Record<string, string> = {
     admin: "Platform Administrator",
     epc: "EPC Installer",
-    brand: "Solar Brand"
+    brand: "Solar Brand",
+    writer: "Contributing Article Writer"
   };
 
   const roleDescriptions: Record<string, string> = {
     epc: "You have been formally invited to join the <strong>EnergyGurus</strong> ecosystem as a verified <strong>EPC Installer</strong> partner. By claiming this invitation, your business profile will be automatically verified and indexed into our public directory, enabling clients and homeowners to connect with you directly.",
     brand: "You have been formally invited to join the <strong>EnergyGurus</strong> ecosystem as an official <strong>Solar Brand</strong> partner. By claiming this invitation, your equipment portfolio will be verified and indexed in our brand directory to connect with certified installers and consumers.",
-    admin: "You have been granted administrative privileges on the <strong>EnergyGurus</strong> platform to oversee analytics, moderation, and verified business onboarding."
+    admin: "You have been granted administrative privileges on the <strong>EnergyGurus</strong> platform to oversee analytics, moderation, and verified business onboarding.",
+    writer: "You have been formally invited to join the <strong>EnergyGurus</strong> platform as a verified <strong>Contributing Article Writer</strong>. Claim this invitation to complete your author profile and share insights and articles with Pakistan's leading renewable energy community."
   };
 
   const badgeStyles: Record<string, { bg: string; color: string; border: string }> = {
     epc: { bg: "#EBF5F3", color: "#2F6E62", border: "#BFE3DC" },
     brand: { bg: "#FEF7EC", color: "#B4690E", border: "#FCD34D" },
-    admin: { bg: "#EEF2FF", color: "#3730A3", border: "#C7D2FE" }
+    admin: { bg: "#EEF2FF", color: "#3730A3", border: "#C7D2FE" },
+    writer: { bg: "#FAF5FF", color: "#7E22CE", border: "#E9D5FF" }
   };
 
   const roleLabel = roleLabels[role] || role;

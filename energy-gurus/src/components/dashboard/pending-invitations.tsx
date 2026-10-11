@@ -71,7 +71,12 @@ export function PendingInvitations({ initialInvites }: { initialInvites: Invitat
                                 <tr key={invite.id} className="border-b">
                                     <td className="p-6 font-medium">{invite.email}</td>
                                     <td className="p-6">
-                                        <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-paper text-slate-custom border">
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                                            invite.role === 'writer' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                                            invite.role === 'brand' ? 'bg-amber/15 text-amber-900 border-amber/30' :
+                                            invite.role === 'admin' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                                            'bg-green-50 text-green-700 border-green-200'
+                                        }`}>
                                             {invite.role}
                                         </span>
                                     </td>
