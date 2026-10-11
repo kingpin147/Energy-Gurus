@@ -19,7 +19,6 @@ import Link from "next/link";
 import { ReviewForm } from "@/components/forms/review-form";
 import { ReviewList } from "@/components/reviews/review-list";
 import { getProfileRating, getTeamRating } from "@/lib/actions/reviews";
-import { redis, CACHE_KEYS } from "@/lib/redis";
 import { InferSelectModel } from "drizzle-orm";
 import { InstallerQuoteForm } from "@/components/forms/installer-quote-form";
 import { TrackedInteraction } from "@/components/shared/AnalyticsTracker";
@@ -30,15 +29,6 @@ import { or, ilike } from "drizzle-orm";
 type EpcInstaller = InferSelectModel<typeof epcInstallers>;
 type EpcOffice = InferSelectModel<typeof epcOffices>;
 type EpcProject = InferSelectModel<typeof epcProjects>;
-
-interface EpcProfileData {
-  installer: EpcInstaller;
-  offices: EpcOffice[];
-  projects: EpcProject[];
-  rating: number | null;
-  count: number;
-  isActive: boolean;
-}
 
 async function getInstallerByParam(param: string) {
   const decoded = decodeURIComponent(param).trim();
@@ -121,7 +111,7 @@ function getYouTubeId(url: string) {
 
 export default async function EpcProfilePage({
   params
-    }: {
+}: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
@@ -130,23 +120,9 @@ export default async function EpcProfilePage({
   if (!installer || !(installer as any).user?.isActive) return notFound();
 
   const realId = installer.id;
-  const cacheKey = CACHE_KEYS.EPC_DETAILS(realId);
-
-  let profileData: EpcProfileData | null = await redis.get<EpcProfileData>(cacheKey);
-
-  if (!profileData) {
-
-    const offices = await db.select().from(epcOffices).where(eq(epcOffices.epcId, realId));
-    const projects = await db.select().from(epcProjects).where(eq(epcProjects.epcId, realId));
-    const { rating, count } = await getProfileRating(realId);
-
-    profileData = { installer, offices, projects, rating, count, isActive: (installer as any).user?.isActive || false };
-    await redis.set(cacheKey, profileData, { ex: 3600 });
-  }
-
-  if (!profileData || !profileData.isActive) return notFound();
-
-  const { offices, projects, rating, count } = profileData;
+  const offices = await db.select().from(epcOffices).where(eq(epcOffices.epcId, realId));
+  const projects = await db.select().from(epcProjects).where(eq(epcProjects.epcId, realId));
+  const { rating, count } = await getProfileRating(realId);
 
   const { score } = getEpcCompleteness(installer, offices.length, projects.length);
   if (score < 50) notFound();
@@ -199,7 +175,7 @@ export default async function EpcProfilePage({
       projects={projects}
       rating={rating}
       count={count}
-      isActive={profileData.isActive}
+      isActive={(installer as any).user?.isActive ?? true}
     />
   );
 }

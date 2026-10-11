@@ -7,6 +7,8 @@ import { eq, and, desc, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { sendAdminNotificationEmail } from "@/lib/mail";
 
+import { inquirySubmissionSchema, supportMessageSchema } from "@/lib/validations/schemas";
+
 export async function sendInquiry(formData: FormData) {
     try {
         const { userId: clerkId } = await auth();
@@ -17,31 +19,45 @@ export async function sendInquiry(formData: FormData) {
             if (user) senderId = user.id;
         }
 
-        const receiverId = formData.get("receiverId") as string;
-        const message = formData.get("message") as string;
-        const guestName = formData.get("guestName") as string;
-        const guestEmail = formData.get("guestEmail") as string;
-        const guestPhone = formData.get("guestPhone") as string;
-        const inquiryType = (formData.get("inquiryType") as string) ?? "client";
-        const metadataString = formData.get("metadata") as string;
-        const metadata = metadataString ? JSON.parse(metadataString) : null;
+        const rawData = {
+            receiverId: formData.get("receiverId") as string,
+            message: formData.get("message") as string,
+            guestName: (formData.get("guestName") as string)?.trim() || null,
+            guestEmail: (formData.get("guestEmail") as string)?.trim() || null,
+            guestPhone: (formData.get("guestPhone") as string)?.trim() || null,
+            inquiryType: ((formData.get("inquiryType") as string) ?? "client") as "client" | "support",
+        };
 
-        if (!receiverId || !message) {
-            return { success: false, message: "Missing required fields" };
+        const validated = inquirySubmissionSchema.safeParse(rawData);
+        if (!validated.success) {
+            const firstError = validated.error.issues[0]?.message || "Validation failed";
+            return { success: false, message: firstError };
+        }
+
+        const { receiverId, message, guestName, guestEmail, guestPhone, inquiryType } = validated.data;
+
+        let metadata: any = null;
+        const metadataString = formData.get("metadata") as string;
+        if (metadataString) {
+            try {
+                metadata = JSON.parse(metadataString);
+            } catch {
+                metadata = null;
+            }
         }
 
         await db.insert(inquiries).values({
             senderId,
             receiverId,
-            guestName,
-            guestEmail,
-            guestPhone,
+            guestName: guestName || null,
+            guestEmail: guestEmail || null,
+            guestPhone: guestPhone || null,
             message,
-            inquiryType: inquiryType as "client" | "support",
+            inquiryType,
             status: "new",
             isRead: false,
             metadata
-    });
+        });
 
         // Fetch sender logo if registered
         let senderLogoUrl = null;
@@ -70,7 +86,7 @@ export async function sendInquiry(formData: FormData) {
             <p><strong>Message:</strong></p>
             <blockquote style="border-left: 4px solid #eee; padding-left: 10px;">${message.replace(/\n/g, '<br/>')}</blockquote>
             <br/>
-            <p><a href="https://energygurus.net/dashboard/inbox">View in Admin Inbox</a></p>
+            <p><a href="https://energygurus.online/dashboard/inbox">View in Admin Inbox</a></p>
         `;
         sendAdminNotificationEmail(`New Platform Lead: ${guestName || "Anonymous"}`, emailHtml).catch(console.error);
 
@@ -78,7 +94,7 @@ export async function sendInquiry(formData: FormData) {
         return { success: true, message: "Inquiry sent successfully" };
     } catch (error) {
         console.error("sendInquiry error:", error);
-        return { success: false, message: "Failed to send inquiry" };
+        return { success: false, message: "Failed to send inquiry. Please try again." };
     }
 }
 
@@ -87,17 +103,34 @@ export async function sendSupportMessage(formData: FormData) {
         const { userId: clerkId } = await auth();
 
         let senderId = null;
-        let senderName = formData.get("guestName") as string;
-        let senderEmail = formData.get("guestEmail") as string;
+        let senderName = (formData.get("guestName") as string)?.trim() || "Platform User";
+        let senderEmail = (formData.get("guestEmail") as string)?.trim() || "";
 
         if (clerkId) {
             const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId));
             if (user) {
                 senderId = user.id;
-                senderName = user.name || "Platform User";
-                senderEmail = user.email;
+                senderName = user.name || senderName;
+                senderEmail = user.email || senderEmail;
             }
         }
+
+        const rawData = {
+            senderEmail,
+            senderName,
+            senderPhone: (formData.get("guestPhone") as string)?.trim() || null,
+            subject: (formData.get("subject") as string)?.trim() || "",
+            message: (formData.get("message") as string)?.trim() || "",
+            category: (formData.get("category") as string)?.trim() || null,
+        };
+
+        const validated = supportMessageSchema.safeParse(rawData);
+        if (!validated.success) {
+            const firstError = validated.error.issues[0]?.message || "Validation failed";
+            return { success: false, message: firstError };
+        }
+
+        const { subject, message, senderPhone, category } = validated.data;
 
         // Find any admin/super-admin to send to
         const [admin] = await db.select().from(users)
@@ -109,24 +142,20 @@ export async function sendSupportMessage(formData: FormData) {
             .limit(1);
 
         const adminReceiver = superAdmin ?? admin;
-        if (!adminReceiver) return { success: false, message: "No admin available" };
-
-        const subject = formData.get("subject") as string;
-        const message = formData.get("message") as string;
-
-        if (!message) return { success: false, message: "Message is required" };
+        if (!adminReceiver) return { success: false, message: "Support service temporarily unavailable. Please try again later." };
 
         await db.insert(inquiries).values({
             senderId: senderId,
             receiverId: adminReceiver.id,
             guestName: senderName,
             guestEmail: senderEmail,
+            guestPhone: senderPhone || null,
             subject,
             message,
             inquiryType: "support",
             status: "new",
             isRead: false
-    });
+        });
 
         // Create notification for admin
         await db.insert(notifications).values({
@@ -135,7 +164,7 @@ export async function sendSupportMessage(formData: FormData) {
             message: `New support message from ${senderName}`,
             type: "system",
             link: "/dashboard/inbox",
-            senderLogoUrl: null, // Admin notifications usually don't need sender logo or can be added later
+            senderLogoUrl: null,
         });
 
         // Send email alert to admin
@@ -146,15 +175,15 @@ export async function sendSupportMessage(formData: FormData) {
             <p><strong>Message:</strong></p>
             <blockquote style="border-left: 4px solid #eee; padding-left: 10px;">${message.replace(/\n/g, '<br/>')}</blockquote>
             <br/>
-            <p><a href="https://energygurus.net/dashboard/inbox">View in Inbox</a></p>
+            <p><a href="https://energygurus.online/dashboard/inbox">View in Inbox</a></p>
         `;
         sendAdminNotificationEmail(`Support Request: ${subject || "No Subject"}`, emailHtml).catch(console.error);
 
         revalidatePath("/dashboard/support", "layout");
-        return { success: true, message: "Support message sent" };
+        return { success: true, message: "Support message sent successfully" };
     } catch (error) {
         console.error("sendSupportMessage error:", error);
-        return { success: false, message: "Failed to send support message" };
+        return { success: false, message: "Failed to send support message. Please try again." };
     }
 }
 

@@ -208,17 +208,6 @@ export async function onboardEpcInstaller(formData: FormData) {
             await db.insert(epcProjects).values(allProjectRecords);
         }
 
-        // 8. Invalidate Redis Cache & Next.js cache
-        try {
-            const { redis, CACHE_KEYS } = await import("@/lib/redis");
-            await redis.del(CACHE_KEYS.EPCS_LIST);
-            if (newEpc?.id) {
-                await redis.del(CACHE_KEYS.EPC_DETAILS(newEpc.id));
-            }
-        } catch (cacheErr) {
-            console.warn("Redis cache invalidation warning:", cacheErr);
-        }
-
         revalidatePath("/dashboard/users", "layout");
         revalidatePath("/dashboard/epc", "layout");
         revalidatePath("/epcs", "layout");
@@ -232,6 +221,6 @@ export async function onboardEpcInstaller(formData: FormData) {
         
     } catch (error: any) {
         console.error("Failed to onboard EPC:", error);
-        return { success: false, message: error?.message || "An error occurred during onboarding." };
+        return { success: false, message: "An error occurred during EPC onboarding. Please check your data or try again." };
     }
 }

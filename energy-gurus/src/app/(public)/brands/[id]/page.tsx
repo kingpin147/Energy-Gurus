@@ -3,7 +3,6 @@ import { brands, products, reviews, news, users } from "@/db/schema";
 import { eq, and, desc, or, ilike } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import { redis, CACHE_KEYS } from "@/lib/redis";
 import { BrandProfileView } from "@/components/brands/BrandProfileView";
 import { auth } from "@clerk/nextjs/server";
 import { getUserRole } from "@/lib/roles";

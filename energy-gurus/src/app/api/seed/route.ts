@@ -3,7 +3,6 @@ import { db } from "@/db";
 import { users, brands, epcInstallers, epcOffices, epcProjects, products, brandCertifications } from "@/db/schema";
 import { like, inArray } from "drizzle-orm";
 import { seedDummyData } from "@/lib/seed";
-import { redis } from "@/lib/redis";
 import { revalidatePath } from "next/cache";
 
 const DUMMY_EMAIL_SUFFIX = "@energygurus.demo";
@@ -26,9 +25,6 @@ export async function POST() {
         }
 
         await seedDummyData();
-
-        // Bust Redis caches
-        try { await redis.del("epcs:all", "brands:all"); } catch {}
 
         // Bust Next.js page cache
         revalidatePath("/", "layout");
@@ -84,7 +80,6 @@ export async function DELETE() {
 
         await db.delete(users).where(inArray(users.id, dummyUserIds));
 
-        try { await redis.del("epcs:all", "brands:all"); } catch {}
         revalidatePath("/", "layout");
         revalidatePath("/epcs");
         revalidatePath("/brands");

@@ -5,7 +5,6 @@ import { reviews, users } from "@/db/schema";
 import { eq, avg, count, and, inArray } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { redis, CACHE_KEYS } from "@/lib/redis";
 import { getUserRole } from "@/lib/roles";
 import { reviewSubmissionSchema } from "@/lib/validations/schemas";
 
@@ -86,17 +85,6 @@ export async function submitReview(formData: FormData) {
             isVerifiedPurchase: !!proofUrl
         }).returning();
 
-        // Invalidate Redis cache
-        try {
-            if (targetType === "brand") {
-                await redis.del(CACHE_KEYS.BRAND_DETAILS(targetId), CACHE_KEYS.BRANDS_LIST);
-            } else if (targetType === "epc") {
-                await redis.del(CACHE_KEYS.EPC_DETAILS(targetId), CACHE_KEYS.EPCS_LIST);
-            }
-        } catch (error) {
-            console.error("Failed to delete Redis cache in submitReview:", error);
-        }
-
         revalidatePath("/", "layout");
         revalidatePath("/dashboard/reviews", "layout");
         revalidatePath("/dashboard/moderation", "layout");
@@ -110,7 +98,7 @@ export async function submitReview(formData: FormData) {
         };
     } catch (error: any) {
         console.error("[submitReview Error]:", error);
-        return { success: false, message: error?.message || "Failed to submit review" };
+        return { success: false, message: "Failed to submit review. Please try again." };
     }
 }
 
@@ -132,18 +120,6 @@ export async function approveReviewAction(reviewId: string, isVerifiedPurchase?:
             })
             .where(eq(reviews.id, reviewId));
 
-        if (review.targetId) {
-            try {
-                if (review.targetType === "brand") {
-                    await redis.del(CACHE_KEYS.BRAND_DETAILS(review.targetId), CACHE_KEYS.BRANDS_LIST);
-                } else if (review.targetType === "epc") {
-                    await redis.del(CACHE_KEYS.EPC_DETAILS(review.targetId), CACHE_KEYS.EPCS_LIST);
-                }
-            } catch (e) {
-                console.error("Cache clear failed:", e);
-            }
-        }
-
         revalidatePath("/", "layout");
         revalidatePath("/dashboard/reviews", "layout");
         revalidatePath("/dashboard/moderation", "layout");
@@ -151,7 +127,7 @@ export async function approveReviewAction(reviewId: string, isVerifiedPurchase?:
         return { success: true, message: "Review approved and published!" };
     } catch (error: any) {
         console.error("approveReviewAction error:", error);
-        return { success: false, message: error?.message || "Failed to approve review" };
+        return { success: false, message: "Failed to approve review. Please try again." };
     }
 }
 
@@ -172,18 +148,6 @@ export async function rejectReviewAction(reviewId: string, rejectionReason: stri
             })
             .where(eq(reviews.id, reviewId));
 
-        if (review.targetId) {
-            try {
-                if (review.targetType === "brand") {
-                    await redis.del(CACHE_KEYS.BRAND_DETAILS(review.targetId), CACHE_KEYS.BRANDS_LIST);
-                } else if (review.targetType === "epc") {
-                    await redis.del(CACHE_KEYS.EPC_DETAILS(review.targetId), CACHE_KEYS.EPCS_LIST);
-                }
-            } catch (e) {
-                console.error("Cache clear failed:", e);
-            }
-        }
-
         revalidatePath("/", "layout");
         revalidatePath("/dashboard/reviews", "layout");
         revalidatePath("/dashboard/moderation", "layout");
@@ -191,7 +155,7 @@ export async function rejectReviewAction(reviewId: string, rejectionReason: stri
         return { success: true, message: "Review rejected and moved to archive." };
     } catch (error: any) {
         console.error("rejectReviewAction error:", error);
-        return { success: false, message: error?.message || "Failed to reject review" };
+        return { success: false, message: "Failed to reject review. Please try again." };
     }
 }
 
@@ -216,7 +180,7 @@ export async function toggleVerifyReviewAction(reviewId: string) {
         return { success: true, message: `Review marked as ${!review.isVerifiedPurchase ? "Verified Purchase" : "Standard Review"}` };
     } catch (error: any) {
         console.error("toggleVerifyReviewAction error:", error);
-        return { success: false, message: error?.message || "Failed to toggle verification" };
+        return { success: false, message: "Failed to update review verification. Please try again." };
     }
 }
 
@@ -289,17 +253,6 @@ export async function submitAdminReview(formData: FormData) {
             isVerifiedPurchase: true
         });
 
-        // Invalidate Redis cache
-        try {
-            if (targetType === "brand") {
-                await redis.del(CACHE_KEYS.BRAND_DETAILS(targetId), CACHE_KEYS.BRANDS_LIST);
-            } else if (targetType === "epc") {
-                await redis.del(CACHE_KEYS.EPC_DETAILS(targetId), CACHE_KEYS.EPCS_LIST);
-            }
-        } catch (error) {
-            console.error("Failed to clear cache:", error);
-        }
-
         revalidatePath("/", "layout");
         revalidatePath("/dashboard/reviews", "layout");
         revalidatePath("/dashboard/moderation", "layout");
@@ -320,18 +273,6 @@ export async function deleteReviewAction(reviewId: string, targetId?: string, ta
 
         await db.delete(reviews).where(eq(reviews.id, reviewId));
 
-        if (targetId && targetType) {
-            try {
-                if (targetType === "brand") {
-                    await redis.del(CACHE_KEYS.BRAND_DETAILS(targetId), CACHE_KEYS.BRANDS_LIST);
-                } else if (targetType === "epc") {
-                    await redis.del(CACHE_KEYS.EPC_DETAILS(targetId), CACHE_KEYS.EPCS_LIST);
-                }
-            } catch (e) {
-                console.error("Cache clear failed:", e);
-            }
-        }
-
         revalidatePath("/", "layout");
         revalidatePath("/dashboard/reviews", "layout");
         revalidatePath("/dashboard/moderation", "layout");
@@ -346,25 +287,12 @@ export async function deleteReviewAction(reviewId: string, targetId?: string, ta
 export async function replyToReview(formData: FormData) {
     const reviewId = formData.get("reviewId") as string;
     const reply = formData.get("reply") as string;
-    const targetType = formData.get("targetType") as string;
-    const targetId = formData.get("targetId") as string;
 
     if (!reviewId || !reply) return;
 
     await db.update(reviews)
         .set({ reply })
         .where(eq(reviews.id, reviewId));
-
-    // Invalidate Redis cache for specific profiles
-    try {
-        if (targetType === "brand" && targetId) {
-            await redis.del(CACHE_KEYS.BRAND_DETAILS(targetId));
-        } else if (targetType === "epc" && targetId) {
-            await redis.del(CACHE_KEYS.EPC_DETAILS(targetId));
-        }
-    } catch (error) {
-        console.error("Failed to delete Redis cache in replyToReview:", error);
-    }
 
     revalidatePath("/", "layout");
 }

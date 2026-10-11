@@ -1,6 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
-import { apiRatelimit } from './lib/ratelimit';
 
 const isProtectedRoute = createRouteMatcher([
     '/dashboard(.*)',
@@ -10,7 +9,6 @@ const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 const isClerkConfigured = clerkKey && clerkKey.startsWith('pk_') && !clerkKey.includes('your_') && clerkKey !== 'pk_test_...';
 
 export default function middleware(req: any) {
-    const ip = req.ip ?? "127.0.0.1";
     const pathname = req.nextUrl.pathname;
     
     // Skip Clerk middleware for static root files like sitemap.xml and robots.txt
@@ -27,9 +25,6 @@ export default function middleware(req: any) {
         return NextResponse.next();
     }
 
-    // Only rate-limit actual API routes, NOT page navigation
-    const isApiRoute = pathname.startsWith('/api');
-
     // If Clerk is not properly configured, just run directly
     if (!isClerkConfigured) {
         return NextResponse.next();
@@ -37,19 +32,6 @@ export default function middleware(req: any) {
 
     // Otherwise, use Clerk's middleware wrapper
     return clerkMiddleware(async (auth, req) => {
-        // Only rate-limit API calls, not page navigation
-        if (isApiRoute) {
-            const { success } = await apiRatelimit.limit(ip);
-            if (!success) {
-                // Return a JSON error for API routes
-                return NextResponse.json(
-                    { error: "Too many requests. Please slow down." },
-                    { status: 429 }
-                );
-            }
-            return NextResponse.next();
-        }
-
         // Protect dashboard routes with Clerk auth
         if (isProtectedRoute(req)) await auth.protect();
 
@@ -64,4 +46,4 @@ export const config = {
         // Always run for API routes
         '/(api|trpc)(.*)',
     ]
-    };
+};

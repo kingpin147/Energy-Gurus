@@ -7,7 +7,6 @@ import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { redis, CACHE_KEYS } from "@/lib/redis";
 import { deleteFile, extractKeyFromUrl } from "@/lib/r2";
 import { clerkClient as createClerkClient } from "@clerk/nextjs/server";
 
@@ -122,16 +121,8 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
     }
   }
 
-  // Invalidate Cache
   if (result.length > 0) {
     const b = result[0];
-    try {
-      await redis.del(CACHE_KEYS.BRAND_DETAILS(b.id));
-      await redis.del(CACHE_KEYS.BRANDS_LIST);
-    } catch (e) {
-      console.error("Redis cache del failed:", e);
-    }
-
     revalidatePath("/", "layout");
     revalidatePath(`/brands/${b.id}`, "page");
     revalidatePath("/brands", "page");
@@ -169,11 +160,6 @@ export async function submitBrandForReviewAction(brandId: string) {
         updatedAt: new Date()
       })
       .where(eq(brands.id, brandId));
-
-    try {
-      await redis.del(CACHE_KEYS.BRAND_DETAILS(brandId));
-      await redis.del(CACHE_KEYS.BRANDS_LIST);
-    } catch (e) {}
 
     revalidatePath("/", "layout");
     revalidatePath("/dashboard/brand", "page");
@@ -223,11 +209,6 @@ export async function adminUpdateBrandStatusAction(
         updatedAt: new Date()
       })
       .where(eq(brands.id, brandId));
-
-    try {
-      await redis.del(CACHE_KEYS.BRAND_DETAILS(brandId));
-      await redis.del(CACHE_KEYS.BRANDS_LIST);
-    } catch (e) {}
 
     revalidatePath("/", "layout");
     revalidatePath(`/brands/${brandId}`, "page");
@@ -288,10 +269,6 @@ export async function addProductModel(formData: FormData) {
     specifications
   });
 
-  try {
-    await redis.del(CACHE_KEYS.BRAND_DETAILS(brand.id));
-  } catch (e) {}
-
   revalidatePath("/", "layout");
   revalidatePath(`/brands/${brand.id}`, "page");
   revalidatePath("/dashboard/brand", "page");
@@ -334,11 +311,6 @@ export async function deleteProductModel(productId: string) {
 
   // 3. Delete from DB
   await db.delete(products).where(eq(products.id, productId));
-
-  // 4. Invalidate Cache
-  try {
-    await redis.del(CACHE_KEYS.BRAND_DETAILS(product.brandId));
-  } catch (e) {}
 
   revalidatePath("/", "layout");
   revalidatePath(`/brands/${product.brandId}`, "page");

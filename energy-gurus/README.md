@@ -13,7 +13,6 @@ A full-stack Next.js 16 platform connecting **EPC solar installers** with **glob
 | Database | PostgreSQL (Neon) + Drizzle ORM |
 | Auth | Clerk |
 | File Storage | Cloudflare R2 (S3-compatible) |
-| Cache | Upstash Redis |
 | Email | Brevo (Transactional Email via SMTP/API) |
 | Analytics | PostHog |
 | i18n | next-intl (EN / UR) |
@@ -39,7 +38,6 @@ src/
 │   └── index.ts          # Database client configuration
 └── lib/
     ├── r2.ts             # Cloudflare R2 upload + URL utilities
-    ├── redis.ts          # Upstash Redis client + cache keys
     ├── mail.ts           # Brevo email integration for notifications
     ├── actions/          # Server Actions (auth, epc, brand, reviews, inquiries...)
     └── utils/            # Shared utility functions
@@ -111,10 +109,6 @@ R2_ACCESS_KEY_ID=your_key_id
 R2_SECRET_ACCESS_KEY=your_secret_key
 R2_BUCKET_NAME=energy-gurus
 R2_PUBLIC_URL=https://pub-xxxx.r2.dev   # Your R2 public subdomain
-
-# Upstash Redis Cache
-UPSTASH_REDIS_REST_URL=https://...
-UPSTASH_REDIS_REST_TOKEN=...
 
 # Email (Brevo)
 BREVO_API_KEY=xkeysib-...

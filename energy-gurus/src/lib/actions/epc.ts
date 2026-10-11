@@ -7,7 +7,6 @@ import { auth } from "@clerk/nextjs/server";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
-import { redis, CACHE_KEYS } from "@/lib/redis";
 import { deleteFile, extractKeyFromUrl } from "@/lib/r2";
 
 export async function updateEpcProfile(data: FormData | Partial<typeof epcInstallers.$inferInsert>) {
@@ -81,9 +80,6 @@ export async function updateEpcProfile(data: FormData | Partial<typeof epcInstal
     .set({ ...updateData, updatedAt: new Date() })
     .where(eq(epcInstallers.userId, targetUserId));
 
-  await redis.del(CACHE_KEYS.EPC_DETAILS(existingEpc.id));
-  await redis.del(CACHE_KEYS.EPCS_LIST);
-
   revalidatePath("/", "layout");
 }
 
@@ -92,26 +88,19 @@ export async function addEpcOffice(epcId: string, data: Omit<typeof epcOffices.$
   await db.insert(epcOffices).values({
     ...data,
     epcId
-    });
-  await redis.del(CACHE_KEYS.EPC_DETAILS(epcId));
+  });
   revalidatePath("/", "layout");
 }
 
 export async function updateEpcOffice(officeId: string, data: Partial<typeof epcOffices.$inferInsert>) {
   const [office] = await db.select().from(epcOffices).where(eq(epcOffices.id, officeId));
   await db.update(epcOffices).set(data).where(eq(epcOffices.id, officeId));
-  if (office) {
-    await redis.del(CACHE_KEYS.EPC_DETAILS(office.epcId));
-  }
   revalidatePath("/", "layout");
 }
 
 export async function deleteEpcOffice(officeId: string) {
   const [office] = await db.select().from(epcOffices).where(eq(epcOffices.id, officeId));
   await db.delete(epcOffices).where(eq(epcOffices.id, officeId));
-  if (office) {
-    await redis.del(CACHE_KEYS.EPC_DETAILS(office.epcId));
-  }
   revalidatePath("/", "layout");
 }
 
@@ -120,17 +109,13 @@ export async function addEpcProject(epcId: string, data: Omit<typeof epcProjects
   await db.insert(epcProjects).values({
     ...data,
     epcId
-    });
-  await redis.del(CACHE_KEYS.EPC_DETAILS(epcId));
+  });
   revalidatePath("/", "layout");
 }
 
 export async function updateEpcProject(projectId: string, data: Partial<typeof epcProjects.$inferInsert>) {
   const [project] = await db.select().from(epcProjects).where(eq(epcProjects.id, projectId));
   await db.update(epcProjects).set({ ...data, updatedAt: new Date() }).where(eq(epcProjects.id, projectId));
-  if (project) {
-    await redis.del(CACHE_KEYS.EPC_DETAILS(project.epcId));
-  }
   revalidatePath("/", "layout");
 }
 
@@ -156,9 +141,6 @@ export async function deleteEpcProject(projectId: string) {
 
     // 3. Delete from DB
     await db.delete(epcProjects).where(eq(epcProjects.id, projectId));
-
-    // 4. Invalidate Cache
-    await redis.del(CACHE_KEYS.EPC_DETAILS(project.epcId));
   }
   revalidatePath("/", "layout");
 }
