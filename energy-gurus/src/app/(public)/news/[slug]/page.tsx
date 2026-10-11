@@ -110,8 +110,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const description = extractExcerpt(article.content, 160);
     const url = `${baseUrl}/news/${targetSlug}`;
     
-    const isAdmin = article.userRole === "admin" || article.userRole === "super-admin";
-    const authorName = isAdmin ? "EnergyGurus Editorial" : (article.writerName || article.authorName || "EnergyGurus");
+    const authorName =
+        article.authorName?.trim() ||
+        article.writerName?.trim() ||
+        article.userName?.trim() ||
+        "Energy Gurus Team";
     const imageUrl = article.imageUrl || `${baseUrl}/new_hero_banner.jpg`;
 
     return {
@@ -178,40 +181,66 @@ export default async function NewsArticlePage({
         permanentRedirect(`/news/${article.slug}`);
     }
 
-    // Determine author profile: Admin vs Writer
+    // Determine author profile: Writer vs Admin custom author vs Editorial fallback
     const isAdmin = article.userRole === "admin" || article.userRole === "super-admin";
+    const isWriter = !isAdmin && !!article.writerName;
 
-    let displayName = "Energy Gurus Team";
-    let displayDesignation = "Official Publication";
-    let displayPictureUrl: string | null = null;
-    let displayBio: string | null = "Official renewable energy news, policy insights, and technology breakthroughs published by the EnergyGurus editorial team.";
-    let displayLinkedIn: string | null = null;
-    let displayFacebook: string | null = null;
-    let displayInstagram: string | null = null;
-    let displayTwitter: string | null = null;
-    let displayTiktok: string | null = null;
-    let displayEmail: string | null = "contact@energygurus.online";
+    const hasSpecificAuthor = Boolean(article.authorName?.trim() || article.writerName?.trim());
 
-    if (isAdmin) {
-        displayName = "Energy Gurus Team";
-        displayDesignation = "Official Editorial Team";
-        displayPictureUrl = null;
-        displayBio = "Official renewable energy news, policy insights, and technology breakthroughs published by the EnergyGurus editorial team.";
-        displayLinkedIn = "https://linkedin.com/company/energygurus";
-        displayEmail = "contact@energygurus.online";
-    } else {
-        // Contributing Writer
-        displayName = article.writerName || article.authorName || article.userName || "Contributing Writer";
-        displayDesignation = article.writerDesignation || article.authorDesignation || "Contributing Columnist";
-        displayPictureUrl = article.writerPictureUrl || article.authorPictureUrl || null;
-        displayBio = article.writerBio || article.authorBio || null;
-        displayLinkedIn = article.authorLinkedIn || article.writerSocialLinks?.linkedin || null;
-        displayFacebook = article.authorFacebook || article.writerSocialLinks?.facebook || null;
-        displayInstagram = article.authorInstagram || article.writerSocialLinks?.instagram || null;
-        displayTwitter = article.authorTwitter || article.writerSocialLinks?.twitter || null;
-        displayTiktok = article.authorTiktok || article.writerSocialLinks?.tiktok || null;
-        displayEmail = article.authorEmail || article.userEmail || null;
-    }
+    // Display Name: prioritize custom authorName entered on article, then writer profile name, then user name, then default
+    const displayName =
+        article.authorName?.trim() ||
+        article.writerName?.trim() ||
+        article.userName?.trim() ||
+        "Energy Gurus Team";
+
+    // Designation: prioritize authorDesignation, then writer designation, then default based on role
+    const displayDesignation =
+        article.authorDesignation?.trim() ||
+        article.writerDesignation?.trim() ||
+        (isAdmin ? "Official Editorial Team" : "Contributing Columnist");
+
+    const displayPictureUrl =
+        article.authorPictureUrl ||
+        article.writerPictureUrl ||
+        null;
+
+    const displayBio =
+        article.authorBio ||
+        article.writerBio ||
+        (!hasSpecificAuthor && isAdmin
+            ? "Official renewable energy news, policy insights, and technology breakthroughs published by the EnergyGurus editorial team."
+            : null);
+
+    const displayLinkedIn =
+        article.authorLinkedIn ||
+        article.writerSocialLinks?.linkedin ||
+        (!hasSpecificAuthor && isAdmin ? "https://linkedin.com/company/energygurus" : null);
+
+    const displayFacebook =
+        article.authorFacebook ||
+        article.writerSocialLinks?.facebook ||
+        null;
+
+    const displayInstagram =
+        article.authorInstagram ||
+        article.writerSocialLinks?.instagram ||
+        null;
+
+    const displayTwitter =
+        article.authorTwitter ||
+        article.writerSocialLinks?.twitter ||
+        null;
+
+    const displayTiktok =
+        article.authorTiktok ||
+        article.writerSocialLinks?.tiktok ||
+        null;
+
+    const displayEmail =
+        article.authorEmail ||
+        article.userEmail ||
+        (!hasSpecificAuthor && isAdmin ? "contact@energygurus.online" : null);
 
     return (
         <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 min-h-screen">
@@ -240,17 +269,24 @@ export default async function NewsArticlePage({
                         </h1>
                         
                         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-b border-line py-4 text-sm text-slate-custom font-ibm-plex-mono">
-                            <div className="flex items-center gap-2.5">
+                            <div className="flex items-center gap-3">
                                 <Avatar className="h-8 w-8 border border-line">
                                     <AvatarImage src={displayPictureUrl || undefined} />
                                     <AvatarFallback className="bg-amber/10 text-amber font-bold text-xs">
                                         {displayName.substring(0, 2).toUpperCase()}
                                     </AvatarFallback>
                                 </Avatar>
-                                <span className="font-semibold text-ink">
-                                    {isAdmin ? "By Energy Gurus" : `By ${displayName}`}
-                                </span>
-                                {!isAdmin && (
+                                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                    <span className="font-semibold text-ink">
+                                        By {displayName}
+                                    </span>
+                                    {displayDesignation && (
+                                        <span className="text-slate-500 font-normal text-xs sm:text-sm">
+                                            • {displayDesignation}
+                                        </span>
+                                    )}
+                                </div>
+                                {isWriter && (
                                     <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
                                         Writer
                                     </span>
@@ -309,6 +345,9 @@ export default async function NewsArticlePage({
                                     {displayDesignation && (
                                         <p className="text-xs text-slate-custom font-medium flex items-center gap-1.5 mt-1">
                                             <Briefcase className="w-3.5 h-3.5 text-amber" /> {displayDesignation}
+                                            {article.authorOrganization && (
+                                                <span className="text-slate-400 font-normal">({article.authorOrganization})</span>
+                                            )}
                                         </p>
                                     )}
                                 </div>

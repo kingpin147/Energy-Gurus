@@ -30,6 +30,9 @@ const DEFAULT_NEWS_CATEGORIES = [
   "Policy & Incentives",
   "Product Launches",
   "Project Sign Off",
+  "Battery Energy Storage System",
+  "Technology & Innovation",
+  "Guidelines",
 ];
 
 interface NewsFormProps {

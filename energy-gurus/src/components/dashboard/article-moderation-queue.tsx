@@ -20,6 +20,8 @@ import { adminReviewArticleAction } from "@/lib/actions/news";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import Link from "next/link";
+import { FormattedMarkdown } from "@/components/news/formatted-markdown";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 export interface ArticleModerationItem {
   id: string;
@@ -180,8 +182,8 @@ export function ArticleModerationQueue({ articles }: { articles: ArticleModerati
                   </div>
 
                   {/* Article Excerpt */}
-                  <div className="bg-paper/30 p-4 rounded-2xl border border-line text-sm text-slate-700 leading-relaxed max-h-32 overflow-hidden text-ellipsis">
-                    <div dangerouslySetInnerHTML={{ __html: art.content.slice(0, 300) + "..." }} />
+                  <div className="bg-paper/40 p-4 rounded-2xl border border-line text-sm text-slate-700 leading-relaxed max-h-36 overflow-hidden">
+                    <FormattedMarkdown content={art.content.slice(0, 320) + (art.content.length > 320 ? "..." : "")} className="text-xs md:text-sm" />
                   </div>
 
                   {/* Feedback Box if open */}
@@ -225,10 +227,18 @@ export function ArticleModerationQueue({ articles }: { articles: ArticleModerati
                   {/* Action Bar */}
                   <div className="flex items-center justify-between gap-4 pt-2 border-t border-line">
                     <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPreviewArticle(art)}
+                        className="rounded-xl text-xs font-bold border-line hover:bg-paper"
+                      >
+                        <Eye className="w-3.5 h-3.5 mr-1 text-amber" /> Preview Article
+                      </Button>
                       {art.slug && art.isPublished && (
                         <Button asChild variant="ghost" size="sm" className="rounded-xl text-xs font-bold text-teal">
                           <Link href={`/news/${art.slug}`} target="_blank">
-                            <Eye className="w-3.5 h-3.5 mr-1" /> View Live
+                            <ExternalLink className="w-3.5 h-3.5 mr-1" /> View Live
                           </Link>
                         </Button>
                       )}
@@ -286,6 +296,87 @@ export function ArticleModerationQueue({ articles }: { articles: ArticleModerati
             );
           })}
         </div>
+      )}
+
+      {/* Full Article Preview Dialog Modal */}
+      {previewArticle && (
+        <Dialog open={!!previewArticle} onOpenChange={(open) => !open && setPreviewArticle(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-6 md:p-10 rounded-3xl bg-white border border-line">
+            <DialogHeader className="space-y-3 border-b border-line pb-4">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-teal bg-teal/10 px-2.5 py-0.5 rounded-full font-bold">
+                  {previewArticle.category}
+                </span>
+                <Badge className="rounded-full text-[10px] uppercase font-black">
+                  {previewArticle.isPublished ? "Published" : previewArticle.status.replace("_", " ")}
+                </Badge>
+              </div>
+              <DialogTitle className="font-fraunces text-2xl md:text-3xl font-bold text-navy-deep leading-tight">
+                {previewArticle.title}
+              </DialogTitle>
+              <DialogDescription className="text-xs text-slate-custom flex items-center gap-2">
+                <User className="w-3.5 h-3.5 text-amber" />
+                <span>Author: <strong>{previewArticle.authorName || "Contributing Writer"}</strong></span>
+                {previewArticle.authorDesignation && <span>({previewArticle.authorDesignation})</span>}
+                <span>• Updated: {format(new Date(previewArticle.updatedAt), "MMMM d, yyyy")}</span>
+              </DialogDescription>
+            </DialogHeader>
+
+            {previewArticle.imageUrl && (
+              <div className="my-6 rounded-2xl overflow-hidden border border-line aspect-[21/9] max-h-[360px]">
+                <img
+                  src={previewArticle.imageUrl}
+                  alt={previewArticle.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
+            <div className="py-4">
+              <FormattedMarkdown content={previewArticle.content} />
+            </div>
+
+            <div className="flex items-center justify-between gap-4 pt-6 border-t border-line mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setPreviewArticle(null)}
+                className="rounded-xl font-bold text-xs"
+              >
+                Close Preview
+              </Button>
+              <div className="flex items-center gap-2">
+                {!previewArticle.isPublished && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const art = previewArticle;
+                        setPreviewArticle(null);
+                        setActiveFeedbackId(art.id);
+                        setFeedbackText(art.adminFeedback || "");
+                      }}
+                      className="rounded-xl font-bold border-red-200 text-red-600 hover:bg-red-50 text-xs"
+                    >
+                      <AlertTriangle className="w-3.5 h-3.5 mr-1" /> Request Changes
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        const art = previewArticle;
+                        setPreviewArticle(null);
+                        handleApprove(art.id, art.title);
+                      }}
+                      className="rounded-xl font-bold bg-green-700 text-white hover:bg-green-800 text-xs"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Approve & Publish Live
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

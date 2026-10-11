@@ -1,28 +1,30 @@
 import { db } from "@/db";
 import { news } from "@/db/schema";
-import { eq, desc, and, or, isNull, isNotNull, lte } from "drizzle-orm";
+import { eq, desc, and, or, isNull, isNotNull, lte, sql } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import Link from "next/link";
 import { AdBanner } from "@/components/shared/AdBanner";
 import { format } from "date-fns";
 import { Newspaper } from "lucide-react";
 import { NewsFilters } from "@/components/news/news-filters";
+import { cleanArticleExcerpt } from "@/components/news/formatted-markdown";
 import type { Metadata } from "next";
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ category?: string }> }): Promise<Metadata> {
     const { category } = await searchParams;
+    const cleanCategory = (category || "All").trim();
+    const isFiltered = cleanCategory.toLowerCase() !== "all";
     const baseUrl = "https://www.energygurus.online";
-    const isFiltered = category && category !== "All";
     
     const title = isFiltered 
-        ? `${category} - Solar News & Updates | EnergyGurus`
+        ? `${cleanCategory} - Solar News & Updates | EnergyGurus`
         : "Solar News & Industry Updates in Pakistan | EnergyGurus";
         
     const description = isFiltered
-        ? `Stay updated with the latest ${category} in Pakistan's solar sector, policy reforms, and market developments.`
+        ? `Stay updated with the latest ${cleanCategory} in Pakistan's solar sector, policy reforms, and market developments.`
         : "Stay up to date with the latest from Pakistan's solar industry, net metering policies, technology breakthroughs, and project updates.";
 
-    const url = isFiltered ? `${baseUrl}/news?category=${encodeURIComponent(category)}` : `${baseUrl}/news`;
+    const url = isFiltered ? `${baseUrl}/news?category=${encodeURIComponent(cleanCategory)}` : `${baseUrl}/news`;
 
     return {
         title,
@@ -62,40 +64,53 @@ const DEFAULT_CATEGORIES = [
     "Policy & Incentives",
     "Product Launches",
     "Project Sign Off",
+    "Battery Energy Storage System",
+    "Technology & Innovation",
+    "Guidelines",
 ];
 
-const getNews = unstable_cache(
-    async (category?: string) => {
-        const now = new Date();
-        // An article is ONLY visible publicly if it has been formally approved and published (isPublished = true)
-        let conditions = [
-            eq(news.isPublished, true),
-            or(
-                isNull(news.publishedAt),
-                lte(news.publishedAt, now)
-            )
-        ];
-        
-        if (category && category !== "All") {
-            conditions.push(eq(news.category, category));
-        }
+async function getNews(category: string = "All") {
+    const cleanCategory = (category || "All").trim();
+    const isAll = cleanCategory.toLowerCase() === "all";
+    const cacheKey = `news-list-v4-${cleanCategory.toLowerCase()}`;
 
-        const articles = await db.select().from(news)
-            .where(and(...conditions))
-            .orderBy(desc(news.publishedAt));
+    return unstable_cache(
+        async () => {
+            const now = new Date();
+            // An article is ONLY visible publicly if it has been formally approved and published (isPublished = true)
+            let conditions = [
+                eq(news.isPublished, true),
+                or(
+                    isNull(news.publishedAt),
+                    lte(news.publishedAt, now)
+                )
+            ];
+            
+            if (!isAll) {
+                conditions.push(
+                    sql`LOWER(TRIM(${news.category})) = LOWER(${cleanCategory})`
+                );
+            }
 
-        // Fetch distinct categories from database to dynamically display custom categories
-        const distinctCats = await db.selectDistinct({ category: news.category }).from(news);
-        const dbCategories = distinctCats.map(c => c.category).filter(Boolean);
+            const articles = await db.select().from(news)
+                .where(and(...conditions))
+                .orderBy(desc(news.publishedAt));
 
-        const categorySet = new Set(["All", ...DEFAULT_CATEGORIES, ...dbCategories]);
-        const categoriesList = Array.from(categorySet);
+            // Fetch distinct categories from database to dynamically display custom categories
+            const distinctCats = await db.selectDistinct({ category: news.category }).from(news);
+            const dbCategories = distinctCats
+                .map(c => c.category?.trim())
+                .filter(Boolean) as string[];
 
-        return { articles, categoriesList };
-    },
-    ['news-list-v3'],
-    { revalidate: 60, tags: ['news'] }
-);
+            const categorySet = new Set(["All", ...DEFAULT_CATEGORIES, ...dbCategories]);
+            const categoriesList = Array.from(categorySet);
+
+            return { articles, categoriesList };
+        },
+        [cacheKey],
+        { revalidate: 30, tags: ['news'] }
+    )();
+}
 
 export default async function NewsPage({
     searchParams
@@ -103,11 +118,14 @@ export default async function NewsPage({
     searchParams: Promise<{ category?: string }>;
 }) {
     const { category = "All" } = await searchParams;
-    const { articles, categoriesList } = await getNews(category);
+    const cleanCategory = (category || "All").trim();
+    const isAll = cleanCategory.toLowerCase() === "all";
+
+    const { articles, categoriesList } = await getNews(cleanCategory);
     
-    // Featured is the first article if category is "All", otherwise no specific featured unless we want to
-    const featured = category === "All" && articles.length > 0 ? articles[0] : null;
-    const gridArticles = category === "All" ? articles.slice(1) : articles;
+    // Featured is the first article if category is "All", otherwise show all matching articles in the grid
+    const featured = isAll && articles.length > 0 ? articles[0] : null;
+    const gridArticles = isAll ? articles.slice(1) : articles;
 
     return (
         <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 min-h-screen">
@@ -163,7 +181,7 @@ export default async function NewsPage({
                                         {featured.title}
                                     </h2>
                                     <p className="text-slate-custom text-[0.98rem] mb-4 line-clamp-3">
-                                        {featured.content}
+                                        {cleanArticleExcerpt(featured.content, 180)}
                                     </p>
                                     <div className="font-ibm-plex-mono text-[0.78rem] text-slate-custom mb-[18px]">
                                         {featured.publishedAt ? format(featured.publishedAt, "MMM d, yyyy") : ""}
@@ -200,7 +218,7 @@ export default async function NewsPage({
                                             {article.title}
                                         </h3>
                                         <p className="text-slate-custom text-[0.88rem] flex-grow line-clamp-2">
-                                            {article.content}
+                                            {cleanArticleExcerpt(article.content, 140)}
                                         </p>
                                         <div className="font-ibm-plex-mono text-[0.76rem] text-slate-custom mt-3.5">
                                             {article.publishedAt ? format(article.publishedAt, "MMM d, yyyy") : ""}
@@ -212,11 +230,24 @@ export default async function NewsPage({
                     </div>
 
                     {articles.length === 0 && (
-                        <div className="py-20 text-center bg-white border border-line rounded-[4px]">
-                            <h3 className="font-space-grotesk font-semibold text-xl text-ink mb-2">No News Found</h3>
-                            <p className="text-slate-custom text-[0.95rem]">
-                                Check back later for more updates.
+                        <div className="py-20 text-center bg-white border border-line rounded-2xl max-w-xl mx-auto p-8 shadow-sm">
+                            <div className="w-12 h-12 bg-amber/10 text-amber rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <Newspaper className="w-6 h-6" />
+                            </div>
+                            <h3 className="font-space-grotesk font-semibold text-xl text-ink mb-2">No Articles Found</h3>
+                            <p className="text-slate-custom text-sm mb-6 leading-relaxed">
+                                {isAll 
+                                    ? "Check back later for newly published news and articles."
+                                    : `No published articles are currently filed under "${cleanCategory}". Try selecting another category.`}
                             </p>
+                            {!isAll && (
+                                <Link
+                                    href="/news"
+                                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-ink text-white font-semibold text-xs hover:bg-ink/90 transition-colors"
+                                >
+                                    Browse All Categories →
+                                </Link>
+                            )}
                         </div>
                     )}
                     

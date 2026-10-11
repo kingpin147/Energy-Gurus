@@ -9,13 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { createNews, updateNews } from "@/lib/actions/news";
 import { toast } from "sonner";
 import {
-  FileText,
+  Newspaper,
   Loader2,
   User,
   ShieldCheck,
   AlertTriangle,
-  Send,
-  ArrowLeft
+  ArrowLeft,
+  X
 } from "lucide-react";
 import { useR2Upload } from "@/lib/hooks/use-r2-upload";
 import { UploadZone } from "@/components/ui/upload-zone";
@@ -27,8 +27,9 @@ const DEFAULT_NEWS_CATEGORIES = [
   "Policy & Incentives",
   "Product Launches",
   "Project Sign Off",
+  "Battery Energy Storage System",
   "Technology & Innovation",
-  "Market Analysis"
+  "Guidelines",
 ];
 
 interface WriterArticleFormProps {
@@ -148,8 +149,8 @@ export function WriterArticleForm({ initialData, writerProfile }: WriterArticleF
 
       {/* Profile Verification Warning if not approved */}
       {!isProfileApproved && (
-        <div className="p-5 rounded-2xl bg-amber/15 border border-amber/30 flex items-start gap-4">
-          <div className="w-10 h-10 rounded-xl bg-amber/20 text-amber-deep flex items-center justify-center shrink-0">
+        <div className="p-5 rounded-3xl bg-amber/15 border border-amber/30 flex items-start gap-4">
+          <div className="w-10 h-10 rounded-2xl bg-amber/20 text-amber-deep flex items-center justify-center shrink-0">
             <AlertTriangle className="w-6 h-6" />
           </div>
           <div>
@@ -169,13 +170,13 @@ export function WriterArticleForm({ initialData, writerProfile }: WriterArticleF
 
       {/* Admin feedback alert if changes requested */}
       {initialData?.adminFeedback && (
-        <div className="p-5 rounded-2xl bg-red-50 border border-red-200 flex items-start gap-4">
-          <div className="w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center shrink-0">
+        <div className="p-5 rounded-3xl bg-red-50 border border-red-200 flex items-start gap-4">
+          <div className="w-10 h-10 rounded-2xl bg-red-100 text-red-700 flex items-center justify-center shrink-0">
             <AlertTriangle className="w-6 h-6" />
           </div>
           <div>
             <h4 className="font-bold text-red-900">Admin Feedback on this Article</h4>
-            <p className="text-sm text-red-700 mt-1 leading-relaxed bg-white/60 p-3 rounded-lg border border-red-200">
+            <p className="text-sm text-red-700 mt-1 leading-relaxed bg-white/60 p-3 rounded-xl border border-red-200">
               {initialData.adminFeedback}
             </p>
             <p className="text-xs text-red-600 mt-2">
@@ -185,32 +186,37 @@ export function WriterArticleForm({ initialData, writerProfile }: WriterArticleF
         </div>
       )}
 
-      {/* Form */}
+      {/* Form matching NewsForm card architecture exactly */}
       <form onSubmit={onSubmit} className="space-y-8">
-        {/* Article Meta */}
-        <div className="bg-white border border-line rounded-3xl p-6 md:p-8 space-y-6 shadow-sm">
+        {/* 1. ARTICLE GENERAL INFORMATION */}
+        <div className="space-y-5 bg-white p-6 rounded-3xl border border-line shadow-sm">
+          <h3 className="text-base font-bold text-ink flex items-center gap-2 border-b border-line pb-3">
+            <Newspaper className="w-5 h-5 text-amber" /> {initialData ? "Edit Article" : "Article General Information"}
+          </h3>
+
           <div className="space-y-2">
-            <Label htmlFor="title" className="text-xs font-bold uppercase tracking-wider text-slate-custom">
+            <Label htmlFor="title" className="text-sm font-bold text-ink">
               Article Title <span className="text-red-500">*</span>
             </Label>
             <Input
               id="title"
-              placeholder="e.g. Navigating Net Metering Regulations in Pakistan: 2026 Comprehensive Guide"
+              name="title"
+              required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              required
-              className="rounded-xl h-12 text-base md:text-lg font-bold border-line bg-paper/5 focus:ring-amber"
+              placeholder="Enter an engaging title..."
+              className="h-11 rounded-xl bg-slate-50 border-line text-sm focus-visible:ring-amber"
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase tracking-wider text-slate-custom">
+              <Label htmlFor="category" className="text-sm font-bold text-ink">
                 Category <span className="text-red-500">*</span>
               </Label>
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="rounded-xl h-11 border-line bg-paper/5">
-                  <SelectValue placeholder="Select Category" />
+                <SelectTrigger id="category" className="h-11 rounded-xl bg-slate-50 border-line font-medium text-sm">
+                  <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
                   {DEFAULT_NEWS_CATEGORIES.map((cat) => (
@@ -218,107 +224,141 @@ export function WriterArticleForm({ initialData, writerProfile }: WriterArticleF
                       {cat}
                     </SelectItem>
                   ))}
-                  <SelectItem value="custom">+ Custom Category</SelectItem>
+                  <SelectItem value="custom" className="text-amber font-bold">
+                    + Add Custom Category...
+                  </SelectItem>
                 </SelectContent>
               </Select>
+
+              {selectedCategory === "custom" && (
+                <div className="pt-2 space-y-1">
+                  <Label htmlFor="customCategoryInput" className="text-xs font-bold text-slate-custom uppercase tracking-wider">
+                    Custom Category Name <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="customCategoryInput"
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    placeholder="e.g. Battery Storage, Solar Tariffs"
+                    required
+                    className="h-10 rounded-xl bg-slate-50 border-amber/50 text-sm focus-visible:ring-amber"
+                  />
+                </div>
+              )}
             </div>
-
-            {selectedCategory === "custom" && (
-              <div className="space-y-2">
-                <Label htmlFor="customCat" className="text-xs font-bold uppercase tracking-wider text-slate-custom">
-                  Custom Category Name <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="customCat"
-                  placeholder="e.g. Energy Storage"
-                  value={customCategory}
-                  onChange={(e) => setCustomCategory(e.target.value)}
-                  required
-                  className="rounded-xl h-11 border-line bg-paper/5 focus:ring-amber"
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Cover Image Upload (10 MB Limit Enforced) */}
-          <div className="space-y-2">
-            <Label className="text-xs font-bold uppercase tracking-wider text-slate-custom">
-              Featured Cover Image (Max 10 MB)
-            </Label>
-            <UploadZone
-              onUpload={handleCoverUpload}
-              isUploading={isUploading}
-              value={imageUrl}
-              title="Upload Article Cover Image"
-              description="Recommended ratio 16:9 or 21:9 (PNG, JPG, WebP up to 10MB)"
-              maxSizeMB={10}
-              accept="image/*"
-            />
           </div>
         </div>
 
-        {/* Article Body */}
-        <div className="bg-white border border-line rounded-3xl p-6 md:p-8 space-y-4 shadow-sm">
-          <div>
-            <Label className="text-xs font-bold uppercase tracking-wider text-slate-custom">
+        {/* 2. COVER IMAGE UPLOAD (Max 10 MB Enforced) */}
+        <div className="space-y-3 bg-white p-6 rounded-3xl border border-line shadow-sm">
+          <Label className="text-sm font-bold text-ink">Article Cover Image</Label>
+          <UploadZone
+            onUpload={handleCoverUpload}
+            isUploading={isUploading}
+            value={imageUrl}
+            title="Click or drag to upload cover image"
+            description="High resolution PNG or JPG, up to 10MB"
+            maxSizeMB={10}
+            accept="image/*"
+          />
+          {imageUrl && (
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setImageUrl("")}
+                className="text-xs text-rose-600 hover:bg-rose-50 font-bold"
+              >
+                <X className="w-3.5 h-3.5 mr-1" /> Remove Cover Image
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* 3. RICH FORMATTING CONTENT EDITOR (Exact same tools: B, I, H2, H3, Lists, Quote, Link, Image, Divider) */}
+        <div className="space-y-3 bg-white p-6 rounded-3xl border border-line shadow-sm">
+          <div className="flex items-center justify-between border-b border-line pb-3">
+            <Label className="text-sm font-bold text-ink">
               Article Content <span className="text-red-500">*</span>
             </Label>
-            <p className="text-xs text-slate-custom mt-0.5 mb-3">
-              Use headers, bullet points, quotes, and links to format your article clearly.
-            </p>
           </div>
-
           <TiptapEditor content={content} onChange={setContent} />
         </div>
 
-        {/* Verified Author Card Preview */}
-        {writerProfile && (
-          <div className="bg-white border border-line rounded-3xl p-6 space-y-3 shadow-sm">
-            <div className="flex items-center gap-3">
-              <ShieldCheck className="w-5 h-5 text-purple-600" />
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-custom">
-                Author Attribution Preview
-              </span>
+        {/* 4. AUTHOR ATTRIBUTION (Automatically derived from Writer Profile - input fields omitted for writers and left to admin only) */}
+        <div className="space-y-4 bg-white p-6 rounded-3xl border border-line shadow-sm">
+          <div className="flex items-center justify-between border-b border-line pb-3">
+            <div className="flex items-center gap-2">
+              <User className="w-5 h-5 text-amber" />
+              <h3 className="text-base font-bold text-ink">Author Details</h3>
             </div>
-            <div className="flex items-center gap-4 bg-paper/30 p-4 rounded-2xl border border-line">
-              <div className="w-12 h-12 rounded-xl bg-amber/10 text-amber font-bold flex items-center justify-center shrink-0 border border-line overflow-hidden">
-                {writerProfile.pictureUrl ? (
-                  <img src={writerProfile.pictureUrl} alt={writerProfile.name} className="w-full h-full object-cover" />
-                ) : (
-                  writerProfile.name.substring(0, 2).toUpperCase()
-                )}
-              </div>
-              <div>
-                <p className="font-bold text-ink">{writerProfile.name}</p>
-                <p className="text-xs text-slate-custom">{writerProfile.designation || "Contributing Writer"}</p>
-              </div>
-            </div>
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> Linked to Writer Profile
+            </span>
           </div>
-        )}
 
-        {/* Submit Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-line">
-          <p className="text-xs text-slate-custom max-w-md">
-            🔒 <strong>Approval Notice:</strong> Nothing appears live without administrator approval. Your article will
-            be sent to the editorial review queue.
+          <p className="text-xs text-slate-custom leading-relaxed">
+            Your name, designation, photo, and social links are automatically populated from your verified Writer Profile. Custom author overrides are reserved for administrators.
           </p>
 
-          <Button
-            type="submit"
-            disabled={isLoading || isUploading || !isProfileApproved}
-            className="rounded-xl font-bold h-12 px-8 bg-amber text-ink hover:bg-amber/90 shadow-lg shadow-amber/20"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting Article...
-              </>
-            ) : (
-              <>
-                <Send className="w-4 h-4 mr-2" />
-                {initialData?.id ? "Resubmit Article for Review" : "Submit Article for Review"}
-              </>
-            )}
-          </Button>
+          <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-line">
+            <div className="w-12 h-12 rounded-xl bg-amber/10 text-amber font-bold flex items-center justify-center shrink-0 border border-line overflow-hidden">
+              {writerProfile?.pictureUrl ? (
+                <img src={writerProfile.pictureUrl} alt={writerProfile.name || "Writer"} className="w-full h-full object-cover" />
+              ) : (
+                (writerProfile?.name || "Writer").substring(0, 2).toUpperCase()
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <p className="font-bold text-ink text-sm truncate">{writerProfile?.name || "Author Name"}</p>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
+                  Writer
+                </span>
+              </div>
+              <p className="text-xs text-slate-custom truncate">{writerProfile?.designation || "Contributing Columnist"}</p>
+            </div>
+            <Button asChild variant="outline" size="sm" className="rounded-xl text-xs font-bold border-line shrink-0">
+              <Link href="/dashboard/writer">
+                Edit Profile
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        {/* 5. FOOTER ACTIONS */}
+        <div className="pt-4 border-t border-line flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <p className="text-xs text-slate-custom">
+            🔒 <strong>Approval Notice:</strong> Nothing appears live without administrator approval. Your article will be submitted to the review queue.
+          </p>
+          <div className="flex items-center justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push("/dashboard/writer/articles")}
+              disabled={isLoading}
+              className="rounded-xl h-11 px-6 font-bold"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isLoading || isUploading || !isProfileApproved}
+              className="rounded-xl h-11 px-6 font-bold bg-amber text-ink hover:bg-amber/90 shadow-sm"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...
+                </>
+              ) : (
+                <>
+                  <Newspaper className="w-4 h-4 mr-2" />
+                  {initialData?.id ? "Update & Resubmit Article" : "Submit Article for Review"}
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </form>
     </div>
