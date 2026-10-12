@@ -6,7 +6,7 @@ import { AdBanner } from "@/components/shared/AdBanner";
 import { format } from "date-fns";
 import { Newspaper } from "lucide-react";
 import { NewsFilters } from "@/components/news/news-filters";
-import { cleanArticleExcerpt } from "@/components/news/formatted-markdown";
+import { cleanArticleExcerpt } from "@/lib/utils/news";
 import type { Metadata } from "next";
 
 function formatDateSafe(dateVal: Date | string | null | undefined): string {
