@@ -28,9 +28,13 @@ export function LiveQAForm() {
             setThumbnailUrl(publicUrl);
             setFileName(file.name);
             toast.success("Thumbnail uploaded");
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error("Thumbnail upload failed");
+            toast.error(error?.message || "Thumbnail upload failed");
+        } finally {
+            if (thumbnailInputRef.current) {
+                thumbnailInputRef.current.value = "";
+            }
         }
     };
 
@@ -43,11 +47,14 @@ export function LiveQAForm() {
             const { publicUrl } = await uploadFile(file, "expert-photos");
             setExpertPhotoUrl(publicUrl);
             toast.success("Expert photo uploaded");
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error("Expert photo upload failed");
+            toast.error(error?.message || "Expert photo upload failed");
         } finally {
             setLocalIsExpertUploading(false);
+            if (expertPhotoInputRef.current) {
+                expertPhotoInputRef.current.value = "";
+            }
         }
     };
 

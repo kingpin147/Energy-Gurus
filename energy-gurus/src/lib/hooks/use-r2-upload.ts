@@ -73,7 +73,14 @@ export function useR2Upload() {
                         reject(new Error("Failed to parse server upload response."));
                     }
                 } else {
-                    const errorText = xhr.responseText || "Upload failed";
+                    let errorText = xhr.responseText || "Upload failed";
+                    if (xhr.status === 401) {
+                        errorText = "Session expired or unauthorized. Please sign in again.";
+                    } else if (xhr.status === 413) {
+                        errorText = "File is too large to upload (payload size exceeded).";
+                    } else if (errorText.includes("<!DOCTYPE") || errorText.includes("<html")) {
+                        errorText = `Upload failed (Server HTTP ${xhr.status}).`;
+                    }
                     
                     // Simple retry on 5xx or rate-limit status codes
                     if (retriesLeft > 0 && xhr.status >= 500) {
@@ -100,7 +107,7 @@ export function useR2Upload() {
                         reject(err);
                     }
                 } else {
-                    reject(new Error("Network error during file upload."));
+                    reject(new Error("Network connection error during file upload. Please check your internet connection."));
                 }
             };
 

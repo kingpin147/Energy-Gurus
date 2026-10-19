@@ -23,9 +23,13 @@ export function PodcastForm() {
             setThumbnailUrl(publicUrl);
             setFileName(file.name);
             toast.success("Thumbnail uploaded");
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error("Failed to upload thumbnail");
+            toast.error(error?.message || "Failed to upload thumbnail");
+        } finally {
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
         }
     };
 
