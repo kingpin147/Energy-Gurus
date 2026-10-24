@@ -18,7 +18,8 @@ import {
     HeadphonesIcon,
     MousePointerClick,
     Star,
-    User
+    User,
+    UserCheck
 } from "lucide-react";
 import { UserRole } from "@/db/schema";
 
@@ -29,7 +30,9 @@ export default function Sidebar({ role }: { role: UserRole }) {
 
     const adminLinks = [
         { href: "/dashboard", icon: <LayoutDashboard className="w-4 h-4" />, label: "Overview" },
-        { href: "/dashboard/admin/onboard-epc", icon: <Briefcase className="w-4 h-4" />, label: "EPC Installers & Onboarding" },
+        { href: "/dashboard/admin/onboard-epc", icon: <Briefcase className="w-4 h-4" />, label: "EPC Installers Hub" },
+        { href: "/dashboard/admin/onboard-brand", icon: <Building2 className="w-4 h-4" />, label: "Brands Hub & Onboarding" },
+        { href: "/dashboard/admin/onboard-writer", icon: <UserCheck className="w-4 h-4" />, label: "Writers Hub & Onboarding" },
         { href: "/dashboard/moderation", icon: <ShieldCheck className="w-4 h-4" />, label: "Submissions & Moderation" },
         { href: "/dashboard/admin/certifications", icon: <ShieldCheck className="w-4 h-4" />, label: "Certification Approvals" },
         { href: "/dashboard/content", icon: <Video className="w-4 h-4" />, label: "Content (Podcast/QA)" },

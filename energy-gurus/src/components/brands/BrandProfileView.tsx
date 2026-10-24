@@ -323,8 +323,20 @@ export function BrandProfileView({
   });
 
   // Capacity calculation
-  const capacityNumber = brand.annualCapacity || (brand.brandName.toLowerCase().includes("longi") || brand.brandName.toLowerCase().includes("jinko") ? "45 GW+" : "17 GW+");
-  const capacityTitle = brand.brandName.toLowerCase().includes("longi") || brand.brandName.toLowerCase().includes("jinko") ? "Panel capacity" : "Inverter capacity";
+  let parsedCapacity: string | null = null;
+  if (typeof brand.annualCapacity === "string" && brand.annualCapacity.trim()) {
+    parsedCapacity = brand.annualCapacity.trim();
+  } else if (brand.annualCapacity && typeof brand.annualCapacity === "object") {
+    const cap = brand.annualCapacity as Record<string, any>;
+    const val = cap.inverters || cap.panels || cap.batteries || cap.bess || Object.values(cap).find((v: any) => typeof v === "string" && v.trim());
+    if (typeof val === "string" && val.trim()) {
+      parsedCapacity = val.trim();
+    }
+  }
+
+  const isPanelBrand = (brand.brandName || "").toLowerCase().includes("longi") || (brand.brandName || "").toLowerCase().includes("jinko");
+  const capacityNumber = parsedCapacity || (isPanelBrand ? "45 GW+" : "17 GW+");
+  const capacityTitle = isPanelBrand ? "Panel capacity" : "Inverter capacity";
 
   return (
     <div className="bg-cream text-ink min-h-screen">

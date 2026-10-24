@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { users, brands, epcInstallers, invitations } from "@/db/schema";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users as UsersIcon, ShieldAlert, User as UserIcon } from "lucide-react";
@@ -227,6 +228,28 @@ export default async function UserManagementPage({
                                                     </td>
                                                     <td className="p-6">
                                                         <div className="flex items-center justify-end gap-2">
+                                                            {user.role === 'epc' && (
+                                                                <Button asChild variant="outline" size="sm" className="h-8 px-2.5 rounded-lg text-xs font-bold border-line text-slate-custom hover:text-ink hover:bg-paper">
+                                                                    <Link href="/dashboard/admin/onboard-epc">
+                                                                        EPC Hub
+                                                                    </Link>
+                                                                </Button>
+                                                            )}
+                                                            {user.role === 'brand' && (
+                                                                <Button asChild variant="outline" size="sm" className="h-8 px-2.5 rounded-lg text-xs font-bold border-line text-slate-custom hover:text-ink hover:bg-paper">
+                                                                    <Link href="/dashboard/admin/onboard-brand">
+                                                                        Brand Hub
+                                                                    </Link>
+                                                                </Button>
+                                                            )}
+                                                            {user.role === 'writer' && (
+                                                                <Button asChild variant="outline" size="sm" className="h-8 px-2.5 rounded-lg text-xs font-bold border-line text-slate-custom hover:text-ink hover:bg-paper">
+                                                                    <Link href="/dashboard/admin/onboard-writer">
+                                                                        Writer Hub
+                                                                    </Link>
+                                                                </Button>
+                                                            )}
+
                                                             {!isSuperAdmin && (user.role === 'epc' || user.role === 'brand' || user.role === 'writer') && (
                                                                 <UserStatusButton
                                                                     userId={user.id}

@@ -31,6 +31,36 @@ export async function getMyWriterArticles() {
   }
 }
 
+export async function getApprovedWritersForAdmin() {
+  try {
+    const role = await getUserRole();
+    if (role !== "super-admin" && role !== "admin") {
+      return [];
+    }
+
+    const list = await db
+      .select({
+        id: writerProfiles.id,
+        userId: writerProfiles.userId,
+        name: writerProfiles.name,
+        pictureUrl: writerProfiles.pictureUrl,
+        designation: writerProfiles.designation,
+        bio: writerProfiles.bio,
+        socialLinks: writerProfiles.socialLinks,
+        email: users.email,
+      })
+      .from(writerProfiles)
+      .innerJoin(users, eq(writerProfiles.userId, users.id))
+      .where(eq(writerProfiles.status, "approved"))
+      .orderBy(writerProfiles.name);
+
+    return list;
+  } catch (error) {
+    console.error("Failed to fetch approved writers for admin:", error);
+    return [];
+  }
+}
+
 export async function createNews(formData: FormData) {
   try {
     const { userId: clerkId } = await auth();
@@ -79,6 +109,7 @@ export async function createNews(formData: FormData) {
     let authorTiktok: string | null = null;
     let authorBio: string | null = null;
     let authorEmail: string | null = user.email || null;
+    let finalAuthorId = user.id;
 
     let isPublished = false;
     let articleStatus: "draft" | "pending_review" | "changes_requested" | "published" = "draft";
@@ -117,13 +148,50 @@ export async function createNews(formData: FormData) {
       articleStatus = "pending_review";
       finalPublishedAt = null;
     } else {
-      // Admin creation
-      authorName = (formData.get("authorName") as string) || "Energy Gurus Team";
-      authorPictureUrl = (formData.get("authorPictureUrl") as string) || null;
-      authorDesignation = (formData.get("authorDesignation") as string) || "Official Publication";
-      authorOrganization = (formData.get("authorOrganization") as string) || "EnergyGurus";
-      authorLinkedIn = (formData.get("authorLinkedIn") as string) || null;
-      authorEmail = (formData.get("authorEmail") as string) || user.email || null;
+      // Admin creation: check authorMode
+      const authorMode = (formData.get("authorMode") as string) || "manual";
+      const writerUserId = (formData.get("writerUserId") as string)?.trim();
+
+      if (authorMode === "writer" && writerUserId) {
+        const [selectedWriter] = await db
+          .select({
+            id: users.id,
+            email: users.email,
+            name: users.name,
+            profileName: writerProfiles.name,
+            pictureUrl: writerProfiles.pictureUrl,
+            designation: writerProfiles.designation,
+            bio: writerProfiles.bio,
+            socialLinks: writerProfiles.socialLinks,
+          })
+          .from(users)
+          .leftJoin(writerProfiles, eq(users.id, writerProfiles.userId))
+          .where(eq(users.id, writerUserId))
+          .limit(1);
+
+        if (selectedWriter) {
+          finalAuthorId = selectedWriter.id;
+          authorName = selectedWriter.profileName || selectedWriter.name || "Energy Gurus Writer";
+          authorPictureUrl = selectedWriter.pictureUrl || null;
+          authorDesignation = selectedWriter.designation || null;
+          authorOrganization = null;
+          authorBio = selectedWriter.bio || null;
+          authorLinkedIn = selectedWriter.socialLinks?.linkedin || null;
+          authorFacebook = selectedWriter.socialLinks?.facebook || null;
+          authorInstagram = selectedWriter.socialLinks?.instagram || null;
+          authorTwitter = selectedWriter.socialLinks?.twitter || null;
+          authorTiktok = selectedWriter.socialLinks?.tiktok || null;
+          authorEmail = selectedWriter.email || null;
+        }
+      } else {
+        // Manual author details
+        authorName = (formData.get("authorName") as string) || "Energy Gurus Team";
+        authorPictureUrl = (formData.get("authorPictureUrl") as string) || null;
+        authorDesignation = (formData.get("authorDesignation") as string) || "Official Publication";
+        authorOrganization = (formData.get("authorOrganization") as string) || "EnergyGurus";
+        authorLinkedIn = (formData.get("authorLinkedIn") as string) || null;
+        authorEmail = (formData.get("authorEmail") as string) || user.email || null;
+      }
 
       if (isPublishedImmediate) {
         finalPublishedAt = new Date();
@@ -144,7 +212,7 @@ export async function createNews(formData: FormData) {
       content,
       category,
       imageUrl: imageUrl || null,
-      authorId: user.id,
+      authorId: finalAuthorId,
       authorName,
       authorPictureUrl,
       authorDesignation,
@@ -275,7 +343,56 @@ export async function updateNews(id: string, formData: FormData) {
         message: "Article updated and submitted for admin review! Changes will go live upon approval."
       };
     } else {
-      // Admin update
+      // Admin update: handle author details and mode
+      const authorMode = (formData.get("authorMode") as string) || "manual";
+      const writerUserId = (formData.get("writerUserId") as string)?.trim();
+
+      let authorUpdates: Record<string, any> = {};
+
+      if (authorMode === "writer" && writerUserId) {
+        const [selectedWriter] = await db
+          .select({
+            id: users.id,
+            email: users.email,
+            name: users.name,
+            profileName: writerProfiles.name,
+            pictureUrl: writerProfiles.pictureUrl,
+            designation: writerProfiles.designation,
+            bio: writerProfiles.bio,
+            socialLinks: writerProfiles.socialLinks,
+          })
+          .from(users)
+          .leftJoin(writerProfiles, eq(users.id, writerProfiles.userId))
+          .where(eq(users.id, writerUserId))
+          .limit(1);
+
+        if (selectedWriter) {
+          authorUpdates = {
+            authorId: selectedWriter.id,
+            authorName: selectedWriter.profileName || selectedWriter.name,
+            authorPictureUrl: selectedWriter.pictureUrl || null,
+            authorDesignation: selectedWriter.designation || null,
+            authorOrganization: null,
+            authorBio: selectedWriter.bio || null,
+            authorLinkedIn: selectedWriter.socialLinks?.linkedin || null,
+            authorFacebook: selectedWriter.socialLinks?.facebook || null,
+            authorInstagram: selectedWriter.socialLinks?.instagram || null,
+            authorTwitter: selectedWriter.socialLinks?.twitter || null,
+            authorTiktok: selectedWriter.socialLinks?.tiktok || null,
+            authorEmail: selectedWriter.email || null,
+          };
+        }
+      } else if (authorMode === "manual") {
+        authorUpdates = {
+          authorName: (formData.get("authorName") as string) || "Energy Gurus Team",
+          authorPictureUrl: (formData.get("authorPictureUrl") as string) || null,
+          authorDesignation: (formData.get("authorDesignation") as string) || "Official Publication",
+          authorOrganization: (formData.get("authorOrganization") as string) || "EnergyGurus",
+          authorLinkedIn: (formData.get("authorLinkedIn") as string) || null,
+          authorEmail: (formData.get("authorEmail") as string) || user.email || null,
+        };
+      }
+
       let finalPublishedAt: Date | undefined = undefined;
       if (isPublishedImmediate) {
         finalPublishedAt = new Date();
@@ -297,6 +414,7 @@ export async function updateNews(id: string, formData: FormData) {
           isPublished,
           status: isPublished ? "published" : "draft",
           publishedAt: finalPublishedAt,
+          ...authorUpdates,
           updatedAt: new Date()
         })
         .where(eq(news.id, id));

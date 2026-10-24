@@ -167,10 +167,39 @@ function getBrandMetrics(brand: any) {
   const cats = (brand.categories as string[] | undefined) || [];
 
   // Capacity & Label
-  let capacity = brand.annualCapacity;
+  let rawCapacity: string | null = null;
+  let detectedType: "panel" | "inverter" | "storage" | null = null;
+
+  if (typeof brand.annualCapacity === "string" && brand.annualCapacity.trim()) {
+    rawCapacity = brand.annualCapacity.trim();
+  } else if (brand.annualCapacity && typeof brand.annualCapacity === "object") {
+    const cap = brand.annualCapacity as Record<string, any>;
+    if (cap.inverters && typeof cap.inverters === "string" && cap.inverters.trim()) {
+      rawCapacity = cap.inverters.trim();
+      detectedType = "inverter";
+    } else if (cap.panels && typeof cap.panels === "string" && cap.panels.trim()) {
+      rawCapacity = cap.panels.trim();
+      detectedType = "panel";
+    } else if (cap.batteries && typeof cap.batteries === "string" && cap.batteries.trim()) {
+      rawCapacity = cap.batteries.trim();
+      detectedType = "storage";
+    } else if (cap.bess && typeof cap.bess === "string" && cap.bess.trim()) {
+      rawCapacity = cap.bess.trim();
+      detectedType = "storage";
+    } else {
+      for (const val of Object.values(cap)) {
+        if (typeof val === "string" && val.trim()) {
+          rawCapacity = val.trim();
+          break;
+        }
+      }
+    }
+  }
+
+  let capacity = "";
   let capacityLabel = "Capacity";
 
-  if (!capacity) {
+  if (!rawCapacity) {
     if (name.includes("growatt")) {
       capacity = "17 GW";
       capacityLabel = "Inverter capacity";
@@ -196,9 +225,10 @@ function getBrandMetrics(brand: any) {
       capacityLabel = isPanel ? "Panel capacity" : isInverter ? "Inverter capacity" : "Capacity n/a";
     }
   } else {
-    const isPanel = cats.some((c) => c.toLowerCase().includes("panel")) || name.includes("longi") || name.includes("jinko");
-    const isInverter = cats.some((c) => c.toLowerCase().includes("inverter")) || name.includes("growatt") || name.includes("huawei") || name.includes("solis");
-    capacityLabel = isPanel ? "Panel capacity" : isInverter ? "Inverter capacity" : "Annual capacity";
+    capacity = rawCapacity;
+    const isPanel = detectedType === "panel" || cats.some((c) => c.toLowerCase().includes("panel")) || name.includes("longi") || name.includes("jinko");
+    const isInverter = detectedType === "inverter" || cats.some((c) => c.toLowerCase().includes("inverter")) || name.includes("growatt") || name.includes("huawei") || name.includes("solis");
+    capacityLabel = isPanel ? "Panel capacity" : isInverter ? "Inverter capacity" : detectedType === "storage" ? "Storage capacity" : "Annual capacity";
   }
 
   // Distributors count

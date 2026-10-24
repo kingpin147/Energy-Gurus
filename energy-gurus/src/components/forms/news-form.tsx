@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +15,8 @@ import {
   Newspaper,
   Loader2,
   User,
+  UserCheck,
+  CheckCircle2,
   Mail,
   Linkedin,
   Building,
@@ -24,6 +27,7 @@ import {
 import { useR2Upload } from "@/lib/hooks/use-r2-upload";
 import { UploadZone } from "@/components/ui/upload-zone";
 import { TiptapEditor } from "@/components/ui/tiptap-editor";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const DEFAULT_NEWS_CATEGORIES = [
   "Industry News",
@@ -35,6 +39,17 @@ const DEFAULT_NEWS_CATEGORIES = [
   "Guidelines",
 ];
 
+export interface OnboardedWriterOption {
+  id: string;
+  userId: string;
+  name: string;
+  email: string;
+  designation?: string | null;
+  pictureUrl?: string | null;
+  bio?: string | null;
+  socialLinks?: any;
+}
+
 interface NewsFormProps {
   initialData?: {
     id: string;
@@ -44,6 +59,7 @@ interface NewsFormProps {
     imageUrl?: string | null;
     isPublished: boolean;
     publishedAt?: Date | string | null;
+    authorId?: string | null;
     authorName?: string | null;
     authorPictureUrl?: string | null;
     authorDesignation?: string | null;
@@ -51,15 +67,25 @@ interface NewsFormProps {
     authorLinkedIn?: string | null;
     authorEmail?: string | null;
   };
+  writers?: OnboardedWriterOption[];
 }
 
-export function NewsForm({ initialData }: NewsFormProps) {
+export function NewsForm({ initialData, writers = [] }: NewsFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [title, setTitle] = useState(initialData?.title || "");
   const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || "");
   const [authorPictureUrl, setAuthorPictureUrl] = useState(initialData?.authorPictureUrl || "");
   const [isPublished, setIsPublished] = useState(initialData?.isPublished ?? true);
+
+  // Author Mode: "writer" (onboarded writer) vs "manual" (custom author)
+  const writerMatch = writers.find((w) => w.userId === initialData?.authorId);
+  const [authorMode, setAuthorMode] = useState<"writer" | "manual">(
+    writerMatch ? "writer" : writers.length > 0 && !initialData?.id ? "writer" : "manual"
+  );
+  const [selectedWriterUserId, setSelectedWriterUserId] = useState<string>(
+    writerMatch ? writerMatch.userId : writers[0]?.userId || ""
+  );
 
   const isDefaultCat = initialData?.category ? DEFAULT_NEWS_CATEGORIES.includes(initialData.category) : true;
   const [selectedCategory, setSelectedCategory] = useState<string>(
@@ -302,124 +328,245 @@ export function NewsForm({ initialData }: NewsFormProps) {
         <TiptapEditor content={content} onChange={setContent} />
       </div>
 
-      {/* 4. AUTHOR DETAILS SECTION */}
-      <div className="space-y-5 bg-white p-6 rounded-3xl border border-line shadow-sm">
-        <h3 className="text-base font-bold text-ink flex items-center gap-2 border-b border-line pb-3">
-          <User className="w-5 h-5 text-amber" /> Author Details
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="space-y-2">
-            <Label htmlFor="authorName" className="text-xs font-bold uppercase tracking-wider text-slate-custom">
-              Author Name (Optional)
-            </Label>
-            <div className="relative">
-              <User className="w-4 h-4 text-slate-custom absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <Input
-                id="authorName"
-                name="authorName"
-                value={authorName}
-                onChange={(e) => setAuthorName(e.target.value)}
-                placeholder="e.g. Engr. Faisal Hameed"
-                className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
-              />
+      {/* 4. AUTHOR DETAILS SECTION (DUAL-MODE: ONBOARDED WRITER VS CUSTOM DETAILS) */}
+      <div className="space-y-6 bg-white p-6 rounded-3xl border border-line shadow-sm">
+        <div className="border-b border-line pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-amber/15 text-amber flex items-center justify-center">
+              <UserCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-ink">Author Byline & Ghostwriting</h3>
+              <p className="text-xs text-slate-custom">Choose an onboarded contributing writer or enter custom author details.</p>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="authorDesignation" className="text-xs font-bold uppercase tracking-wider text-slate-custom">
-              Designation
-            </Label>
-            <div className="relative">
-              <Briefcase className="w-4 h-4 text-slate-custom absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <Input
-                id="authorDesignation"
-                name="authorDesignation"
-                value={authorDesignation}
-                onChange={(e) => setAuthorDesignation(e.target.value)}
-                placeholder="e.g. Chief Renewable Analyst"
-                className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
-              />
-            </div>
+          {/* Mode Switcher */}
+          <div className="flex p-1 bg-slate-100 rounded-2xl shrink-0">
+            <button
+              type="button"
+              onClick={() => setAuthorMode("writer")}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                authorMode === "writer"
+                  ? "bg-amber text-ink shadow-sm"
+                  : "text-slate-custom hover:text-ink"
+              }`}
+            >
+              <UserCheck className="w-3.5 h-3.5" /> Onboarded Writer
+            </button>
+            <button
+              type="button"
+              onClick={() => setAuthorMode("manual")}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                authorMode === "manual"
+                  ? "bg-amber text-ink shadow-sm"
+                  : "text-slate-custom hover:text-ink"
+              }`}
+            >
+              <User className="w-3.5 h-3.5" /> Custom Details
+            </button>
           </div>
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="authorOrganization" className="text-xs font-bold uppercase tracking-wider text-slate-custom">
-              Organization
-            </Label>
-            <div className="relative">
-              <Building className="w-4 h-4 text-slate-custom absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <Input
-                id="authorOrganization"
-                name="authorOrganization"
-                value={authorOrganization}
-                onChange={(e) => setAuthorOrganization(e.target.value)}
-                placeholder="e.g. EnergyGurus / AEDB"
-                className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
-              />
-            </div>
-          </div>
+        {/* Hidden inputs to pass selection mode */}
+        <input type="hidden" name="authorMode" value={authorMode} />
 
-          <div className="space-y-2">
-            <Label htmlFor="authorEmail" className="text-xs font-bold uppercase tracking-wider text-slate-custom">
-              Email Address
-            </Label>
-            <div className="relative">
-              <Mail className="w-4 h-4 text-slate-custom absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <Input
-                type="email"
-                id="authorEmail"
-                name="authorEmail"
-                value={authorEmail}
-                onChange={(e) => setAuthorEmail(e.target.value)}
-                placeholder="author@energygurus.online"
-                className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
-              />
-            </div>
-          </div>
+        {/* MODE A: ONBOARDED WRITER SELECTION */}
+        {authorMode === "writer" ? (
+          <div className="space-y-5">
+            <input type="hidden" name="writerUserId" value={selectedWriterUserId} />
 
-          <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="authorLinkedIn" className="text-xs font-bold uppercase tracking-wider text-slate-custom">
-              LinkedIn Profile URL
-            </Label>
-            <div className="relative">
-              <Linkedin className="w-4 h-4 text-slate-custom absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <Input
-                id="authorLinkedIn"
-                name="authorLinkedIn"
-                value={authorLinkedIn}
-                onChange={(e) => setAuthorLinkedIn(e.target.value)}
-                placeholder="https://linkedin.com/in/author-profile"
-                className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
-              />
-            </div>
-          </div>
+            {writers.length === 0 ? (
+              <div className="p-5 rounded-2xl bg-amber/10 border border-amber/20 text-xs text-amber-deep space-y-2">
+                <p className="font-bold">No approved onboarded writers found</p>
+                <p className="text-slate-custom">
+                  You can register contributing authors in the{" "}
+                  <Link href="/dashboard/admin/onboard-writer" className="text-amber font-bold underline" target="_blank">
+                    Writers Hub
+                  </Link>{" "}
+                  or switch to &quot;Custom Details&quot; to enter author credentials manually.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2 max-w-lg">
+                  <Label htmlFor="writerSelect" className="text-xs font-bold uppercase tracking-wider text-slate-custom">
+                    Select Contributing Writer <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    value={selectedWriterUserId}
+                    onValueChange={(val) => setSelectedWriterUserId(val)}
+                  >
+                    <SelectTrigger id="writerSelect" className="h-11 rounded-xl bg-slate-50 border-line text-sm font-semibold">
+                      <SelectValue placeholder="Choose an onboarded writer..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {writers.map((w) => (
+                        <SelectItem key={w.userId} value={w.userId} className="text-sm">
+                          {w.name} {w.designation ? `— ${w.designation}` : ""} ({w.email})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-          <div className="space-y-2 md:col-span-2">
-            <Label className="text-xs font-bold uppercase tracking-wider text-slate-custom">Author Picture</Label>
-            <UploadZone
-              onUpload={handleAuthorPicUpload}
-              isUploading={isUploading}
-              value={authorPictureUrl}
-              title="Click or drag to upload author headshot photo"
-              description="PNG or JPG photo"
-              accept="image/*"
-            />
-            {authorPictureUrl && (
-              <div className="flex justify-end">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setAuthorPictureUrl("")}
-                  className="text-xs text-rose-600 hover:bg-rose-50 font-bold"
-                >
-                  <X className="w-3.5 h-3.5 mr-1" /> Remove Picture
-                </Button>
+                {/* Selected Writer Preview Card */}
+                {(() => {
+                  const currentWriter = writers.find((w) => w.userId === selectedWriterUserId) || writers[0];
+                  if (!currentWriter) return null;
+
+                  return (
+                    <div className="p-5 bg-slate-50 rounded-2xl border border-line space-y-3">
+                      <div className="flex items-center gap-3.5">
+                        <Avatar className="h-12 w-12 rounded-xl border border-line bg-white shadow-sm shrink-0">
+                          <AvatarImage src={currentWriter.pictureUrl || undefined} className="object-cover" />
+                          <AvatarFallback className="bg-amber/15 text-amber-deep font-bold rounded-xl text-xs">
+                            {currentWriter.name.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm text-ink">{currentWriter.name}</span>
+                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                              Verified Author
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-custom">{currentWriter.designation || "Contributing Columnist"}</p>
+                          <p className="text-[11px] text-slate-custom font-mono">{currentWriter.email}</p>
+                        </div>
+                      </div>
+
+                      {currentWriter.bio && (
+                        <p className="text-xs text-slate-custom line-clamp-2 italic bg-white p-3 rounded-xl border border-line/60">
+                          &ldquo;{currentWriter.bio}&rdquo;
+                        </p>
+                      )}
+
+                      <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-medium pt-1 border-t border-line/50">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>Public will see this article published from <strong>{currentWriter.name}</strong>, and this writer can also edit it in their own dashboard.</span>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>
-        </div>
+        ) : (
+          /* MODE B: MANUAL CUSTOM AUTHOR DETAILS */
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-2">
+              <Label htmlFor="authorName" className="text-xs font-bold uppercase tracking-wider text-slate-custom">
+                Author Name (Optional)
+              </Label>
+              <div className="relative">
+                <User className="w-4 h-4 text-slate-custom absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Input
+                  id="authorName"
+                  name="authorName"
+                  value={authorName}
+                  onChange={(e) => setAuthorName(e.target.value)}
+                  placeholder="e.g. Engr. Faisal Hameed"
+                  className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="authorDesignation" className="text-xs font-bold uppercase tracking-wider text-slate-custom">
+                Designation
+              </Label>
+              <div className="relative">
+                <Briefcase className="w-4 h-4 text-slate-custom absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Input
+                  id="authorDesignation"
+                  name="authorDesignation"
+                  value={authorDesignation}
+                  onChange={(e) => setAuthorDesignation(e.target.value)}
+                  placeholder="e.g. Chief Renewable Analyst"
+                  className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="authorOrganization" className="text-xs font-bold uppercase tracking-wider text-slate-custom">
+                Organization
+              </Label>
+              <div className="relative">
+                <Building className="w-4 h-4 text-slate-custom absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Input
+                  id="authorOrganization"
+                  name="authorOrganization"
+                  value={authorOrganization}
+                  onChange={(e) => setAuthorOrganization(e.target.value)}
+                  placeholder="e.g. EnergyGurus / AEDB"
+                  className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="authorEmail" className="text-xs font-bold uppercase tracking-wider text-slate-custom">
+                Email Address
+              </Label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-slate-custom absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Input
+                  type="email"
+                  id="authorEmail"
+                  name="authorEmail"
+                  value={authorEmail}
+                  onChange={(e) => setAuthorEmail(e.target.value)}
+                  placeholder="author@energygurus.online"
+                  className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="authorLinkedIn" className="text-xs font-bold uppercase tracking-wider text-slate-custom">
+                LinkedIn Profile URL
+              </Label>
+              <div className="relative">
+                <Linkedin className="w-4 h-4 text-slate-custom absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Input
+                  id="authorLinkedIn"
+                  name="authorLinkedIn"
+                  value={authorLinkedIn}
+                  onChange={(e) => setAuthorLinkedIn(e.target.value)}
+                  placeholder="https://linkedin.com/in/author-profile"
+                  className="pl-10 h-11 rounded-xl bg-slate-50 border-line text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label className="text-xs font-bold uppercase tracking-wider text-slate-custom">Author Picture</Label>
+              <UploadZone
+                onUpload={handleAuthorPicUpload}
+                isUploading={isUploading}
+                value={authorPictureUrl}
+                title="Click or drag to upload author headshot photo"
+                description="PNG or JPG photo"
+                accept="image/*"
+              />
+              {authorPictureUrl && (
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setAuthorPictureUrl("")}
+                    className="text-xs text-rose-600 hover:bg-rose-50 font-bold"
+                  >
+                    <X className="w-3.5 h-3.5 mr-1" /> Remove Picture
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* FOOTER ACTIONS */}

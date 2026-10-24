@@ -4,6 +4,7 @@ import { NewsForm } from "@/components/forms/news-form";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { getApprovedWritersForAdmin } from "@/lib/actions/news";
 
 export default async function NewNewsPage() {
     const role = await getUserRole();
@@ -11,6 +12,8 @@ export default async function NewNewsPage() {
     if (role !== 'super-admin' && role !== 'admin') {
         redirect("/dashboard");
     }
+
+    const writers = await getApprovedWritersForAdmin();
 
     return (
         <div className="p-4 md:p-8 space-y-8 max-w-3xl mx-auto">
@@ -27,7 +30,7 @@ export default async function NewNewsPage() {
             </div>
 
             <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm">
-                <NewsForm />
+                <NewsForm writers={writers} />
             </div>
         </div>
     );
