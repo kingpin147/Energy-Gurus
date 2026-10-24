@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { epcInstallers, epcOffices, epcProjects, users, reviews } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, isNull } from "drizzle-orm";
 import { getUserRole } from "@/lib/roles";
 import { revalidatePath } from "next/cache";
 import { deleteUser } from "@/lib/actions/users";
@@ -15,6 +15,32 @@ export async function getAllEpcInstallers() {
   const role = await getUserRole();
   if (role !== "super-admin" && role !== "admin") {
     throw new Error("Unauthorized access");
+  }
+
+  // Auto-sync: Ensure all users with role 'epc' have a corresponding epcInstallers entry
+  const missingEpc = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+    })
+    .from(users)
+    .leftJoin(epcInstallers, eq(users.id, epcInstallers.userId))
+    .where(and(eq(users.role, "epc"), isNull(epcInstallers.id)));
+
+  if (missingEpc.length > 0) {
+    for (const epcUser of missingEpc) {
+      await db
+        .insert(epcInstallers)
+        .values({
+          userId: epcUser.id,
+          companyName: epcUser.name || "Solar EPC Installer",
+          email: epcUser.email,
+          isVerified: true,
+          status: "live",
+        })
+        .onConflictDoNothing();
+    }
   }
 
   const list = await db

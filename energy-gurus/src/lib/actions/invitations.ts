@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { invitations, users, UserRole } from "@/db/schema";
+import { invitations, users, UserRole, writerProfiles, epcInstallers, brands } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { createClerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
@@ -64,7 +64,7 @@ export async function checkAndApplyInvitation(userId: string, email: string) {
         }
 
         // Upsert local DB user
-        await db.insert(users).values({
+        const [upsertedUser] = await db.insert(users).values({
             clerkId: userId,
             email: lowerEmail,
             name: lowerEmail.split("@")[0],
@@ -73,7 +73,33 @@ export async function checkAndApplyInvitation(userId: string, email: string) {
         }).onConflictDoUpdate({
             target: users.email,
             set: { role: invitation.role, clerkId: userId, isActive: true }
-        });
+        }).returning();
+
+        if (upsertedUser) {
+            if (invitation.role === 'writer') {
+                await db.insert(writerProfiles).values({
+                    userId: upsertedUser.id,
+                    name: upsertedUser.name || lowerEmail.split("@")[0],
+                    designation: "Contributing Columnist",
+                    status: "approved"
+                }).onConflictDoNothing();
+            } else if (invitation.role === 'epc') {
+                await db.insert(epcInstallers).values({
+                    userId: upsertedUser.id,
+                    companyName: upsertedUser.name || "Solar EPC Installer",
+                    email: upsertedUser.email,
+                    isVerified: true
+                }).onConflictDoNothing();
+            } else if (invitation.role === 'brand') {
+                await db.insert(brands).values({
+                    userId: upsertedUser.id,
+                    brandName: upsertedUser.name || "Solar Brand",
+                    customerCareEmail: upsertedUser.email,
+                    status: "live",
+                    isVerified: true
+                }).onConflictDoNothing();
+            }
+        }
 
         // Delete consumed invitation
         await db.delete(invitations).where(eq(invitations.id, invitation.id));

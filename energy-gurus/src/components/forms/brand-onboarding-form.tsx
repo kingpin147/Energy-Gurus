@@ -27,7 +27,9 @@ import {
   ExternalLink,
   Loader2,
   ShieldCheck,
-  Check
+  Check,
+  Award,
+  Share2
 } from "lucide-react";
 
 const DEFAULT_CATEGORIES = [
@@ -74,15 +76,30 @@ interface RetailerInput {
   address: string;
   phone: string;
   whatsapp?: string;
+  mapUrl?: string;
 }
 
 interface ServiceCentreInput {
   name: string;
+  type?: string;
   city: string;
   address: string;
   phone: string;
   hotline?: string;
   hours?: string;
+}
+
+interface CertifiedInstallerInput {
+  name: string;
+  city: string;
+  region: string;
+  rating?: string;
+  tier?: string;
+}
+
+interface SocialLinkInput {
+  platform: string;
+  url: string;
 }
 
 export function BrandOnboardingForm() {
@@ -103,6 +120,8 @@ export function BrandOnboardingForm() {
   const [distributors, setDistributors] = useState<DistributorInput[]>([]);
   const [retailers, setRetailers] = useState<RetailerInput[]>([]);
   const [serviceCentres, setServiceCentres] = useState<ServiceCentreInput[]>([]);
+  const [certifiedInstallers, setCertifiedInstallers] = useState<CertifiedInstallerInput[]>([]);
+  const [socialLinks, setSocialLinks] = useState<SocialLinkInput[]>([]);
   const [products, setProducts] = useState<ProductInput[]>([]);
 
   const handleLogoUpload = async (file: File) => {
@@ -148,17 +167,34 @@ export function BrandOnboardingForm() {
   };
 
   const addRetailer = () => {
-    setRetailers([...retailers, { name: "", city: "", address: "", phone: "", whatsapp: "" }]);
+    setRetailers([...retailers, { name: "", city: "", address: "", phone: "", whatsapp: "", mapUrl: "" }]);
   };
   const removeRetailer = (idx: number) => {
     setRetailers(retailers.filter((_, i) => i !== idx));
   };
 
   const addServiceCentre = () => {
-    setServiceCentres([...serviceCentres, { name: "", city: "", address: "", phone: "", hotline: "", hours: "9 AM - 6 PM" }]);
+    setServiceCentres([...serviceCentres, { name: "", type: "Flagship Service Centre", city: "", address: "", phone: "", hotline: "", hours: "9 AM - 6 PM" }]);
   };
   const removeServiceCentre = (idx: number) => {
     setServiceCentres(serviceCentres.filter((_, i) => i !== idx));
+  };
+
+  const addCertifiedInstaller = () => {
+    setCertifiedInstallers([
+      ...certifiedInstallers,
+      { name: "", city: "", region: "Punjab", rating: "4.8", tier: "Gold" }
+    ]);
+  };
+  const removeCertifiedInstaller = (idx: number) => {
+    setCertifiedInstallers(certifiedInstallers.filter((_, i) => i !== idx));
+  };
+
+  const addSocialLink = () => {
+    setSocialLinks([...socialLinks, { platform: "LinkedIn", url: "" }]);
+  };
+  const removeSocialLink = (idx: number) => {
+    setSocialLinks(socialLinks.filter((_, i) => i !== idx));
   };
 
   const addProduct = () => {
@@ -200,6 +236,8 @@ export function BrandOnboardingForm() {
       formData.set("distributors", JSON.stringify(distributors.filter((d) => d.name.trim())));
       formData.set("retailers", JSON.stringify(retailers.filter((r) => r.name.trim())));
       formData.set("serviceCentres", JSON.stringify(serviceCentres.filter((s) => s.name.trim())));
+      formData.set("certifiedInstallers", JSON.stringify(certifiedInstallers.filter((ci) => ci.name.trim())));
+      formData.set("socialLinks", JSON.stringify(socialLinks.filter((sl) => sl.url.trim())));
       formData.set("products", JSON.stringify(products.filter((p) => p.name.trim())));
 
       const brandNameVal = formData.get("brandName") as string;
@@ -719,7 +757,388 @@ export function BrandOnboardingForm() {
         )}
       </div>
 
-      {/* 5. Initial Product Catalog */}
+      {/* 5. Authorized Retailers & Solar Shops */}
+      <div className="bg-white p-6 md:p-8 rounded-3xl border border-line shadow-sm space-y-6">
+        <div className="border-b border-line pb-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+              <Store className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-ink">5. Authorized Retailers & Local Shops</h3>
+              <p className="text-xs text-slate-custom">Market dealers, retail partner shops, and local authorized stockists.</p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addRetailer}
+            className="rounded-xl font-bold gap-1.5"
+          >
+            <Plus className="w-4 h-4" /> Add Retailer
+          </Button>
+        </div>
+
+        {retailers.length === 0 ? (
+          <p className="text-xs text-slate-custom italic text-center py-4 bg-slate-50 rounded-2xl border border-dashed border-line">
+            No retailers added. Click &quot;Add Retailer&quot; to list local shops.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {retailers.map((r, idx) => (
+              <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-line relative space-y-3">
+                <button
+                  type="button"
+                  onClick={() => removeRetailer(idx)}
+                  className="absolute top-3 right-3 text-slate-custom hover:text-red-600"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <Input
+                    placeholder="Shop / Business Name *"
+                    value={r.name}
+                    onChange={(e) => {
+                      const updated = [...retailers];
+                      updated[idx].name = e.target.value;
+                      setRetailers(updated);
+                    }}
+                    className="h-10 rounded-xl bg-white text-xs border-line font-medium"
+                  />
+                  <Input
+                    placeholder="City"
+                    value={r.city}
+                    onChange={(e) => {
+                      const updated = [...retailers];
+                      updated[idx].city = e.target.value;
+                      setRetailers(updated);
+                    }}
+                    className="h-10 rounded-xl bg-white text-xs border-line"
+                  />
+                  <Input
+                    placeholder="Phone"
+                    value={r.phone}
+                    onChange={(e) => {
+                      const updated = [...retailers];
+                      updated[idx].phone = e.target.value;
+                      setRetailers(updated);
+                    }}
+                    className="h-10 rounded-xl bg-white text-xs border-line"
+                  />
+                  <Input
+                    placeholder="WhatsApp"
+                    value={r.whatsapp || ""}
+                    onChange={(e) => {
+                      const updated = [...retailers];
+                      updated[idx].whatsapp = e.target.value;
+                      setRetailers(updated);
+                    }}
+                    className="h-10 rounded-xl bg-white text-xs border-line"
+                  />
+                  <Input
+                    placeholder="Google Maps URL"
+                    value={r.mapUrl || ""}
+                    onChange={(e) => {
+                      const updated = [...retailers];
+                      updated[idx].mapUrl = e.target.value;
+                      setRetailers(updated);
+                    }}
+                    className="h-10 rounded-xl bg-white text-xs border-line"
+                  />
+                  <Input
+                    placeholder="Shop Address"
+                    value={r.address}
+                    onChange={(e) => {
+                      const updated = [...retailers];
+                      updated[idx].address = e.target.value;
+                      setRetailers(updated);
+                    }}
+                    className="h-10 rounded-xl bg-white text-xs border-line"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 6. Flagship Stores & Service Centres */}
+      <div className="bg-white p-6 md:p-8 rounded-3xl border border-line shadow-sm space-y-6">
+        <div className="border-b border-line pb-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center">
+              <Wrench className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-ink">6. Flagship Stores & Service Centres</h3>
+              <p className="text-xs text-slate-custom">Official repair, warranty RMA collection, and diagnostic labs.</p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addServiceCentre}
+            className="rounded-xl font-bold gap-1.5"
+          >
+            <Plus className="w-4 h-4" /> Add Service Centre
+          </Button>
+        </div>
+
+        {serviceCentres.length === 0 ? (
+          <p className="text-xs text-slate-custom italic text-center py-4 bg-slate-50 rounded-2xl border border-dashed border-line">
+            No service centres added. Click &quot;Add Service Centre&quot; to list repair facilities.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {serviceCentres.map((sc, idx) => (
+              <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-line relative space-y-3">
+                <button
+                  type="button"
+                  onClick={() => removeServiceCentre(idx)}
+                  className="absolute top-3 right-3 text-slate-custom hover:text-red-600"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <Input
+                    placeholder="Centre Name *"
+                    value={sc.name}
+                    onChange={(e) => {
+                      const updated = [...serviceCentres];
+                      updated[idx].name = e.target.value;
+                      setServiceCentres(updated);
+                    }}
+                    className="h-10 rounded-xl bg-white text-xs border-line font-medium"
+                  />
+                  <select
+                    value={sc.type || "Flagship Service Centre"}
+                    onChange={(e) => {
+                      const updated = [...serviceCentres];
+                      updated[idx].type = e.target.value;
+                      setServiceCentres(updated);
+                    }}
+                    className="h-10 rounded-xl bg-white text-xs border border-line px-3"
+                  >
+                    <option>Flagship Service Centre</option>
+                    <option>Warranty Claim Drop-off Point</option>
+                    <option>Authorized Repair Partner</option>
+                  </select>
+                  <Input
+                    placeholder="City"
+                    value={sc.city}
+                    onChange={(e) => {
+                      const updated = [...serviceCentres];
+                      updated[idx].city = e.target.value;
+                      setServiceCentres(updated);
+                    }}
+                    className="h-10 rounded-xl bg-white text-xs border-line"
+                  />
+                  <Input
+                    placeholder="Address"
+                    value={sc.address}
+                    onChange={(e) => {
+                      const updated = [...serviceCentres];
+                      updated[idx].address = e.target.value;
+                      setServiceCentres(updated);
+                    }}
+                    className="h-10 rounded-xl bg-white text-xs border-line"
+                  />
+                  <Input
+                    placeholder="Phone / Hotline"
+                    value={sc.phone}
+                    onChange={(e) => {
+                      const updated = [...serviceCentres];
+                      updated[idx].phone = e.target.value;
+                      setServiceCentres(updated);
+                    }}
+                    className="h-10 rounded-xl bg-white text-xs border-line"
+                  />
+                  <Input
+                    placeholder="Operating Hours"
+                    value={sc.hours || ""}
+                    onChange={(e) => {
+                      const updated = [...serviceCentres];
+                      updated[idx].hours = e.target.value;
+                      setServiceCentres(updated);
+                    }}
+                    className="h-10 rounded-xl bg-white text-xs border-line"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 7. Certified Installation Partners */}
+      <div className="bg-white p-6 md:p-8 rounded-3xl border border-line shadow-sm space-y-6">
+        <div className="border-b border-line pb-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber/15 text-amber-deep flex items-center justify-center">
+              <Award className="w-5 h-5 text-amber" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-ink">7. Certified Installation Partners</h3>
+              <p className="text-xs text-slate-custom">Brand-approved EPC solar contractors and certified installers.</p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addCertifiedInstaller}
+            className="rounded-xl font-bold gap-1.5"
+          >
+            <Plus className="w-4 h-4" /> Add Partner
+          </Button>
+        </div>
+
+        {certifiedInstallers.length === 0 ? (
+          <p className="text-xs text-slate-custom italic text-center py-4 bg-slate-50 rounded-2xl border border-dashed border-line">
+            No certified installers added. Click &quot;Add Partner&quot; to list installation partners.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {certifiedInstallers.map((inst, idx) => (
+              <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-line relative space-y-3">
+                <button
+                  type="button"
+                  onClick={() => removeCertifiedInstaller(idx)}
+                  className="absolute top-3 right-3 text-slate-custom hover:text-red-600"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                  <Input
+                    placeholder="EPC Company Name *"
+                    value={inst.name}
+                    onChange={(e) => {
+                      const updated = [...certifiedInstallers];
+                      updated[idx].name = e.target.value;
+                      setCertifiedInstallers(updated);
+                    }}
+                    className="h-10 rounded-xl bg-white text-xs border-line font-medium"
+                  />
+                  <Input
+                    placeholder="City"
+                    value={inst.city}
+                    onChange={(e) => {
+                      const updated = [...certifiedInstallers];
+                      updated[idx].city = e.target.value;
+                      setCertifiedInstallers(updated);
+                    }}
+                    className="h-10 rounded-xl bg-white text-xs border-line"
+                  />
+                  <select
+                    value={inst.tier || "Gold"}
+                    onChange={(e) => {
+                      const updated = [...certifiedInstallers];
+                      updated[idx].tier = e.target.value;
+                      setCertifiedInstallers(updated);
+                    }}
+                    className="h-10 rounded-xl bg-white text-xs border border-line px-3"
+                  >
+                    <option>Bronze</option>
+                    <option>Silver</option>
+                    <option>Gold</option>
+                    <option>Platinum</option>
+                    <option>Diamond</option>
+                  </select>
+                  <Input
+                    placeholder="Rating (e.g. 4.8)"
+                    value={inst.rating || ""}
+                    onChange={(e) => {
+                      const updated = [...certifiedInstallers];
+                      updated[idx].rating = e.target.value;
+                      setCertifiedInstallers(updated);
+                    }}
+                    className="h-10 rounded-xl bg-white text-xs border-line"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 8. Social Media Profiles */}
+      <div className="bg-white p-6 md:p-8 rounded-3xl border border-line shadow-sm space-y-6">
+        <div className="border-b border-line pb-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+              <Share2 className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-ink">8. Social Media Channels</h3>
+              <p className="text-xs text-slate-custom">Connected public handles and channels for the brand.</p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addSocialLink}
+            className="rounded-xl font-bold gap-1.5"
+          >
+            <Plus className="w-4 h-4" /> Add Channel
+          </Button>
+        </div>
+
+        {socialLinks.length === 0 ? (
+          <p className="text-xs text-slate-custom italic text-center py-4 bg-slate-50 rounded-2xl border border-dashed border-line">
+            No social channels added yet. Click &quot;Add Channel&quot; to link social profiles.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {socialLinks.map((s, idx) => (
+              <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-line relative space-y-3">
+                <button
+                  type="button"
+                  onClick={() => removeSocialLink(idx)}
+                  className="absolute top-3 right-3 text-slate-custom hover:text-red-600"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <select
+                    value={s.platform || "LinkedIn"}
+                    onChange={(e) => {
+                      const updated = [...socialLinks];
+                      updated[idx].platform = e.target.value;
+                      setSocialLinks(updated);
+                    }}
+                    className="h-10 rounded-xl bg-white text-xs border border-line px-3"
+                  >
+                    <option>LinkedIn</option>
+                    <option>Facebook</option>
+                    <option>Twitter</option>
+                    <option>YouTube</option>
+                    <option>Instagram</option>
+                    <option>TikTok</option>
+                    <option>Website</option>
+                  </select>
+                  <div className="md:col-span-2">
+                    <Input
+                      placeholder="https://..."
+                      value={s.url}
+                      onChange={(e) => {
+                        const updated = [...socialLinks];
+                        updated[idx].url = e.target.value;
+                        setSocialLinks(updated);
+                      }}
+                      className="h-10 rounded-xl bg-white text-xs border-line"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 9. Initial Product Catalog */}
       <div className="bg-white p-6 md:p-8 rounded-3xl border border-line shadow-sm space-y-6">
         <div className="border-b border-line pb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -727,7 +1146,7 @@ export function BrandOnboardingForm() {
               <Package className="w-5 h-5 text-amber" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-ink">5. Product Models & Equipment</h3>
+              <h3 className="text-lg font-bold text-ink">9. Product Models & Equipment</h3>
               <p className="text-xs text-slate-custom">Catalog solar panels, inverters, or battery models manufactured by the brand.</p>
             </div>
           </div>

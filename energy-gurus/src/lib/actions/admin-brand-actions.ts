@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { brands, products, users, reviews } from "@/db/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and, isNull } from "drizzle-orm";
 import { getUserRole } from "@/lib/roles";
 import { revalidatePath } from "next/cache";
 import { deleteUser } from "@/lib/actions/users";
@@ -16,6 +16,32 @@ export async function getAllBrandsAdmin() {
   const role = await getUserRole();
   if (role !== "super-admin" && role !== "admin") {
     throw new Error("Unauthorized access");
+  }
+
+  // Auto-sync: Ensure all users with role 'brand' have a corresponding brands entry
+  const missingBrands = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+    })
+    .from(users)
+    .leftJoin(brands, eq(users.id, brands.userId))
+    .where(and(eq(users.role, "brand"), isNull(brands.id)));
+
+  if (missingBrands.length > 0) {
+    for (const brandUser of missingBrands) {
+      await db
+        .insert(brands)
+        .values({
+          userId: brandUser.id,
+          brandName: brandUser.name || "Solar Brand",
+          customerCareEmail: brandUser.email,
+          status: "live",
+          isVerified: true,
+        })
+        .onConflictDoNothing();
+    }
   }
 
   const list = await db
@@ -305,6 +331,8 @@ export async function adminUpdateBrandFull(
     countryOfOrigin?: string | null;
     customerCare?: string | null;
     customerCareEmail?: string | null;
+    countryHead?: string | null;
+    customerCareHead?: string | null;
     headOffice?: string | null;
     about?: string | null;
     isVerified?: boolean;
@@ -345,6 +373,8 @@ export async function adminUpdateBrandFull(
         countryOfOrigin: data.countryOfOrigin ?? "China",
         customerCare: data.customerCare ?? null,
         customerCareEmail: data.customerCareEmail ?? null,
+        countryHead: data.countryHead !== undefined ? data.countryHead : existing.countryHead,
+        customerCareHead: data.customerCareHead !== undefined ? data.customerCareHead : existing.customerCareHead,
         headOffice: data.headOffice ?? null,
         about: data.about ?? null,
         isVerified: data.isVerified !== undefined ? data.isVerified : existing.isVerified,

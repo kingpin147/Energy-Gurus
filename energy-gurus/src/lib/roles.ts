@@ -74,7 +74,7 @@ export const getUserRole = cache(async (): Promise<UserRole> => {
       }
 
       // Check if user has an active invitation
-      const { invitations } = await import("@/db/schema");
+      const { invitations, writerProfiles, epcInstallers, brands } = await import("@/db/schema");
       const [invitation] = await db
         .select()
         .from(invitations)
@@ -83,7 +83,7 @@ export const getUserRole = cache(async (): Promise<UserRole> => {
 
       if (invitation) {
         if (userId) {
-          await db.insert(users).values({
+          const [upsertedUser] = await db.insert(users).values({
             clerkId: userId,
             email: lowerEmail,
             name: user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : lowerEmail.split('@')[0],
@@ -92,7 +92,33 @@ export const getUserRole = cache(async (): Promise<UserRole> => {
           }).onConflictDoUpdate({
             target: users.email,
             set: { role: invitation.role, clerkId: userId, isActive: true }
-          });
+          }).returning();
+
+          if (upsertedUser) {
+            if (invitation.role === 'writer') {
+              await db.insert(writerProfiles).values({
+                userId: upsertedUser.id,
+                name: upsertedUser.name || lowerEmail.split('@')[0],
+                designation: "Contributing Columnist",
+                status: "approved"
+              }).onConflictDoNothing();
+            } else if (invitation.role === 'epc') {
+              await db.insert(epcInstallers).values({
+                userId: upsertedUser.id,
+                companyName: upsertedUser.name || "Solar EPC Installer",
+                email: upsertedUser.email,
+                isVerified: true
+              }).onConflictDoNothing();
+            } else if (invitation.role === 'brand') {
+              await db.insert(brands).values({
+                userId: upsertedUser.id,
+                brandName: upsertedUser.name || "Solar Brand",
+                customerCareEmail: upsertedUser.email,
+                status: "live",
+                isVerified: true
+              }).onConflictDoNothing();
+            }
+          }
 
           // Delete consumed invitation
           await db.delete(invitations).where(eq(invitations.id, invitation.id));

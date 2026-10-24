@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { writerProfiles, users, news } from "@/db/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and, isNull } from "drizzle-orm";
 import { getUserRole } from "@/lib/roles";
 import { revalidatePath } from "next/cache";
 import { deleteUser } from "@/lib/actions/users";
@@ -15,6 +15,38 @@ export async function getAllWritersAdmin() {
   const role = await getUserRole();
   if (role !== "super-admin" && role !== "admin") {
     throw new Error("Unauthorized access");
+  }
+
+  // Auto-sync: Ensure all users with role 'writer' have a corresponding writerProfiles entry
+  const missingProfiles = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+    })
+    .from(users)
+    .leftJoin(writerProfiles, eq(users.id, writerProfiles.userId))
+    .where(and(eq(users.role, "writer"), isNull(writerProfiles.id)));
+
+  if (missingProfiles.length > 0) {
+    for (const writerUser of missingProfiles) {
+      await db
+        .insert(writerProfiles)
+        .values({
+          userId: writerUser.id,
+          name: writerUser.name || writerUser.email.split("@")[0],
+          designation: "Contributing Columnist",
+          status: "approved",
+          approvalHistory: [
+            {
+              date: new Date().toISOString(),
+              action: "Account Provisioned & Approved",
+              note: "Writer profile initialized from registered writer account.",
+            },
+          ],
+        })
+        .onConflictDoNothing();
+    }
   }
 
   const list = await db
@@ -30,6 +62,7 @@ export async function getAllWritersAdmin() {
       adminFeedback: writerProfiles.adminFeedback,
       createdAt: writerProfiles.createdAt,
       updatedAt: writerProfiles.updatedAt,
+      email: users.email,
       userEmail: users.email,
       userIsActive: users.isActive,
       articlesCount: sql<number>`(SELECT COUNT(*) FROM ${news} WHERE ${news.authorId} = ${writerProfiles.userId})`.mapWith(Number),

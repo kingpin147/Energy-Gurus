@@ -43,6 +43,8 @@ import {
   getWriterFullDetails,
 } from "@/lib/actions/admin-writer-actions";
 import { useRouter } from "next/navigation";
+import { UploadZone } from "@/components/ui/upload-zone";
+import { useR2Upload } from "@/lib/hooks/use-r2-upload";
 
 export interface WriterListItem {
   id: string;
@@ -81,16 +83,28 @@ export function WriterTableClient({ initialWriters }: { initialWriters: WriterLi
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Edit form state
+  const { uploadFile, isUploading: isUploadingAvatar } = useR2Upload();
   const [editName, setEditName] = useState("");
   const [editDesignation, setEditDesignation] = useState("");
   const [editPictureUrl, setEditPictureUrl] = useState("");
   const [editBio, setEditBio] = useState("");
   const [editStatus, setEditStatus] = useState<"draft" | "pending_review" | "changes_requested" | "approved">("approved");
+  const [editAdminFeedback, setEditAdminFeedback] = useState("");
   const [editLinkedin, setEditLinkedin] = useState("");
   const [editFacebook, setEditFacebook] = useState("");
   const [editInstagram, setEditInstagram] = useState("");
   const [editTwitter, setEditTwitter] = useState("");
   const [editTiktok, setEditTiktok] = useState("");
+
+  const handleAvatarUpload = async (file: File) => {
+    try {
+      const { publicUrl } = await uploadFile(file, "writer-avatars");
+      setEditPictureUrl(publicUrl);
+      toast.success("Author avatar uploaded successfully");
+    } catch (error) {
+      toast.error("Failed to upload avatar");
+    }
+  };
 
   const editWords = editBio.trim() ? editBio.trim().split(/\s+/).filter(Boolean) : [];
   const editWordCount = editWords.length;
@@ -137,6 +151,7 @@ export function WriterTableClient({ initialWriters }: { initialWriters: WriterLi
       setEditPictureUrl(data.pictureUrl || "");
       setEditBio(data.bio || "");
       setEditStatus(data.status || "approved");
+      setEditAdminFeedback(data.adminFeedback || "");
       setEditLinkedin(data.socialLinks?.linkedin || "");
       setEditFacebook(data.socialLinks?.facebook || "");
       setEditInstagram(data.socialLinks?.instagram || "");
@@ -172,6 +187,7 @@ export function WriterTableClient({ initialWriters }: { initialWriters: WriterLi
         pictureUrl: editPictureUrl.trim() || null,
         bio: editBio.trim() || null,
         status: editStatus,
+        adminFeedback: editAdminFeedback.trim() || null,
         socialLinks,
       });
 
@@ -542,12 +558,14 @@ export function WriterTableClient({ initialWriters }: { initialWriters: WriterLi
               </div>
 
               <div className="space-y-1.5">
-                <Label className="font-bold text-slate-custom uppercase">Profile Picture URL</Label>
-                <Input
+                <Label className="font-bold text-slate-custom uppercase">Author Headshot Photo</Label>
+                <UploadZone
+                  onUpload={handleAvatarUpload}
+                  isUploading={isUploadingAvatar}
                   value={editPictureUrl}
-                  onChange={(e) => setEditPictureUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="h-10 rounded-xl bg-slate-50 text-sm border-line"
+                  title="Upload Author Photo"
+                  description="PNG or JPG format, square aspect ratio recommended"
+                  accept="image/*"
                 />
               </div>
 
@@ -566,19 +584,32 @@ export function WriterTableClient({ initialWriters }: { initialWriters: WriterLi
                 />
               </div>
 
-              {/* Status */}
-              <div className="p-4 bg-slate-50 rounded-2xl border border-line space-y-1">
-                <Label className="font-bold text-ink">Editorial Approval Status</Label>
-                <select
-                  value={editStatus}
-                  onChange={(e) => setEditStatus(e.target.value as any)}
-                  className="w-full h-9 rounded-xl bg-white border border-line text-xs font-bold px-2"
-                >
-                  <option value="approved">Approved (Can write & be assigned articles)</option>
-                  <option value="pending_review">Pending Review</option>
-                  <option value="changes_requested">Changes Requested</option>
-                  <option value="draft">Draft</option>
-                </select>
+              {/* Status & Feedback */}
+              <div className="p-4 bg-slate-50 rounded-2xl border border-line space-y-3">
+                <div className="space-y-1">
+                  <Label className="font-bold text-ink">Editorial Approval Status</Label>
+                  <select
+                    value={editStatus}
+                    onChange={(e) => setEditStatus(e.target.value as any)}
+                    className="w-full h-9 rounded-xl bg-white border border-line text-xs font-bold px-2"
+                  >
+                    <option value="approved">Approved (Can write & be assigned articles)</option>
+                    <option value="pending_review">Pending Review</option>
+                    <option value="changes_requested">Changes Requested</option>
+                    <option value="draft">Draft</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="font-bold text-slate-custom text-[11px] uppercase">Admin Feedback / Review Notes</Label>
+                  <Textarea
+                    rows={2}
+                    value={editAdminFeedback}
+                    onChange={(e) => setEditAdminFeedback(e.target.value)}
+                    placeholder="Feedback notes visible to the author on what changes are needed..."
+                    className="rounded-xl bg-white text-xs border-line"
+                  />
+                </div>
               </div>
 
               {/* Social Links */}
@@ -608,6 +639,12 @@ export function WriterTableClient({ initialWriters }: { initialWriters: WriterLi
                     value={editInstagram}
                     onChange={(e) => setEditInstagram(e.target.value)}
                     className="h-9 bg-slate-50 text-xs border-line rounded-xl"
+                  />
+                  <Input
+                    placeholder="TikTok URL"
+                    value={editTiktok}
+                    onChange={(e) => setEditTiktok(e.target.value)}
+                    className="h-9 bg-slate-50 text-xs border-line rounded-xl sm:col-span-2"
                   />
                 </div>
               </div>

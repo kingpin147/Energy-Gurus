@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { users, brands, epcInstallers, invitations } from "@/db/schema";
+import { users, brands, epcInstallers, writerProfiles, invitations } from "@/db/schema";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -49,12 +49,41 @@ export default async function UserManagementPage({
 
             if (clerkUsers.data && clerkUsers.data.length > 0) {
                 const clerkUser = clerkUsers.data[0];
-                await db.insert(users).values({
+                const [dbUser] = await db.insert(users).values({
                     clerkId: clerkUser.id,
                     email: invite.email.toLowerCase(),
                     name: clerkUser.fullName || clerkUser.firstName || invite.email.split("@")[0],
                     role: invite.role
-                }).onConflictDoNothing();
+                }).onConflictDoUpdate({
+                    target: users.email,
+                    set: { role: invite.role, clerkId: clerkUser.id, isActive: true }
+                }).returning();
+
+                if (dbUser) {
+                    if (invite.role === 'writer') {
+                        await db.insert(writerProfiles).values({
+                            userId: dbUser.id,
+                            name: dbUser.name || invite.email.split("@")[0],
+                            designation: "Contributing Columnist",
+                            status: "approved"
+                        }).onConflictDoNothing();
+                    } else if (invite.role === 'epc') {
+                        await db.insert(epcInstallers).values({
+                            userId: dbUser.id,
+                            companyName: dbUser.name || "Solar EPC Installer",
+                            email: dbUser.email,
+                            isVerified: true
+                        }).onConflictDoNothing();
+                    } else if (invite.role === 'brand') {
+                        await db.insert(brands).values({
+                            userId: dbUser.id,
+                            brandName: dbUser.name || "Solar Brand",
+                            customerCareEmail: dbUser.email,
+                            status: "live",
+                            isVerified: true
+                        }).onConflictDoNothing();
+                    }
+                }
 
                 await db.delete(invitations).where(eq(invitations.id, invite.id));
 

@@ -17,11 +17,32 @@ export async function getCurrentWriterProfile() {
     const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId)).limit(1);
     if (!user) return null;
 
-    const [profile] = await db
+    let [profile] = await db
       .select()
       .from(writerProfiles)
       .where(eq(writerProfiles.userId, user.id))
       .limit(1);
+
+    if (!profile && user.role === "writer") {
+      const [newProfile] = await db
+        .insert(writerProfiles)
+        .values({
+          userId: user.id,
+          name: user.name || user.email.split("@")[0],
+          designation: "Contributing Columnist",
+          status: "approved",
+          approvalHistory: [
+            {
+              date: new Date().toISOString(),
+              action: "Auto-Provisioned & Approved",
+              note: "Writer profile initialized.",
+            },
+          ],
+        })
+        .onConflictDoNothing()
+        .returning();
+      profile = newProfile;
+    }
 
     return { user, profile };
   } catch (error) {
