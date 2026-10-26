@@ -67,22 +67,18 @@ export function WriterArticleForm({ initialData, writerProfile }: WriterArticleF
     initialData?.category && !isDefaultCat ? initialData.category : ""
   );
 
-  const { uploadFile, isUploading } = useR2Upload();
+  const { uploadFile, isUploading, progress, cancelUpload } = useR2Upload();
 
   const isProfileApproved = writerProfile?.status === "approved";
 
   const handleCoverUpload = async (file: File) => {
-    // 10 MB strict limit
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Image exceeds maximum allowed size of 10 MB. Please upload a smaller image.");
-      return;
-    }
     try {
       const { publicUrl } = await uploadFile(file, "news-covers");
       setImageUrl(publicUrl);
       toast.success("Cover image uploaded successfully");
     } catch (error: any) {
       toast.error(error?.message || "Failed to upload cover image");
+      throw error;
     }
   };
 
@@ -251,13 +247,19 @@ export function WriterArticleForm({ initialData, writerProfile }: WriterArticleF
 
         {/* 2. COVER IMAGE UPLOAD (Max 10 MB Enforced) */}
         <div className="space-y-3 bg-white p-6 rounded-3xl border border-line shadow-sm">
-          <Label className="text-sm font-bold text-ink">Article Cover Image</Label>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+            <Label className="text-sm font-bold text-ink">Article Cover Image</Label>
+            <span className="text-xs text-slate-custom font-medium">Recommended: 1200×630px or 1920×1080px (16:9 widescreen)</span>
+          </div>
           <UploadZone
             onUpload={handleCoverUpload}
             isUploading={isUploading}
+            progress={progress}
+            onCancel={cancelUpload}
             value={imageUrl}
             title="Click or drag to upload cover image"
-            description="High resolution PNG or JPG, up to 10MB"
+            description="High resolution PNG, JPG, or WEBP (Max 10MB)"
+            recommendedDimensions="1200 × 630 px (16:9 widescreen, min 800×450px)"
             maxSizeMB={10}
             accept="image/*"
           />

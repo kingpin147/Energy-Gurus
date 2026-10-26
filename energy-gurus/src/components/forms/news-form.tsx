@@ -115,33 +115,27 @@ export function NewsForm({ initialData, writers = [] }: NewsFormProps) {
   const [authorEmail, setAuthorEmail] = useState(initialData?.authorEmail || "");
   const [authorLinkedIn, setAuthorLinkedIn] = useState(initialData?.authorLinkedIn || "");
 
-  const { uploadFile, isUploading } = useR2Upload();
+  const { uploadFile, isUploading, progress, cancelUpload } = useR2Upload();
 
   const handleCoverUpload = async (file: File) => {
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Image exceeds maximum allowed size of 10 MB. Please upload a smaller image.");
-      return;
-    }
     try {
       const { publicUrl } = await uploadFile(file, "news-covers");
       setImageUrl(publicUrl);
       toast.success("Cover image uploaded successfully");
-    } catch (error) {
-      toast.error("Failed to upload cover image");
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to upload cover image");
+      throw error;
     }
   };
 
   const handleAuthorPicUpload = async (file: File) => {
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Image exceeds maximum allowed size of 10 MB. Please upload a smaller image.");
-      return;
-    }
     try {
       const { publicUrl } = await uploadFile(file, "news-authors");
       setAuthorPictureUrl(publicUrl);
       toast.success("Author picture uploaded successfully");
-    } catch (error) {
-      toast.error("Failed to upload author picture");
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to upload author picture");
+      throw error;
     }
   };
 
@@ -294,13 +288,20 @@ export function NewsForm({ initialData, writers = [] }: NewsFormProps) {
 
       {/* 2. COVER IMAGE UPLOAD */}
       <div className="space-y-3 bg-white p-6 rounded-3xl border border-line shadow-sm">
-        <Label className="text-sm font-bold text-ink">Article Cover Image</Label>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+          <Label className="text-sm font-bold text-ink">Article Cover Image</Label>
+          <span className="text-xs text-slate-custom font-medium">Recommended: 1200×630px or 1920×1080px (16:9 widescreen)</span>
+        </div>
         <UploadZone
           onUpload={handleCoverUpload}
           isUploading={isUploading}
+          progress={progress}
+          onCancel={cancelUpload}
           value={imageUrl}
-          title="Click or drag to upload cover image"
-          description="High resolution PNG or JPG, up to 5MB"
+          title="Click or drag to upload article cover image"
+          description="High resolution PNG, JPG, or WEBP (Max 10MB)"
+          recommendedDimensions="1200 × 630 px (16:9 widescreen, min 800×450px)"
+          maxSizeMB={10}
           accept="image/*"
         />
         {imageUrl && (
@@ -542,13 +543,20 @@ export function NewsForm({ initialData, writers = [] }: NewsFormProps) {
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <Label className="text-xs font-bold uppercase tracking-wider text-slate-custom">Author Picture</Label>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <Label className="text-xs font-bold uppercase tracking-wider text-slate-custom">Author Picture / Headshot</Label>
+                <span className="text-xs text-slate-custom font-medium">Recommended: 400×400px (1:1 square headshot)</span>
+              </div>
               <UploadZone
                 onUpload={handleAuthorPicUpload}
                 isUploading={isUploading}
+                progress={progress}
+                onCancel={cancelUpload}
                 value={authorPictureUrl}
                 title="Click or drag to upload author headshot photo"
-                description="PNG or JPG photo"
+                description="High resolution square PNG, JPG, or WEBP (Max 10MB)"
+                recommendedDimensions="400 × 400 px (1:1 square ratio, min 200×200px)"
+                maxSizeMB={10}
                 accept="image/*"
               />
               {authorPictureUrl && (

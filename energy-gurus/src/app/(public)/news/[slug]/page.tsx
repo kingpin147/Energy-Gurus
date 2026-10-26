@@ -269,10 +269,10 @@ export default async function NewsArticlePage({
                         </h1>
                         
                         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-b border-line py-4 text-sm text-slate-custom font-ibm-plex-mono">
-                            <div className="flex items-center gap-3">
-                                <Avatar className="h-8 w-8 border border-line">
-                                    <AvatarImage src={displayPictureUrl || undefined} />
-                                    <AvatarFallback className="bg-amber/10 text-amber font-bold text-xs">
+                            <div className="flex items-center gap-3.5">
+                                <Avatar className="h-11 w-11 sm:h-12 sm:w-12 border border-line shadow-xs rounded-full shrink-0">
+                                    <AvatarImage src={displayPictureUrl || undefined} className="object-cover" />
+                                    <AvatarFallback className="bg-amber/10 text-amber font-bold text-sm">
                                         {displayName.substring(0, 2).toUpperCase()}
                                     </AvatarFallback>
                                 </Avatar>
