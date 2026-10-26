@@ -17,7 +17,8 @@ import {
   ChevronLeft,
   ChevronRight,
   User,
-  Calendar
+  Calendar,
+  Eye
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ interface NewsItem {
   isPublished: boolean;
   publishedAt?: Date | string | null;
   createdAt: Date | string;
+  viewCount?: number;
 }
 
 interface NewsTableClientProps {
@@ -69,6 +71,7 @@ export function NewsTableClient({ initialNews }: NewsTableClientProps) {
     return Boolean(!isLive && a.publishedAt && new Date(a.publishedAt) > now);
   }).length;
   const draftCount = totalCount - liveCount - scheduledCount;
+  const totalViews = initialNews.reduce((sum, a) => sum + (a.viewCount || 0), 0);
 
   // Filter articles
   const filtered = initialNews.filter((article) => {
@@ -107,7 +110,7 @@ export function NewsTableClient({ initialNews }: NewsTableClientProps) {
   return (
     <div className="space-y-6">
       {/* 1. METRICS OVERVIEW */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card className="border-line shadow-sm rounded-2xl bg-white">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
@@ -152,6 +155,18 @@ export function NewsTableClient({ initialNews }: NewsTableClientProps) {
             </div>
             <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500">
               <Pencil className="w-5 h-5" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-line shadow-sm rounded-2xl bg-white">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-custom uppercase">Total Views</p>
+              <p className="text-2xl font-bold text-blue-600 mt-1">{totalViews.toLocaleString()}</p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+              <Eye className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
@@ -249,6 +264,7 @@ export function NewsTableClient({ initialNews }: NewsTableClientProps) {
                 <TableHead className="font-bold text-ink text-xs uppercase">Article Title & Category</TableHead>
                 <TableHead className="font-bold text-ink text-xs uppercase">Author</TableHead>
                 <TableHead className="font-bold text-ink text-xs uppercase">Status</TableHead>
+                <TableHead className="font-bold text-ink text-xs uppercase">Views</TableHead>
                 <TableHead className="font-bold text-ink text-xs uppercase">Publish Date</TableHead>
                 <TableHead className="font-bold text-ink text-xs uppercase text-right">Actions</TableHead>
               </TableRow>
@@ -309,6 +325,14 @@ export function NewsTableClient({ initialNews }: NewsTableClientProps) {
                       )}
                     </TableCell>
 
+                    {/* Views */}
+                    <TableCell className="py-3">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-700">
+                        <Eye className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                        <span>{(article.viewCount || 0).toLocaleString()}</span>
+                      </div>
+                    </TableCell>
+
                     {/* Publish Date */}
                     <TableCell className="py-3 text-xs text-slate-custom font-mono">
                       <div className="flex items-center gap-1.5">
@@ -352,7 +376,7 @@ export function NewsTableClient({ initialNews }: NewsTableClientProps) {
 
               {paginatedArticles.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="py-12 text-center text-slate-custom">
+                  <TableCell colSpan={6} className="py-12 text-center text-slate-custom">
                     <Newspaper className="w-10 h-10 mx-auto mb-2 opacity-20" />
                     <p className="text-sm font-semibold">No news articles found</p>
                     <p className="text-xs text-slate-custom mt-0.5">Try adjusting your search query or filters.</p>
@@ -417,11 +441,16 @@ export function NewsTableClient({ initialNews }: NewsTableClientProps) {
                   </div>
 
                   <div className="pt-2 border-t border-line text-[11px] text-slate-custom flex items-center justify-between font-mono">
-                    <span>
-                      {article.publishedAt
-                        ? format(new Date(article.publishedAt), "MMM d, yyyy")
-                        : "Draft"}
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <span>
+                        {article.publishedAt
+                          ? format(new Date(article.publishedAt), "MMM d, yyyy")
+                          : "Draft"}
+                      </span>
+                      <span className="flex items-center gap-1 text-blue-600 font-semibold">
+                        <Eye className="w-3 h-3" /> {(article.viewCount || 0).toLocaleString()}
+                      </span>
+                    </div>
                     <Link href={`/dashboard/news/${article.id}/edit`} className="text-amber font-bold hover:underline flex items-center gap-0.5">
                       Edit <Pencil className="w-2.5 h-2.5" />
                     </Link>

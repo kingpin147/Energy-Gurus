@@ -5,7 +5,7 @@ import { getCurrentUser } from "./user";
 import { db } from "@/db";
 import { eq } from "drizzle-orm";
 
-export const getUserRole = cache(async (): Promise<UserRole> => {
+export const getUserRole = cache(async (): Promise<UserRole | null> => {
   try {
     const { sessionClaims, userId } = await auth();
 
@@ -36,18 +36,19 @@ export const getUserRole = cache(async (): Promise<UserRole> => {
       }
     }
 
-    // 2. Fallback to Clerk primary email directly
+    // 2. Fallback to Clerk email(s) directly
     const user = await getCurrentUser();
-    const primaryEmail = user?.emailAddresses?.find(e => e.id === user.primaryEmailAddressId)?.emailAddress || user?.emailAddresses?.[0]?.emailAddress;
-    const lowerEmail = primaryEmail?.toLowerCase();
+    const emails = (user?.emailAddresses?.map(e => e.emailAddress.toLowerCase()) || []).filter(Boolean);
+    const primaryEmail = (user?.emailAddresses?.find(e => e.id === user.primaryEmailAddressId)?.emailAddress || user?.emailAddresses?.[0]?.emailAddress)?.toLowerCase();
     
-    if (lowerEmail) {
-      if (whitelist.includes(lowerEmail)) {
-        // Auto-heal: Ensure user record exists in local DB as super-admin
+    if (emails.length > 0) {
+      // Check if any email is on whitelist
+      const whitelistedEmail = emails.find(e => whitelist.includes(e));
+      if (whitelistedEmail) {
         if (userId) {
           await db.insert(users).values({
             clerkId: userId,
-            email: lowerEmail,
+            email: whitelistedEmail,
             name: user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : "Super Admin",
             role: "super-admin",
             isActive: true
@@ -59,71 +60,86 @@ export const getUserRole = cache(async (): Promise<UserRole> => {
         return "super-admin";
       }
 
-      // Check if user already exists in DB by email
-      const [dbUserByEmail] = await db
-        .select({ id: users.id, role: users.role, clerkId: users.clerkId })
-        .from(users)
-        .where(eq(users.email, lowerEmail))
-        .limit(1);
+      // Check if user already exists in DB by any of their emails
+      for (const email of emails) {
+        const [dbUserByEmail] = await db
+          .select({ id: users.id, role: users.role, clerkId: users.clerkId })
+          .from(users)
+          .where(eq(users.email, email))
+          .limit(1);
 
-      if (dbUserByEmail) {
-        if (userId && dbUserByEmail.clerkId !== userId) {
-          await db.update(users).set({ clerkId: userId }).where(eq(users.id, dbUserByEmail.id));
+        if (dbUserByEmail) {
+          if (userId && dbUserByEmail.clerkId !== userId) {
+            await db.update(users).set({ clerkId: userId }).where(eq(users.id, dbUserByEmail.id));
+          }
+          return dbUserByEmail.role as UserRole;
         }
-        return dbUserByEmail.role as UserRole;
       }
 
-      // Check if user has an active invitation
+      // Check if user has an active invitation matching any of their emails
       const { invitations, writerProfiles, epcInstallers, brands } = await import("@/db/schema");
-      const [invitation] = await db
-        .select()
-        .from(invitations)
-        .where(eq(invitations.email, lowerEmail))
-        .limit(1);
+      for (const email of emails) {
+        const [invitation] = await db
+          .select()
+          .from(invitations)
+          .where(eq(invitations.email, email))
+          .limit(1);
 
-      if (invitation) {
-        if (userId) {
-          const [upsertedUser] = await db.insert(users).values({
-            clerkId: userId,
-            email: lowerEmail,
-            name: user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : lowerEmail.split('@')[0],
-            role: invitation.role,
-            isActive: true
-          }).onConflictDoUpdate({
-            target: users.email,
-            set: { role: invitation.role, clerkId: userId, isActive: true }
-          }).returning();
+        if (invitation) {
+          if (userId) {
+            const [upsertedUser] = await db.insert(users).values({
+              clerkId: userId,
+              email: email,
+              name: user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : email.split('@')[0],
+              role: invitation.role,
+              isActive: true
+            }).onConflictDoUpdate({
+              target: users.email,
+              set: { role: invitation.role, clerkId: userId, isActive: true }
+            }).returning();
 
-          if (upsertedUser) {
-            if (invitation.role === 'writer') {
-              await db.insert(writerProfiles).values({
-                userId: upsertedUser.id,
-                name: upsertedUser.name || lowerEmail.split('@')[0],
-                designation: "Contributing Columnist",
-                status: "approved"
-              }).onConflictDoNothing();
-            } else if (invitation.role === 'epc') {
-              await db.insert(epcInstallers).values({
-                userId: upsertedUser.id,
-                companyName: upsertedUser.name || "Solar EPC Installer",
-                email: upsertedUser.email,
-                isVerified: true
-              }).onConflictDoNothing();
-            } else if (invitation.role === 'brand') {
-              await db.insert(brands).values({
-                userId: upsertedUser.id,
-                brandName: upsertedUser.name || "Solar Brand",
-                customerCareEmail: upsertedUser.email,
-                status: "live",
-                isVerified: true
-              }).onConflictDoNothing();
+            if (upsertedUser) {
+              if (invitation.role === 'writer') {
+                await db.insert(writerProfiles).values({
+                  userId: upsertedUser.id,
+                  name: upsertedUser.name || email.split('@')[0],
+                  designation: "Contributing Columnist",
+                  status: "approved"
+                }).onConflictDoNothing();
+              } else if (invitation.role === 'epc') {
+                await db.insert(epcInstallers).values({
+                  userId: upsertedUser.id,
+                  companyName: upsertedUser.name || "Solar EPC Installer",
+                  email: upsertedUser.email,
+                  isVerified: true
+                }).onConflictDoNothing();
+              } else if (invitation.role === 'brand') {
+                await db.insert(brands).values({
+                  userId: upsertedUser.id,
+                  brandName: upsertedUser.name || "Solar Brand",
+                  customerCareEmail: upsertedUser.email,
+                  status: "live",
+                  isVerified: true
+                }).onConflictDoNothing();
+              }
             }
-          }
 
-          // Delete consumed invitation
-          await db.delete(invitations).where(eq(invitations.id, invitation.id));
+            // Sync Clerk metadata
+            try {
+              const { createClerkClient } = await import("@clerk/nextjs/server");
+              const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+              await clerk.users.updateUserMetadata(userId, {
+                publicMetadata: { role: invitation.role }
+              });
+            } catch (clerkErr) {
+              console.error("Failed to update Clerk metadata in getUserRole:", clerkErr);
+            }
+
+            // Delete consumed invitation
+            await db.delete(invitations).where(eq(invitations.id, invitation.id));
+          }
+          return invitation.role;
         }
-        return invitation.role;
       }
     }
 
@@ -131,10 +147,10 @@ export const getUserRole = cache(async (): Promise<UserRole> => {
     const claimRole = (sessionClaims?.metadata as { role?: UserRole })?.role;
     if (claimRole) return claimRole;
 
-    // 4. Last resort fallback
-    return "epc";
+    // 4. No role matched - return null (never blindly fallback to an operational role like epc)
+    return null;
   } catch (error) {
     console.error("Error in getUserRole:", error);
-    return "epc";
+    return null;
   }
 });

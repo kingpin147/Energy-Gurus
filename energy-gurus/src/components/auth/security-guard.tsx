@@ -6,18 +6,24 @@ export async function SecurityGuard() {
     const user = await getCurrentUser();
     
     if (user) {
-        const email = user.emailAddresses[0].emailAddress;
+        const email = user.emailAddresses?.[0]?.emailAddress;
+        if (!email) {
+            redirect(`/access-denied`);
+        }
+
+        let allowed = false;
         try {
-            const allowed = await isUserAllowed(email, user.id, user.fullName || user.firstName || "");
-            if (!allowed) {
-                redirect(`/reject-access?error=not_invited`);
-            }
+            allowed = await isUserAllowed(email, user.id, user.fullName || user.firstName || "");
         } catch (error) {
             console.error("Security Guard Check Failed:", error);
-            // In case of DB failure, we let them through to prevent 500 error on homepage
-            // Or we could redirect to a safe "Service Temporarily Unavailable" page
+            // In case of error, allowed remains false
+        }
+
+        if (!allowed) {
+            redirect(`/access-denied`);
         }
     }
     
     return null;
 }
+

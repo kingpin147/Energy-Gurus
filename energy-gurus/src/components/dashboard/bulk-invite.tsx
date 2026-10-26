@@ -58,10 +58,22 @@ export function BulkInvite() {
         const cells = lines[i].split(",").map(cell => cell.trim());
         const email = cells[emailIndex]?.toLowerCase();
         
-        // Parse role, default to epc
-        let rawRole = (cells[roleIndex] || "epc").toLowerCase() as any;
-        if (!["epc", "brand", "admin", "writer"].includes(rawRole)) {
+        // Validate and normalize role (do NOT silently default to epc)
+        const cellValue = (cells[roleIndex] || "").toLowerCase().trim();
+        let rawRole: "epc" | "brand" | "admin" | "writer" | null = null;
+
+        if (["writer", "author", "article writer", "columnist"].includes(cellValue)) {
+          rawRole = "writer";
+        } else if (["brand", "solar brand", "manufacturer"].includes(cellValue)) {
+          rawRole = "brand";
+        } else if (["epc", "installer", "epc installer", "solar installer"].includes(cellValue)) {
           rawRole = "epc";
+        } else if (["admin", "administrator"].includes(cellValue)) {
+          rawRole = "admin";
+        }
+
+        if (!rawRole) {
+          throw new Error(`Row ${i + 1}: Missing or invalid role "${cells[roleIndex] || ''}". Must be 'writer', 'brand', 'epc', or 'admin'.`);
         }
 
         if (email && emailRegex.test(email)) {

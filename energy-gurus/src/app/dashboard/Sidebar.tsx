@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { UserRole } from "@/db/schema";
 
-export default function Sidebar({ role }: { role: UserRole }) {
+export default function Sidebar({ role }: { role: UserRole | null | undefined }) {
     const pathname = usePathname();
 
     const isAdmin = role === 'super-admin' || role === 'admin';
@@ -71,7 +71,9 @@ export default function Sidebar({ role }: { role: UserRole }) {
             ? brandLinks
             : role === 'writer'
                 ? writerLinks
-                : epcLinks;
+                : role === 'epc'
+                    ? epcLinks
+                    : [];
 
 
     return (

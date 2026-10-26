@@ -31,7 +31,7 @@ export default async function UserManagementPage({
     }
 
     const order = sort === "oldest" ? asc(users.createdAt) : desc(users.createdAt);
-    const roleCondition = roleFilter ? eq(users.role, roleFilter as "admin" | "epc" | "brand" | "super-admin") : undefined;
+    const roleCondition = roleFilter ? eq(users.role, roleFilter as "admin" | "epc" | "brand" | "writer" | "super-admin") : undefined;
     const searchCondition = q ? or(like(users.name, `%${q}%`), like(users.email, `%${q}%`)) : undefined;
     const where = and(roleCondition, searchCondition);
 
@@ -178,6 +178,7 @@ export default async function UserManagementPage({
                                 { label: "Admin", value: "admin" },
                                 { label: "EPC Installer", value: "epc" },
                                 { label: "Solar Brand", value: "brand" },
+                                { label: "Writer", value: "writer" },
                             ]}
                         />
                         <ListSort

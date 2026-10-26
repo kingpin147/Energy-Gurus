@@ -22,6 +22,7 @@ import { unstable_cache } from "next/cache";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ShareButtons } from "@/components/news/share-buttons";
 import { FormattedMarkdown } from "@/components/news/formatted-markdown";
+import { ArticleViewTracker } from "@/components/news/article-view-tracker";
 import type { Metadata } from "next";
 
 function extractExcerpt(content?: string | null, maxLen = 160): string {
@@ -244,6 +245,8 @@ export default async function NewsArticlePage({
 
     return (
         <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 min-h-screen">
+            {/* Invisible view tracker — fires once per session per article */}
+            <ArticleViewTracker articleId={article.id} />
             <AdBanner placement="skyscraper_left" targetPage="news" />
             <AdBanner placement="skyscraper_right" targetPage="news" />
 

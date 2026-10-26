@@ -6,9 +6,13 @@ import { users, inquiries, epcInstallers, brands, products, writerProfiles, news
 import { eq, sql, and } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default async function Dashboard() {
     const role = await getUserRole();
+    if (!role) {
+        redirect("/access-denied");
+    }
     const { userId: clerkId } = await auth();
 
     // Fetch common data if needed, or role-specific data

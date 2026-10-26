@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Logo } from "@/components/ui/logo";
 import { ArrowLeft, Mic } from "lucide-react";
 import { getUserRole } from "@/lib/roles";
@@ -21,6 +22,10 @@ export default async function DashboardLayout({
 }) {
     
     const role = await getUserRole();
+    if (!role) {
+        redirect("/access-denied");
+    }
+
     const user = await getCurrentUser();
     const email = user?.emailAddresses[0]?.emailAddress;
 

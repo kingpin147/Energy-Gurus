@@ -135,22 +135,55 @@ export async function isUserAllowed(email: string, clerkId?: string, name?: stri
     if (invitation || isWhitelisted) {
         // Automatically create them in the DB if they don't exist yet but are allowed
         if (clerkId) {
-            const role = isWhitelisted ? 'super-admin' : invitation?.role || 'epc';
+            const role: UserRole = isWhitelisted ? 'super-admin' : invitation!.role;
             try {
-                await db.insert(users).values({
+                const [upsertedUser] = await db.insert(users).values({
                     clerkId,
                     email: lowerEmail,
                     name: name || lowerEmail.split("@")[0],
-                    role: role as UserRole,
+                    role,
                     isActive: true
                 }).onConflictDoUpdate({
                     target: users.email,
-                    set: { role: role as UserRole, clerkId, isActive: true }
-                });
+                    set: { role, clerkId, isActive: true }
+                }).returning();
 
-                // ✅ Auto-cleanup: remove the invitation now that the user has registered
-                if (invitation) {
+                if (upsertedUser && invitation) {
+                    if (invitation.role === 'writer') {
+                        await db.insert(writerProfiles).values({
+                            userId: upsertedUser.id,
+                            name: upsertedUser.name || lowerEmail.split("@")[0],
+                            designation: "Contributing Columnist",
+                            status: "approved"
+                        }).onConflictDoNothing();
+                    } else if (invitation.role === 'epc') {
+                        await db.insert(epcInstallers).values({
+                            userId: upsertedUser.id,
+                            companyName: upsertedUser.name || "Solar EPC Installer",
+                            email: upsertedUser.email,
+                            isVerified: true
+                        }).onConflictDoNothing();
+                    } else if (invitation.role === 'brand') {
+                        await db.insert(brands).values({
+                            userId: upsertedUser.id,
+                            brandName: upsertedUser.name || "Solar Brand",
+                            customerCareEmail: upsertedUser.email,
+                            status: "live",
+                            isVerified: true
+                        }).onConflictDoNothing();
+                    }
+
+                    // Delete consumed invitation
                     await db.delete(invitations).where(eq(invitations.id, invitation.id));
+
+                    // Sync Clerk metadata
+                    try {
+                        await clerkClient.users.updateUserMetadata(clerkId, {
+                            publicMetadata: { role: invitation.role }
+                        });
+                    } catch (metaErr) {
+                        console.error("Failed to update Clerk metadata in isUserAllowed:", metaErr);
+                    }
                 }
             } catch (e) {
                 console.error("Failed to auto-create allowed user:", e);

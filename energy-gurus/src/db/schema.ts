@@ -476,6 +476,7 @@ export const news = pgTable('news', {
   authorTiktok: text('author_tiktok'),
   authorBio: text('author_bio'),
   authorEmail: text('author_email'),
+  viewCount: integer('view_count').default(0).notNull(),
   isPublished: boolean('is_published').default(false).notNull(),
   status: text('status').$type<'draft' | 'pending_review' | 'changes_requested' | 'published'>().default('draft').notNull(),
   adminFeedback: text('admin_feedback'),

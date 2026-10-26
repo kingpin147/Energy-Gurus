@@ -9,7 +9,7 @@ import { UserNav } from "@/components/layout/user-nav";
 import { UserRole } from "@/db/schema";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
 
-export function MobileDashboardNav({ role }: { role: UserRole }) {
+export function MobileDashboardNav({ role }: { role: UserRole | null | undefined }) {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
