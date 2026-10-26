@@ -11,30 +11,33 @@ import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin"]
+  subsets: ["latin"],
+  display: "swap"
 });
 
 const notoArabic = Noto_Sans_Arabic({
   variable: "--font-noto-arabic",
-  subsets: ["arabic"]
+  subsets: ["arabic"],
+  display: "swap"
 });
 
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"]
+  display: "swap"
 });
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"]
+  display: "swap"
 });
 
 const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-ibm-plex-mono",
   subsets: ["latin"],
-  weight: ["400", "500"]
+  weight: ["400", "500"],
+  display: "swap"
 });
 
 export const metadata: Metadata = {

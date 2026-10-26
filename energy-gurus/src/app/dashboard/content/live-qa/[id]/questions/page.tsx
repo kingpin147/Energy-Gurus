@@ -9,13 +9,13 @@ import Link from "next/link";
 import { getUserRole } from "@/lib/roles";
 import { redirect } from "next/navigation";
 
-export default async function LiveQAQuestionsPage({ params }: { params: { id: string } }) {
+export default async function LiveQAQuestionsPage({ params }: { params: Promise<{ id: string }> }) {
     const role = await getUserRole();
     if (role !== 'super-admin' && role !== 'admin') {
         redirect("/dashboard");
     }
 
-    const sessionId = params.id;
+    const { id: sessionId } = await params;
     const session = await db.query.liveQA.findFirst({
         where: eq(liveQA.id, sessionId)
     });
