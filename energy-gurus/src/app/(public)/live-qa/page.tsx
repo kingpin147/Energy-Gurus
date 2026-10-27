@@ -17,6 +17,17 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
   return {
     title,
     description,
+    keywords: [
+      "live solar QA Pakistan",
+      "ask solar engineers Pakistan",
+      "solar consultation Pakistan",
+      "solar system troubleshooting",
+      "net metering questions Pakistan",
+      "solar inverter fault advice",
+      "solar expert advice Pakistan",
+      "renewable energy session Pakistan",
+      "EnergyGurus live"
+    ],
     alternates: {
       canonical: `${baseUrl}/live-qa`,
       

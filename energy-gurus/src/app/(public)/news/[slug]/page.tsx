@@ -16,7 +16,8 @@ import {
     Music,
     Building,
     Briefcase,
-    ShieldCheck
+    ShieldCheck,
+    Calendar
 } from "lucide-react";
 import { unstable_cache } from "next/cache";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -123,13 +124,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         description,
         authors: [{ name: authorName }],
         keywords: [
-            "best solar panels in Pakistan",
-            "solar inverter price in Pakistan",
             article.category,
+            article.title,
+            `${article.category} Pakistan`,
             "Pakistan solar news",
-            "solar industry updates",
-            "solar energy Pakistan",
-            "EnergyGurus",
+            "solar industry updates Pakistan",
+            "renewable energy Pakistan",
+            "NEPRA net metering updates",
+            "solar policy Pakistan",
+            "solar panel price in Pakistan",
+            "solar inverter price in Pakistan",
+            "EnergyGurus solar news"
         ].filter(Boolean) as string[],
         alternates: {
             canonical: url,
@@ -271,34 +276,43 @@ export default async function NewsArticlePage({
                             {article.title}
                         </h1>
                         
-                        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-b border-line py-4 text-sm text-slate-custom font-ibm-plex-mono">
-                            <div className="flex items-center gap-3.5">
-                                <Avatar className="h-11 w-11 sm:h-12 sm:w-12 border border-line shadow-xs rounded-full shrink-0">
-                                    <AvatarImage src={displayPictureUrl || undefined} className="object-cover" />
-                                    <AvatarFallback className="bg-amber/10 text-amber font-bold text-sm">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-b border-line py-4 sm:py-5 text-sm text-slate-custom font-ibm-plex-mono">
+                            <div className="flex items-center gap-4">
+                                <Avatar className="h-16 w-16 sm:h-20 sm:w-20 border-2 border-line shadow-sm rounded-full shrink-0 ring-2 ring-slate-100 overflow-hidden">
+                                    <AvatarImage src={displayPictureUrl || undefined} alt={displayName} className="object-cover object-top" />
+                                    <AvatarFallback className="bg-amber/10 text-amber font-bold text-base sm:text-xl">
                                         {displayName.substring(0, 2).toUpperCase()}
                                     </AvatarFallback>
                                 </Avatar>
-                                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                                    <span className="font-semibold text-ink">
-                                        By {displayName}
-                                    </span>
-                                    {displayDesignation && (
-                                        <span className="text-slate-500 font-normal text-xs sm:text-sm">
-                                            • {displayDesignation}
+                                <div className="flex flex-col justify-center gap-1">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <span className="font-semibold text-ink text-base sm:text-lg">
+                                            By {displayName}
                                         </span>
+                                        {isWriter && (
+                                            <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
+                                                Writer
+                                            </span>
+                                        )}
+                                        {isAdmin && (
+                                            <span className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                                                <ShieldCheck className="w-3 h-3 text-blue-600" /> Editorial
+                                            </span>
+                                        )}
+                                    </div>
+                                    {displayDesignation && (
+                                        <p className="text-slate-500 font-normal text-xs sm:text-sm">
+                                            {displayDesignation}
+                                        </p>
                                     )}
                                 </div>
-                                {isWriter && (
-                                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
-                                        Writer
-                                    </span>
-                                )}
                             </div>
-                            <div className="flex items-center gap-4">
-                                <div className="hidden sm:block w-1 h-1 rounded-full bg-slate-300"></div>
-                                <div>{article.publishedAt ? format(new Date(article.publishedAt), "MMMM d, yyyy 'at' h:mm a") : ""}</div>
-                            </div>
+                            {article.publishedAt && (
+                                <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 self-start sm:self-center shrink-0">
+                                    <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
+                                    <span>{format(new Date(article.publishedAt), "MMMM d, yyyy 'at' h:mm a")}</span>
+                                </div>
+                            )}
                         </div>
                     </header>
 
@@ -331,10 +345,10 @@ export default async function NewsArticlePage({
                     {/* AUTHOR DETAILS CARD (Accurately distinguishes Admin vs Writer) */}
                     <div className="bg-white border border-line rounded-3xl p-6 md:p-8 space-y-6 shadow-sm">
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-line pb-6">
-                            <div className="flex items-center gap-4">
-                                <Avatar className="h-16 w-16 border-2 border-line rounded-2xl shrink-0 shadow-sm overflow-hidden">
-                                    <AvatarImage src={displayPictureUrl || undefined} />
-                                    <AvatarFallback className="bg-amber/10 text-amber font-bold text-xl">
+                            <div className="flex items-center gap-4 sm:gap-5">
+                                <Avatar className="h-20 w-20 sm:h-24 sm:w-24 border-2 border-line rounded-2xl shrink-0 shadow-sm overflow-hidden ring-2 ring-slate-100">
+                                    <AvatarImage src={displayPictureUrl || undefined} alt={displayName} className="object-cover object-top" />
+                                    <AvatarFallback className="bg-amber/10 text-amber font-bold text-2xl">
                                         {displayName.substring(0, 2).toUpperCase()}
                                     </AvatarFallback>
                                 </Avatar>

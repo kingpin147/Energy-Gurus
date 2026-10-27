@@ -12,6 +12,17 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
   return {
     title,
     description,
+    keywords: [
+      "solar OM services Pakistan",
+      "solar panel cleaning services",
+      "solar maintenance Pakistan",
+      "solar operations and maintenance",
+      "solar inverter repair Pakistan",
+      "preventive solar maintenance",
+      "commercial solar maintenance",
+      "thermal imaging solar panels",
+      "solar system performance optimization"
+    ],
     alternates: {
       canonical: `${baseUrl}/om`,
       

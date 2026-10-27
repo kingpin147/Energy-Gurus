@@ -1,3 +1,5 @@
-import EpcListingPage from "../epcs/page";
+import EpcListingPage, { generateMetadata } from "../epcs/page";
 
+export { generateMetadata };
 export default EpcListingPage;
+

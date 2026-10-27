@@ -29,9 +29,13 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
     description,
     keywords: [
       "solar monitoring Pakistan",
-      "best solar panels in Pakistan",
-      "solar system telemetry",
+      "real-time solar telemetry",
       "solar inverter monitoring Pakistan",
+      "solar system telemetry",
+      "solar power generation tracking",
+      "solar fault alerts Pakistan",
+      "remote solar monitoring system",
+      "commercial solar monitoring Pakistan",
       "solar O&M services"
     ],
     alternates: {

@@ -9,6 +9,12 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
   return {
     title,
     description,
+    keywords: [
+      "EnergyGurus cookie policy",
+      "website cookies EnergyGurus",
+      "tracking and analytics policy",
+      "cookie preferences"
+    ],
     alternates: {
       canonical: `${baseUrl}/cookies`,
       

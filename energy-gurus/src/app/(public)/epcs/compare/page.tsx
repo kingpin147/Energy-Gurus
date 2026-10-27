@@ -18,8 +18,12 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
     description,
     keywords: [
       "compare solar installers Pakistan",
+      "compare solar companies Pakistan",
+      "solar EPC comparison Pakistan",
       "best solar companies in Pakistan",
       "top solar installers in Pakistan",
+      "verified solar companies reviews",
+      "commercial solar company comparison",
       "solar installation near me"
     ],
     alternates: {

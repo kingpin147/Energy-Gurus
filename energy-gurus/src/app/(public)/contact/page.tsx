@@ -10,6 +10,15 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
   return {
     title,
     description,
+    keywords: [
+      "contact EnergyGurus",
+      "solar company contact Pakistan",
+      "list solar EPC company",
+      "solar brand partnership Pakistan",
+      "solar consultancy inquiry Pakistan",
+      "request solar audit Pakistan",
+      "EnergyGurus support"
+    ],
     alternates: {
       canonical: `${baseUrl}/contact`,
       

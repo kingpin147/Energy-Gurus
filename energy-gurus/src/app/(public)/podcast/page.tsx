@@ -17,13 +17,16 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
     title,
     description,
     keywords: [
-      "best solar panels in Pakistan",
-      "solar inverter price in Pakistan",
       "top gurus of solar from Pakistan",
       "best ideas on solar",
       "solar podcast Pakistan",
-      "solar energy experts Pakistan",
-      "solar industry insights",
+      "renewable energy podcast Pakistan",
+      "solar industry experts interview",
+      "net metering discussion Pakistan",
+      "solar technology insights Pakistan",
+      "solar panel price trends Pakistan",
+      "solar inverter technology",
+      "EnergyGurus podcast"
     ],
     alternates: {
       canonical: `${baseUrl}/podcast`,

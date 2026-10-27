@@ -17,9 +17,15 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
     description,
     keywords: [
       "compare solar brands Pakistan",
+      "tier-1 solar brand comparison",
       "best solar panels in Pakistan",
-      "tier-1 solar brands",
-      "LONGi vs Jinko Pakistan"
+      "solar inverter comparison Pakistan",
+      "LONGi vs Jinko Pakistan",
+      "Growatt vs Huawei inverter",
+      "Inverex vs Solis inverter",
+      "hybrid inverter comparison Pakistan",
+      "tier-1 solar warranty comparison",
+      "best solar inverter brands Pakistan"
     ],
     alternates: {
       canonical: `${baseUrl}/brands/compare`,

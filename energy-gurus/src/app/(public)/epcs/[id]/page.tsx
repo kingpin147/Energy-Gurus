@@ -73,11 +73,15 @@ export async function generateMetadata({
     title,
     description,
     keywords: [
+      installer.companyName,
+      `${installer.companyName} solar Pakistan`,
+      `${installer.companyName} reviews`,
+      `${installer.companyName} solar projects`,
+      "verified solar EPC installer Pakistan",
       "best solar installers in Pakistan",
       "top solar companies in Pakistan",
-      "solar installation near me",
-      "verified EPC installers",
-      installer.companyName
+      "net metering certified installer",
+      "solar installation near me"
     ],
     alternates: {
       canonical: url

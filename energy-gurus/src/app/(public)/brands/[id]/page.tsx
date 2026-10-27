@@ -51,11 +51,16 @@ export async function generateMetadata({
     description,
     keywords: [
       brand.brandName,
-      `${brand.brandName} solar in Pakistan`,
-      `${brand.brandName} inverters`,
-      `${brand.brandName} datasheets`,
-      "solar equipment Pakistan",
-      "best solar inverters"
+      `${brand.brandName} Pakistan`,
+      `${brand.brandName} price in Pakistan`,
+      `${brand.brandName} solar inverters`,
+      `${brand.brandName} solar panels`,
+      `${brand.brandName} authorized distributor`,
+      `${brand.brandName} warranty claim Pakistan`,
+      `${brand.brandName} technical datasheets`,
+      "tier-1 solar equipment Pakistan",
+      "best solar inverters in Pakistan",
+      "solar equipment Pakistan"
     ],
     alternates: { canonical: url },
     openGraph: {

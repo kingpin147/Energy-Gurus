@@ -23,13 +23,21 @@ export async function generateMetadata(): Promise<Metadata> {
     description,
     keywords: [
       "solar brands in Pakistan",
-      "solar inverter brands",
-      "best solar panels in Pakistan",
-      "tier-1 solar manufacturers",
-      "Growatt Pakistan",
-      "LONGi Pakistan",
-      "Huawei Solar",
-      "Inverex"
+      "tier-1 solar manufacturers Pakistan",
+      "best solar panel brands in Pakistan",
+      "solar inverter brands Pakistan",
+      "hybrid solar inverters Pakistan",
+      "on-grid inverters Pakistan",
+      "LONGi Solar Pakistan",
+      "JinkoSolar Pakistan",
+      "Canadian Solar Pakistan",
+      "Huawei Solar inverters",
+      "Growatt inverters Pakistan",
+      "Solis inverters Pakistan",
+      "Inverex solar inverters",
+      "Deye hybrid inverters Pakistan",
+      "lithium solar battery brands",
+      "authorized solar distributors Pakistan"
     ],
     alternates: { canonical: `${baseUrl}/brands` },
     openGraph: {

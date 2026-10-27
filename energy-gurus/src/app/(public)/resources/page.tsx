@@ -14,6 +14,18 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
   return {
     title,
     description,
+    keywords: [
+      "solar calculator Pakistan",
+      "solar payback calculator",
+      "solar buying guide Pakistan",
+      "net metering guide Pakistan",
+      "solar system sizing Pakistan",
+      "NEPRA net metering regulations",
+      "solar inverter wiring guide",
+      "solar technical whitepapers",
+      "solar knowledge hub Pakistan",
+      "EnergyGurus resources"
+    ],
     alternates: {
       canonical: `${baseUrl}/resources`,
       

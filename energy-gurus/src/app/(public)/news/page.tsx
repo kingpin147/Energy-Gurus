@@ -41,13 +41,18 @@ export async function generateMetadata({ searchParams }: { searchParams?: Promis
             title,
             description,
             keywords: [
-                "best solar panels in Pakistan",
-                "solar inverter price in Pakistan",
+                ...(isFiltered ? [`${cleanCategory} solar Pakistan`, cleanCategory] : []),
                 "Pakistan solar news",
-                "net metering policy Pakistan",
                 "solar industry updates Pakistan",
+                "NEPRA net metering policy Pakistan",
+                "solar panel rates today Pakistan",
+                "solar tax updates Pakistan",
+                "solar panel price in Pakistan",
+                "solar inverter price in Pakistan",
+                "renewable energy policy Pakistan",
                 "solar technology breakthroughs",
-                "EnergyGurus news",
+                "commercial solar Pakistan",
+                "EnergyGurus solar news"
             ],
             alternates: {
                 canonical: url,

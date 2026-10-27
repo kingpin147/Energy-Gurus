@@ -22,9 +22,17 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
     keywords: [
       "best solar installers in Pakistan",
       "top solar companies in Pakistan",
-      "solar installation near me",
       "verified solar EPC installers",
-      "solar directory Pakistan",
+      "solar company in Lahore",
+      "solar companies in Karachi",
+      "solar installers Islamabad",
+      "A-grade solar EPC Pakistan",
+      "net metering installation Pakistan",
+      "industrial solar EPC Pakistan",
+      "commercial solar companies Pakistan",
+      "residential solar installers Pakistan",
+      "solar installation near me",
+      "solar directory Pakistan"
     ],
     alternates: { canonical: `${baseUrl}/installers` },
     openGraph: {

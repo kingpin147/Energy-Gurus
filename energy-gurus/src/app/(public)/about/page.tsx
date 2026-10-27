@@ -10,9 +10,14 @@ export async function generateMetadata(): Promise<Metadata> {
         title,
         description,
         keywords: [
-            "best solar panels in Pakistan",
-            "solar inverter price in Pakistan",
-            "solar company in Pakistan",
+            "about EnergyGurus",
+            "EnergyGurus Pakistan",
+            "solar platform Pakistan",
+            "trusted solar advisors Pakistan",
+            "verified solar EPC directory",
+            "tier-1 solar equipment platform",
+            "Aafaaq Ali Khan",
+            "clean energy transition Pakistan",
             "reliable solar installation Pakistan",
             "EnergyGurus"
         ],

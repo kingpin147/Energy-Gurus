@@ -9,6 +9,12 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
   return {
     title,
     description,
+    keywords: [
+      "EnergyGurus terms of use",
+      "solar directory terms",
+      "EnergyGurus user agreement",
+      "solar services terms and conditions"
+    ],
     alternates: {
       canonical: `${baseUrl}/terms`,
       

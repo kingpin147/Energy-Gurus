@@ -15,6 +15,17 @@ export async function generateMetadata({ params }: { params: Promise<{ }> }): Pr
   return {
     title,
     description,
+    keywords: [
+      "solar energy audit Pakistan",
+      "solar feasibility study Pakistan",
+      "commercial energy audit Pakistan",
+      "industrial solar audit",
+      "electrical load analysis Pakistan",
+      "solar power ROI Pakistan",
+      "solar inspection services Pakistan",
+      "power quality audit Pakistan",
+      "energy efficiency audit"
+    ],
     alternates: {
       canonical: `${baseUrl}/audit`,
       

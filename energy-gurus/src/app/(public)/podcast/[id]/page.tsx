@@ -31,11 +31,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         title,
         description,
         keywords: [
-            "best solar panels in Pakistan",
-            "solar inverter price in Pakistan",
+            podcast.title,
+            ...(podcast.guestName ? [podcast.guestName, `${podcast.guestName} solar`] : []),
+            ...(podcast.category ? [`${podcast.category} solar`, podcast.category] : []),
             "top gurus of solar from Pakistan",
             "best ideas on solar",
             "solar podcast Pakistan",
+            "renewable energy interview Pakistan",
+            "EnergyGurus podcast"
         ],
         alternates: {
             canonical: url
