@@ -323,11 +323,17 @@ export function ArticleModerationQueue({ articles }: { articles: ArticleModerati
             </DialogHeader>
 
             {previewArticle.imageUrl && (
-              <div className="my-6 rounded-2xl overflow-hidden border border-line aspect-[21/9] max-h-[360px]">
+              <div className="my-6 rounded-2xl overflow-hidden border border-line aspect-[21/9] max-h-[360px] bg-slate-950 relative flex items-center justify-center">
+                <img
+                  src={previewArticle.imageUrl}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover blur-lg opacity-40 scale-110 pointer-events-none"
+                />
                 <img
                   src={previewArticle.imageUrl}
                   alt={previewArticle.title}
-                  className="w-full h-full object-cover"
+                  className="relative z-10 w-full h-full object-contain p-1"
                 />
               </div>
             )}

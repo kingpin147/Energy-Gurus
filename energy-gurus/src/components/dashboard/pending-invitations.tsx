@@ -3,9 +3,9 @@
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, Trash2, Send, Loader2 } from "lucide-react";
+import { Clock, Trash2, Send, Loader2, RefreshCw } from "lucide-react";
 
-import { deleteInvitation, resendInvitation } from "@/lib/actions/invitations"; // I'll need to create these
+import { deleteInvitation, resendInvitation, syncPendingInvitations } from "@/lib/actions/invitations";
 import { toast } from "sonner";
 import { UserRole } from "@/db/schema";
 
@@ -17,6 +17,22 @@ interface Invitation {
 
 export function PendingInvitations({ initialInvites }: { initialInvites: Invitation[] }) {
     const [isPending, startTransition] = useTransition();
+    const [isSyncing, startSync] = useTransition();
+
+    const handleSync = () => {
+        startSync(async () => {
+            try {
+                const res = await syncPendingInvitations();
+                if (res.removedCount > 0) {
+                    toast.success(`Cleaned! Removed ${res.removedCount} activated user${res.removedCount > 1 ? 's' : ''} who already logged in.`);
+                } else {
+                    toast.info("All pending invitations are checked and up to date.");
+                }
+            } catch (error: any) {
+                toast.error(error.message || "Failed to sync pending invitations");
+            }
+        });
+    };
 
     const handleDelete = async (id: string, email: string) => {
         if (!confirm(`Are you sure you want to delete the invitation for ${email}?`)) return;
@@ -51,10 +67,26 @@ export function PendingInvitations({ initialInvites }: { initialInvites: Invitat
     return (
         <Card className="border-none shadow-sm rounded-3xl overflow-hidden">
             <CardHeader className="bg-orange-500/10 p-6">
-                <CardTitle className="text-xl flex items-center gap-2 text-orange-600">
-                    <Clock className="w-5 h-5" />
-                    Pending Invitations
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                    <CardTitle className="text-xl flex items-center gap-2 text-orange-600">
+                        <Clock className="w-5 h-5" />
+                        Pending Invitations
+                        <span className="text-xs bg-orange-200/60 text-orange-800 px-2.5 py-0.5 rounded-full font-bold ml-2">
+                            {initialInvites.length}
+                        </span>
+                    </CardTitle>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={isSyncing || isPending}
+                        onClick={handleSync}
+                        className="rounded-xl border-orange-200 text-orange-700 hover:bg-orange-100/50 text-xs font-bold gap-1.5 h-8 px-3"
+                        title="Check if any invited user has already logged in with code/password and remove them"
+                    >
+                        <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin" : ""}`} />
+                        {isSyncing ? "Checking..." : "Check & Clean"}
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent className="p-0">
                 <div className="overflow-x-auto">

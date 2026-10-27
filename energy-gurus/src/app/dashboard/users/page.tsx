@@ -17,6 +17,7 @@ import { UserStatusButton } from "@/components/dashboard/user-status-button";
 import { createClerkClient } from "@clerk/nextjs/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { syncPendingInvitations } from "@/lib/actions/invitations";
 
 export default async function UserManagementPage({
     searchParams
@@ -35,73 +36,13 @@ export default async function UserManagementPage({
     const searchCondition = q ? or(like(users.name, `%${q}%`), like(users.email, `%${q}%`)) : undefined;
     const where = and(roleCondition, searchCondition);
 
-    const allInvites = await db.select().from(invitations).orderBy(invitations.createdAt);
+    // Automatically sync pending invitations against DB users and Clerk
+    await syncPendingInvitations();
 
-    // Sync pending invitations with Clerk on-demand
-    const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
-    let needsRequery = false;
+    // Fetch verified pending invitations
+    const pendingInvites = await db.select().from(invitations).orderBy(invitations.createdAt);
 
-    await Promise.all(allInvites.map(async (invite) => {
-        try {
-            const clerkUsers = await clerkClient.users.getUserList({
-                emailAddress: [invite.email.toLowerCase()]
-            });
-
-            if (clerkUsers.data && clerkUsers.data.length > 0) {
-                const clerkUser = clerkUsers.data[0];
-                const [dbUser] = await db.insert(users).values({
-                    clerkId: clerkUser.id,
-                    email: invite.email.toLowerCase(),
-                    name: clerkUser.fullName || clerkUser.firstName || invite.email.split("@")[0],
-                    role: invite.role
-                }).onConflictDoUpdate({
-                    target: users.email,
-                    set: { role: invite.role, clerkId: clerkUser.id, isActive: true }
-                }).returning();
-
-                if (dbUser) {
-                    if (invite.role === 'writer') {
-                        await db.insert(writerProfiles).values({
-                            userId: dbUser.id,
-                            name: dbUser.name || invite.email.split("@")[0],
-                            designation: "Contributing Columnist",
-                            status: "approved"
-                        }).onConflictDoNothing();
-                    } else if (invite.role === 'epc') {
-                        await db.insert(epcInstallers).values({
-                            userId: dbUser.id,
-                            companyName: dbUser.name || "Solar EPC Installer",
-                            email: dbUser.email,
-                            isVerified: true
-                        }).onConflictDoNothing();
-                    } else if (invite.role === 'brand') {
-                        await db.insert(brands).values({
-                            userId: dbUser.id,
-                            brandName: dbUser.name || "Solar Brand",
-                            customerCareEmail: dbUser.email,
-                            status: "live",
-                            isVerified: true
-                        }).onConflictDoNothing();
-                    }
-                }
-
-                await db.delete(invitations).where(eq(invitations.id, invite.id));
-
-                await clerkClient.users.updateUserMetadata(clerkUser.id, {
-                    publicMetadata: { role: invite.role }
-                });
-
-                needsRequery = true;
-            }
-        } catch (err) {
-            console.error("Clerk sync error for:", invite.email, err);
-        }
-    }));
-
-    let baseUsers;
-    let pendingInvites;
-
-    const query = db.select({
+    const baseUsers = await db.select({
         id: users.id,
         name: users.name,
         email: users.email,
@@ -117,17 +58,6 @@ export default async function UserManagementPage({
         .leftJoin(epcInstallers, eq(epcInstallers.userId, users.id))
         .where(where)
         .orderBy(order);
-
-    if (needsRequery) {
-        baseUsers = await query;
-        const updatedInvites = await db.select().from(invitations).orderBy(invitations.createdAt);
-        const registeredEmails = new Set(baseUsers.map(u => u.email.toLowerCase()));
-        pendingInvites = updatedInvites.filter(inv => !registeredEmails.has(inv.email.toLowerCase()));
-    } else {
-        baseUsers = await query;
-        const registeredEmails = new Set(baseUsers.map(u => u.email.toLowerCase()));
-        pendingInvites = allInvites.filter(inv => !registeredEmails.has(inv.email.toLowerCase()));
-    }
 
     const allUsers = [...baseUsers];
 

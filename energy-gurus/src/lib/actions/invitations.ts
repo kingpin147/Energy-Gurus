@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { invitations, users, UserRole, writerProfiles, epcInstallers, brands } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { createClerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { getUserRole } from "@/lib/roles";
@@ -26,7 +26,7 @@ export async function createInvitation(email: string, role: UserRole) {
         }
 
         await db.insert(invitations).values({
-            email: validated.data.email.toLowerCase(),
+            email: validated.data.email.toLowerCase().trim(),
             role: validated.data.role
         }).onConflictDoUpdate({
             target: invitations.email,
@@ -50,8 +50,10 @@ export async function createInvitation(email: string, role: UserRole) {
 }
 
 export async function checkAndApplyInvitation(userId: string, email: string) {
-    const lowerEmail = email.toLowerCase();
-    const [invitation] = await db.select().from(invitations).where(eq(invitations.email, lowerEmail));
+    const lowerEmail = email.toLowerCase().trim();
+    const [invitation] = await db.select().from(invitations).where(
+        sql`LOWER(TRIM(${invitations.email})) = ${lowerEmail}`
+    );
 
     if (invitation) {
         // Update Clerk metadata
@@ -111,10 +113,12 @@ export async function checkAndApplyInvitation(userId: string, email: string) {
 }
 
 export async function isUserAllowed(email: string, clerkId?: string, name?: string) {
-    const lowerEmail = email.toLowerCase();
+    const lowerEmail = email.toLowerCase().trim();
 
     // 1. Check if they are already in the users table
-    const [dbUser] = await db.select().from(users).where(eq(users.email, lowerEmail));
+    const [dbUser] = await db.select().from(users).where(
+        sql`LOWER(TRIM(${users.email})) = ${lowerEmail}`
+    );
     if (dbUser) {
         if (!dbUser.isActive) {
             return false;
@@ -122,11 +126,17 @@ export async function isUserAllowed(email: string, clerkId?: string, name?: stri
         if (clerkId && dbUser.clerkId !== clerkId) {
             await db.update(users).set({ clerkId }).where(eq(users.id, dbUser.id));
         }
+        // User is registered and allowed — clean up any lingering invitation for this email
+        await db.delete(invitations).where(
+            sql`LOWER(TRIM(${invitations.email})) = ${lowerEmail}`
+        );
         return true;
     }
 
     // 2. Check if they have a pending invitation
-    const [invitation] = await db.select().from(invitations).where(eq(invitations.email, lowerEmail));
+    const [invitation] = await db.select().from(invitations).where(
+        sql`LOWER(TRIM(${invitations.email})) = ${lowerEmail}`
+    );
 
     // 3. Hardcoded super-admin whitelist for initial setup
     const whitelist = ["nomiking0072012@gmail.com", "energygurusonline@gmail.com"];
@@ -240,5 +250,158 @@ export async function deleteInvitation(id: string) {
 
 export async function resendInvitation(email: string, role: UserRole) {
     return createInvitation(email, role);
+}
+
+/**
+ * Checks all pending invitations against:
+ * 1. Users already active in DB
+ * 2. Clerk accounts created directly (via email code / OTP, password, or SSO)
+ * 3. Matched name / identity (e.g. invited via work email but signed in with personal Gmail)
+ * 
+ * Automatically activates the user in DB with their assigned role and removes them from the pending invitations list.
+ */
+export async function syncPendingInvitations() {
+    try {
+        const allInvites = await db.select().from(invitations);
+        if (allInvites.length === 0) return { success: true, removedCount: 0 };
+
+        const allDbUsers = await db.select().from(users);
+        const allClerkRes = await clerkClient.users.getUserList({ limit: 500 });
+        const allClerkUsers = allClerkRes.data;
+
+        let removedCount = 0;
+
+        for (const inv of allInvites) {
+            const invEmail = inv.email.toLowerCase().trim();
+
+            // 1. Check if user already exists in DB users table
+            const dbUser = allDbUsers.find(u => u.email.toLowerCase().trim() === invEmail);
+            if (dbUser) {
+                // User is already active in database, remove stale pending invitation
+                await db.delete(invitations).where(eq(invitations.id, inv.id));
+                removedCount++;
+                continue;
+            }
+
+            // 2. Check if user exists in Clerk by email address (logged in directly via code/password)
+            const clerkUser = allClerkUsers.find(cu =>
+                cu.emailAddresses.some(e => e.emailAddress.toLowerCase().trim() === invEmail)
+            );
+
+            if (clerkUser) {
+                const primaryEmail = (clerkUser.emailAddresses.find(e => e.id === clerkUser.primaryEmailAddressId)?.emailAddress || invEmail).toLowerCase().trim();
+                const userName = clerkUser.fullName || `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || invEmail.split('@')[0];
+
+                const [newDbUser] = await db.insert(users).values({
+                    clerkId: clerkUser.id,
+                    email: primaryEmail,
+                    name: userName,
+                    role: inv.role,
+                    isActive: true
+                }).onConflictDoUpdate({
+                    target: users.email,
+                    set: { role: inv.role, clerkId: clerkUser.id, isActive: true }
+                }).returning();
+
+                if (newDbUser) {
+                    if (inv.role === 'writer') {
+                        await db.insert(writerProfiles).values({
+                            userId: newDbUser.id,
+                            name: newDbUser.name || userName,
+                            designation: "Contributing Columnist",
+                            status: "approved"
+                        }).onConflictDoNothing();
+                    } else if (inv.role === 'epc') {
+                        await db.insert(epcInstallers).values({
+                            userId: newDbUser.id,
+                            companyName: newDbUser.name || "Solar EPC Installer",
+                            email: newDbUser.email,
+                            isVerified: true
+                        }).onConflictDoNothing();
+                    } else if (inv.role === 'brand') {
+                        await db.insert(brands).values({
+                            userId: newDbUser.id,
+                            brandName: newDbUser.name || "Solar Brand",
+                            customerCareEmail: newDbUser.email,
+                            status: "live",
+                            isVerified: true
+                        }).onConflictDoNothing();
+                    }
+                }
+
+                await clerkClient.users.updateUserMetadata(clerkUser.id, {
+                    publicMetadata: { role: inv.role }
+                });
+
+                await db.delete(invitations).where(eq(invitations.id, inv.id));
+                removedCount++;
+                continue;
+            }
+
+            // 3. Name/Identity match (e.g., user was invited to company email but logged in with personal account)
+            const invPrefix = invEmail.split("@")[0].replace(/[._-]/g, " ").trim().toLowerCase();
+            if (invPrefix.length >= 4) {
+                const nameMatch = allClerkUsers.find(cu => {
+                    const fullName = `${cu.firstName || ""} ${cu.lastName || ""}`.trim().toLowerCase();
+                    return fullName === invPrefix || (cu.firstName && cu.lastName && invPrefix.includes(cu.firstName.toLowerCase()) && invPrefix.includes(cu.lastName.toLowerCase()));
+                });
+
+                if (nameMatch) {
+                    const primaryEmail = (nameMatch.emailAddresses[0]?.emailAddress || invEmail).toLowerCase().trim();
+                    const userName = `${nameMatch.firstName || ''} ${nameMatch.lastName || ''}`.trim() || invEmail.split('@')[0];
+
+                    const [newDbUser] = await db.insert(users).values({
+                        clerkId: nameMatch.id,
+                        email: primaryEmail,
+                        name: userName,
+                        role: inv.role,
+                        isActive: true
+                    }).onConflictDoUpdate({
+                        target: users.email,
+                        set: { role: inv.role, clerkId: nameMatch.id, isActive: true }
+                    }).returning();
+
+                    if (newDbUser) {
+                        if (inv.role === 'writer') {
+                            await db.insert(writerProfiles).values({
+                                userId: newDbUser.id,
+                                name: newDbUser.name || userName,
+                                designation: "Contributing Columnist",
+                                status: "approved"
+                            }).onConflictDoNothing();
+                        } else if (inv.role === 'epc') {
+                            await db.insert(epcInstallers).values({
+                                userId: newDbUser.id,
+                                companyName: newDbUser.name || "Solar EPC Installer",
+                                email: newDbUser.email,
+                                isVerified: true
+                            }).onConflictDoNothing();
+                        } else if (inv.role === 'brand') {
+                            await db.insert(brands).values({
+                                userId: newDbUser.id,
+                                brandName: newDbUser.name || "Solar Brand",
+                                customerCareEmail: newDbUser.email,
+                                status: "live",
+                                isVerified: true
+                            }).onConflictDoNothing();
+                        }
+                    }
+
+                    await clerkClient.users.updateUserMetadata(nameMatch.id, {
+                        publicMetadata: { role: inv.role }
+                    });
+
+                    await db.delete(invitations).where(eq(invitations.id, inv.id));
+                    removedCount++;
+                }
+            }
+        }
+
+        revalidatePath("/dashboard/users", "layout");
+        return { success: true, removedCount };
+    } catch (error) {
+        console.error("Error in syncPendingInvitations:", error);
+        return { success: false, removedCount: 0, error: (error as any)?.message };
+    }
 }
 

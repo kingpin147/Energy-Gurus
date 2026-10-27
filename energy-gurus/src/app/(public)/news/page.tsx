@@ -176,11 +176,25 @@ export default async function NewsPage({
                     {/* Featured Article (Hero for "All" tab) */}
                     {featured && (
                         <div className="grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-10 items-center mb-14">
-                            <Link href={`/news/${featured.slug || featured.id}`} className="rounded-[8px] overflow-hidden border border-line block relative group shadow-sm bg-slate-50">
+                            <Link href={`/news/${featured.slug || featured.id}`} className="rounded-[8px] overflow-hidden border border-line block relative group shadow-sm bg-slate-950 aspect-[16/9] flex items-center justify-center">
                                 {featured.imageUrl ? (
-                                    <img src={featured.imageUrl} alt={featured.title} className="w-full h-auto block group-hover:scale-[1.02] transition-transform duration-300" />
+                                    <>
+                                        {/* Ambient blurred backdrop for portrait / non-standard aspect ratio images */}
+                                        <img 
+                                            src={featured.imageUrl} 
+                                            alt="" 
+                                            aria-hidden="true" 
+                                            className="absolute inset-0 w-full h-full object-cover blur-xl opacity-40 scale-110 pointer-events-none" 
+                                        />
+                                        {/* Crisp contained foreground image */}
+                                        <img 
+                                            src={featured.imageUrl} 
+                                            alt={featured.title} 
+                                            className="relative z-10 w-full h-full object-contain p-1 group-hover:scale-[1.02] transition-transform duration-300" 
+                                        />
+                                    </>
                                 ) : (
-                                    <div className="aspect-[2/1] bg-gradient-to-br from-ink to-[#1b3157] flex items-center justify-center py-12">
+                                    <div className="w-full h-full bg-gradient-to-br from-ink to-[#1b3157] flex items-center justify-center py-12">
                                         <div className="w-11 h-11 border-2 border-amber rounded-[3px] opacity-70 flex items-center justify-center">
                                             <Newspaper className="w-6 h-6 text-amber" />
                                         </div>
@@ -213,11 +227,25 @@ export default async function NewsPage({
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                         {gridArticles.map((article) => (
                             <div key={article.id} className="bg-white border border-line rounded-[8px] overflow-hidden flex flex-col hover:border-teal hover:shadow-sm transition-all group">
-                                <Link href={`/news/${article.slug || article.id}`} className="w-full bg-slate-50 block overflow-hidden border-b border-line">
+                                <Link href={`/news/${article.slug || article.id}`} className="w-full bg-slate-950 block overflow-hidden border-b border-line aspect-[16/9] relative flex items-center justify-center">
                                     {article.imageUrl ? (
-                                        <img src={article.imageUrl} alt={article.title} className="w-full h-auto block group-hover:scale-[1.03] transition-transform duration-300" />
+                                        <>
+                                            {/* Ambient blurred backdrop */}
+                                            <img 
+                                                src={article.imageUrl} 
+                                                alt="" 
+                                                aria-hidden="true" 
+                                                className="absolute inset-0 w-full h-full object-cover blur-lg opacity-40 scale-110 pointer-events-none" 
+                                            />
+                                            {/* Crisp contained foreground */}
+                                            <img 
+                                                src={article.imageUrl} 
+                                                alt={article.title} 
+                                                className="relative z-10 w-full h-full object-contain p-1 group-hover:scale-[1.03] transition-transform duration-300" 
+                                            />
+                                        </>
                                     ) : (
-                                        <div className="aspect-[2/1] bg-gradient-to-br from-ink to-[#1b3157] flex items-center justify-center py-8">
+                                        <div className="w-full h-full bg-gradient-to-br from-ink to-[#1b3157] flex items-center justify-center py-8">
                                             <div className="w-[30px] h-[30px] border-2 border-amber rounded-[3px] opacity-60 flex items-center justify-center">
                                                 <Newspaper className="w-4 h-4 text-amber" />
                                             </div>

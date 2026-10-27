@@ -304,11 +304,17 @@ export default async function NewsArticlePage({
 
                     {/* Featured Cover Image */}
                     {article.imageUrl ? (
-                        <div className="w-full rounded-[8px] overflow-hidden mb-12 border border-line shadow-sm bg-slate-50">
+                        <div className="w-full rounded-[8px] overflow-hidden mb-12 border border-line shadow-sm bg-slate-950 aspect-[16/9] sm:aspect-[21/9] max-h-[460px] relative flex items-center justify-center">
+                            <img 
+                                src={article.imageUrl} 
+                                alt="" 
+                                aria-hidden="true" 
+                                className="absolute inset-0 w-full h-full object-cover blur-xl opacity-40 scale-110 pointer-events-none" 
+                            />
                             <img 
                                 src={article.imageUrl} 
                                 alt={article.title} 
-                                className="w-full h-auto block" 
+                                className="relative z-10 w-full h-full object-contain p-1" 
                             />
                         </div>
                     ) : (
