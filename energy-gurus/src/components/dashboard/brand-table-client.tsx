@@ -25,7 +25,9 @@ import {
   Check,
   Wrench,
   Award,
-  Share2
+  Share2,
+  Upload,
+  Image as ImageIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +54,7 @@ import {
 import { useRouter } from "next/navigation";
 import { UploadZone } from "@/components/ui/upload-zone";
 import { useR2Upload } from "@/lib/hooks/use-r2-upload";
+import { MultiPhotoUpload, SinglePhotoUpload } from "@/components/dashboard/multi-media-upload";
 
 const DEFAULT_CATEGORIES = [
   "Inverters",
@@ -74,6 +77,7 @@ export interface BrandListItem {
   customerCareHead: string | null;
   logoUrl: string | null;
   about: string | null;
+  photos?: string[] | null;
   countryOfOrigin: string | null;
   headquarters: string | null;
   founded: string | null;
@@ -123,6 +127,7 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
   const [editBrandName, setEditBrandName] = useState("");
   const [editTagline, setEditTagline] = useState("");
   const [editLogoUrl, setEditLogoUrl] = useState("");
+  const [editPhotos, setEditPhotos] = useState<string[]>([]);
   const [editCountryOfOrigin, setEditCountryOfOrigin] = useState("China");
   const [editHeadquarters, setEditHeadquarters] = useState("");
   const [editFounded, setEditFounded] = useState("");
@@ -212,6 +217,7 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
       setEditBrandName(data.brandName || "");
       setEditTagline(data.tagline || "");
       setEditLogoUrl(data.logoUrl || "");
+      setEditPhotos(Array.isArray(data.photos) ? data.photos : []);
       setEditCountryOfOrigin(data.countryOfOrigin || "China");
       setEditHeadquarters(data.headquarters || "");
       setEditFounded(data.founded || "");
@@ -254,6 +260,7 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
         brandName: editBrandName.trim(),
         tagline: editTagline.trim() || null,
         logoUrl: editLogoUrl || null,
+        photos: editPhotos,
         countryOfOrigin: editCountryOfOrigin.trim() || null,
         headquarters: editHeadquarters.trim() || null,
         founded: editFounded.trim() || null,
@@ -288,6 +295,7 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
                   brandName: editBrandName.trim(),
                   tagline: editTagline.trim() || null,
                   logoUrl: editLogoUrl || null,
+                  photos: editPhotos,
                   countryOfOrigin: editCountryOfOrigin.trim() || null,
                   isVerified: editIsVerified,
                   status: editStatus,
@@ -516,7 +524,7 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
 
       {/* VIEW BRAND PROFILE DIALOG */}
       <Dialog open={!!viewingBrand} onOpenChange={(open) => !open && setViewingBrand(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl p-6 md:p-8">
+        <DialogContent className="sm:max-w-4xl md:max-w-5xl lg:max-w-6xl w-[94vw] max-h-[92vh] overflow-y-auto rounded-3xl p-6 sm:p-8">
           {viewingBrand && (
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-line pb-6">
@@ -568,6 +576,19 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
                   </div>
                 )}
 
+                {viewingBrand.photos && viewingBrand.photos.length > 0 && (
+                  <div className="sm:col-span-2 space-y-2 pt-2">
+                    <span className="font-bold uppercase tracking-wider text-slate-custom text-[10px]">Brand Showcase Photos</span>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      {viewingBrand.photos.map((pUrl: string, pIdx: number) => (
+                        <div key={pIdx} className="aspect-square rounded-xl border border-line overflow-hidden bg-white shadow-xs">
+                          <img src={pUrl} alt="Showcase" className="w-full h-full object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {viewingBrand.about && (
                   <div className="sm:col-span-2 bg-slate-50 p-4 rounded-2xl border border-line space-y-1">
                     <span className="font-bold uppercase tracking-wider text-slate-custom text-[10px]">About Brand</span>
@@ -599,34 +620,106 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
 
       {/* EDIT BRAND PROFILE DIALOG */}
       <Dialog open={!!editingBrand} onOpenChange={(open) => !open && setEditingBrand(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl p-6 md:p-8">
+        <DialogContent className="sm:max-w-4xl md:max-w-5xl lg:max-w-6xl w-[94vw] max-h-[92vh] overflow-y-auto rounded-3xl p-6 sm:p-8">
           <DialogHeader className="border-b border-line pb-4">
-            <DialogTitle className="text-xl font-bold text-ink flex items-center gap-2">
+            <DialogTitle className="text-2xl font-bold text-ink flex items-center gap-2">
               <Pencil className="w-5 h-5 text-amber" /> Edit Brand Profile
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-custom">
-              Modify corporate information, equipment categories, distributors, products, and verification status.
+              Modify corporate information, equipment categories, brand photos, distributors, and product models.
             </DialogDescription>
           </DialogHeader>
 
           {editingBrand && (
             <div className="space-y-6 pt-4">
               <Tabs defaultValue="general" className="w-full">
-                <TabsList className="bg-slate-100 p-1 rounded-xl mb-6 flex flex-wrap h-auto gap-1">
-                  <TabsTrigger value="general" className="rounded-lg text-xs font-bold">General Info</TabsTrigger>
-                  <TabsTrigger value="presence" className="rounded-lg text-xs font-bold">Support & HQ</TabsTrigger>
-                  <TabsTrigger value="team" className="rounded-lg text-xs font-bold">Team ({editTeam.length})</TabsTrigger>
-                  <TabsTrigger value="distributors" className="rounded-lg text-xs font-bold">Distributors ({editDistributors.length})</TabsTrigger>
-                  <TabsTrigger value="retailers" className="rounded-lg text-xs font-bold">Retailers ({editRetailers.length})</TabsTrigger>
-                  <TabsTrigger value="centres" className="rounded-lg text-xs font-bold">Service Centres ({editServiceCentres.length})</TabsTrigger>
-                  <TabsTrigger value="installers" className="rounded-lg text-xs font-bold">Installers ({editCertifiedInstallers.length})</TabsTrigger>
-                  <TabsTrigger value="social" className="rounded-lg text-xs font-bold">Social Links ({editSocialLinks.length})</TabsTrigger>
-                  <TabsTrigger value="products" className="rounded-lg text-xs font-bold">Products ({editProducts.length})</TabsTrigger>
+                <TabsList className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl overflow-x-auto w-full justify-start scrollbar-none mb-6">
+                  <TabsTrigger value="general" className="rounded-xl text-xs font-bold px-4 py-2 shrink-0 flex items-center gap-1.5">
+                    <Building2 className="w-3.5 h-3.5 mr-1" /> General Info
+                  </TabsTrigger>
+                  <TabsTrigger value="photos" className="rounded-xl text-xs font-bold px-4 py-2 shrink-0 flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5 mr-1" /> Photos ({editPhotos.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="presence" className="rounded-xl text-xs font-bold px-4 py-2 shrink-0 flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 mr-1" /> Support &amp; HQ
+                  </TabsTrigger>
+                  <TabsTrigger value="team" className="rounded-xl text-xs font-bold px-4 py-2 shrink-0 flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 mr-1" /> Team ({editTeam.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="distributors" className="rounded-xl text-xs font-bold px-4 py-2 shrink-0 flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 mr-1" /> Distributors ({editDistributors.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="retailers" className="rounded-xl text-xs font-bold px-4 py-2 shrink-0 flex items-center gap-1.5">
+                    <Store className="w-3.5 h-3.5 mr-1" /> Retailers ({editRetailers.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="centres" className="rounded-xl text-xs font-bold px-4 py-2 shrink-0 flex items-center gap-1.5">
+                    <Wrench className="w-3.5 h-3.5 mr-1" /> Service Centres ({editServiceCentres.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="installers" className="rounded-xl text-xs font-bold px-4 py-2 shrink-0 flex items-center gap-1.5">
+                    <Award className="w-3.5 h-3.5 mr-1" /> Installers ({editCertifiedInstallers.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="social" className="rounded-xl text-xs font-bold px-4 py-2 shrink-0 flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 mr-1" /> Social Links ({editSocialLinks.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="products" className="rounded-xl text-xs font-bold px-4 py-2 shrink-0 flex items-center gap-1.5">
+                    <Package className="w-3.5 h-3.5 mr-1" /> Products ({editProducts.length})
+                  </TabsTrigger>
                 </TabsList>
 
-                {/* Tab 1: General */}
-                <TabsContent value="general" className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Tab 1: General Info */}
+                <TabsContent value="general" className="space-y-6">
+                  {/* BRAND LOGO UPLOAD CARD */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-slate-50 border border-line rounded-2xl">
+                    <div className="w-16 h-16 rounded-xl border border-line bg-white flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+                      {editLogoUrl ? (
+                        <img src={editLogoUrl} alt="Brand Logo" className="w-full h-full object-contain p-1" />
+                      ) : (
+                        <Building2 className="w-8 h-8 text-slate-300" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <Label className="text-xs font-bold uppercase text-slate-custom block mb-0.5">Brand Logo</Label>
+                      <p className="text-xs text-slate-custom mb-2">High resolution PNG, SVG or JPG format with transparent or white background.</p>
+                      <div className="flex items-center gap-2">
+                        <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border border-line bg-white hover:bg-slate-100 text-ink shadow-xs transition-colors">
+                          <Upload className="w-3.5 h-3.5 text-amber" />
+                          <span>{editLogoUrl ? "Change Logo" : "Upload Logo"}</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              try {
+                                toast.loading("Uploading logo...");
+                                const res = await uploadFile(file, "brand-logos");
+                                setEditLogoUrl(res.publicUrl);
+                                toast.dismiss();
+                                toast.success("Logo uploaded successfully");
+                              } catch (err: any) {
+                                toast.dismiss();
+                                toast.error(err?.message || "Failed to upload logo");
+                              }
+                            }}
+                          />
+                        </label>
+                        {editLogoUrl && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setEditLogoUrl("")}
+                            className="h-8 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl"
+                          >
+                            Remove
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="space-y-1.5">
                       <Label className="text-xs font-bold text-slate-custom uppercase">Brand Name *</Label>
                       <Input
@@ -641,6 +734,7 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
                       <Input
                         value={editTagline}
                         onChange={(e) => setEditTagline(e.target.value)}
+                        placeholder="e.g. Empowering Solar Energy"
                         className="h-10 rounded-xl bg-slate-50 text-sm border-line"
                       />
                     </div>
@@ -659,6 +753,7 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
                       <Input
                         value={editHeadquarters}
                         onChange={(e) => setEditHeadquarters(e.target.value)}
+                        placeholder="e.g. Munich, Germany / Shenzhen, China"
                         className="h-10 rounded-xl bg-slate-50 text-sm border-line"
                       />
                     </div>
@@ -678,33 +773,20 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
                       <Input
                         value={editWebsite}
                         onChange={(e) => setEditWebsite(e.target.value)}
+                        placeholder="https://brand.com"
                         className="h-10 rounded-xl bg-slate-50 text-sm border-line"
                       />
                     </div>
 
-                    <div className="space-y-1.5 sm:col-span-2">
+                    <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
                       <Label className="text-xs font-bold text-slate-custom uppercase">Warranty Portal URL</Label>
                       <Input
                         value={editWarrantyUrl}
                         onChange={(e) => setEditWarrantyUrl(e.target.value)}
+                        placeholder="https://service.brand.com/warranty"
                         className="h-10 rounded-xl bg-slate-50 text-sm border-line"
                       />
                     </div>
-                  </div>
-
-                  {/* Brand Logo Upload */}
-                  <div className="space-y-2 pt-2">
-                    <Label className="text-xs font-bold uppercase tracking-wider text-slate-custom">
-                      Brand Logo
-                    </Label>
-                    <UploadZone
-                      onUpload={handleLogoUpload}
-                      isUploading={isUploadingLogo}
-                      value={editLogoUrl}
-                      title="Upload Brand Logo"
-                      description="PNG, SVG or JPG format with transparent or white background"
-                      accept="image/*"
-                    />
                   </div>
 
                   {/* Equipment Categories */}
@@ -720,9 +802,9 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
                             type="button"
                             key={cat}
                             onClick={() => toggleCategory(cat)}
-                            className={`px-3 py-1 rounded-xl text-xs font-bold transition-all border ${
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
                               active
-                                ? "bg-amber text-ink border-amber shadow-sm"
+                                ? "bg-amber text-ink border-amber shadow-xs"
                                 : "bg-slate-50 text-slate-custom border-line hover:border-slate-300"
                             }`}
                           >
@@ -803,7 +885,18 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
                   </div>
                 </TabsContent>
 
-                {/* Tab 2: Support & HQ */}
+                {/* Tab 2: Photos & Media */}
+                <TabsContent value="photos" className="space-y-4">
+                  <MultiPhotoUpload
+                    label="Brand Showcase &amp; Gallery Photos"
+                    description="Upload high-resolution photos of manufacturing facilities, test laboratories, global offices, or trade expos."
+                    urls={editPhotos}
+                    onChange={setEditPhotos}
+                    folder="brand-gallery"
+                  />
+                </TabsContent>
+
+                {/* Tab 3: Support & HQ */}
                 <TabsContent value="presence" className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
@@ -858,10 +951,13 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
                   </div>
                 </TabsContent>
 
-                {/* Tab 3: Local Team */}
+                {/* Tab 4: Local Team */}
                 <TabsContent value="team" className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <p className="text-xs text-slate-custom">Local Pakistan team members and key contacts.</p>
+                    <div>
+                      <h4 className="text-sm font-bold text-ink">Pakistan Team &amp; Contacts</h4>
+                      <p className="text-xs text-slate-custom">Local team members, corporate leads, and key technical representatives.</p>
+                    </div>
                     <Button
                       type="button"
                       variant="outline"
@@ -869,92 +965,132 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
                       onClick={() =>
                         setEditTeam([
                           ...editTeam,
-                          { name: "", designation: "Regional Sales Lead", email: "", phone: "", linkedIn: "" }
+                          { name: "", designation: "Regional Sales Lead", email: "", phone: "", linkedIn: "", photoUrl: "" }
                         ])
                       }
-                      className="rounded-xl h-8 text-xs font-bold gap-1"
+                      className="rounded-xl h-9 text-xs font-bold gap-1.5 border-line"
                     >
-                      <Plus className="w-3.5 h-3.5" /> Add Member
+                      <Plus className="w-3.5 h-3.5 text-amber" /> Add Member
                     </Button>
                   </div>
 
                   {editTeam.length === 0 ? (
-                    <p className="text-xs text-slate-custom italic text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-line">
+                    <p className="text-xs text-slate-custom italic text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-line">
                       No team members added yet. Click &quot;Add Member&quot; above to list key representatives.
                     </p>
                   ) : (
-                    editTeam.map((m, idx) => (
-                      <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-line grid grid-cols-1 sm:grid-cols-3 gap-2 relative">
-                        <Input
-                          placeholder="Name *"
-                          value={m.name || ""}
-                          onChange={(e) => {
-                            const updated = [...editTeam];
-                            updated[idx].name = e.target.value;
-                            setEditTeam(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg font-bold"
-                        />
-                        <Input
-                          placeholder="Designation"
-                          value={m.designation || ""}
-                          onChange={(e) => {
-                            const updated = [...editTeam];
-                            updated[idx].designation = e.target.value;
-                            setEditTeam(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg"
-                        />
-                        <div className="flex gap-1 items-center">
-                          <Input
-                            placeholder="Email"
-                            value={m.email || ""}
-                            onChange={(e) => {
-                              const updated = [...editTeam];
-                              updated[idx].email = e.target.value;
-                              setEditTeam(updated);
-                            }}
-                            className="h-9 bg-white text-xs border-line rounded-lg flex-1"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setEditTeam(editTeam.filter((_, i) => i !== idx))}
-                            className="text-slate-custom hover:text-red-600 p-1.5"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                    <div className="space-y-3">
+                      {editTeam.map((m, idx) => (
+                        <div key={idx} className="p-4 bg-slate-50/70 rounded-2xl border border-line grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 relative items-start">
+                          <div className="space-y-1">
+                            <Label className="text-[10px] uppercase font-bold text-slate-custom">Member Name *</Label>
+                            <Input
+                              placeholder="Name *"
+                              value={m.name || ""}
+                              onChange={(e) => {
+                                const updated = [...editTeam];
+                                updated[idx].name = e.target.value;
+                                setEditTeam(updated);
+                              }}
+                              className="h-9 bg-white text-xs border-line rounded-xl font-bold"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <Label className="text-[10px] uppercase font-bold text-slate-custom">Designation</Label>
+                            <Input
+                              placeholder="Designation"
+                              value={m.designation || ""}
+                              onChange={(e) => {
+                                const updated = [...editTeam];
+                                updated[idx].designation = e.target.value;
+                                setEditTeam(updated);
+                              }}
+                              className="h-9 bg-white text-xs border-line rounded-xl"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <Label className="text-[10px] uppercase font-bold text-slate-custom">Photo</Label>
+                            <SinglePhotoUpload
+                              value={m.photoUrl || m.imageUrl || ""}
+                              onChange={(url) => {
+                                const updated = [...editTeam];
+                                updated[idx].photoUrl = url;
+                                updated[idx].imageUrl = url;
+                                setEditTeam(updated);
+                              }}
+                              folder="brand-team"
+                              title={m.name || `Team Member #${idx + 1}`}
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <Label className="text-[10px] uppercase font-bold text-slate-custom">Email</Label>
+                            <Input
+                              placeholder="Email"
+                              value={m.email || ""}
+                              onChange={(e) => {
+                                const updated = [...editTeam];
+                                updated[idx].email = e.target.value;
+                                setEditTeam(updated);
+                              }}
+                              className="h-9 bg-white text-xs border-line rounded-xl"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <Label className="text-[10px] uppercase font-bold text-slate-custom">Phone / WhatsApp</Label>
+                            <Input
+                              placeholder="Phone / WhatsApp"
+                              value={m.phone || ""}
+                              onChange={(e) => {
+                                const updated = [...editTeam];
+                                updated[idx].phone = e.target.value;
+                                setEditTeam(updated);
+                              }}
+                              className="h-9 bg-white text-xs border-line rounded-xl"
+                            />
+                          </div>
+
+                          <div className="space-y-1 flex items-end gap-2">
+                            <div className="flex-1">
+                              <Label className="text-[10px] uppercase font-bold text-slate-custom">LinkedIn URL</Label>
+                              <Input
+                                placeholder="LinkedIn URL"
+                                value={m.linkedIn || ""}
+                                onChange={(e) => {
+                                  const updated = [...editTeam];
+                                  updated[idx].linkedIn = e.target.value;
+                                  setEditTeam(updated);
+                                }}
+                                className="h-9 bg-white text-xs border-line rounded-xl"
+                              />
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setEditTeam(editTeam.filter((_, i) => i !== idx))}
+                              className="h-9 px-2 text-rose-600 hover:bg-rose-50 rounded-xl shrink-0"
+                              title="Delete member"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
-                        <Input
-                          placeholder="Phone / WhatsApp"
-                          value={m.phone || ""}
-                          onChange={(e) => {
-                            const updated = [...editTeam];
-                            updated[idx].phone = e.target.value;
-                            setEditTeam(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg"
-                        />
-                        <div className="sm:col-span-2">
-                          <Input
-                            placeholder="LinkedIn URL"
-                            value={m.linkedIn || ""}
-                            onChange={(e) => {
-                              const updated = [...editTeam];
-                              updated[idx].linkedIn = e.target.value;
-                              setEditTeam(updated);
-                            }}
-                            className="h-9 bg-white text-xs border-line rounded-lg"
-                          />
-                        </div>
-                      </div>
-                    ))
+                      ))}
+                    </div>
                   )}
                 </TabsContent>
 
-                {/* Tab 4: Distributors */}
+                {/* Tab 5: Distributors */}
                 <TabsContent value="distributors" className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <p className="text-xs text-slate-custom">National and regional supply distributors.</p>
+                    <div>
+                      <h4 className="text-sm font-bold text-ink">Authorized Supply Distributors</h4>
+                      <p className="text-xs text-slate-custom">National and regional distributor partners.</p>
+                    </div>
                     <Button
                       type="button"
                       variant="outline"
@@ -965,40 +1101,40 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
                           { name: "", city: "", phone: "", contactPerson: "", territory: "All Pakistan", email: "", address: "" }
                         ])
                       }
-                      className="rounded-xl h-8 text-xs font-bold gap-1"
+                      className="rounded-xl h-9 text-xs font-bold gap-1.5 border-line"
                     >
-                      <Plus className="w-3.5 h-3.5" /> Add Distributor
+                      <Plus className="w-3.5 h-3.5 text-amber" /> Add Distributor
                     </Button>
                   </div>
 
                   {editDistributors.length === 0 ? (
-                    <p className="text-xs text-slate-custom italic text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-line">
-                      No distributors added yet.
+                    <p className="text-xs text-slate-custom italic text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-line">
+                      No distributors added yet. Click &quot;Add Distributor&quot; above to list partners.
                     </p>
                   ) : (
-                    editDistributors.map((d, idx) => (
-                      <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-line grid grid-cols-1 sm:grid-cols-3 gap-2 relative">
-                        <Input
-                          placeholder="Company Name *"
-                          value={d.name || ""}
-                          onChange={(e) => {
-                            const updated = [...editDistributors];
-                            updated[idx].name = e.target.value;
-                            setEditDistributors(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg font-bold"
-                        />
-                        <Input
-                          placeholder="City"
-                          value={d.city || ""}
-                          onChange={(e) => {
-                            const updated = [...editDistributors];
-                            updated[idx].city = e.target.value;
-                            setEditDistributors(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg"
-                        />
-                        <div className="flex gap-1 items-center">
+                    <div className="space-y-3">
+                      {editDistributors.map((d, idx) => (
+                        <div key={idx} className="p-4 bg-slate-50/70 rounded-2xl border border-line grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 relative">
+                          <Input
+                            placeholder="Company Name *"
+                            value={d.name || ""}
+                            onChange={(e) => {
+                              const updated = [...editDistributors];
+                              updated[idx].name = e.target.value;
+                              setEditDistributors(updated);
+                            }}
+                            className="h-9 bg-white text-xs border-line rounded-xl font-bold"
+                          />
+                          <Input
+                            placeholder="City"
+                            value={d.city || ""}
+                            onChange={(e) => {
+                              const updated = [...editDistributors];
+                              updated[idx].city = e.target.value;
+                              setEditDistributors(updated);
+                            }}
+                            className="h-9 bg-white text-xs border-line rounded-xl"
+                          />
                           <Input
                             placeholder="Phone"
                             value={d.phone || ""}
@@ -1007,55 +1143,62 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
                               updated[idx].phone = e.target.value;
                               setEditDistributors(updated);
                             }}
-                            className="h-9 bg-white text-xs border-line rounded-lg flex-1"
+                            className="h-9 bg-white text-xs border-line rounded-xl"
                           />
-                          <button
-                            type="button"
-                            onClick={() => setEditDistributors(editDistributors.filter((_, i) => i !== idx))}
-                            className="text-slate-custom hover:text-red-600 p-1.5"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          <Input
+                            placeholder="Contact Person"
+                            value={d.contactPerson || ""}
+                            onChange={(e) => {
+                              const updated = [...editDistributors];
+                              updated[idx].contactPerson = e.target.value;
+                              setEditDistributors(updated);
+                            }}
+                            className="h-9 bg-white text-xs border-line rounded-xl"
+                          />
+                          <Input
+                            placeholder="Territory (e.g. Punjab, Nationwide)"
+                            value={d.territory || ""}
+                            onChange={(e) => {
+                              const updated = [...editDistributors];
+                              updated[idx].territory = e.target.value;
+                              setEditDistributors(updated);
+                            }}
+                            className="h-9 bg-white text-xs border-line rounded-xl"
+                          />
+                          <div className="flex gap-2 items-center">
+                            <Input
+                              placeholder="Email"
+                              value={d.email || ""}
+                              onChange={(e) => {
+                                const updated = [...editDistributors];
+                                updated[idx].email = e.target.value;
+                                setEditDistributors(updated);
+                              }}
+                              className="h-9 bg-white text-xs border-line rounded-xl flex-1"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setEditDistributors(editDistributors.filter((_, i) => i !== idx))}
+                              className="h-9 px-2 text-rose-600 hover:bg-rose-50 rounded-xl shrink-0"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
-                        <Input
-                          placeholder="Contact Person"
-                          value={d.contactPerson || ""}
-                          onChange={(e) => {
-                            const updated = [...editDistributors];
-                            updated[idx].contactPerson = e.target.value;
-                            setEditDistributors(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg"
-                        />
-                        <Input
-                          placeholder="Territory (e.g. Punjab, Nationwide)"
-                          value={d.territory || ""}
-                          onChange={(e) => {
-                            const updated = [...editDistributors];
-                            updated[idx].territory = e.target.value;
-                            setEditDistributors(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg"
-                        />
-                        <Input
-                          placeholder="Email"
-                          value={d.email || ""}
-                          onChange={(e) => {
-                            const updated = [...editDistributors];
-                            updated[idx].email = e.target.value;
-                            setEditDistributors(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg"
-                        />
-                      </div>
-                    ))
+                      ))}
+                    </div>
                   )}
                 </TabsContent>
 
-                {/* Tab 5: Retailers */}
+                {/* Tab 6: Retailers */}
                 <TabsContent value="retailers" className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <p className="text-xs text-slate-custom">Authorized solar shops, dealers, and local stockists.</p>
+                    <div>
+                      <h4 className="text-sm font-bold text-ink">Authorized Retailers &amp; Dealers</h4>
+                      <p className="text-xs text-slate-custom">Solar shops, dealers, and local market stockists.</p>
+                    </div>
                     <Button
                       type="button"
                       variant="outline"
@@ -1066,40 +1209,40 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
                           { name: "", city: "", address: "", phone: "", whatsapp: "", mapUrl: "" }
                         ])
                       }
-                      className="rounded-xl h-8 text-xs font-bold gap-1"
+                      className="rounded-xl h-9 text-xs font-bold gap-1.5 border-line"
                     >
-                      <Plus className="w-3.5 h-3.5" /> Add Retailer
+                      <Plus className="w-3.5 h-3.5 text-amber" /> Add Retailer
                     </Button>
                   </div>
 
                   {editRetailers.length === 0 ? (
-                    <p className="text-xs text-slate-custom italic text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-line">
+                    <p className="text-xs text-slate-custom italic text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-line">
                       No retailers added yet. Click &quot;Add Retailer&quot; above to list local shops.
                     </p>
                   ) : (
-                    editRetailers.map((r, idx) => (
-                      <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-line grid grid-cols-1 sm:grid-cols-3 gap-2 relative">
-                        <Input
-                          placeholder="Shop / Business Name *"
-                          value={r.name || ""}
-                          onChange={(e) => {
-                            const updated = [...editRetailers];
-                            updated[idx].name = e.target.value;
-                            setEditRetailers(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg font-bold"
-                        />
-                        <Input
-                          placeholder="City"
-                          value={r.city || ""}
-                          onChange={(e) => {
-                            const updated = [...editRetailers];
-                            updated[idx].city = e.target.value;
-                            setEditRetailers(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg"
-                        />
-                        <div className="flex gap-1 items-center">
+                    <div className="space-y-3">
+                      {editRetailers.map((r, idx) => (
+                        <div key={idx} className="p-4 bg-slate-50/70 rounded-2xl border border-line grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 relative">
+                          <Input
+                            placeholder="Shop / Business Name *"
+                            value={r.name || ""}
+                            onChange={(e) => {
+                              const updated = [...editRetailers];
+                              updated[idx].name = e.target.value;
+                              setEditRetailers(updated);
+                            }}
+                            className="h-9 bg-white text-xs border-line rounded-xl font-bold"
+                          />
+                          <Input
+                            placeholder="City"
+                            value={r.city || ""}
+                            onChange={(e) => {
+                              const updated = [...editRetailers];
+                              updated[idx].city = e.target.value;
+                              setEditRetailers(updated);
+                            }}
+                            className="h-9 bg-white text-xs border-line rounded-xl"
+                          />
                           <Input
                             placeholder="Phone"
                             value={r.phone || ""}
@@ -1108,55 +1251,62 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
                               updated[idx].phone = e.target.value;
                               setEditRetailers(updated);
                             }}
-                            className="h-9 bg-white text-xs border-line rounded-lg flex-1"
+                            className="h-9 bg-white text-xs border-line rounded-xl"
                           />
-                          <button
-                            type="button"
-                            onClick={() => setEditRetailers(editRetailers.filter((_, i) => i !== idx))}
-                            className="text-slate-custom hover:text-red-600 p-1.5"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          <Input
+                            placeholder="WhatsApp"
+                            value={r.whatsapp || ""}
+                            onChange={(e) => {
+                              const updated = [...editRetailers];
+                              updated[idx].whatsapp = e.target.value;
+                              setEditRetailers(updated);
+                            }}
+                            className="h-9 bg-white text-xs border-line rounded-xl"
+                          />
+                          <Input
+                            placeholder="Address"
+                            value={r.address || ""}
+                            onChange={(e) => {
+                              const updated = [...editRetailers];
+                              updated[idx].address = e.target.value;
+                              setEditRetailers(updated);
+                            }}
+                            className="h-9 bg-white text-xs border-line rounded-xl"
+                          />
+                          <div className="flex gap-2 items-center">
+                            <Input
+                              placeholder="Google Maps URL"
+                              value={r.mapUrl || ""}
+                              onChange={(e) => {
+                                const updated = [...editRetailers];
+                                updated[idx].mapUrl = e.target.value;
+                                setEditRetailers(updated);
+                              }}
+                              className="h-9 bg-white text-xs border-line rounded-xl flex-1"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setEditRetailers(editRetailers.filter((_, i) => i !== idx))}
+                              className="h-9 px-2 text-rose-600 hover:bg-rose-50 rounded-xl shrink-0"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
-                        <Input
-                          placeholder="WhatsApp"
-                          value={r.whatsapp || ""}
-                          onChange={(e) => {
-                            const updated = [...editRetailers];
-                            updated[idx].whatsapp = e.target.value;
-                            setEditRetailers(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg"
-                        />
-                        <Input
-                          placeholder="Google Maps URL"
-                          value={r.mapUrl || ""}
-                          onChange={(e) => {
-                            const updated = [...editRetailers];
-                            updated[idx].mapUrl = e.target.value;
-                            setEditRetailers(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg"
-                        />
-                        <Input
-                          placeholder="Address"
-                          value={r.address || ""}
-                          onChange={(e) => {
-                            const updated = [...editRetailers];
-                            updated[idx].address = e.target.value;
-                            setEditRetailers(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg"
-                        />
-                      </div>
-                    ))
+                      ))}
+                    </div>
                   )}
                 </TabsContent>
 
-                {/* Tab 6: Service Centres */}
+                {/* Tab 7: Service Centres */}
                 <TabsContent value="centres" className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <p className="text-xs text-slate-custom">Official service centres, repair labs, and warranty drop-off points.</p>
+                    <div>
+                      <h4 className="text-sm font-bold text-ink">Official Service Centres</h4>
+                      <p className="text-xs text-slate-custom">Official service centres, repair labs, and warranty drop-off points.</p>
+                    </div>
                     <Button
                       type="button"
                       variant="outline"
@@ -1167,43 +1317,43 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
                           { name: "", type: "Flagship Service Centre", city: "", address: "", phone: "", hours: "Mon-Sat: 9am-6pm" }
                         ])
                       }
-                      className="rounded-xl h-8 text-xs font-bold gap-1"
+                      className="rounded-xl h-9 text-xs font-bold gap-1.5 border-line"
                     >
-                      <Plus className="w-3.5 h-3.5" /> Add Service Centre
+                      <Plus className="w-3.5 h-3.5 text-amber" /> Add Service Centre
                     </Button>
                   </div>
 
                   {editServiceCentres.length === 0 ? (
-                    <p className="text-xs text-slate-custom italic text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-line">
-                      No service centres listed yet.
+                    <p className="text-xs text-slate-custom italic text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-line">
+                      No service centres listed yet. Click &quot;Add Service Centre&quot; above to list locations.
                     </p>
                   ) : (
-                    editServiceCentres.map((sc, idx) => (
-                      <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-line grid grid-cols-1 sm:grid-cols-3 gap-2 relative">
-                        <Input
-                          placeholder="Centre Name *"
-                          value={sc.name || ""}
-                          onChange={(e) => {
-                            const updated = [...editServiceCentres];
-                            updated[idx].name = e.target.value;
-                            setEditServiceCentres(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg font-bold"
-                        />
-                        <select
-                          value={sc.type || "Flagship Service Centre"}
-                          onChange={(e) => {
-                            const updated = [...editServiceCentres];
-                            updated[idx].type = e.target.value;
-                            setEditServiceCentres(updated);
-                          }}
-                          className="h-9 bg-white text-xs border border-line rounded-lg px-2"
-                        >
-                          <option>Flagship Service Centre</option>
-                          <option>Warranty Claim Drop-off Point</option>
-                          <option>Authorized Repair Partner</option>
-                        </select>
-                        <div className="flex gap-1 items-center">
+                    <div className="space-y-3">
+                      {editServiceCentres.map((sc, idx) => (
+                        <div key={idx} className="p-4 bg-slate-50/70 rounded-2xl border border-line grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 relative">
+                          <Input
+                            placeholder="Centre Name *"
+                            value={sc.name || ""}
+                            onChange={(e) => {
+                              const updated = [...editServiceCentres];
+                              updated[idx].name = e.target.value;
+                              setEditServiceCentres(updated);
+                            }}
+                            className="h-9 bg-white text-xs border-line rounded-xl font-bold"
+                          />
+                          <select
+                            value={sc.type || "Flagship Service Centre"}
+                            onChange={(e) => {
+                              const updated = [...editServiceCentres];
+                              updated[idx].type = e.target.value;
+                              setEditServiceCentres(updated);
+                            }}
+                            className="h-9 bg-white text-xs border border-line rounded-xl px-2.5 font-medium"
+                          >
+                            <option>Flagship Service Centre</option>
+                            <option>Warranty Claim Drop-off Point</option>
+                            <option>Authorized Repair Partner</option>
+                          </select>
                           <Input
                             placeholder="City"
                             value={sc.city || ""}
@@ -1212,55 +1362,62 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
                               updated[idx].city = e.target.value;
                               setEditServiceCentres(updated);
                             }}
-                            className="h-9 bg-white text-xs border-line rounded-lg flex-1"
+                            className="h-9 bg-white text-xs border-line rounded-xl"
                           />
-                          <button
-                            type="button"
-                            onClick={() => setEditServiceCentres(editServiceCentres.filter((_, i) => i !== idx))}
-                            className="text-slate-custom hover:text-red-600 p-1.5"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          <Input
+                            placeholder="Address"
+                            value={sc.address || ""}
+                            onChange={(e) => {
+                              const updated = [...editServiceCentres];
+                              updated[idx].address = e.target.value;
+                              setEditServiceCentres(updated);
+                            }}
+                            className="h-9 bg-white text-xs border-line rounded-xl"
+                          />
+                          <Input
+                            placeholder="Phone / Hotline"
+                            value={sc.phone || ""}
+                            onChange={(e) => {
+                              const updated = [...editServiceCentres];
+                              updated[idx].phone = e.target.value;
+                              setEditServiceCentres(updated);
+                            }}
+                            className="h-9 bg-white text-xs border-line rounded-xl"
+                          />
+                          <div className="flex gap-2 items-center">
+                            <Input
+                              placeholder="Operating Hours"
+                              value={sc.hours || ""}
+                              onChange={(e) => {
+                                const updated = [...editServiceCentres];
+                                updated[idx].hours = e.target.value;
+                                setEditServiceCentres(updated);
+                              }}
+                              className="h-9 bg-white text-xs border-line rounded-xl flex-1"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setEditServiceCentres(editServiceCentres.filter((_, i) => i !== idx))}
+                              className="h-9 px-2 text-rose-600 hover:bg-rose-50 rounded-xl shrink-0"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
-                        <Input
-                          placeholder="Address"
-                          value={sc.address || ""}
-                          onChange={(e) => {
-                            const updated = [...editServiceCentres];
-                            updated[idx].address = e.target.value;
-                            setEditServiceCentres(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg"
-                        />
-                        <Input
-                          placeholder="Phone / Hotline"
-                          value={sc.phone || ""}
-                          onChange={(e) => {
-                            const updated = [...editServiceCentres];
-                            updated[idx].phone = e.target.value;
-                            setEditServiceCentres(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg"
-                        />
-                        <Input
-                          placeholder="Operating Hours"
-                          value={sc.hours || ""}
-                          onChange={(e) => {
-                            const updated = [...editServiceCentres];
-                            updated[idx].hours = e.target.value;
-                            setEditServiceCentres(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg"
-                        />
-                      </div>
-                    ))
+                      ))}
+                    </div>
                   )}
                 </TabsContent>
 
-                {/* Tab 7: Certified Installers */}
+                {/* Tab 8: Certified Installers */}
                 <TabsContent value="installers" className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <p className="text-xs text-slate-custom">Certified installation EPC partners.</p>
+                    <div>
+                      <h4 className="text-sm font-bold text-ink">Certified EPC Installers</h4>
+                      <p className="text-xs text-slate-custom">Manufacturer-certified solar installation partners in Pakistan.</p>
+                    </div>
                     <Button
                       type="button"
                       variant="outline"
@@ -1268,85 +1425,93 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
                       onClick={() =>
                         setEditCertifiedInstallers([
                           ...editCertifiedInstallers,
-                          { name: "", city: "", region: "Punjab", rating: 4.8, tier: "Gold", slug: "" }
+                          { installerName: "", city: "", tier: "Gold", rating: "4.8" }
                         ])
                       }
-                      className="rounded-xl h-8 text-xs font-bold gap-1"
+                      className="rounded-xl h-9 text-xs font-bold gap-1.5 border-line"
                     >
-                      <Plus className="w-3.5 h-3.5" /> Add Installer
+                      <Plus className="w-3.5 h-3.5 text-amber" /> Add Installer
                     </Button>
                   </div>
 
                   {editCertifiedInstallers.length === 0 ? (
-                    <p className="text-xs text-slate-custom italic text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-line">
-                      No certified installers listed yet.
+                    <p className="text-xs text-slate-custom italic text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-line">
+                      No certified installers listed yet. Click &quot;Add Installer&quot; above to list partner EPCs.
                     </p>
                   ) : (
-                    editCertifiedInstallers.map((inst, idx) => (
-                      <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-line grid grid-cols-1 sm:grid-cols-4 gap-2 relative">
-                        <Input
-                          placeholder="EPC Company Name *"
-                          value={inst.name || ""}
-                          onChange={(e) => {
-                            const updated = [...editCertifiedInstallers];
-                            updated[idx].name = e.target.value;
-                            setEditCertifiedInstallers(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg font-bold"
-                        />
-                        <Input
-                          placeholder="City"
-                          value={inst.city || ""}
-                          onChange={(e) => {
-                            const updated = [...editCertifiedInstallers];
-                            updated[idx].city = e.target.value;
-                            setEditCertifiedInstallers(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg"
-                        />
-                        <select
-                          value={inst.tier || "Gold"}
-                          onChange={(e) => {
-                            const updated = [...editCertifiedInstallers];
-                            updated[idx].tier = e.target.value;
-                            setEditCertifiedInstallers(updated);
-                          }}
-                          className="h-9 bg-white text-xs border border-line rounded-lg px-2"
-                        >
-                          <option>Bronze</option>
-                          <option>Silver</option>
-                          <option>Gold</option>
-                          <option>Platinum</option>
-                          <option>Diamond</option>
-                        </select>
-                        <div className="flex gap-1 items-center">
+                    <div className="space-y-3">
+                      {editCertifiedInstallers.map((inst, idx) => (
+                        <div key={idx} className="p-4 bg-slate-50/70 rounded-2xl border border-line grid grid-cols-1 sm:grid-cols-4 gap-3 relative items-center">
                           <Input
-                            placeholder="Rating (e.g. 4.8)"
-                            value={inst.rating || ""}
+                            placeholder="EPC Company Name *"
+                            value={inst.installerName || inst.name || ""}
                             onChange={(e) => {
                               const updated = [...editCertifiedInstallers];
-                              updated[idx].rating = e.target.value;
+                              updated[idx].installerName = e.target.value;
+                              updated[idx].name = e.target.value;
                               setEditCertifiedInstallers(updated);
                             }}
-                            className="h-9 bg-white text-xs border-line rounded-lg flex-1"
+                            className="h-9 bg-white text-xs border-line rounded-xl font-bold"
                           />
-                          <button
-                            type="button"
-                            onClick={() => setEditCertifiedInstallers(editCertifiedInstallers.filter((_, i) => i !== idx))}
-                            className="text-slate-custom hover:text-red-600 p-1.5"
+                          <Input
+                            placeholder="City"
+                            value={inst.city || ""}
+                            onChange={(e) => {
+                              const updated = [...editCertifiedInstallers];
+                              updated[idx].city = e.target.value;
+                              setEditCertifiedInstallers(updated);
+                            }}
+                            className="h-9 bg-white text-xs border-line rounded-xl"
+                          />
+                          <select
+                            value={inst.tier || "Gold"}
+                            onChange={(e) => {
+                              const updated = [...editCertifiedInstallers];
+                              updated[idx].tier = e.target.value;
+                              setEditCertifiedInstallers(updated);
+                            }}
+                            className="h-9 bg-white text-xs border border-line rounded-xl px-2.5 font-medium"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                            <option>Bronze</option>
+                            <option>Silver</option>
+                            <option>Gold</option>
+                            <option>Platinum</option>
+                            <option>Diamond</option>
+                          </select>
+                          <div className="flex gap-2 items-center">
+                            <Input
+                              placeholder="Rating (e.g. 4.8)"
+                              value={inst.rating || ""}
+                              onChange={(e) => {
+                                const updated = [...editCertifiedInstallers];
+                                updated[idx].rating = e.target.value;
+                                setEditCertifiedInstallers(updated);
+                              }}
+                              className="h-9 bg-white text-xs border-line rounded-xl flex-1"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setEditCertifiedInstallers(editCertifiedInstallers.filter((_, i) => i !== idx))}
+                              className="h-9 px-2 text-rose-600 hover:bg-rose-50 rounded-xl shrink-0"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      ))}
+                    </div>
                   )}
                 </TabsContent>
 
-                {/* Tab 8: Social Links */}
+                {/* Tab 9: Social Links */}
                 <TabsContent value="social" className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <p className="text-xs text-slate-custom">Connected social channels and brand presence.</p>
+                    <div>
+                      <h4 className="text-sm font-bold text-ink">Connected Social Presence</h4>
+                      <p className="text-xs text-slate-custom">Official social channels and brand communities.</p>
+                    </div>
                     <Button
                       type="button"
                       variant="outline"
@@ -1357,64 +1522,71 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
                           { platform: "LinkedIn", url: "" }
                         ])
                       }
-                      className="rounded-xl h-8 text-xs font-bold gap-1"
+                      className="rounded-xl h-9 text-xs font-bold gap-1.5 border-line"
                     >
-                      <Plus className="w-3.5 h-3.5" /> Add Social Link
+                      <Plus className="w-3.5 h-3.5 text-amber" /> Add Social Link
                     </Button>
                   </div>
 
                   {editSocialLinks.length === 0 ? (
-                    <p className="text-xs text-slate-custom italic text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-line">
-                      No social links added yet.
+                    <p className="text-xs text-slate-custom italic text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-line">
+                      No social links added yet. Click &quot;Add Social Link&quot; above to connect channels.
                     </p>
                   ) : (
-                    editSocialLinks.map((s, idx) => (
-                      <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-line grid grid-cols-1 sm:grid-cols-3 gap-2 relative">
-                        <select
-                          value={s.platform || "LinkedIn"}
-                          onChange={(e) => {
-                            const updated = [...editSocialLinks];
-                            updated[idx].platform = e.target.value;
-                            setEditSocialLinks(updated);
-                          }}
-                          className="h-9 bg-white text-xs border border-line rounded-lg px-2"
-                        >
-                          <option>LinkedIn</option>
-                          <option>Facebook</option>
-                          <option>Twitter</option>
-                          <option>YouTube</option>
-                          <option>Instagram</option>
-                          <option>TikTok</option>
-                          <option>Website</option>
-                        </select>
-                        <div className="flex gap-1 items-center sm:col-span-2">
-                          <Input
-                            placeholder="https://..."
-                            value={s.url || ""}
+                    <div className="space-y-3">
+                      {editSocialLinks.map((s, idx) => (
+                        <div key={idx} className="p-4 bg-slate-50/70 rounded-2xl border border-line grid grid-cols-1 sm:grid-cols-3 gap-3 relative items-center">
+                          <select
+                            value={s.platform || "LinkedIn"}
                             onChange={(e) => {
                               const updated = [...editSocialLinks];
-                              updated[idx].url = e.target.value;
+                              updated[idx].platform = e.target.value;
                               setEditSocialLinks(updated);
                             }}
-                            className="h-9 bg-white text-xs border-line rounded-lg flex-1"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setEditSocialLinks(editSocialLinks.filter((_, i) => i !== idx))}
-                            className="text-slate-custom hover:text-red-600 p-1.5"
+                            className="h-9 bg-white text-xs border border-line rounded-xl px-2.5 font-medium"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                            <option>LinkedIn</option>
+                            <option>Facebook</option>
+                            <option>Twitter</option>
+                            <option>YouTube</option>
+                            <option>Instagram</option>
+                            <option>TikTok</option>
+                            <option>Website</option>
+                          </select>
+                          <div className="flex gap-2 items-center sm:col-span-2">
+                            <Input
+                              placeholder="https://..."
+                              value={s.url || ""}
+                              onChange={(e) => {
+                                const updated = [...editSocialLinks];
+                                updated[idx].url = e.target.value;
+                                setEditSocialLinks(updated);
+                              }}
+                              className="h-9 bg-white text-xs border-line rounded-xl flex-1"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setEditSocialLinks(editSocialLinks.filter((_, i) => i !== idx))}
+                              className="h-9 px-2 text-rose-600 hover:bg-rose-50 rounded-xl shrink-0"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      ))}
+                    </div>
                   )}
                 </TabsContent>
 
-                {/* Tab 9: Products */}
+                {/* Tab 10: Products */}
                 <TabsContent value="products" className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <p className="text-xs text-slate-custom">Solar inverters, panels, batteries manufactured by brand.</p>
+                    <div>
+                      <h4 className="text-sm font-bold text-ink">Cataloged Equipment Models</h4>
+                      <p className="text-xs text-slate-custom">Solar inverters, solar panels, batteries, and accessories manufactured by this brand.</p>
+                    </div>
                     <Button
                       type="button"
                       variant="outline"
@@ -1422,63 +1594,93 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
                       onClick={() =>
                         setEditProducts([
                           ...editProducts,
-                          { name: "", category: "Inverters", series: "", description: "" }
+                          { name: "", category: "Inverters", series: "", description: "", imageUrl: "" }
                         ])
                       }
-                      className="rounded-xl h-8 text-xs font-bold gap-1"
+                      className="rounded-xl h-9 text-xs font-bold gap-1.5 border-line"
                     >
-                      <Plus className="w-3.5 h-3.5" /> Add Model
+                      <Plus className="w-3.5 h-3.5 text-amber" /> Add Model
                     </Button>
                   </div>
 
                   {editProducts.length === 0 ? (
-                    <p className="text-xs text-slate-custom italic text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-line">
-                      No models cataloged yet.
+                    <p className="text-xs text-slate-custom italic text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-line">
+                      No models cataloged yet. Click &quot;Add Model&quot; above to list products.
                     </p>
                   ) : (
-                    editProducts.map((p, idx) => (
-                      <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-line grid grid-cols-1 sm:grid-cols-3 gap-2 relative">
-                        <Input
-                          placeholder="Model Name *"
-                          value={p.name}
-                          onChange={(e) => {
-                            const updated = [...editProducts];
-                            updated[idx].name = e.target.value;
-                            setEditProducts(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg font-bold"
-                        />
-                        <Input
-                          placeholder="Category"
-                          value={p.category || "Inverters"}
-                          onChange={(e) => {
-                            const updated = [...editProducts];
-                            updated[idx].category = e.target.value;
-                            setEditProducts(updated);
-                          }}
-                          className="h-9 bg-white text-xs border-line rounded-lg"
-                        />
-                        <div className="flex gap-1 items-center">
-                          <Input
-                            placeholder="Series (e.g. Commercial)"
-                            value={p.series || ""}
-                            onChange={(e) => {
-                              const updated = [...editProducts];
-                              updated[idx].series = e.target.value;
-                              setEditProducts(updated);
-                            }}
-                            className="h-9 bg-white text-xs border-line rounded-lg flex-1"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setEditProducts(editProducts.filter((_, i) => i !== idx))}
-                            className="text-slate-custom hover:text-red-600 p-1.5"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                    <div className="space-y-3">
+                      {editProducts.map((p, idx) => (
+                        <div key={idx} className="p-4 bg-slate-50/70 rounded-2xl border border-line grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 relative items-start">
+                          <div className="space-y-1">
+                            <Label className="text-[10px] uppercase font-bold text-slate-custom">Model Name *</Label>
+                            <Input
+                              placeholder="Model Name *"
+                              value={p.name}
+                              onChange={(e) => {
+                                const updated = [...editProducts];
+                                updated[idx].name = e.target.value;
+                                setEditProducts(updated);
+                              }}
+                              className="h-9 bg-white text-xs border-line rounded-xl font-bold"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <Label className="text-[10px] uppercase font-bold text-slate-custom">Category</Label>
+                            <Input
+                              placeholder="Category (e.g. Inverters)"
+                              value={p.category || "Inverters"}
+                              onChange={(e) => {
+                                const updated = [...editProducts];
+                                updated[idx].category = e.target.value;
+                                setEditProducts(updated);
+                              }}
+                              className="h-9 bg-white text-xs border-line rounded-xl"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <Label className="text-[10px] uppercase font-bold text-slate-custom">Series / Type</Label>
+                            <Input
+                              placeholder="Series (e.g. Commercial Hybrid)"
+                              value={p.series || ""}
+                              onChange={(e) => {
+                                const updated = [...editProducts];
+                                updated[idx].series = e.target.value;
+                                setEditProducts(updated);
+                              }}
+                              className="h-9 bg-white text-xs border-line rounded-xl"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-[10px] uppercase font-bold text-slate-custom">Product Image</Label>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setEditProducts(editProducts.filter((_, i) => i !== idx))}
+                                className="h-6 w-6 p-0 text-rose-600 hover:bg-rose-50 rounded-lg"
+                                title="Remove model"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                            <SinglePhotoUpload
+                              value={p.imageUrl || ""}
+                              onChange={(url) => {
+                                const updated = [...editProducts];
+                                updated[idx].imageUrl = url;
+                                setEditProducts(updated);
+                              }}
+                              folder="product-images"
+                              title={p.name || `Model #${idx + 1}`}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      ))}
+                    </div>
                   )}
                 </TabsContent>
               </Tabs>
