@@ -48,6 +48,7 @@ export function BrandSubmissionEditor({
   const { uploadFile, isUploading } = useR2Upload();
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [actionFeedback, setActionFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [activeTab, setActiveTab] = useState("sec-profile");
 
   const scrollToSection = (id: string) => {

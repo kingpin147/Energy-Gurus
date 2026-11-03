@@ -49,6 +49,8 @@ interface WriterProfileFormProps {
 
 export function WriterProfileForm({ initialProfile, userEmail }: WriterProfileFormProps) {
   const [isPending, startTransition] = useTransition();
+  const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
   const [name, setName] = useState(initialProfile?.name || "");
   const [designation, setDesignation] = useState(initialProfile?.designation || "");
   const [pictureUrl, setPictureUrl] = useState(initialProfile?.pictureUrl || "");
@@ -92,19 +94,26 @@ export function WriterProfileForm({ initialProfile, userEmail }: WriterProfileFo
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setStatusMessage(null);
 
     if (!name.trim()) {
-      toast.error("Please enter your author name.");
+      const msg = "Please enter your author display name.";
+      setStatusMessage({ type: "error", text: msg });
+      toast.error(msg);
       return;
     }
 
     if (!isWordCountValid) {
-      toast.error(`Short intro must be between 50 and 100 words. (Currently: ${wordCount} words)`);
+      const msg = `Short intro must be between 50 and 100 words. (Currently: ${wordCount} words)`;
+      setStatusMessage({ type: "error", text: msg });
+      toast.error(msg);
       return;
     }
 
     if (!hasMinSocials) {
-      toast.error("Please connect at least 2 social media handles (LinkedIn, Facebook, Instagram, X, or TikTok).");
+      const msg = "Please connect at least 2 social media handles (LinkedIn, Facebook, Instagram, X, or TikTok).";
+      setStatusMessage({ type: "error", text: msg });
+      toast.error(msg);
       return;
     }
 
@@ -120,11 +129,19 @@ export function WriterProfileForm({ initialProfile, userEmail }: WriterProfileFo
     formData.set("tiktok", tiktok.trim());
 
     startTransition(async () => {
-      const result = await saveWriterProfile(formData);
-      if (result.success) {
-        toast.success(result.message);
-      } else {
-        toast.error(result.message);
+      try {
+        const result = await saveWriterProfile(formData);
+        if (result.success) {
+          setStatusMessage({ type: "success", text: result.message });
+          toast.success(result.message);
+        } else {
+          setStatusMessage({ type: "error", text: result.message });
+          toast.error(result.message);
+        }
+      } catch (err: any) {
+        const msg = err?.message || "Failed to submit writer profile. Please try again.";
+        setStatusMessage({ type: "error", text: msg });
+        toast.error(msg);
       }
     });
   };
@@ -404,27 +421,47 @@ export function WriterProfileForm({ initialProfile, userEmail }: WriterProfileFo
           </CardContent>
         </Card>
 
-        {/* SUBMIT BUTTON */}
-        <div className="flex items-center justify-between gap-4 pt-4 border-t border-line">
-          <p className="text-xs text-slate-custom">
-            All submitted profile updates are sent to the administrative review queue before taking effect.
-          </p>
+        {/* SUBMIT BUTTON & ERROR/SUCCESS ALERTS */}
+        <div className="space-y-4 pt-4 border-t border-line">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <p className="text-xs text-slate-custom">
+              All submitted profile updates are sent to the administrative review queue before taking effect.
+            </p>
 
-          <Button
-            type="submit"
-            disabled={isPending || isUploading}
-            className="rounded-xl font-bold h-12 px-8 bg-amber text-ink hover:bg-amber/90 shadow-lg shadow-amber/20"
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting for Review...
-              </>
-            ) : (
-              <>
-                <CheckCircle2 className="w-4 h-4 mr-2" /> Submit Profile for Approval
-              </>
-            )}
-          </Button>
+            <Button
+              type="submit"
+              disabled={isPending || isUploading}
+              className="rounded-xl font-bold h-12 px-8 bg-amber text-ink hover:bg-amber/90 hover:text-ink shadow-lg shadow-amber/20 shrink-0 cursor-pointer"
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin text-ink" /> Submitting for Review...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4 mr-2 text-ink" /> Submit Profile for Approval
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Persistent Clean Error & Success Alerts Below Submit Button */}
+          {statusMessage?.type === "error" && (
+            <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 animate-in fade-in slide-in-from-top-2">
+              <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-red-600" />
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-red-800">Unable to submit profile</p>
+                <p className="text-xs text-red-700 font-medium">{statusMessage.text}</p>
+              </div>
+            </div>
+          )}
+
+          {statusMessage?.type === "success" && (
+            <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 animate-in fade-in slide-in-from-top-2">
+              <CheckCircle2 className="w-5 h-5 shrink-0 text-green-600" />
+              <p className="text-sm font-semibold">{statusMessage.text}</p>
+            </div>
+          )}
         </div>
       </form>
     </div>

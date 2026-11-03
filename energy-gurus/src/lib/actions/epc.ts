@@ -31,56 +31,71 @@ export async function updateEpcProfile(data: FormData | Partial<typeof epcInstal
   };
 
   const isFormData = data instanceof FormData;
-  const updateData = isFormData ? {
-    companyName: (data.get("companyName") as string | null) || undefined,
-    ceoName: (data.get("ceoName") as string | null) || undefined,
-    designation: (data.get("designation") as string | null) || undefined,
-    businessType: (data.get("businessType") as string | null) || undefined,
-    email: (data.get("email") as string | null) || undefined,
-    contactNo: (data.get("contactNo") as string | null) || undefined,
-    whatsapp: (data.get("whatsapp") as string | null) || undefined,
-    address: (data.get("address") as string | null) || undefined,
-    area: (data.get("area") as string | null) || undefined,
-    city: (data.get("city") as string | null) || undefined,
-    country: (data.get("country") as string | null) || undefined,
-    coordinates: (data.get("coordinates") as string | null) || undefined,
-    logoUrl: (data.get("logoUrl") as string | null) || undefined,
-    portfolio: parseJsonArray(data.get("portfolio"), []),
-    socialLinks: parseJsonArray(data.get("socialLinks"), []),
-    reviewVideos: parseJsonArray(data.get("reviewVideos"), []),
-    photos: parseJsonArray(data.get("photos"), []),
-    sectors: parseJsonArray(data.get("sectors"), []),
-    certifications: parseJsonArray(data.get("certifications"), []),
-    brandsCertified: parseJsonArray(data.get("brandsCertified"), []),
-    solarBrands: parseJsonArray(data.get("solarBrands"), []),
-    inverterBrands: parseJsonArray(data.get("inverterBrands"), []),
-    batteryBrands: parseJsonArray(data.get("batteryBrands"), []),
-    solarCertDocuments: parseJsonArray(data.get("solarCertDocuments"), []),
-    inverterCertDocuments: parseJsonArray(data.get("inverterCertDocuments"), []),
-    batteryCertDocuments: parseJsonArray(data.get("batteryCertDocuments"), []),
-    team: parseJsonArray(data.get("team"), []),
-    about: (data.get("about") as string | null) || undefined,
-    website: (data.get("website") as string | null) || undefined,
-    yearsInBusiness: data.get("yearsInBusiness") ? Number(data.get("yearsInBusiness")) || undefined : undefined,
-    regNumber: (data.get("regNumber") as string | null) || undefined,
-    licenceDocuments: parseJsonArray(data.get("licenceDocuments"), []),
-    tier: ((data.get("tier") as string | null) as any) || undefined,
-    isVerified: data.get("isVerified") ? String(data.get("isVerified")) === "true" : undefined,
-    } : data;
+  const passedId = isFormData ? (data.get("id") as string | null) : ((data as any).id || (data as any).epcId);
 
-  let targetUserId = user.id;
-  if (!isFormData && (data as any).userId && isAdmin) {
-    targetUserId = (data as any).userId;
+  const updateData: Partial<typeof epcInstallers.$inferInsert> = isFormData ? {
+    ...(data.has("companyName") ? { companyName: (data.get("companyName") as string)?.trim() || undefined } : {}),
+    ...(data.has("ceoName") ? { ceoName: (data.get("ceoName") as string)?.trim() || undefined } : {}),
+    ...(data.has("designation") ? { designation: (data.get("designation") as string)?.trim() || undefined } : {}),
+    ...(data.has("businessType") ? { businessType: (data.get("businessType") as string)?.trim() || undefined } : {}),
+    ...(data.has("email") ? { email: (data.get("email") as string)?.trim() || undefined } : {}),
+    ...(data.has("contactNo") ? { contactNo: (data.get("contactNo") as string)?.trim() || undefined } : {}),
+    ...(data.has("whatsapp") ? { whatsapp: (data.get("whatsapp") as string)?.trim() || undefined } : {}),
+    ...(data.has("address") ? { address: (data.get("address") as string)?.trim() || undefined } : {}),
+    ...(data.has("area") ? { area: (data.get("area") as string)?.trim() || undefined } : {}),
+    ...(data.has("city") ? { city: (data.get("city") as string)?.trim() || undefined } : {}),
+    ...(data.has("country") ? { country: (data.get("country") as string)?.trim() || "Pakistan" } : {}),
+    ...(data.has("coordinates") ? { coordinates: (data.get("coordinates") as string)?.trim() || undefined } : {}),
+    ...(data.has("logoUrl") ? { logoUrl: (data.get("logoUrl") as string)?.trim() || undefined } : {}),
+    ...(data.has("about") ? { about: (data.get("about") as string)?.trim() || undefined } : {}),
+    ...(data.has("website") ? { website: (data.get("website") as string)?.trim() || undefined } : {}),
+    ...(data.has("regNumber") ? { regNumber: (data.get("regNumber") as string)?.trim() || undefined } : {}),
+    ...(data.has("yearsInBusiness") ? { yearsInBusiness: Number(data.get("yearsInBusiness")) || undefined } : {}),
+    ...(data.has("isVerified") ? { isVerified: String(data.get("isVerified")) === "true" } : {}),
+    ...(data.has("tier") ? { tier: (data.get("tier") as any) } : {}),
+    ...(data.has("portfolio") ? { portfolio: parseJsonArray(data.get("portfolio"), []) } : {}),
+    ...(data.has("socialLinks") ? { socialLinks: parseJsonArray(data.get("socialLinks"), []) } : {}),
+    ...(data.has("reviewVideos") ? { reviewVideos: parseJsonArray(data.get("reviewVideos"), []) } : {}),
+    ...(data.has("photos") ? { photos: parseJsonArray(data.get("photos"), []) } : {}),
+    ...(data.has("sectors") ? { sectors: parseJsonArray(data.get("sectors"), []) } : {}),
+    ...(data.has("certifications") ? { certifications: parseJsonArray(data.get("certifications"), []) } : {}),
+    ...(data.has("brandsCertified") ? { brandsCertified: parseJsonArray(data.get("brandsCertified"), []) } : {}),
+    ...(data.has("solarBrands") ? { solarBrands: parseJsonArray(data.get("solarBrands"), []) } : {}),
+    ...(data.has("inverterBrands") ? { inverterBrands: parseJsonArray(data.get("inverterBrands"), []) } : {}),
+    ...(data.has("batteryBrands") ? { batteryBrands: parseJsonArray(data.get("batteryBrands"), []) } : {}),
+    ...(data.has("solarCertDocuments") ? { solarCertDocuments: parseJsonArray(data.get("solarCertDocuments"), []) } : {}),
+    ...(data.has("inverterCertDocuments") ? { inverterCertDocuments: parseJsonArray(data.get("inverterCertDocuments"), []) } : {}),
+    ...(data.has("batteryCertDocuments") ? { batteryCertDocuments: parseJsonArray(data.get("batteryCertDocuments"), []) } : {}),
+    ...(data.has("team") ? { team: parseJsonArray(data.get("team"), []) } : {}),
+    ...(data.has("licenceDocuments") ? { licenceDocuments: parseJsonArray(data.get("licenceDocuments"), []) } : {}),
+  } : data;
+
+  let existingEpc = null;
+  // If explicit epc id provided and user is admin, allow targeting that EPC
+  if (passedId && isAdmin) {
+    [existingEpc] = await db.select().from(epcInstallers).where(eq(epcInstallers.id, passedId));
+  }
+  // If explicit epc id provided by regular EPC user, verify ownership
+  if (passedId && !existingEpc) {
+    [existingEpc] = await db.select().from(epcInstallers).where(and(eq(epcInstallers.id, passedId), eq(epcInstallers.userId, user.id)));
+  }
+  // Fallback: match by userId
+  if (!existingEpc) {
+    let targetUserId = user.id;
+    if (!isFormData && (data as any).userId && isAdmin) {
+      targetUserId = (data as any).userId;
+    }
+    [existingEpc] = await db.select().from(epcInstallers).where(eq(epcInstallers.userId, targetUserId));
   }
 
-  const [existingEpc] = await db.select().from(epcInstallers).where(eq(epcInstallers.userId, targetUserId));
   if (!existingEpc) throw new Error("EPC profile not found");
 
   await db.update(epcInstallers)
     .set({ ...updateData, updatedAt: new Date() })
-    .where(eq(epcInstallers.userId, targetUserId));
+    .where(eq(epcInstallers.id, existingEpc.id));
 
   revalidatePath("/", "layout");
+  return { success: true, id: existingEpc.id };
 }
 
 // Office Actions

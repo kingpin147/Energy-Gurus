@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { updateEpcProfile } from "@/lib/actions/epc";
 import { CheckCircle2, AlertCircle, Loader2, X, Plus } from "lucide-react";
 import { useR2Upload } from "@/lib/hooks/use-r2-upload";
@@ -61,6 +61,21 @@ export function EpcProfileForm({
 }: EpcProfileFormProps) {
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
     const [errorMsg, setErrorMsg] = useState("");
+
+    // Controlled form states so inputs never disappear or reset on submit
+    const [companyName, setCompanyName] = useState(defaultCompanyName || "");
+    const [ceoName, setCeoName] = useState(defaultCeoName || "");
+    const [designation, setDesignation] = useState(defaultDesignation || "");
+    const [businessType, setBusinessType] = useState(defaultBusinessType || "");
+    const [contactNo, setContactNo] = useState(defaultContactNo || "");
+    const [whatsapp, setWhatsapp] = useState(defaultWhatsapp || "");
+    const [address, setAddress] = useState(defaultAddress || "");
+    const [area, setArea] = useState(defaultArea || "");
+    const [city, setCity] = useState(defaultCity || "");
+    const [country, setCountry] = useState(defaultCountry || "Pakistan");
+    const [about, setAbout] = useState(defaultAbout || "");
+    const [website, setWebsite] = useState(defaultWebsite || "");
+
     const [selectedSectors, setSelectedSectors] = useState<string[]>(defaultSectors);
     const [selectedCertifications, setSelectedCertifications] = useState<string[]>(defaultCertifications);
 
@@ -78,6 +93,17 @@ export function EpcProfileForm({
     const [team, setTeam] = useState<{name: string, designation: string, linkedIn: string, imageUrl: string}[]>(defaultTeam || []);
     
     const { uploadFile, isUploading } = useR2Upload();
+
+    // Synchronize default values when props change without wiping entered data
+    useEffect(() => {
+        if (defaultCompanyName && !companyName) setCompanyName(defaultCompanyName);
+    }, [defaultCompanyName]);
+    useEffect(() => {
+        if (defaultCeoName && !ceoName) setCeoName(defaultCeoName);
+    }, [defaultCeoName]);
+    useEffect(() => {
+        if (defaultBusinessType && !businessType) setBusinessType(defaultBusinessType);
+    }, [defaultBusinessType]);
 
     const sectors = ["Residential", "Commercial", "Industrial", "Agriculture"];
     const certificationsList = [
@@ -101,10 +127,31 @@ export function EpcProfileForm({
     const parseFields = (value: string | undefined) =>
         value ? value.split(",").map((item) => item.trim()).filter(Boolean) : [];
 
-    const handleSubmit = async (formData: FormData) => {
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
         setStatus("loading");
         setErrorMsg("");
+
         try {
+            if (!companyName.trim()) {
+                throw new Error("Company Name is required.");
+            }
+
+            const formData = new FormData();
+            formData.set("id", epcId);
+            formData.set("companyName", companyName.trim());
+            formData.set("ceoName", ceoName.trim());
+            formData.set("designation", designation.trim());
+            formData.set("businessType", businessType.trim());
+            formData.set("contactNo", contactNo.trim());
+            formData.set("whatsapp", whatsapp.trim());
+            formData.set("address", address.trim());
+            formData.set("area", area.trim());
+            formData.set("city", city.trim());
+            formData.set("country", country.trim() || "Pakistan");
+            formData.set("about", about.trim());
+            formData.set("website", website.trim());
+
             formData.set("sectors", JSON.stringify(selectedSectors));
             formData.set("certifications", JSON.stringify(selectedCertifications));
             formData.set("solarBrands", JSON.stringify(solarBrands));
@@ -115,35 +162,33 @@ export function EpcProfileForm({
             formData.set("inverterCertDocuments", JSON.stringify(inverterCertDocuments));
             formData.set("batteryCertDocuments", JSON.stringify(batteryCertDocuments));
             formData.set("team", JSON.stringify(team.filter(t => t.name || t.designation)));
-            formData.set("designation", formData.get("designation")?.toString() || "");
-            formData.set("businessType", formData.get("businessType")?.toString() || "");
-            formData.set("contactNo", formData.get("contactNo")?.toString() || "");
-            formData.set("whatsapp", formData.get("whatsapp")?.toString() || "");
-            formData.set("address", formData.get("address")?.toString() || "");
-            formData.set("area", formData.get("area")?.toString() || "");
-            formData.set("city", formData.get("city")?.toString() || "");
-            formData.set("country", formData.get("country")?.toString() || "Pakistan");
             
             await updateEpcProfile(formData);
             setStatus("success");
-            setTimeout(() => setStatus("idle"), 4000);
-        } catch (err: any) {
-            setStatus("error");
-            setErrorMsg(err?.message || "Something went wrong. Please try again.");
+            toast.success("Profile updated successfully!");
             setTimeout(() => setStatus("idle"), 5000);
+        } catch (err: any) {
+            console.error("EPC Profile update error:", err);
+            const msg = err?.message || "Something went wrong while saving. Please try again.";
+            setStatus("error");
+            setErrorMsg(msg);
+            toast.error(msg);
         }
     };
 
     return (
-        <form action={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
             <input type="hidden" name="id" value={epcId} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Company Name</label>
+                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">
+                        Company Name <span className="text-red-500">*</span>
+                    </label>
                     <input
                         name="companyName"
-                        defaultValue={defaultCompanyName}
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
                         className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
                         required
                     />
@@ -152,7 +197,8 @@ export function EpcProfileForm({
                     <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">CEO / Owner Name</label>
                     <input
                         name="ceoName"
-                        defaultValue={defaultCeoName}
+                        value={ceoName}
+                        onChange={(e) => setCeoName(e.target.value)}
                         className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
                     />
                 </div>
@@ -160,7 +206,8 @@ export function EpcProfileForm({
                     <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Designation</label>
                     <input
                         name="designation"
-                        defaultValue={defaultDesignation}
+                        value={designation}
+                        onChange={(e) => setDesignation(e.target.value)}
                         placeholder="Owner / Sales Manager"
                         className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
                     />
@@ -169,7 +216,8 @@ export function EpcProfileForm({
                     <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Business Type</label>
                     <select
                         name="businessType"
-                        defaultValue={defaultBusinessType}
+                        value={businessType}
+                        onChange={(e) => setBusinessType(e.target.value)}
                         className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
                     >
                         <option value="">Select business type</option>
@@ -185,7 +233,8 @@ export function EpcProfileForm({
                     <input
                         name="contactNo"
                         type="tel"
-                        defaultValue={defaultContactNo}
+                        value={contactNo}
+                        onChange={(e) => setContactNo(e.target.value)}
                         className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
                     />
                 </div>
@@ -194,7 +243,8 @@ export function EpcProfileForm({
                     <input
                         name="whatsapp"
                         type="tel"
-                        defaultValue={defaultWhatsapp}
+                        value={whatsapp}
+                        onChange={(e) => setWhatsapp(e.target.value)}
                         className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
                     />
                 </div>
@@ -202,7 +252,8 @@ export function EpcProfileForm({
                     <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Address</label>
                     <input
                         name="address"
-                        defaultValue={defaultAddress}
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
                         placeholder="Street address"
                         className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
                     />
@@ -211,7 +262,8 @@ export function EpcProfileForm({
                     <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Area</label>
                     <input
                         name="area"
-                        defaultValue={defaultArea}
+                        value={area}
+                        onChange={(e) => setArea(e.target.value)}
                         className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
                     />
                 </div>
@@ -219,7 +271,8 @@ export function EpcProfileForm({
                     <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">City</label>
                     <input
                         name="city"
-                        defaultValue={defaultCity}
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
                         className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
                     />
                 </div>
@@ -227,7 +280,8 @@ export function EpcProfileForm({
                     <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Country</label>
                     <input
                         name="country"
-                        defaultValue={defaultCountry}
+                        value={country}
+                        onChange={(e) => setCountry(e.target.value)}
                         className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
                     />
                 </div>
@@ -290,9 +344,9 @@ export function EpcProfileForm({
                                 value={tempSolarBrand} 
                                 onChange={(e) => setTempSolarBrand(e.target.value)} 
                                 placeholder="e.g. LONGI Solar" 
-                                onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempSolarBrand) { setSolarBrands([...solarBrands, tempSolarBrand]); setTempSolarBrand(""); }}}}
+                                onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempSolarBrand.trim()) { setSolarBrands([...solarBrands, tempSolarBrand.trim()]); setTempSolarBrand(""); }}}}
                             />
-                            <button type="button" className="px-4 border rounded-xl hover:bg-slate-50 font-semibold" onClick={() => { if (tempSolarBrand) { setSolarBrands([...solarBrands, tempSolarBrand]); setTempSolarBrand(""); } }}>+ Add</button>
+                            <button type="button" className="px-4 border rounded-xl hover:bg-slate-50 font-semibold" onClick={() => { if (tempSolarBrand.trim()) { setSolarBrands([...solarBrands, tempSolarBrand.trim()]); setTempSolarBrand(""); } }}>+ Add</button>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-2">
                             {solarBrands.map((b, i) => (
@@ -310,9 +364,9 @@ export function EpcProfileForm({
                                 value={tempInverterBrand} 
                                 onChange={(e) => setTempInverterBrand(e.target.value)} 
                                 placeholder="e.g. Huawei" 
-                                onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempInverterBrand) { setInverterBrands([...inverterBrands, tempInverterBrand]); setTempInverterBrand(""); }}}}
+                                onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempInverterBrand.trim()) { setInverterBrands([...inverterBrands, tempInverterBrand.trim()]); setTempInverterBrand(""); }}}}
                             />
-                            <button type="button" className="px-4 border rounded-xl hover:bg-slate-50 font-semibold" onClick={() => { if (tempInverterBrand) { setInverterBrands([...inverterBrands, tempInverterBrand]); setTempInverterBrand(""); } }}>+ Add</button>
+                            <button type="button" className="px-4 border rounded-xl hover:bg-slate-50 font-semibold" onClick={() => { if (tempInverterBrand.trim()) { setInverterBrands([...inverterBrands, tempInverterBrand.trim()]); setTempInverterBrand(""); } }}>+ Add</button>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-2">
                             {inverterBrands.map((b, i) => (
@@ -330,9 +384,9 @@ export function EpcProfileForm({
                                 value={tempBatteryBrand} 
                                 onChange={(e) => setTempBatteryBrand(e.target.value)} 
                                 placeholder="e.g. CoreCell Energy" 
-                                onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempBatteryBrand) { setBatteryBrands([...batteryBrands, tempBatteryBrand]); setTempBatteryBrand(""); }}}}
+                                onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (tempBatteryBrand.trim()) { setBatteryBrands([...batteryBrands, tempBatteryBrand.trim()]); setTempBatteryBrand(""); }}}}
                             />
-                            <button type="button" className="px-4 border rounded-xl hover:bg-slate-50 font-semibold" onClick={() => { if (tempBatteryBrand) { setBatteryBrands([...batteryBrands, tempBatteryBrand]); setTempBatteryBrand(""); } }}>+ Add</button>
+                            <button type="button" className="px-4 border rounded-xl hover:bg-slate-50 font-semibold" onClick={() => { if (tempBatteryBrand.trim()) { setBatteryBrands([...batteryBrands, tempBatteryBrand.trim()]); setTempBatteryBrand(""); } }}>+ Add</button>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-2">
                             {batteryBrands.map((b, i) => (
@@ -444,7 +498,8 @@ export function EpcProfileForm({
                 <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">About Company</label>
                 <textarea
                     name="about"
-                    defaultValue={defaultAbout}
+                    value={about}
+                    onChange={(e) => setAbout(e.target.value)}
                     rows={4}
                     className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none resize-none"
                 />
@@ -454,40 +509,45 @@ export function EpcProfileForm({
                 <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Website URL</label>
                 <input
                     name="website"
-                    defaultValue={defaultWebsite}
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
                     className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
                 />
             </div>
 
-            {status === "success" && (
-                <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 animate-in fade-in slide-in-from-top-2">
-                    <CheckCircle2 className="w-5 h-5 shrink-0" />
-                    <p className="text-sm font-semibold">Profile updated successfully!</p>
-                </div>
-            )}
-
-            {status === "error" && (
-                <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 animate-in fade-in slide-in-from-top-2">
-                    <AlertCircle className="w-5 h-5 shrink-0" />
-                    <p className="text-sm font-semibold">{errorMsg}</p>
-                </div>
-            )}
-
+            {/* Submit Button */}
             <button
                 type="submit"
                 disabled={status === "loading"}
-                className="w-full bg-amber text-ink h-12 rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60"
+                className="w-full bg-amber text-ink h-12 rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
             >
                 {status === "loading" ? (
                     <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        Saving...
+                        Saving Profile...
                     </>
                 ) : (
                     "Save Changes"
                 )}
             </button>
+
+            {/* Clear Persistent Feedback Alerts Below Submit Button */}
+            {status === "error" && (
+                <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 animate-in fade-in slide-in-from-top-2">
+                    <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-600" />
+                    <div className="space-y-1">
+                        <p className="text-sm font-bold text-red-800">Unable to save profile</p>
+                        <p className="text-xs text-red-700 font-medium">{errorMsg}</p>
+                    </div>
+                </div>
+            )}
+
+            {status === "success" && (
+                <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 animate-in fade-in slide-in-from-top-2">
+                    <CheckCircle2 className="w-5 h-5 shrink-0 text-green-600" />
+                    <p className="text-sm font-semibold">Profile updated successfully!</p>
+                </div>
+            )}
         </form>
     );
 }
-

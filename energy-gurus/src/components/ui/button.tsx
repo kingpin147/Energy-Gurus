@@ -9,7 +9,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-amber text-ink text-ink hover:bg-amber/90 text-ink",
+        default: "bg-amber text-ink hover:bg-amber/90 hover:text-ink font-bold",
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
         outline:
@@ -20,8 +20,8 @@ const buttonVariants = cva(
           "hover:bg-paper hover:text-ink dark:hover:bg-paper/50",
         link: "text-amber underline-offset-4 hover:underline",
         accent: "bg-paper text-ink hover:bg-paper/90",
-        primary: "bg-amber text-ink text-ink hover:bg-amber/90 text-ink"
-    },
+        primary: "bg-amber text-ink hover:bg-amber/90 hover:text-ink font-bold"
+      },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
@@ -31,13 +31,13 @@ const buttonVariants = cva(
         "icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
         "icon-sm": "size-8",
         "icon-lg": "size-10"
-    }
+      }
     },
     defaultVariants: {
       variant: "default",
       size: "default"
     }
-    }
+  }
 )
 
 function Button({
