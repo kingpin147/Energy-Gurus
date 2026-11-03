@@ -5,6 +5,7 @@ import { updateEpcProfile } from "@/lib/actions/epc";
 import { CheckCircle2, AlertCircle, Loader2, X, Plus } from "lucide-react";
 import { useR2Upload } from "@/lib/hooks/use-r2-upload";
 import { UploadZone } from "@/components/ui/upload-zone";
+import { MultiPhotoUpload, MultiDocumentUpload } from "@/components/dashboard/multi-media-upload";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
@@ -399,43 +400,40 @@ export function EpcProfileForm({
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Company Photos (comma-separated URLs)</label>
-                    <textarea
-                        value={photos.join(", ")}
-                        onChange={(e) => setPhotos(parseFields(e.target.value))}
-                        rows={3}
-                        className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none resize-none"
-                        placeholder="https://...jpg, https://...jpg"
-                    />
-                </div>
-                <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Solar Certification Docs</label>
-                    <textarea
-                        value={solarCertDocuments.join(", ")}
-                        onChange={(e) => setSolarCertDocuments(parseFields(e.target.value))}
-                        rows={3}
-                        className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none resize-none"
-                    />
-                </div>
-                <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Inverter Certification Docs</label>
-                    <textarea
-                        value={inverterCertDocuments.join(", ")}
-                        onChange={(e) => setInverterCertDocuments(parseFields(e.target.value))}
-                        rows={3}
-                        className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none resize-none"
-                    />
-                </div>
-                <div className="md:col-span-2">
-                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Battery Certification Docs</label>
-                    <textarea
-                        value={batteryCertDocuments.join(", ")}
-                        onChange={(e) => setBatteryCertDocuments(parseFields(e.target.value))}
-                        rows={3}
-                        className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none resize-none"
-                    />
+            <div className="space-y-6 pt-4 border-t">
+                <MultiPhotoUpload
+                    label="Company Photos"
+                    description="Upload showcase gallery photos of office facilities, installations, or site setups."
+                    urls={photos}
+                    onChange={setPhotos}
+                    folder="epc-photos"
+                />
+
+                <div className="space-y-4">
+                    <label className="block text-xs font-bold uppercase tracking-widest opacity-60">Brand Certification Documents</label>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <MultiDocumentUpload
+                            label="Solar Panel Certs"
+                            description="PDF/images for LONGi, Jinko, Canadian Solar, etc."
+                            urls={solarCertDocuments}
+                            onChange={setSolarCertDocuments}
+                            folder="epc-brand-certs"
+                        />
+                        <MultiDocumentUpload
+                            label="Inverter Certs"
+                            description="PDF/images for GoodWe, Huawei, Sungrow, etc."
+                            urls={inverterCertDocuments}
+                            onChange={setInverterCertDocuments}
+                            folder="epc-brand-certs"
+                        />
+                        <MultiDocumentUpload
+                            label="Battery Certs"
+                            description="PDF/images for Pylontech, BYD, Narada, etc."
+                            urls={batteryCertDocuments}
+                            onChange={setBatteryCertDocuments}
+                            folder="epc-brand-certs"
+                        />
+                    </div>
                 </div>
             </div>
 

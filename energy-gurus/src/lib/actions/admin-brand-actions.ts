@@ -56,6 +56,7 @@ export async function getAllBrandsAdmin() {
       customerCareHead: brands.customerCareHead,
       logoUrl: brands.logoUrl,
       about: brands.about,
+      photos: brands.photos,
       countryOfOrigin: brands.countryOfOrigin,
       headquarters: brands.headquarters,
       founded: brands.founded,
@@ -323,6 +324,7 @@ export async function adminUpdateBrandFull(
     brandName: string;
     tagline?: string | null;
     logoUrl?: string | null;
+    photos?: string[];
     categories?: string[];
     website?: string | null;
     warrantyUrl?: string | null;
@@ -365,6 +367,7 @@ export async function adminUpdateBrandFull(
         brandName: data.brandName,
         tagline: data.tagline ?? null,
         logoUrl: data.logoUrl !== undefined ? data.logoUrl : existing.logoUrl,
+        photos: data.photos !== undefined ? data.photos : existing.photos,
         categories: data.categories ?? existing.categories,
         website: data.website ?? null,
         warrantyUrl: data.warrantyUrl ?? null,
