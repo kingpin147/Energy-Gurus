@@ -1,8 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
-import { users, inquiries } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { users, inquiries, brands, epcInstallers } from "@/db/schema";
+import { eq, and, desc, inArray, ne } from "drizzle-orm";
 import { InquiriesTable } from "@/components/dashboard/inquiries-table";
 import { Inbox, Mail } from "lucide-react";
 
@@ -13,10 +13,18 @@ export default async function InquiriesPage() {
     const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId));
     if (!user) redirect("/sign-in");
 
+    // Gather all IDs representing this user (user.id, brand.id, epc.id)
+    const [brand] = await db.select({ id: brands.id }).from(brands).where(eq(brands.userId, user.id));
+    const [epc] = await db.select({ id: epcInstallers.id }).from(epcInstallers).where(eq(epcInstallers.userId, user.id));
+
+    const possibleReceiverIds = [user.id];
+    if (brand?.id) possibleReceiverIds.push(brand.id);
+    if (epc?.id) possibleReceiverIds.push(epc.id);
+
     const myInquiries = await db.select().from(inquiries)
         .where(and(
-            eq(inquiries.receiverId, user.id),
-            eq(inquiries.inquiryType, "client")
+            inArray(inquiries.receiverId, possibleReceiverIds),
+            ne(inquiries.inquiryType, "support")
         ))
         .orderBy(desc(inquiries.createdAt));
 

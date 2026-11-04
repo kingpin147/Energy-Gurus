@@ -23,6 +23,7 @@ type Inquiry = {
     status: string;
     isRead: boolean;
     reply: string | null;
+    metadata?: any;
     createdAt: Date;
 };
 
@@ -256,11 +257,52 @@ export function InquiriesTable({ inquiries, hideReply = false }: { inquiries: In
                                     </button>
                                 </div>
                             </div>
-
                             {/* Expanded Content */}
                             {expanded === inq.id && (
-                                <div className="px-4 pb-4 pt-0 border-t border-dashed border-line ml-7">
-                                    <p className="text-sm text-graphite leading-relaxed mt-3 whitespace-pre-wrap">{inq.message}</p>
+                                <div className="px-4 pb-4 pt-0 border-t border-dashed border-line ml-7 space-y-3">
+                                    {/* Full Customer Contact Details */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-slate-50 border border-line rounded-xl text-xs mt-3">
+                                        <div>
+                                            <span className="text-[10px] uppercase font-bold text-slate-custom block">Customer Name</span>
+                                            <span className="font-semibold text-ink text-sm">{inq.guestName || "Anonymous"}</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-[10px] uppercase font-bold text-slate-custom block">Email Address</span>
+                                            {inq.guestEmail ? (
+                                                <a href={`mailto:${inq.guestEmail}`} className="font-semibold text-blue-600 hover:underline flex items-center gap-1 mt-0.5">
+                                                    <Mail className="w-3.5 h-3.5" /> {inq.guestEmail}
+                                                </a>
+                                            ) : <span className="text-slate-custom">N/A</span>}
+                                        </div>
+                                        <div>
+                                            <span className="text-[10px] uppercase font-bold text-slate-custom block">Phone / WhatsApp</span>
+                                            {inq.guestPhone ? (
+                                                <a href={`tel:${inq.guestPhone}`} className="font-semibold text-emerald-600 hover:underline flex items-center gap-1 mt-0.5">
+                                                    <Phone className="w-3.5 h-3.5" /> {inq.guestPhone}
+                                                </a>
+                                            ) : <span className="text-slate-custom">N/A</span>}
+                                        </div>
+                                    </div>
+
+                                    {/* Additional inquiry metadata if provided */}
+                                    {inq.metadata && typeof inq.metadata === "object" && Object.keys(inq.metadata).length > 0 && (
+                                        <div className="p-3 bg-amber/5 border border-amber/20 rounded-xl space-y-1">
+                                            <span className="text-[10px] uppercase font-bold text-amber block">Inquiry Specifications</span>
+                                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                                                {Object.entries(inq.metadata).map(([k, v]) => (
+                                                    <div key={k}>
+                                                        <span className="text-slate-custom capitalize text-[11px] block">{k.replace(/([A-Z])/g, ' $1')}:</span>
+                                                        <span className="font-medium text-ink">{String(v || "-")}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <span className="text-[10px] uppercase font-bold text-slate-custom block mb-1">Message</span>
+                                        <p className="text-sm text-graphite leading-relaxed whitespace-pre-wrap bg-white p-3 border border-line rounded-xl">{inq.message}</p>
+                                    </div>
 
                                     {!hideReply && (
                                         <>

@@ -5,30 +5,9 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getEpcCompleteness } from "@/lib/utils/completeness";
-import {
-  Globe,
-  Facebook,
-  Instagram,
-  Linkedin,
-  Youtube,
-  Play,
-  Star
-} from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { ReviewForm } from "@/components/forms/review-form";
-import { ReviewList } from "@/components/reviews/review-list";
-import { getProfileRating, getTeamRating } from "@/lib/actions/reviews";
-import { InferSelectModel } from "drizzle-orm";
-import { InstallerQuoteForm } from "@/components/forms/installer-quote-form";
-import { TrackedInteraction } from "@/components/shared/AnalyticsTracker";
-
+import { getProfileRating } from "@/lib/actions/reviews";
 import { isUUID, slugify } from "@/lib/utils/slug";
 import { or, ilike } from "drizzle-orm";
-
-type EpcInstaller = InferSelectModel<typeof epcInstallers>;
-type EpcOffice = InferSelectModel<typeof epcOffices>;
-type EpcProject = InferSelectModel<typeof epcProjects>;
 
 async function getInstallerByParam(param: string) {
   const decoded = decodeURIComponent(param).trim();
@@ -55,10 +34,10 @@ async function getInstallerByParam(param: string) {
 
 export async function generateMetadata({
   params
-    }: {
+}: {
   params: Promise<{ id: string; locale?: string }>;
 }): Promise<Metadata> {
-  const { id, locale = "en" } = await params;
+  const { id } = await params;
   const installer = await getInstallerByParam(id);
 
   if (!installer) return {};
@@ -103,16 +82,6 @@ export async function generateMetadata({
   };
 }
 
-function renderStars(rating: number) {
-  const fullStars = Math.floor(rating);
-  return "★".repeat(Math.min(5, fullStars)) + "☆".repeat(Math.max(0, 5 - fullStars));
-}
-
-function getYouTubeId(url: string) {
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&]{11})/);
-  return match ? match[1] : null;
-}
-
 export default async function EpcProfilePage({
   params
 }: {
@@ -131,48 +100,7 @@ export default async function EpcProfilePage({
   const { score } = getEpcCompleteness(installer, offices.length, projects.length);
   if (score < 50) notFound();
 
-  const { rating: teamRating, count: teamCount } = await getTeamRating(installer.id, "epc");
-
-  const primaryCity = offices[0]?.city || "Lahore";
-  const yearsInBusiness = Math.max(1, new Date().getFullYear() - new Date(installer.createdAt).getFullYear());
-
-  const certBrands = (installer.brandsCertified as string[])?.length > 0 
-    ? (installer.brandsCertified as string[]) 
-    : ["LONGI", "JINKO", "JA", "TRINA", "HUAWEI"];
-
-  const solarBrands = (installer.solarBrands as string[]) || [];
-  const inverterBrands = (installer.inverterBrands as string[]) || [];
-  const batteryBrands = (installer.batteryBrands as string[]) || [];
-
-  const team = (installer.team as { name: string; designation: string; linkedIn: string; imageUrl: string }[]) || [];
-
-  const sectorsList = (installer.sectors as string[])?.length > 0
-    ? (installer.sectors as string[])
-    : ["Residential", "Commercial", "Industrial", "Agriculture"];
-
-  const certificationsList = (installer.certifications as string[])?.length > 0
-    ? (installer.certifications as string[])
-    : [];
-
-  const socialLinks = (installer.socialLinks as { platform: string; url: string }[] | null) || [];
-  const websiteUrl = installer.website || socialLinks.find(l => l.platform.toLowerCase() === "website")?.url || "#";
-  const facebookUrl = socialLinks.find(l => l.platform.toLowerCase() === "facebook")?.url || "#";
-  const instagramUrl = socialLinks.find(l => l.platform.toLowerCase() === "instagram")?.url || "#";
-  const linkedinUrl = socialLinks.find(l => l.platform.toLowerCase() === "linkedin")?.url || "#";
-  const youtubeUrl = socialLinks.find(l => l.platform.toLowerCase() === "youtube")?.url || "#";
-  const photos = (installer.photos as string[] | null) || [];
-  const reviewVideos = (installer.reviewVideos as string[] | null) || [];
-  const testimonialProjects = projects.filter((project) => project.entryType === "testimonial" || project.customerName || project.companyName || project.youtubeUrl);
-  const customerVideoEntries = testimonialProjects.length > 0 ? testimonialProjects.slice(0, 3) : reviewVideos.slice(0, 3).map((url, index) => ({
-    id: `${index}-review-video`,
-    name: `Customer Testimonial ${index + 1}`,
-    customerName: `Verified customer ${index + 1}`,
-    city: primaryCity,
-    youtubeUrl: url,
-  }));
-  const portfolioFallback = photos.length > 0 ? photos : projects.flatMap((project) => project.images || []);
-
-    return (
+  return (
     <EpcProfileView
       installer={installer}
       offices={offices}

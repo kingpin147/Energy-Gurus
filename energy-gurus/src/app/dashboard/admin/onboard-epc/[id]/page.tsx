@@ -203,13 +203,129 @@ export default async function AdminReviewPage({ params }: { params: Promise<{ id
 
           {/* 7. Certifications & Documents */}
           <div className="review-card">
-            <h2><span className="num">7</span>Certifications &amp; Brands</h2>
+            <h2><span className="num">7</span>Certifications, Licences &amp; Documents</h2>
             <div className="review-body">
               <div className="field-grid three">
-                <div className="field-row"><label>Licences Held</label><div className="val">{epc.regNumber || "N/A"}</div></div>
+                <div className="field-row"><label>Licence / Registration #</label><div className="val">{epc.regNumber || "N/A"}</div></div>
               </div>
+
+              {/* Company Licence & Legal Documents */}
               <div className="divider"></div>
-              
+              <div className="font-ibm-plex-mono text-[0.7rem] tracking-[0.05em] uppercase text-slate-custom mb-3 flex items-center justify-between">
+                <span>Company Licence &amp; Legal Documents ({licenceDocuments.length})</span>
+              </div>
+              {licenceDocuments.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+                  {licenceDocuments.map((url: string, idx: number) => {
+                    const isImg = url.toLowerCase().match(/\.(jpeg|jpg|png|webp|gif|svg)(\?.*)?$/i);
+                    return (
+                      <a
+                        key={idx}
+                        href={url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="group flex items-center gap-3 p-3 bg-white border border-line hover:border-amber rounded-xl shadow-xs hover:shadow-sm transition-all"
+                      >
+                        {isImg ? (
+                          <div className="w-12 h-12 rounded-lg border border-line overflow-hidden shrink-0 bg-slate-50 relative">
+                            <img src={url} alt={`Document ${idx + 1}`} className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-200">
+                            <FileText className="w-6 h-6" />
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-ink truncate group-hover:text-amber">
+                            Legal Document {idx + 1}
+                          </p>
+                          <span className="text-[11px] text-blue-600 group-hover:underline flex items-center gap-1 mt-0.5">
+                            <span>Open Document</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </span>
+                        </div>
+                      </a>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-xs text-[#b0b7c3] italic mb-6">No company licence documents uploaded.</p>
+              )}
+
+              {/* Brand Certification Documents */}
+              {(solarCertDocuments.length > 0 || inverterCertDocuments.length > 0 || batteryCertDocuments.length > 0) && (
+                <>
+                  <div className="divider"></div>
+                  <div className="font-ibm-plex-mono text-[0.7rem] tracking-[0.05em] uppercase text-slate-custom mb-3">
+                    Brand Certification Documents
+                  </div>
+                  
+                  {solarCertDocuments.length > 0 && (
+                    <div className="mb-4">
+                      <span className="text-xs font-semibold text-slate-700 block mb-2">Solar Panel Certificates ({solarCertDocuments.length}):</span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        {solarCertDocuments.map((url: string, idx: number) => (
+                          <a
+                            key={idx}
+                            href={url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="group flex items-center gap-2.5 p-2.5 bg-white border border-line hover:border-amber rounded-xl shadow-xs transition-all text-xs"
+                          >
+                            <FileText className="w-4 h-4 text-amber shrink-0" />
+                            <span className="font-medium truncate flex-1">Solar Cert {idx + 1}</span>
+                            <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-amber" />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {inverterCertDocuments.length > 0 && (
+                    <div className="mb-4">
+                      <span className="text-xs font-semibold text-slate-700 block mb-2">Inverter Certificates ({inverterCertDocuments.length}):</span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        {inverterCertDocuments.map((url: string, idx: number) => (
+                          <a
+                            key={idx}
+                            href={url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="group flex items-center gap-2.5 p-2.5 bg-white border border-line hover:border-amber rounded-xl shadow-xs transition-all text-xs"
+                          >
+                            <FileText className="w-4 h-4 text-amber shrink-0" />
+                            <span className="font-medium truncate flex-1">Inverter Cert {idx + 1}</span>
+                            <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-amber" />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {batteryCertDocuments.length > 0 && (
+                    <div className="mb-4">
+                      <span className="text-xs font-semibold text-slate-700 block mb-2">Battery Certificates ({batteryCertDocuments.length}):</span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        {batteryCertDocuments.map((url: string, idx: number) => (
+                          <a
+                            key={idx}
+                            href={url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="group flex items-center gap-2.5 p-2.5 bg-white border border-line hover:border-amber rounded-xl shadow-xs transition-all text-xs"
+                          >
+                            <FileText className="w-4 h-4 text-amber shrink-0" />
+                            <span className="font-medium truncate flex-1">Battery Cert {idx + 1}</span>
+                            <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-amber" />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              <div className="divider"></div>
               <div className="font-ibm-plex-mono text-[0.7rem] tracking-[0.05em] uppercase text-slate-custom mb-3">Brands</div>
               <div className="flex flex-wrap gap-2 mb-4">
                 {[...solarBrands, ...inverterBrands, ...batteryBrands, ...certBrands].map((b, i) => (

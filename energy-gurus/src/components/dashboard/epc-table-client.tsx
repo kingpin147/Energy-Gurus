@@ -821,24 +821,107 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                         </div>
                       </div>
 
-                      {viewData.licenceDocuments && viewData.licenceDocuments.length > 0 && (
-                        <div className="space-y-2">
-                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-custom">License Documents</h4>
-                          <div className="flex flex-wrap gap-3">
-                            {viewData.licenceDocuments.map((docUrl: string, idx: number) => (
-                              <a
-                                key={idx}
-                                href={docUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="flex items-center gap-2 p-3 bg-white border border-line rounded-xl text-xs font-semibold text-blue-600 hover:bg-blue-50 transition-colors shadow-sm"
-                              >
-                                <FileText className="w-4 h-4 text-blue-600" />
-                                <span>Document {idx + 1}</span>
-                                <ExternalLink className="w-3 h-3 ml-1" />
-                              </a>
-                            ))}
-                          </div>
+                      {/* Uploaded Documents & Certificates */}
+                      {((viewData.licenceDocuments && viewData.licenceDocuments.length > 0) ||
+                        (viewData.solarCertDocuments && viewData.solarCertDocuments.length > 0) ||
+                        (viewData.inverterCertDocuments && viewData.inverterCertDocuments.length > 0) ||
+                        (viewData.batteryCertDocuments && viewData.batteryCertDocuments.length > 0)) && (
+                        <div className="space-y-4 p-4 border border-line rounded-2xl bg-white shadow-xs">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-custom border-b border-line pb-2">
+                            Uploaded Documents &amp; Certificates
+                          </h4>
+
+                          {viewData.licenceDocuments && viewData.licenceDocuments.length > 0 && (
+                            <div className="space-y-2">
+                              <span className="text-xs font-bold text-slate-700 block">
+                                Company Licences &amp; Legal Documents ({viewData.licenceDocuments.length}):
+                              </span>
+                              <div className="flex flex-wrap gap-2.5">
+                                {viewData.licenceDocuments.map((docUrl: string, idx: number) => (
+                                  <a
+                                    key={idx}
+                                    href={docUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="flex items-center gap-2 p-2.5 bg-slate-50 hover:bg-blue-50 border border-line hover:border-blue-300 rounded-xl text-xs font-semibold text-blue-600 transition-colors shadow-xs"
+                                  >
+                                    <FileText className="w-4 h-4 text-blue-600 shrink-0" />
+                                    <span>Legal Document {idx + 1}</span>
+                                    <ExternalLink className="w-3 h-3 ml-1" />
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {viewData.solarCertDocuments && viewData.solarCertDocuments.length > 0 && (
+                            <div className="space-y-2">
+                              <span className="text-xs font-bold text-slate-700 block">
+                                Solar Panel Certificates ({viewData.solarCertDocuments.length}):
+                              </span>
+                              <div className="flex flex-wrap gap-2.5">
+                                {viewData.solarCertDocuments.map((docUrl: string, idx: number) => (
+                                  <a
+                                    key={idx}
+                                    href={docUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="flex items-center gap-2 p-2.5 bg-slate-50 hover:bg-amber/10 border border-line hover:border-amber rounded-xl text-xs font-semibold text-amber-deep transition-colors shadow-xs"
+                                  >
+                                    <FileText className="w-4 h-4 text-amber shrink-0" />
+                                    <span>Solar Cert {idx + 1}</span>
+                                    <ExternalLink className="w-3 h-3 ml-1" />
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {viewData.inverterCertDocuments && viewData.inverterCertDocuments.length > 0 && (
+                            <div className="space-y-2">
+                              <span className="text-xs font-bold text-slate-700 block">
+                                Inverter Certificates ({viewData.inverterCertDocuments.length}):
+                              </span>
+                              <div className="flex flex-wrap gap-2.5">
+                                {viewData.inverterCertDocuments.map((docUrl: string, idx: number) => (
+                                  <a
+                                    key={idx}
+                                    href={docUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="flex items-center gap-2 p-2.5 bg-slate-50 hover:bg-amber/10 border border-line hover:border-amber rounded-xl text-xs font-semibold text-amber-deep transition-colors shadow-xs"
+                                  >
+                                    <FileText className="w-4 h-4 text-amber shrink-0" />
+                                    <span>Inverter Cert {idx + 1}</span>
+                                    <ExternalLink className="w-3 h-3 ml-1" />
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {viewData.batteryCertDocuments && viewData.batteryCertDocuments.length > 0 && (
+                            <div className="space-y-2">
+                              <span className="text-xs font-bold text-slate-700 block">
+                                Battery Certificates ({viewData.batteryCertDocuments.length}):
+                              </span>
+                              <div className="flex flex-wrap gap-2.5">
+                                {viewData.batteryCertDocuments.map((docUrl: string, idx: number) => (
+                                  <a
+                                    key={idx}
+                                    href={docUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="flex items-center gap-2 p-2.5 bg-slate-50 hover:bg-amber/10 border border-line hover:border-amber rounded-xl text-xs font-semibold text-amber-deep transition-colors shadow-xs"
+                                  >
+                                    <FileText className="w-4 h-4 text-amber shrink-0" />
+                                    <span>Battery Cert {idx + 1}</span>
+                                    <ExternalLink className="w-3 h-3 ml-1" />
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

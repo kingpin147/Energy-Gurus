@@ -179,28 +179,29 @@ export default async function EpcListingPage({
 
       {/* Filters + List Wrapper */}
       <InstallerFilters totalCount={installers.length}>
-          {installers.map((installer) => {
-            const yearsInBusiness = Math.max(1, new Date().getFullYear() - new Date(installer.createdAt).getFullYear());
-            const locationText = installer.primaryCity ? `Serving ${installer.primaryCity}` : "Serving Pakistan";
+        {installers.map((installer) => {
+          const yearsInBusiness = Math.max(1, new Date().getFullYear() - new Date(installer.createdAt).getFullYear());
+          const locationText = installer.primaryCity ? `Serving ${installer.primaryCity}` : "Serving Pakistan";
+          const slug = installer.slug || slugify(installer.companyName) || installer.id;
 
-            const slug = installer.slug || slugify(installer.companyName) || installer.id;
-
-            return (
-              <TrackedLink
-                key={installer.id}
-                href={`/installers/${slug}` as any}
-                className="installer-card"
-                eventName="epc_profile_view"
-                eventProperties={{ epcId: installer.id, companyName: installer.companyName }}
-              >
+          return (
+            <TrackedLink
+              key={installer.id}
+              href={`/installers/${slug}` as any}
+              className="bg-white border border-[#e5e5dc] hover:border-amber rounded-[6px] p-5 md:p-6 shadow-xs hover:shadow-sm transition-all duration-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 group block"
+              eventName="epc_profile_view"
+              eventProperties={{ epcId: installer.id, companyName: installer.companyName }}
+            >
+              {/* Left: Avatar + Info */}
+              <div className="flex items-start sm:items-center gap-4 flex-1 min-w-0">
                 {/* Avatar */}
-                <div className="avatar">
+                <div className="w-14 h-14 rounded-[6px] bg-slate-100 border border-line flex items-center justify-center shrink-0 overflow-hidden shadow-xs font-bold text-lg text-slate-700">
                   {installer.logoUrl ? (
                     <Image
                       src={installer.logoUrl}
                       width={56}
                       height={56}
-                      className="object-cover w-full h-full rounded-[6px]"
+                      className="object-contain w-full h-full p-1 bg-white"
                       alt={installer.companyName}
                     />
                   ) : (
@@ -208,66 +209,82 @@ export default async function EpcListingPage({
                   )}
                 </div>
 
-                {/* Info */}
-                <div className="installer-info">
-                  <h3>
-                    {installer.companyName}
+                {/* Details */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-space-grotesk font-semibold text-base md:text-lg text-ink group-hover:text-amber transition-colors truncate">
+                      {installer.companyName}
+                    </h3>
                     {installer.isVerified && (
-                        <span className="verified-tag gold">★ Gold Verified</span>
-                    )}
-                  </h3>
-                  <div className="service-area">
-                    📍 {locationText} · {yearsInBusiness} {yearsInBusiness === 1 ? 'yr' : 'yrs'} in business
-                    {installer.projectsCount > 0 && (
-                      <span className="ml-2">· {installer.projectsCount} project{installer.projectsCount !== 1 ? 's' : ''}</span>
+                      <span className="text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                        ★ Verified
+                      </span>
                     )}
                   </div>
-                  <div className="badges">
-                    {(installer.sectors as string[])?.slice(0, 4).map((sector, i) => (
+
+                  <div className="text-xs text-slate-custom flex items-center gap-1.5 flex-wrap mt-1">
+                    <span>📍 {locationText}</span>
+                    <span>·</span>
+                    <span>{yearsInBusiness} {yearsInBusiness === 1 ? "yr" : "yrs"} in business</span>
+                    {installer.projectsCount > 0 && (
+                      <>
+                        <span>·</span>
+                        <span>{installer.projectsCount} project{installer.projectsCount !== 1 ? "s" : ""}</span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Sector & Certification Badges */}
+                  <div className="flex flex-wrap gap-1.5 mt-2.5">
+                    {(installer.sectors as string[])?.slice(0, 3).map((sector, i) => (
                       <span
                         key={`sector-${i}`}
-                        className="badge"
+                        className="text-[11px] font-medium bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-full"
                       >
                         {sector}
                       </span>
                     ))}
-                    {(installer.certifications as string[])?.slice(0, 3).map((cert, i) => (
+                    {(installer.certifications as string[])?.slice(0, 2).map((cert, i) => (
                       <span
                         key={`cert-${i}`}
-                        className="badge"
+                        className="text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full"
                       >
                         {cert}
                       </span>
                     ))}
                   </div>
                 </div>
+              </div>
 
-                {/* Right: rating + view button */}
-                <div className="installer-right">
-                  <div className="rating">
-                    <span className="stars">{renderStars(installer.avgRating || 5)}</span>
-                    <span className="ml-1.5">
-                      {installer.avgRating ? installer.avgRating.toFixed(1) : '5.0'}{' '}
-                      <span style={{ color: 'var(--slate)' }}>({installer.reviewCount || 0})</span>
-                    </span>
-                  </div>
-                  <span className="view-btn">
-                    View Profile
+              {/* Right: Rating + View Profile Button */}
+              <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center w-full md:w-auto gap-3 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-line">
+                <div className="flex items-center gap-1 text-sm font-semibold text-ink">
+                  <span className="text-amber">★</span>
+                  <span>{installer.avgRating ? installer.avgRating.toFixed(1) : "5.0"}</span>
+                  <span className="text-xs font-normal text-slate-custom">
+                    ({installer.reviewCount || 0})
                   </span>
                 </div>
-              </TrackedLink>
-            );
-          })}
+
+                <span className="bg-ink group-hover:bg-amber text-paper group-hover:text-ink px-4 py-2 rounded-[3px] font-semibold text-xs transition-colors shrink-0">
+                  View Profile
+                </span>
+              </div>
+            </TrackedLink>
+          );
+        })}
 
         {installers.length === 0 && (
-          <div className="py-20 text-center bg-white border border-line rounded-[4px]">
+          <div className="py-20 text-center bg-white border border-line rounded-[6px] p-8 shadow-xs">
             <h3 className="font-space-grotesk font-semibold text-xl text-ink mb-2">No Installers Found</h3>
-            <p className="text-slate-custom text-[0.95rem]">Try adjusting your search query or filters.</p>
+            <p className="text-slate-custom text-sm max-w-md mx-auto">
+              No installers match your active location or filter criteria. Try clearing search filters or entering a different city.
+            </p>
           </div>
         )}
 
         {installers.length >= 3 && (
-          <div className="mt-12 w-full flex justify-center">
+          <div className="mt-8 w-full flex justify-center">
             <AdBanner placement="in_list" targetPage="epcs" />
           </div>
         )}
