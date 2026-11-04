@@ -27,7 +27,8 @@ import {
   Maximize2,
   Minimize2,
   Plus,
-  X
+  X,
+  Upload
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +46,8 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { MultiPhotoUpload, MultiDocumentUpload, SinglePhotoUpload } from "@/components/dashboard/multi-media-upload";
+import { useR2Upload } from "@/lib/hooks/use-r2-upload";
 import {
   getEpcFullDetails,
   adminUpdateEpcInstaller,
@@ -76,6 +79,10 @@ type EpcListItem = {
   about: string | null;
   team: any;
   licenceDocuments: any;
+  photos?: string[] | null;
+  solarCertDocuments?: string[] | null;
+  inverterCertDocuments?: string[] | null;
+  batteryCertDocuments?: string[] | null;
   createdAt: Date;
   userIsActive: boolean | null;
   userEmail: string | null;
@@ -130,6 +137,7 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
   // Edit state
   const [editEpc, setEditEpc] = useState<EpcListItem | null>(null);
   const [editFormData, setEditFormData] = useState<any>({});
+  const { uploadFile } = useR2Upload();
   const [editTeam, setEditTeam] = useState<TeamMemberInput[]>([]);
   const [editOffices, setEditOffices] = useState<OfficeInput[]>([]);
   const [editProjects, setEditProjects] = useState<ProjectInput[]>([]);
@@ -204,10 +212,12 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
       solarBrands: epc.solarBrands ? epc.solarBrands.join(", ") : "",
       inverterBrands: epc.inverterBrands ? epc.inverterBrands.join(", ") : "",
       batteryBrands: epc.batteryBrands ? epc.batteryBrands.join(", ") : "",
-      photos: Array.isArray((epc as any).photos) ? (epc as any).photos.join(", ") : "",
-      solarCertDocuments: Array.isArray((epc as any).solarCertDocuments) ? (epc as any).solarCertDocuments.join(", ") : "",
-      inverterCertDocuments: Array.isArray((epc as any).inverterCertDocuments) ? (epc as any).inverterCertDocuments.join(", ") : "",
-      batteryCertDocuments: Array.isArray((epc as any).batteryCertDocuments) ? (epc as any).batteryCertDocuments.join(", ") : "",
+      logoUrl: epc.logoUrl || "",
+      photos: Array.isArray((epc as any).photos) ? (epc as any).photos : [],
+      solarCertDocuments: Array.isArray((epc as any).solarCertDocuments) ? (epc as any).solarCertDocuments : [],
+      inverterCertDocuments: Array.isArray((epc as any).inverterCertDocuments) ? (epc as any).inverterCertDocuments : [],
+      batteryCertDocuments: Array.isArray((epc as any).batteryCertDocuments) ? (epc as any).batteryCertDocuments : [],
+      licenceDocuments: Array.isArray((epc as any).licenceDocuments) ? (epc as any).licenceDocuments : [],
     });
 
     setEditTeam(Array.isArray(epc.team) ? epc.team : []);
@@ -251,6 +261,15 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
             }))
           );
         }
+        setEditFormData((prev: any) => ({
+          ...prev,
+          logoUrl: fullDetails.logoUrl || prev.logoUrl || "",
+          photos: Array.isArray(fullDetails.photos) && fullDetails.photos.length > 0 ? fullDetails.photos : prev.photos,
+          solarCertDocuments: Array.isArray(fullDetails.solarCertDocuments) && fullDetails.solarCertDocuments.length > 0 ? fullDetails.solarCertDocuments : prev.solarCertDocuments,
+          inverterCertDocuments: Array.isArray(fullDetails.inverterCertDocuments) && fullDetails.inverterCertDocuments.length > 0 ? fullDetails.inverterCertDocuments : prev.inverterCertDocuments,
+          batteryCertDocuments: Array.isArray(fullDetails.batteryCertDocuments) && fullDetails.batteryCertDocuments.length > 0 ? fullDetails.batteryCertDocuments : prev.batteryCertDocuments,
+          licenceDocuments: Array.isArray(fullDetails.licenceDocuments) && fullDetails.licenceDocuments.length > 0 ? fullDetails.licenceDocuments : prev.licenceDocuments,
+        }));
       }
     } catch (err) {
       console.warn("Failed to fetch full details for edit:", err);
@@ -286,11 +305,11 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
       .map((s: string) => s.trim())
       .filter(Boolean);
 
-    const parseCsv = (value: string | undefined) =>
-      (value || "")
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
+    const ensureArray = (value: any): string[] => {
+      if (Array.isArray(value)) return value.filter(Boolean);
+      if (typeof value === "string") return value.split(",").map((s) => s.trim()).filter(Boolean);
+      return [];
+    };
 
     const payload = {
       companyName: editFormData.companyName,
@@ -305,6 +324,7 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
       city: editFormData.city,
       country: editFormData.country,
       website: editFormData.website,
+      logoUrl: editFormData.logoUrl || null,
       tier: editFormData.tier as 'bronze' | 'silver' | 'gold',
       isVerified: editFormData.isVerified,
       yearsInBusiness: parseInt(editFormData.yearsInBusiness) || 0,
@@ -315,10 +335,11 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
       solarBrands: solarArr,
       inverterBrands: inverterArr,
       batteryBrands: batteryArr,
-      photos: parseCsv(editFormData.photos),
-      solarCertDocuments: parseCsv(editFormData.solarCertDocuments),
-      inverterCertDocuments: parseCsv(editFormData.inverterCertDocuments),
-      batteryCertDocuments: parseCsv(editFormData.batteryCertDocuments),
+      photos: ensureArray(editFormData.photos),
+      solarCertDocuments: ensureArray(editFormData.solarCertDocuments),
+      inverterCertDocuments: ensureArray(editFormData.inverterCertDocuments),
+      batteryCertDocuments: ensureArray(editFormData.batteryCertDocuments),
+      licenceDocuments: ensureArray(editFormData.licenceDocuments),
       team: editTeam.filter((t) => t.name || t.designation),
       offices: editOffices.filter((o) => o.city || o.officeNumber || o.area || o.block).map((o) => ({
         ...o,
@@ -975,6 +996,56 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                 {/* EDIT TAB 1: GENERAL INFO */}
                 <TabsContent value="general" className="mt-6 space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {/* COMPANY LOGO UPLOAD */}
+                    <div className="md:col-span-3 flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-slate-50 border border-line rounded-2xl">
+                      <div className="w-16 h-16 rounded-xl border border-line bg-white flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+                        {editFormData.logoUrl ? (
+                          <img src={editFormData.logoUrl} alt="Company Logo" className="w-full h-full object-contain p-1" />
+                        ) : (
+                          <Building2 className="w-8 h-8 text-slate-300" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <Label className="text-xs font-bold uppercase text-slate-custom block mb-0.5">Company Logo</Label>
+                        <p className="text-xs text-slate-custom mb-2">Display avatar for installer profile and directory listings.</p>
+                        <div className="flex items-center gap-2">
+                          <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border border-line bg-white hover:bg-slate-100 text-ink shadow-xs transition-colors">
+                            <Upload className="w-3.5 h-3.5 text-amber" />
+                            <span>{editFormData.logoUrl ? "Change Logo" : "Upload Logo"}</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                try {
+                                  toast.loading("Uploading logo...");
+                                  const res = await uploadFile(file, "epc-logos");
+                                  setEditFormData((prev: any) => ({ ...prev, logoUrl: res.publicUrl }));
+                                  toast.dismiss();
+                                  toast.success("Logo uploaded successfully");
+                                } catch (err: any) {
+                                  toast.dismiss();
+                                  toast.error(err?.message || "Failed to upload logo");
+                                }
+                              }}
+                            />
+                          </label>
+                          {editFormData.logoUrl && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setEditFormData({ ...editFormData, logoUrl: "" })}
+                              className="h-8 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl"
+                            >
+                              Remove
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs font-bold uppercase text-slate-custom">Company Name *</Label>
                       <Input
@@ -1140,22 +1211,32 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                     </div>
 
                     <div className="space-y-1.5 md:col-span-3">
-                      <Label className="text-xs font-bold uppercase text-slate-custom">Company Photos (comma-separated URLs)</Label>
-                      <Textarea
-                        value={editFormData.photos || ""}
-                        onChange={(e) => setEditFormData({ ...editFormData, photos: e.target.value })}
-                        rows={3}
-                        className="bg-slate-50 border-line"
+                      <MultiPhotoUpload
+                        label="Company Photos"
+                        description="Upload showcase gallery photos of office facilities, team, or completed installations."
+                        urls={Array.isArray(editFormData.photos) ? editFormData.photos : []}
+                        onChange={(newUrls) => setEditFormData({ ...editFormData, photos: newUrls })}
+                        folder="epc-photos"
                       />
                     </div>
 
                     <div className="space-y-1.5 md:col-span-3">
-                      <Label className="text-xs font-bold uppercase text-slate-custom">Solar Certification Documents (comma-separated URLs)</Label>
-                      <Textarea
-                        value={editFormData.solarCertDocuments || ""}
-                        onChange={(e) => setEditFormData({ ...editFormData, solarCertDocuments: e.target.value })}
-                        rows={3}
-                        className="bg-slate-50 border-line"
+                      <MultiDocumentUpload
+                        label="Solar Certification Documents"
+                        description="Upload solar certifications, OEM authorization letters, or technical accreditations."
+                        urls={Array.isArray(editFormData.solarCertDocuments) ? editFormData.solarCertDocuments : []}
+                        onChange={(newUrls) => setEditFormData({ ...editFormData, solarCertDocuments: newUrls })}
+                        folder="epc-brand-certs"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 md:col-span-3">
+                      <MultiDocumentUpload
+                        label="Company Licence & Legal Documents"
+                        description="Upload AEDB Licence, PEC License, SECP incorporation, or NTN tax certificates."
+                        urls={Array.isArray(editFormData.licenceDocuments) ? editFormData.licenceDocuments : []}
+                        onChange={(newUrls) => setEditFormData({ ...editFormData, licenceDocuments: newUrls })}
+                        folder="epc-documents"
                       />
                     </div>
                   </div>
@@ -1211,6 +1292,24 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                         onChange={(e) => setEditFormData({ ...editFormData, batteryBrands: e.target.value })}
                         placeholder="Pylontech, Narada, BYD, Soluna"
                         className="bg-slate-50 border-line"
+                      />
+                    </div>
+
+                    <div className="pt-4 border-t border-line space-y-4">
+                      <h4 className="text-sm font-bold text-ink">Inverter & Battery Brand Certifications</h4>
+                      <MultiDocumentUpload
+                        label="Inverter Certification Documents"
+                        description="Certificates of training or authorization from GoodWe, Huawei, Sungrow, Growatt, etc."
+                        urls={Array.isArray(editFormData.inverterCertDocuments) ? editFormData.inverterCertDocuments : []}
+                        onChange={(newUrls) => setEditFormData({ ...editFormData, inverterCertDocuments: newUrls })}
+                        folder="epc-brand-certs"
+                      />
+                      <MultiDocumentUpload
+                        label="Battery Certification Documents"
+                        description="Certificates of training or authorization from Pylontech, BYD, Narada, etc."
+                        urls={Array.isArray(editFormData.batteryCertDocuments) ? editFormData.batteryCertDocuments : []}
+                        onChange={(newUrls) => setEditFormData({ ...editFormData, batteryCertDocuments: newUrls })}
+                        folder="epc-brand-certs"
                       />
                     </div>
                   </div>
@@ -1283,17 +1382,17 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                           </div>
 
                           <div className="flex items-center gap-2 pt-4 sm:pt-0">
-                            <div className="space-y-1 flex-1">
-                              <Label className="text-[10px] uppercase font-bold text-slate-custom">Photo URL</Label>
-                              <Input
+                            <div className="space-y-1 flex-1 min-w-0">
+                              <Label className="text-[10px] uppercase font-bold text-slate-custom">Photo</Label>
+                              <SinglePhotoUpload
                                 value={member.imageUrl}
-                                onChange={(e) => {
+                                onChange={(url) => {
                                   const copy = [...editTeam];
-                                  copy[idx].imageUrl = e.target.value;
+                                  copy[idx].imageUrl = url;
                                   setEditTeam(copy);
                                 }}
-                                placeholder="Image link"
-                                className="bg-white border-line h-9 text-xs"
+                                folder="epc-team"
+                                title={member.name ? `${member.name} - Photo` : `Team Member #${idx + 1}`}
                               />
                             </div>
                             <Button
@@ -1301,7 +1400,8 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                               variant="ghost"
                               size="sm"
                               onClick={() => setEditTeam(editTeam.filter((_, i) => i !== idx))}
-                              className="h-9 px-2 text-rose-600 hover:bg-rose-50 rounded-lg mt-4"
+                              className="h-9 px-2 text-rose-600 hover:bg-rose-50 rounded-lg mt-4 shrink-0"
+                              title="Delete team member"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>

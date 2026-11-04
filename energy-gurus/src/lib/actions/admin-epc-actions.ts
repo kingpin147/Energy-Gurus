@@ -67,6 +67,10 @@ export async function getAllEpcInstallers() {
       inverterBrands: epcInstallers.inverterBrands,
       batteryBrands: epcInstallers.batteryBrands,
       about: epcInstallers.about,
+      photos: epcInstallers.photos,
+      solarCertDocuments: epcInstallers.solarCertDocuments,
+      inverterCertDocuments: epcInstallers.inverterCertDocuments,
+      batteryCertDocuments: epcInstallers.batteryCertDocuments,
       team: epcInstallers.team,
       licenceDocuments: epcInstallers.licenceDocuments,
       status: epcInstallers.status,
@@ -156,6 +160,8 @@ export async function adminUpdateEpcInstaller(epcId: string, data: {
   solarCertDocuments?: string[];
   inverterCertDocuments?: string[];
   batteryCertDocuments?: string[];
+  logoUrl?: string | null;
+  licenceDocuments?: string[];
   team?: { name: string; designation: string; linkedIn: string; imageUrl: string }[];
   offices?: { officeNumber?: string; block?: string | null; address?: string; area?: string; city: string; country?: string; coordinates?: string; }[];
   projects?: { name: string; entryType?: 'project' | 'testimonial'; customerName?: string; companyName?: string; installationDate?: string; city?: string; country?: string; segmentType?: string[]; systemSize?: string; systemType?: string; inverterModel?: string | null; batteryModel?: string | null; solarPanelModel?: string | null; description?: string; youtubeUrl?: string }[];
@@ -207,6 +213,8 @@ export async function adminUpdateEpcInstaller(epcId: string, data: {
         batteryCertDocuments: data.batteryCertDocuments ?? [],
         photos: data.photos ?? [],
         team: data.team ?? [],
+        logoUrl: data.logoUrl !== undefined ? data.logoUrl : existing.logoUrl,
+        licenceDocuments: data.licenceDocuments !== undefined ? data.licenceDocuments : (existing.licenceDocuments ?? []),
         updatedAt: new Date(),
       })
       .where(eq(epcInstallers.id, epcId));
