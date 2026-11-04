@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { brands, products, reviews, news, users } from "@/db/schema";
+import { brands, products, reviews, users } from "@/db/schema";
 import { eq, and, desc, or, ilike } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
@@ -131,14 +131,6 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
     .where(and(eq(reviews.targetId, brand.id), eq(reviews.targetType, "brand"), eq(reviews.status, "approved")))
     .orderBy(desc(reviews.createdAt));
 
-  // Fetch brand news
-  const brandNews = await db
-    .select()
-    .from(news)
-    .where(eq(news.isPublished, true))
-    .orderBy(desc(news.createdAt))
-    .limit(6);
-
   // Compute rating average
   const totalRating = brandReviews.reduce((acc, r) => acc + (r.rating || 5), 0);
   const avgRating = brandReviews.length > 0 ? totalRating / brandReviews.length : 5.0;
@@ -148,7 +140,6 @@ export default async function BrandProfilePage({ params }: { params: Promise<{ i
       brand={brand}
       products={brandProducts}
       reviews={brandReviews}
-      news={brandNews}
       rating={avgRating}
       reviewCount={brandReviews.length}
     />

@@ -20,7 +20,6 @@ import {
   Store,
   Briefcase,
   Layers,
-  Newspaper,
   MessageSquare,
   Linkedin,
   Facebook,
@@ -40,7 +39,7 @@ interface BrandProfileViewProps {
   brand: any;
   products: any[];
   reviews: any[];
-  news: any[];
+  news?: any[];
   rating: number;
   reviewCount: number;
 }
@@ -49,21 +48,17 @@ export function BrandProfileView({
   brand,
   products,
   reviews,
-  news,
   rating,
   reviewCount
 }: BrandProfileViewProps) {
   const [activeTab, setActiveTab] = useState<
-    "profile" | "news" | "products" | "distributors" | "retailers" | "centres" | "installers"
+    "profile" | "products" | "distributors" | "retailers" | "centres" | "installers"
   >("profile");
 
   // Filters
   const [productSearch, setProductSearch] = useState("");
   const [productCategoryFilter, setProductCategoryFilter] = useState("all");
   const [productTypeFilter, setProductTypeFilter] = useState("all");
-
-  const [newsSearch, setNewsSearch] = useState("");
-  const [newsCategoryFilter, setNewsCategoryFilter] = useState("all");
 
   const [distributorSearch, setDistributorSearch] = useState("");
   const [distributorRegionFilter, setDistributorRegionFilter] = useState("all");
@@ -475,8 +470,7 @@ export function BrandProfileView({
           <div className="max-w-[1080px] mx-auto px-5 md:px-7 flex gap-1 overflow-x-auto scrollbar-none">
             {[
               { id: "profile", label: "Profile" },
-              { id: "news", label: `News & Updates` },
-              { id: "products", label: `Products` },
+              { id: "products", label: "Products" },
               { id: "distributors", label: `Distributors` },
               { id: "retailers", label: `Retailers` },
               { id: "centres", label: `Stores & CSS` },
@@ -934,102 +928,7 @@ export function BrandProfileView({
           </div>
         )}
 
-        {/* TAB 2: NEWS & UPDATES */}
-        {activeTab === "news" && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="font-fraunces text-xl font-semibold text-navy-deep">News & Updates</h2>
-              <p className="text-xs text-slate-custom mt-1">Announcements, launches, and events from {brand.brandName} in Pakistan.</p>
-            </div>
-
-            {/* Toolbar */}
-            <div className="flex gap-3 flex-wrap">
-              <div className="relative flex-1 min-w-[220px]">
-                <Search className="w-4 h-4 text-slate-custom absolute left-3 top-3" />
-                <input
-                  type="text"
-                  placeholder="Search updates"
-                  value={newsSearch}
-                  onChange={(e) => setNewsSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-white border border-line rounded-[3px] text-xs focus:outline-none focus:border-amber"
-                />
-              </div>
-              <select
-                value={newsCategoryFilter}
-                onChange={(e) => setNewsCategoryFilter(e.target.value)}
-                className="bg-white border border-line rounded-[3px] text-xs px-3 py-2 text-ink focus:outline-none focus:border-amber"
-              >
-                <option value="all">All types</option>
-                <option value="Product Launch">Product Launch</option>
-                <option value="Inauguration">Inauguration</option>
-                <option value="Outlet Opening">Outlet Opening</option>
-                <option value="Event">Event</option>
-                <option value="Announcement">Announcement</option>
-              </select>
-            </div>
-
-            {/* News Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {(news.length > 0 ? news : [
-                {
-                  id: "1",
-                  title: `${brand.brandName} launches WIT 100H commercial storage cabinet in Pakistan`,
-                  content: "The utility-scale battery cabinet is now available through authorized distribution channels for commercial self-consumption.",
-                  category: "Product Launch",
-                  city: "Lahore, Punjab",
-                  date: "Sep 2, 2026"
-                },
-                {
-                  id: "2",
-                  title: `New ${brand.brandName} service centre opens on Shahrah-e-Faisal`,
-                  content: "The Karachi service centre adds warranty claims and repair drop-off support for customers across Sindh.",
-                  category: "Outlet Opening",
-                  city: "Karachi, Sindh",
-                  date: "Aug 14, 2026"
-                },
-                {
-                  id: "3",
-                  title: `${brand.brandName} flagship store inaugurated in Gulberg III`,
-                  content: "The new flagship store offers live product demos and on-site technical consultations.",
-                  category: "Inauguration",
-                  city: "Lahore, Punjab",
-                  date: "Jul 20, 2026"
-                },
-                {
-                  id: "4",
-                  title: `${brand.brandName} installer training day draws 60+ certified partners`,
-                  content: "A one-day technical workshop covering hybrid inverter commissioning and storage lineup.",
-                  category: "Event",
-                  city: "Islamabad, ICT",
-                  date: "Jun 5, 2026"
-                }
-              ]).map((item: any, idx: number) => (
-                <div key={idx} className="bg-white border border-line rounded-[3px] overflow-hidden flex flex-col shadow-sm">
-                  <div className="h-36 bg-gradient-to-br from-navy to-navy-deep relative flex items-end p-3">
-                    <span className="text-[11px] font-semibold bg-white/95 text-navy-deep px-2.5 py-0.5 rounded-full">
-                      {item.category || "Announcement"}
-                    </span>
-                  </div>
-                  <div className="p-4 flex-1 flex flex-col justify-between">
-                    <div>
-                      <span className="text-[11.5px] text-amber-deep font-semibold block mb-1">
-                        {item.date || new Date().toLocaleDateString()} {item.city ? `· ${item.city}` : ""}
-                      </span>
-                      <h3 className="font-semibold text-sm text-navy-deep leading-snug">
-                        {item.title}
-                      </h3>
-                      <p className="text-xs text-slate-custom mt-2 line-clamp-3 leading-relaxed">
-                        {item.content}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: PRODUCTS (Matches exact reference image) */}
+        {/* TAB 2: PRODUCTS (Matches exact reference image) */}
         {activeTab === "products" && (
           <div className="space-y-6">
             <div>
