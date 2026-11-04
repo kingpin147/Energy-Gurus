@@ -106,7 +106,11 @@ function getDocFileName(url: string, index: number): string {
     const pathname = parsed.pathname;
     const raw = pathname.split("/").pop() || "";
     const clean = decodeURIComponent(raw.replace(/^[0-9a-fA-F-]{36}[_-]?/, ""));
-    return clean || `Document ${index + 1}`;
+    if (!clean || clean.startsWith(".") || clean.length <= 5) {
+      const ext = clean.startsWith(".") ? clean.slice(1).toUpperCase() : (raw.split(".").pop() || "").toUpperCase();
+      return `Document ${index + 1}${ext ? ` (${ext})` : ""}`;
+    }
+    return clean;
   } catch {
     const raw = url.split("/").pop() || "";
     return raw || `Document ${index + 1}`;

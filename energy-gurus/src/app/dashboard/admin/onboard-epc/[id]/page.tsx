@@ -4,7 +4,7 @@ import { getUserRole } from "@/lib/roles";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { AdminReviewSidebar } from "./admin-review-sidebar";
-import { Globe, MapPin, Mail, Phone, Calendar, Star, FileText } from "lucide-react";
+import { Globe, MapPin, Mail, Phone, Calendar, Star, FileText, ExternalLink } from "lucide-react";
 
 export default async function AdminReviewPage({ params }: { params: Promise<{ id: string }> }) {
   const role = await getUserRole();
@@ -35,6 +35,11 @@ export default async function AdminReviewPage({ params }: { params: Promise<{ id
   const solarBrands = Array.isArray(epc.solarBrands) ? epc.solarBrands : [];
   const inverterBrands = Array.isArray(epc.inverterBrands) ? epc.inverterBrands : [];
   const batteryBrands = Array.isArray(epc.batteryBrands) ? epc.batteryBrands : [];
+
+  const licenceDocuments = Array.isArray(epc.licenceDocuments) ? epc.licenceDocuments : [];
+  const solarCertDocuments = Array.isArray(epc.solarCertDocuments) ? epc.solarCertDocuments : [];
+  const inverterCertDocuments = Array.isArray(epc.inverterCertDocuments) ? epc.inverterCertDocuments : [];
+  const batteryCertDocuments = Array.isArray(epc.batteryCertDocuments) ? epc.batteryCertDocuments : [];
 
   return (
     <div className="admin-review-page bg-paper min-h-screen text-graphite font-sans pb-20">

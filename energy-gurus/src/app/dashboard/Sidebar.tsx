@@ -47,12 +47,14 @@ export default function Sidebar({ role }: { role: UserRole | null | undefined })
 
     const epcLinks = [
         { href: "/dashboard/epc", icon: <Briefcase className="w-4 h-4" />, label: "My EPC Profile" },
+        { href: "/dashboard/inquiries", icon: <Inbox className="w-4 h-4" />, label: "My Inquiries" },
         { href: "/dashboard/support", icon: <HeadphonesIcon className="w-4 h-4" />, label: "Contact Support" },
         { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings" },
     ];
 
     const brandLinks = [
         { href: "/dashboard/brand", icon: <Building2 className="w-4 h-4" />, label: "My Brand Profile" },
+        { href: "/dashboard/inquiries", icon: <Inbox className="w-4 h-4" />, label: "My Inquiries" },
         { href: "/dashboard/support", icon: <HeadphonesIcon className="w-4 h-4" />, label: "Contact Support" },
         { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings" },
     ];
