@@ -352,7 +352,12 @@ export async function deleteEpcInstallerAction(epcId: string, userId: string) {
   }
 }
 
-export async function adminUpdateEpcStatusAction(epcId: string, status: "draft" | "pending_review" | "changes_requested" | "live", adminFeedback?: string) {
+export async function adminUpdateEpcStatusAction(
+  epcId: string,
+  status: "draft" | "pending_review" | "changes_requested" | "live",
+  adminFeedback?: string,
+  tier?: string
+) {
   const role = await getUserRole();
   if (role !== "super-admin" && role !== "admin") {
     return { success: false, message: "Unauthorized access" };
@@ -373,23 +378,42 @@ export async function adminUpdateEpcStatusAction(epcId: string, status: "draft" 
     const approvalHistory = Array.isArray(epc.approvalHistory) ? epc.approvalHistory : [];
     approvalHistory.push({
       date: new Date().toISOString(),
-      action: `Status changed to ${status}`,
+      action: `Status changed to ${status}${tier ? ` (${tier})` : ""}`,
       note: adminFeedback || undefined,
       user: userId || "admin",
     });
 
+    const updateData: any = {
+      status,
+      adminFeedback: adminFeedback || null,
+      approvalHistory,
+      updatedAt: new Date(),
+    };
+
+    if (status === "live") {
+      updateData.isVerified = true;
+      if (tier) updateData.tier = tier;
+    }
+
     await db
       .update(epcInstallers)
-      .set({
-        status,
-        adminFeedback: adminFeedback || null,
-        approvalHistory,
-        updatedAt: new Date(),
-      })
+      .set(updateData)
       .where(eq(epcInstallers.id, epcId));
 
+    if (epc.userId) {
+      await db
+        .update(users)
+        .set({
+          isActive: status === "live",
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, epc.userId));
+    }
+
     revalidatePath("/dashboard/admin/onboard-epc");
+    revalidatePath(`/dashboard/admin/onboard-epc/${epcId}`);
     revalidatePath("/epcs");
+    revalidatePath(`/epcs/${epcId}`);
     revalidatePath("/", "layout");
 
     return { success: true, message: `EPC Installer status updated to ${status}` };

@@ -4,7 +4,7 @@ import { getUserRole } from "@/lib/roles";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { AdminReviewSidebar } from "./admin-review-sidebar";
-import { Globe, MapPin, Mail, Phone, Calendar, Star, FileText, ExternalLink } from "lucide-react";
+import { Globe, MapPin, Mail, Phone, Calendar, Star, FileText, ExternalLink, Eye } from "lucide-react";
 
 export default async function AdminReviewPage({ params }: { params: Promise<{ id: string }> }) {
   const role = await getUserRole();
@@ -45,14 +45,25 @@ export default async function AdminReviewPage({ params }: { params: Promise<{ id
     <div className="admin-review-page bg-paper min-h-screen text-graphite font-sans pb-20">
       <div className="page-wrap max-w-[1400px] mx-auto px-8 pt-7 pb-20 grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-7">
         
-        <div className="top-bar col-span-full flex items-center justify-between mb-2">
+        <div className="top-bar col-span-full flex flex-wrap items-center justify-between gap-3 mb-2">
           <div className="text-[0.86rem] text-slate-custom">
             <Link href="/dashboard/admin/onboard-epc" className="text-teal hover:underline">Pending Applications</Link> 
             {" / "} {epc.ceoName || epc.companyName} — {epc.companyName}
           </div>
-          <span className="font-ibm-plex-mono text-[0.7rem] tracking-[0.06em] uppercase px-3.5 py-1.5 rounded-full bg-[rgba(232,163,61,0.15)] text-[#a3711c]">
-            ⏳ Pending Review
-          </span>
+          <div className="flex items-center gap-3">
+            <a
+              href={`/epcs/${epc.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-line text-ink hover:text-amber-deep hover:border-amber text-xs font-bold rounded-lg shadow-sm transition-all"
+            >
+              <Eye className="w-3.5 h-3.5 text-blue-600" />
+              <span>Preview Live Profile ↗</span>
+            </a>
+            <span className="font-ibm-plex-mono text-[0.7rem] tracking-[0.06em] uppercase px-3.5 py-1.5 rounded-full bg-[rgba(232,163,61,0.15)] text-[#a3711c]">
+              ⏳ {epc.status === "live" ? "Live" : "Pending Review"}
+            </span>
+          </div>
         </div>
 
         <div>

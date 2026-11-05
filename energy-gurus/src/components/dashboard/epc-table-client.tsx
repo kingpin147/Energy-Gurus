@@ -551,12 +551,23 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => window.location.href = `/dashboard/admin/onboard-epc/${epc.id}`}
-                          className="h-8 px-2.5 rounded-lg text-slate-custom hover:text-ink hover:bg-slate-100"
-                          title="Review Profile"
+                          onClick={() => window.open(`/epcs/${epc.id}`, "_blank")}
+                          className="h-8 px-2.5 rounded-lg text-slate-custom hover:text-blue-700 hover:bg-blue-50"
+                          title="Preview Live Site Profile"
                         >
                           <Eye className="w-4 h-4 text-blue-600" />
-                          <span className="sr-only">Review</span>
+                          <span className="sr-only">Preview Live Site</span>
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => window.location.href = `/dashboard/admin/onboard-epc/${epc.id}`}
+                          className="h-8 px-2.5 rounded-lg text-slate-custom hover:text-ink hover:bg-slate-100"
+                          title="Review Application in Dashboard"
+                        >
+                          <FileText className="w-4 h-4 text-slate-600" />
+                          <span className="sr-only">Review Application</span>
                         </Button>
 
                         <Button

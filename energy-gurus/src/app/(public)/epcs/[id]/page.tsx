@@ -1,13 +1,14 @@
 import { EpcProfileView } from "@/components/epcs/EpcProfileView";
 import { db } from "@/db";
-import { epcInstallers, epcOffices, epcProjects } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { epcInstallers, epcOffices, epcProjects, users } from "@/db/schema";
+import { eq, or, ilike } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getEpcCompleteness } from "@/lib/utils/completeness";
 import { getProfileRating } from "@/lib/actions/reviews";
 import { isUUID, slugify } from "@/lib/utils/slug";
-import { or, ilike } from "drizzle-orm";
+import { auth } from "@clerk/nextjs/server";
+import { getUserRole } from "@/lib/roles";
 
 async function getInstallerByParam(param: string) {
   const decoded = decodeURIComponent(param).trim();
@@ -41,6 +42,14 @@ export async function generateMetadata({
   const installer = await getInstallerByParam(id);
 
   if (!installer) return {};
+
+  const isLive = installer.status === "live" && ((installer as any).user?.isActive ?? false);
+  if (!isLive) {
+    return {
+      title: `${installer.companyName} (Preview) | EnergyGurus`,
+      robots: { index: false, follow: false }
+    };
+  }
 
   const baseUrl = "https://www.energygurus.online";
   const slug = installer.slug || slugify(installer.companyName);
@@ -90,7 +99,23 @@ export default async function EpcProfilePage({
   const { id } = await params;
   const installer = await getInstallerByParam(id);
 
-  if (!installer || !(installer as any).user?.isActive) return notFound();
+  if (!installer) return notFound();
+
+  // Check live status
+  const user = (installer as any).user;
+  const isLive = installer.status === "live" && (user?.isActive ?? false);
+
+  let isPreview = false;
+  if (!isLive) {
+    const { userId: clerkId } = await auth();
+    if (!clerkId) return notFound();
+    const role = await getUserRole();
+    const [dbUser] = await db.select().from(users).where(eq(users.clerkId, clerkId));
+    const isOwner = dbUser && dbUser.id === installer.userId;
+    const isAdmin = role === "admin" || role === "super-admin";
+    if (!isOwner && !isAdmin) return notFound();
+    isPreview = true;
+  }
 
   const realId = installer.id;
   const offices = await db.select().from(epcOffices).where(eq(epcOffices.epcId, realId));
@@ -98,7 +123,7 @@ export default async function EpcProfilePage({
   const { rating, count } = await getProfileRating(realId);
 
   const { score } = getEpcCompleteness(installer, offices.length, projects.length);
-  if (score < 50) notFound();
+  if (score < 50 && !isPreview) return notFound();
 
   return (
     <EpcProfileView
@@ -107,7 +132,8 @@ export default async function EpcProfilePage({
       projects={projects}
       rating={rating}
       count={count}
-      isActive={(installer as any).user?.isActive ?? true}
+      isActive={user?.isActive ?? true}
+      isPreview={isPreview}
     />
   );
 }

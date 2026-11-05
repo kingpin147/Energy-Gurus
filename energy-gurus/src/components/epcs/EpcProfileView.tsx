@@ -74,7 +74,8 @@ export function EpcProfileView({
   projects,
   rating,
   count,
-  isActive
+  isActive,
+  isPreview = false
 }: any) {
   const [activeTab, setActiveTab] = useState("profile");
 
@@ -145,6 +146,28 @@ export function EpcProfileView({
 
   return (
     <div className="installer-profile-page bg-[#F7F4EC] min-h-screen">
+      {isPreview && (
+        <div className="bg-amber text-ink px-4 py-3 sticky top-0 z-50 border-b border-amber-600 shadow-md flex flex-wrap items-center justify-between gap-3 font-sans">
+          <div className="flex items-center gap-2.5 text-sm font-semibold text-ink">
+            <span className="bg-navy-deep text-white text-[11px] px-2.5 py-1 rounded font-bold uppercase tracking-wider shadow-sm flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-amber" /> Admin Preview Mode
+            </span>
+            <span>
+              This profile is <strong>NOT LIVE</strong> to the public until approved (Status:{" "}
+              <span className="uppercase font-bold text-navy-deep">{installer.status || "Pending"}</span>).
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/dashboard/admin/onboard-epc/${installer.id}`}
+              className="px-3.5 py-1.5 bg-navy-deep hover:bg-ink text-white text-xs font-bold rounded shadow transition-all flex items-center gap-1.5"
+            >
+              <span>Review &amp; Approve in Dashboard &rarr;</span>
+            </Link>
+          </div>
+        </div>
+      )}
+
       <div className="sitebar bg-ink">
         <div className="wrap">
           <div className="crumbs">
