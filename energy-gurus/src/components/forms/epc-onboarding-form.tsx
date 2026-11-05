@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { CheckCircle2, X, Plus, FileText, Trash2 } from 'lucide-react';
+import { CheckCircle2, X, Plus, FileText, Trash2, MapPin } from 'lucide-react';
+import { LocationPickerModal } from '@/components/shared/LocationPickerModal';
 
 const DEFAULT_SECTORS = ['Residential', 'Commercial', 'Industrial', 'Agriculture'];
 const DEFAULT_CERTIFICATIONS = ['AEDB Licence', 'PEC Licence'];
@@ -43,6 +44,14 @@ export function EpcOnboardingForm({ isPublic = false }: { isPublic?: boolean } =
     const [logoUrl, setLogoUrl] = useState("");
     const [photos, setPhotos] = useState<string[]>([]);
     const [uploadedDocs, setUploadedDocs] = useState<UploadedDoc[]>([]);
+    const [mainCoordinates, setMainCoordinates] = useState("");
+    const [mapPickerTarget, setMapPickerTarget] = useState<{
+        type: "main" | "office";
+        index?: number;
+        coordinates: string;
+        city?: string;
+        label?: string;
+    } | null>(null);
     const [solarCertDocs, setSolarCertDocs] = useState<UploadedDoc[]>([]);
     const [inverterCertDocs, setInverterCertDocs] = useState<UploadedDoc[]>([]);
     const [batteryCertDocs, setBatteryCertDocs] = useState<UploadedDoc[]>([]);
@@ -304,8 +313,47 @@ export function EpcOnboardingForm({ isPublic = false }: { isPublic?: boolean } =
                     </div>
                     <div className="field full">
                         <label htmlFor="coordinates">Location Coordinates (Latitude, Longitude)</label>
-                        <input type="text" id="coordinates" name="coordinates" placeholder="e.g. 31.5204, 74.3587" />
-                        <p className="hint">Optional — helps customers find you accurately on the map. You can copy this from Google Maps by right-clicking your location.</p>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <input 
+                                type="text" 
+                                id="coordinates" 
+                                name="coordinates" 
+                                value={mainCoordinates} 
+                                onChange={(e) => setMainCoordinates(e.target.value)} 
+                                placeholder="e.g. 31.5204, 74.3587" 
+                                style={{ flex: 1 }} 
+                            />
+                            <button 
+                                type="button" 
+                                className="pick-map-btn" 
+                                style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    whiteSpace: 'nowrap',
+                                    background: '#FDFCF9',
+                                    border: '1px solid var(--line)',
+                                    color: 'var(--navy-deep)',
+                                    fontSize: '12.5px',
+                                    fontWeight: 600,
+                                    padding: '9px 12px',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer'
+                                }}
+                                onClick={() => {
+                                    const cityInput = (document.getElementById('city') as HTMLInputElement)?.value;
+                                    setMapPickerTarget({
+                                        type: 'main',
+                                        coordinates: mainCoordinates,
+                                        city: cityInput || 'Lahore',
+                                        label: 'Head Office Location'
+                                    });
+                                }}
+                            >
+                                <MapPin className="w-3.5 h-3.5 text-amber" /> Pick on map
+                            </button>
+                        </div>
+                        <p className="hint">Optional — helps customers find you accurately on the map. Click &quot;Pick on map&quot; to drop a pin.</p>
                     </div>
                 </div>
 
@@ -336,7 +384,42 @@ export function EpcOnboardingForm({ isPublic = false }: { isPublic?: boolean } =
                                     </div>
                                     <div className="entry-card-field full">
                                         <label>Location Coordinates (Latitude, Longitude)</label>
-                                        <input type="text" value={office.coordinates} onChange={(e) => { const no = [...offices]; no[idx].coordinates = e.target.value; setOffices(no); }} placeholder="e.g. 31.5204, 74.3587" />
+                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                            <input 
+                                                type="text" 
+                                                value={office.coordinates} 
+                                                onChange={(e) => { const no = [...offices]; no[idx].coordinates = e.target.value; setOffices(no); }} 
+                                                placeholder="e.g. 31.5204, 74.3587" 
+                                                style={{ flex: 1 }} 
+                                            />
+                                            <button 
+                                                type="button" 
+                                                className="pick-map-btn" 
+                                                style={{
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px',
+                                                    whiteSpace: 'nowrap',
+                                                    background: '#FDFCF9',
+                                                    border: '1px solid var(--line)',
+                                                    color: 'var(--navy-deep)',
+                                                    fontSize: '12.5px',
+                                                    fontWeight: 600,
+                                                    padding: '9px 12px',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer'
+                                                }}
+                                                onClick={() => setMapPickerTarget({
+                                                    type: 'office',
+                                                    index: idx,
+                                                    coordinates: office.coordinates,
+                                                    city: office.city || 'Lahore',
+                                                    label: `${office.city || 'Office'} Branch Location`
+                                                })}
+                                            >
+                                                <MapPin className="w-3.5 h-3.5 text-amber" /> Pick on map
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -637,6 +720,25 @@ export function EpcOnboardingForm({ isPublic = false }: { isPublic?: boolean } =
                 {isLoading ? 'Submitting...' : 'Submit Application'}
             </button>
             <p className="form-note">Our team typically reviews applications within 3–5 business days.</p>
+                    {mapPickerTarget && (
+                <LocationPickerModal
+                    isOpen={true}
+                    onClose={() => setMapPickerTarget(null)}
+                    initialCoordinates={mapPickerTarget.coordinates}
+                    defaultCity={mapPickerTarget.city}
+                    locationLabel={mapPickerTarget.label || "Office Location"}
+                    onSave={(coords) => {
+                        if (mapPickerTarget.type === "main") {
+                            setMainCoordinates(coords);
+                        } else if (mapPickerTarget.type === "office" && mapPickerTarget.index !== undefined) {
+                            const copy = [...offices];
+                            copy[mapPickerTarget.index].coordinates = coords;
+                            setOffices(copy);
+                        }
+                        setMapPickerTarget(null);
+                    }}
+                />
+            )}
         </form>
 
     );

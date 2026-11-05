@@ -144,6 +144,32 @@ export function EpcProfileView({
 
   const displayRating = rating && rating > 0 ? rating.toFixed(1) : "5.0";
 
+  const whatsappNumber = installer.whatsapp || (installer.contactNo && installer.contactNo.replace(/[^0-9]/g, "").length >= 10 ? installer.contactNo : null);
+
+  const officeCities = Array.from(
+    new Set(
+      [
+        installer.city,
+        ...offices.map((o: any) => o.city),
+        installer.area
+      ].filter(Boolean)
+    )
+  );
+  const serviceAreasStr = officeCities.length > 0 ? officeCities.join(", ") : `${primaryCity}, Pakistan`;
+
+  const socialLinksObj: Record<string, string> = {};
+  if (Array.isArray(installer.socialLinks)) {
+    installer.socialLinks.forEach((item: any) => {
+      if (item && item.platform && item.url) {
+        socialLinksObj[item.platform.toLowerCase()] = item.url;
+      }
+    });
+  } else if (installer.socialLinks && typeof installer.socialLinks === "object") {
+    Object.entries(installer.socialLinks).forEach(([k, v]) => {
+      if (typeof v === "string" && v) socialLinksObj[k.toLowerCase()] = v;
+    });
+  }
+
   return (
     <div className="installer-profile-page bg-[#F7F4EC] min-h-screen">
       {isPreview && (
@@ -266,9 +292,9 @@ export function EpcProfileView({
                   </div>
                 </DialogContent>
               </Dialog>
-              {installer.whatsapp && (
+              {whatsappNumber && (
                 <a
-                  href={`https://wa.me/${installer.whatsapp.replace(/[^0-9]/g, "")}?text=Hi%2C%20I%20would%20like%20a%20quote`}
+                  href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}?text=Hi%2C%20I%20would%20like%20a%20quote`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-outline text-center"
@@ -299,84 +325,143 @@ export function EpcProfileView({
           {/* PROFILE */}
           <section className={`panel ${activeTab === "profile" ? "active" : ""}`} id="profile">
             <div className="grid-2">
-              <div className="card">
-                <h2>About the Company</h2>
-                <p>{installer.about || "Verified solar EPC installer providing high-efficiency renewable energy systems in Pakistan."}</p>
-                <div className="spec-row">
-                  <span className="spec-label">Years in Business</span>
-                  <span className="spec-val">{installer.yearsInBusiness || yearsInBusiness} {installer.yearsInBusiness === 1 ? 'year' : 'years'}</span>
-                </div>
-                <div className="spec-row">
-                  <span className="spec-label">Head Office</span>
-                  <span className="spec-val">{primaryCity}, Pakistan</span>
-                </div>
-                <div className="spec-row">
-                  <span className="spec-label">Registered Sectors</span>
-                  <span className="spec-val">{sectorsList.join(", ")}</span>
-                </div>
-                <div className="spec-row">
-                  <span className="spec-label">Completed Projects</span>
-                  <span className="spec-val">{projects?.length || 0} registered</span>
-                </div>
-              </div>
               <div>
                 <div className="card">
-                  <h2>Sectors Served</h2>
+                  <h2>About</h2>
+                  <p className="about-text">{installer.about || "Verified solar EPC installer providing high-efficiency renewable energy systems in Pakistan."}</p>
                   <div className="chip-row">
                     {sectorsList.map((sector: string, i: number) => (
                       <span key={i} className="chip">{sector}</span>
                     ))}
                   </div>
+                  <div className="facts">
+                    <div className="fact">
+                      <dt>Firm type</dt>
+                      <dd>{installer.businessType || "Private Limited"}</dd>
+                    </div>
+                    <div className="fact">
+                      <dt>Established</dt>
+                      <dd>
+                        {installer.yearsInBusiness
+                          ? `${new Date().getFullYear() - installer.yearsInBusiness}`
+                          : (yearsInBusiness ? `${new Date().getFullYear() - yearsInBusiness}` : "2016")}
+                      </dd>
+                    </div>
+                    <div className="fact">
+                      <dt>Technical team size</dt>
+                      <dd>{team.length > 0 ? `${team.length} members` : (installer.teamSize || "11-20")}</dd>
+                    </div>
+                    <div className="fact">
+                      <dt>Service areas</dt>
+                      <dd>{serviceAreasStr}</dd>
+                    </div>
+                    <div className="fact">
+                      <dt>Response time</dt>
+                      <dd>Under 24 hours</dd>
+                    </div>
+                  </div>
                 </div>
-
-                <div className="card" style={{ marginTop: "20px" }}>
-                  <h2>Contact &amp; Connect</h2>
+              </div>
+              <div>
+                <div className="card">
+                  <h3 style={{ fontSize: "15px", fontWeight: "600", marginBottom: "12px" }}>Contact</h3>
                   {installer.contactNo && (
                     <div className="contact-line">
                       <svg viewBox="0 0 24 24" fill="none"><path d="M4 5h3l2 5-2 1a11 11 0 005 5l1-2 5 2v3a2 2 0 01-2 2C10 21 3 14 3 7a2 2 0 012-2z" stroke="currentColor" strokeWidth="1.5" /></svg>
-                      {installer.contactNo}
+                      <a href={`tel:${installer.contactNo.replace(/\s+/g, '')}`} className="hover:underline text-inherit">{installer.contactNo}</a>
                     </div>
                   )}
                   {installer.email && (
                     <div className="contact-line">
-                      <svg viewBox="0 0 24 24" fill="none"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="1.5" /><path d="M22 6l-10 7L2 6" stroke="currentColor" strokeWidth="1.5" /></svg>
-                      <a href={`mailto:${installer.email}`}>{installer.email}</a>
+                      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.5"/></svg>
+                      <a href={`mailto:${installer.email}`} className="hover:underline text-inherit truncate">{installer.email}</a>
                     </div>
+                  )}
+                  {whatsappNumber && (
+                    <a
+                      href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}?text=Hi%2C%20I%20would%20like%20a%20quote`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginTop: "8px", fontSize: "12.5px", fontWeight: "600", color: "#2E7D5C", textDecoration: "none" }}
+                      className="hover:underline"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" style={{ width: "15px", height: "15px" }}>
+                        <path d="M20.5 11.5a8.5 8.5 0 10-3.8 7.1L21 20l-1.4-3.8a8.4 8.4 0 001-4.7z" stroke="currentColor" strokeWidth="1.6" />
+                      </svg>
+                      Chat on WhatsApp
+                    </a>
                   )}
                   {installer.website && (
-                    <div className="contact-line">
-                      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" /><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" stroke="currentColor" strokeWidth="1.5" /></svg>
-                      <a href={installer.website.startsWith("http") ? installer.website : `https://${installer.website}`} target="_blank" rel="noopener noreferrer">Visit Website ↗</a>
+                    <div className="contact-line" style={{ marginTop: "6px" }}>
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
+                        <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" stroke="currentColor" strokeWidth="1.5" />
+                      </svg>
+                      <a href={installer.website.startsWith("http") ? installer.website : `https://${installer.website}`} target="_blank" rel="noopener noreferrer" className="hover:underline text-inherit truncate">
+                        Visit Website ↗
+                      </a>
                     </div>
                   )}
-                  {installer.socialLinks && Array.isArray(installer.socialLinks) && (
-                    <div style={{ display: "flex", gap: "10px", marginTop: "14px" }}>
-                      {installer.socialLinks.map((link: any, i: number) => {
-                        if (link.platform.toLowerCase() === "facebook") {
-                          return (
-                            <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" aria-label="Facebook" style={{ width: "32px", height: "32px", borderRadius: "50%", border: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--navy-deep)" }}>
-                              <svg viewBox="0 0 24 24" fill="none" style={{ width: "14px", height: "14px" }}><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3V2z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                            </a>
-                          );
-                        }
-                        if (link.platform.toLowerCase() === "instagram") {
-                          return (
-                            <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" aria-label="Instagram" style={{ width: "32px", height: "32px", borderRadius: "50%", border: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--navy-deep)" }}>
-                              <svg viewBox="0 0 24 24" fill="none" style={{ width: "14px", height: "14px" }}><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="1.5" /><circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.5" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" /></svg>
-                            </a>
-                          );
-                        }
-                        if (link.platform.toLowerCase() === "linkedin") {
-                          return (
-                            <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" style={{ width: "32px", height: "32px", borderRadius: "50%", border: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--navy-deep)" }}>
-                              <svg viewBox="0 0 24 24" fill="none" style={{ width: "14px", height: "14px" }}><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.6" /><path d="M8 10v6M8 7.5v.01M12 16v-4c0-1.1.9-2 2-2s2 .9 2 2v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
-                            </a>
-                          );
-                        }
-                        return null;
-                      })}
-                    </div>
-                  )}
+                  <div style={{ display: "flex", gap: "10px", marginTop: "16px", paddingTop: "16px", borderTop: "1px solid var(--line)" }}>
+                    <a
+                      href={socialLinksObj.facebook || (installer.companyName ? `https://facebook.com/search/top?q=${encodeURIComponent(installer.companyName)}` : "https://facebook.com")}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Facebook"
+                      title="Facebook"
+                      style={{ width: "32px", height: "32px", borderRadius: "50%", border: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--navy-deep)" }}
+                      className="hover:bg-[#F3EEDF] transition-colors"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" style={{ width: "14px", height: "14px" }}>
+                        <path d="M14 9h2V6h-2c-1.7 0-3 1.3-3 3v2H9v3h2v6h3v-6h2l1-3h-3v-1.5c0-.3.2-.5.5-.5z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+                      </svg>
+                    </a>
+                    <a
+                      href={socialLinksObj.instagram || "https://instagram.com"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Instagram"
+                      title="Instagram"
+                      style={{ width: "32px", height: "32px", borderRadius: "50%", border: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--navy-deep)" }}
+                      className="hover:bg-[#F3EEDF] transition-colors"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" style={{ width: "14px", height: "14px" }}>
+                        <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="1.5" />
+                        <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.5" />
+                        <circle cx="17.5" cy="6.5" r="1" fill="currentColor" />
+                      </svg>
+                    </a>
+                    <a
+                      href={socialLinksObj.linkedin || (installer.companyName ? `https://linkedin.com/search/results/all/?keywords=${encodeURIComponent(installer.companyName)}` : "https://linkedin.com")}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="LinkedIn"
+                      title="LinkedIn"
+                      style={{ width: "32px", height: "32px", borderRadius: "50%", border: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--navy-deep)" }}
+                      className="hover:bg-[#F3EEDF] transition-colors"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" style={{ width: "14px", height: "14px" }}>
+                        <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.6" />
+                        <path d="M8 10v6M8 7.5v.01M12 16v-4c0-1.1.9-2 2-2s2 .9 2 2v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                      </svg>
+                    </a>
+                    {socialLinksObj.youtube && (
+                      <a
+                        href={socialLinksObj.youtube}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="YouTube"
+                        title="YouTube"
+                        style={{ width: "32px", height: "32px", borderRadius: "50%", border: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--navy-deep)" }}
+                        className="hover:bg-[#F3EEDF] transition-colors"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" style={{ width: "14px", height: "14px" }}>
+                          <rect x="2" y="5" width="20" height="14" rx="4" stroke="currentColor" strokeWidth="1.5" />
+                          <polygon points="10 9 15 12 10 15 10 9" fill="currentColor" />
+                        </svg>
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -391,20 +476,67 @@ export function EpcProfileView({
             <div className="team-grid-people">
               {team.length > 0 ? (
                 team.map((member: any, i: number) => (
-                  <div key={i} className="card" style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-                    <div className="avatar-lg bg-cream" style={{ width: "56px", height: "56px", fontSize: "18px" }}>
-                      {member.imageUrl ? <Image src={member.imageUrl} width={56} height={56} className="object-cover w-full h-full rounded-full" alt={member.name} /> : member.name.substring(0, 2).toUpperCase()}
+                  <div key={i} className="card hover:shadow-md transition-shadow" style={{ display: "flex", alignItems: "center", gap: "18px", padding: "18px 20px" }}>
+                    <div
+                      className="avatar-lg bg-cream shrink-0"
+                      style={{
+                        width: "80px",
+                        height: "80px",
+                        fontSize: "22px",
+                        fontWeight: "700",
+                        border: "2.5px solid rgba(224, 167, 59, 0.45)",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                        overflow: "hidden"
+                      }}
+                    >
+                      {member.imageUrl ? (
+                        <Image
+                          src={member.imageUrl}
+                          width={80}
+                          height={80}
+                          className="object-cover w-full h-full rounded-full"
+                          alt={member.name}
+                        />
+                      ) : (
+                        <span className="text-navy-deep font-fraunces">
+                          {member.name ? member.name.substring(0, 2).toUpperCase() : "TM"}
+                        </span>
+                      )}
                     </div>
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
-                        <span style={{ fontSize: "15px", fontWeight: "600", color: "var(--navy-deep)" }}>{member.name}</span>
-                        {member.linkedIn && (
-                          <a href={member.linkedIn} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile" style={{ color: "var(--navy-deep)", opacity: .6 }}>
-                            <svg viewBox="0 0 24 24" fill="none" style={{ width: "14px", height: "14px" }}><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.6" /><path d="M8 10v6M8 7.5v.01M12 16v-4c0-1.1.9-2 2-2s2 .9 2 2v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
-                          </a>
-                        )}
+                    <div style={{ minWidth: 0, display: "flex", flexDirection: "column", gap: "2px" }}>
+                      <div style={{ fontSize: "16px", fontWeight: "600", color: "var(--navy-deep)", lineHeight: 1.35 }} className="truncate">
+                        {member.name}
                       </div>
-                      <div style={{ fontSize: "12.5px", color: "var(--ink-soft)", marginTop: "2px" }}>{member.designation}</div>
+                      {member.designation && (
+                        <div style={{ fontSize: "13px", color: "var(--ink-soft)", fontWeight: "500", lineHeight: 1.35 }}>
+                          {member.designation}
+                        </div>
+                      )}
+                      {member.linkedIn && (
+                        <a
+                          href={member.linkedIn.startsWith("http") ? member.linkedIn : `https://${member.linkedIn}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${member.name} LinkedIn Profile`}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "5px",
+                            fontSize: "12px",
+                            fontWeight: "600",
+                            color: "#0A66C2",
+                            marginTop: "4px",
+                            textDecoration: "none",
+                            width: "fit-content"
+                          }}
+                          className="hover:underline"
+                        >
+                          <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: "13px", height: "13px", flexShrink: 0 }}>
+                            <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.64a1.64 1.64 0 1 0 0 3.28 1.64 1.64 0 0 0 0-3.28" />
+                          </svg>
+                          <span>LinkedIn Profile ↗</span>
+                        </a>
+                      )}
                     </div>
                   </div>
                 ))

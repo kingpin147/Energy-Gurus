@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import { addEpcOffice, updateEpcOffice, deleteEpcOffice } from "@/lib/actions/epc";
-import { Plus, Trash2, MapPin, Loader2, Edit2, X, Building2 } from "lucide-react";
+import { Plus, Trash2, MapPin, Loader2, Edit2, X, Building2, ExternalLink } from "lucide-react";
+import { LocationPickerModal } from "@/components/shared/LocationPickerModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -13,6 +14,7 @@ interface Office {
     block: string | null;
     area: string | null;
     city: string;
+    coordinates?: string | null;
 }
 
 interface OfficeManagementProps {
@@ -26,6 +28,8 @@ export function OfficeManagement({ epcId, initialOffices }: OfficeManagementProp
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingOffice, setEditingOffice] = useState<Office | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [coordsValue, setCoordsValue] = useState("");
+    const [isMapPickerOpen, setIsMapPickerOpen] = useState(false);
 
     const openAddForm = () => {
         setEditingOffice(null);
@@ -118,6 +122,27 @@ export function OfficeManagement({ epcId, initialOffices }: OfficeManagementProp
                                     <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">Street / Area</label>
                                     <input name="area" defaultValue={editingOffice?.area || ""} placeholder="e.g. Main Boulevard" className="w-full border rounded-2xl p-4 bg-paper outline-none focus:ring-2 focus:ring-primary transition-all" />
                                 </div>
+                                <div className="md:col-span-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">Location Coordinates (Latitude, Longitude)</label>
+                                    <div className="flex items-center gap-3">
+                                        <input 
+                                            name="coordinates" 
+                                            value={coordsValue} 
+                                            onChange={(e) => setCoordsValue(e.target.value)} 
+                                            placeholder="e.g. 31.4805, 74.3286" 
+                                            className="flex-1 border rounded-2xl p-4 bg-paper outline-none font-mono text-sm focus:ring-2 focus:ring-primary transition-all" 
+                                        />
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setIsMapPickerOpen(true)}
+                                            className="px-4 py-4 bg-[#FBF9F4] hover:bg-[#F3EEDF] border border-line rounded-2xl text-xs font-bold text-navy-deep flex items-center gap-2 transition-colors shrink-0 shadow-sm cursor-pointer"
+                                        >
+                                            <MapPin className="w-4 h-4 text-amber" />
+                                            {coordsValue ? "Change Pin" : "Pick on map"}
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-slate-custom mt-2">Click &quot;Pick on map&quot; to drop an exact pin marker for this branch.</p>
+                                </div>
                             </div>
                             <Button type="submit" disabled={isLoading} className="w-full h-14 rounded-2xl font-bold text-lg shadow-lg shadow-primary/20">
                                 {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : editingOffice ? "Update Office Location" : "Save Office Location"}
@@ -158,11 +183,14 @@ export function OfficeManagement({ epcId, initialOffices }: OfficeManagementProp
                             <p className="text-sm text-slate-custom font-medium leading-relaxed">
                                 {[office.officeNumber, office.block, office.area].filter(Boolean).join(", ")}
                             </p>
-                            <div className="mt-6 pt-6 border-t border-paper/10">
+                            <div className="mt-6 pt-6 border-t border-paper/10 flex items-center justify-between">
+                                {office.coordinates && (
+                                    <span className="text-[11px] font-mono text-slate-500">📍 {office.coordinates}</span>
+                                )}
                                 <a
-                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${office.officeNumber || ''} ${office.block || ''} ${office.area || ''} ${office.city}`)}`}
+                                    href={office.coordinates ? `https://maps.google.com/?q=${office.coordinates}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${office.officeNumber || ''} ${office.block || ''} ${office.area || ''} ${office.city}`)}`}
                                     target="_blank"
-                                    className="text-[10px] font-black uppercase tracking-widest text-amber hover:opacity-70 transition-opacity"
+                                    className="text-[10px] font-black uppercase tracking-widest text-amber hover:opacity-70 transition-opacity flex items-center gap-1"
                                 >
                                     View on Map →
                                 </a>
@@ -180,6 +208,19 @@ export function OfficeManagement({ epcId, initialOffices }: OfficeManagementProp
                     </div>
                 )}
             </div>
+            {isMapPickerOpen && (
+                <LocationPickerModal
+                    isOpen={true}
+                    onClose={() => setIsMapPickerOpen(false)}
+                    initialCoordinates={coordsValue}
+                    defaultCity={editingOffice?.city || "Lahore"}
+                    locationLabel={editingOffice?.city ? `${editingOffice.city} Branch` : "Office Location"}
+                    onSave={(coords) => {
+                        setCoordsValue(coords);
+                        setIsMapPickerOpen(false);
+                    }}
+                />
+            )}
         </div>
     );
 }

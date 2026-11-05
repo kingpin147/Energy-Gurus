@@ -162,6 +162,7 @@ export async function adminUpdateEpcInstaller(epcId: string, data: {
   batteryCertDocuments?: string[];
   logoUrl?: string | null;
   licenceDocuments?: string[];
+  socialLinks?: { platform: string; url: string }[];
   team?: { name: string; designation: string; linkedIn: string; imageUrl: string }[];
   offices?: { officeNumber?: string; block?: string | null; address?: string; area?: string; city: string; country?: string; coordinates?: string; }[];
   projects?: { name: string; entryType?: 'project' | 'testimonial'; customerName?: string; companyName?: string; installationDate?: string; city?: string; country?: string; segmentType?: string[]; systemSize?: string; systemType?: string; inverterModel?: string | null; batteryModel?: string | null; solarPanelModel?: string | null; description?: string; youtubeUrl?: string }[];
@@ -212,6 +213,7 @@ export async function adminUpdateEpcInstaller(epcId: string, data: {
         inverterCertDocuments: data.inverterCertDocuments ?? [],
         batteryCertDocuments: data.batteryCertDocuments ?? [],
         photos: data.photos ?? [],
+        socialLinks: data.socialLinks !== undefined ? data.socialLinks : (existing.socialLinks ?? []),
         team: data.team ?? [],
         logoUrl: data.logoUrl !== undefined ? data.logoUrl : existing.logoUrl,
         licenceDocuments: data.licenceDocuments !== undefined ? data.licenceDocuments : (existing.licenceDocuments ?? []),

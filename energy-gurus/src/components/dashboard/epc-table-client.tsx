@@ -48,6 +48,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { MultiPhotoUpload, MultiDocumentUpload, SinglePhotoUpload } from "@/components/dashboard/multi-media-upload";
 import { useR2Upload } from "@/lib/hooks/use-r2-upload";
+import { LocationPickerModal } from "@/components/shared/LocationPickerModal";
 import {
   getEpcFullDetails,
   adminUpdateEpcInstaller,
@@ -102,6 +103,7 @@ type OfficeInput = {
   area?: string;
   city?: string;
   country?: string;
+  coordinates?: string;
 };
 
 type ProjectInput = {
@@ -143,6 +145,13 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
   const [editProjects, setEditProjects] = useState<ProjectInput[]>([]);
   const [isLoadingEdit, setIsLoadingEdit] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [mapPickerTarget, setMapPickerTarget] = useState<{
+    type: "main" | "office";
+    index?: number;
+    coordinates: string;
+    city?: string;
+    label?: string;
+  } | null>(null);
 
   // Delete state
   const [deleteTarget, setDeleteTarget] = useState<EpcListItem | null>(null);
@@ -189,6 +198,13 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
   const handleOpenEdit = async (epc: EpcListItem) => {
     setEditEpc(epc);
     setIsLoadingEdit(true);
+    const existingSocial: Record<string, string> = {};
+    if (Array.isArray((epc as any).socialLinks)) {
+      (epc as any).socialLinks.forEach((item: any) => {
+        if (item?.platform && item?.url) existingSocial[item.platform.toLowerCase()] = item.url;
+      });
+    }
+
     setEditFormData({
       companyName: epc.companyName || "",
       ceoName: epc.ceoName || "",
@@ -202,6 +218,10 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
       city: epc.city || "",
       country: epc.country || "Pakistan",
       website: epc.website || "",
+      facebook: existingSocial.facebook || "",
+      instagram: existingSocial.instagram || "",
+      linkedin: existingSocial.linkedin || "",
+      youtube: existingSocial.youtube || "",
       tier: epc.tier || "bronze",
       isVerified: epc.isVerified ?? false,
       yearsInBusiness: epc.yearsInBusiness ?? 0,
@@ -228,6 +248,7 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
       const fullDetails = await getEpcFullDetails(epc.id);
       if (fullDetails) {
         if (Array.isArray(fullDetails.team)) setEditTeam(fullDetails.team);
+        if (fullDetails.coordinates) setEditFormData((prev: any) => ({ ...prev, coordinates: fullDetails.coordinates || "" }));
         if (Array.isArray(fullDetails.offices)) {
           setEditOffices(
             fullDetails.offices.map((o: any) => ({
@@ -261,8 +282,20 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
             }))
           );
         }
+        const loadedSocial: Record<string, string> = {};
+        if (Array.isArray(fullDetails.socialLinks)) {
+          fullDetails.socialLinks.forEach((item: any) => {
+            if (item?.platform && item?.url) loadedSocial[item.platform.toLowerCase()] = item.url;
+          });
+        }
         setEditFormData((prev: any) => ({
           ...prev,
+          facebook: loadedSocial.facebook || prev.facebook || "",
+          instagram: loadedSocial.instagram || prev.instagram || "",
+          linkedin: loadedSocial.linkedin || prev.linkedin || "",
+          youtube: loadedSocial.youtube || prev.youtube || "",
+          businessType: fullDetails.businessType || prev.businessType || "",
+          whatsapp: fullDetails.whatsapp || prev.whatsapp || "",
           logoUrl: fullDetails.logoUrl || prev.logoUrl || "",
           photos: Array.isArray(fullDetails.photos) && fullDetails.photos.length > 0 ? fullDetails.photos : prev.photos,
           solarCertDocuments: Array.isArray(fullDetails.solarCertDocuments) && fullDetails.solarCertDocuments.length > 0 ? fullDetails.solarCertDocuments : prev.solarCertDocuments,
@@ -311,6 +344,13 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
       return [];
     };
 
+    const socialLinksPayload = [
+      editFormData.facebook ? { platform: "facebook", url: editFormData.facebook.trim() } : null,
+      editFormData.instagram ? { platform: "instagram", url: editFormData.instagram.trim() } : null,
+      editFormData.linkedin ? { platform: "linkedin", url: editFormData.linkedin.trim() } : null,
+      editFormData.youtube ? { platform: "youtube", url: editFormData.youtube.trim() } : null,
+    ].filter(Boolean) as { platform: string; url: string }[];
+
     const payload = {
       companyName: editFormData.companyName,
       ceoName: editFormData.ceoName,
@@ -323,7 +363,9 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
       area: editFormData.area,
       city: editFormData.city,
       country: editFormData.country,
+      coordinates: editFormData.coordinates || null,
       website: editFormData.website,
+      socialLinks: socialLinksPayload,
       logoUrl: editFormData.logoUrl || null,
       tier: editFormData.tier as 'bronze' | 'silver' | 'gold',
       isVerified: editFormData.isVerified,
@@ -1232,6 +1274,43 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                       />
                     </div>
 
+                    <div className="space-y-1.5 md:col-span-2">
+                      <Label className="text-xs font-bold uppercase text-slate-custom">Head Office Coordinates (Latitude, Longitude)</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          value={editFormData.coordinates || ""}
+                          onChange={(e) => setEditFormData({ ...editFormData, coordinates: e.target.value })}
+                          placeholder="e.g. 31.4805, 74.3286"
+                          className="bg-slate-50 border-line font-mono text-xs flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setMapPickerTarget({
+                            type: "main",
+                            coordinates: editFormData.coordinates || "",
+                            city: editFormData.city || editFormData.area || "Lahore",
+                            label: "Head Office Location"
+                          })}
+                          className="bg-[#FBF9F4] hover:bg-[#F3EEDF] border-line text-xs font-bold text-navy-deep gap-1.5 shrink-0"
+                        >
+                          <MapPin className="w-3.5 h-3.5 text-amber" />
+                          {editFormData.coordinates ? "Change Pin" : "Pick on map"}
+                        </Button>
+                        {editFormData.coordinates && (
+                          <a
+                            href={`https://maps.google.com/?q=${editFormData.coordinates}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-slate-custom hover:text-amber-deep flex items-center gap-1 font-semibold underline shrink-0"
+                          >
+                            <span>View</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+
                     <div className="space-y-1.5">
                       <Label className="text-xs font-bold uppercase text-slate-custom">Area / Society</Label>
                       <Input
@@ -1290,6 +1369,47 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                       <Input
                         value={editFormData.website}
                         onChange={(e) => setEditFormData({ ...editFormData, website: e.target.value })}
+                        className="bg-slate-50 border-line"
+                        placeholder="https://example.com"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-bold uppercase text-slate-custom">Facebook URL</Label>
+                      <Input
+                        value={editFormData.facebook || ""}
+                        onChange={(e) => setEditFormData({ ...editFormData, facebook: e.target.value })}
+                        placeholder="https://facebook.com/..."
+                        className="bg-slate-50 border-line"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-bold uppercase text-slate-custom">Instagram URL</Label>
+                      <Input
+                        value={editFormData.instagram || ""}
+                        onChange={(e) => setEditFormData({ ...editFormData, instagram: e.target.value })}
+                        placeholder="https://instagram.com/..."
+                        className="bg-slate-50 border-line"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-bold uppercase text-slate-custom">LinkedIn URL</Label>
+                      <Input
+                        value={editFormData.linkedin || ""}
+                        onChange={(e) => setEditFormData({ ...editFormData, linkedin: e.target.value })}
+                        placeholder="https://linkedin.com/company/..."
+                        className="bg-slate-50 border-line"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-bold uppercase text-slate-custom">YouTube URL</Label>
+                      <Input
+                        value={editFormData.youtube || ""}
+                        onChange={(e) => setEditFormData({ ...editFormData, youtube: e.target.value })}
+                        placeholder="https://youtube.com/@..."
                         className="bg-slate-50 border-line"
                       />
                     </div>
@@ -1529,51 +1649,51 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                   ) : (
                     <div className="space-y-3">
                       {editOffices.map((office, idx) => (
-                        <div key={idx} className="p-4 border border-line rounded-2xl bg-slate-50/50 grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
-                          <div className="space-y-1">
-                            <Label className="text-[10px] uppercase font-bold text-slate-custom">City *</Label>
-                            <Input
-                              value={office.city}
-                              onChange={(e) => {
-                                const copy = [...editOffices];
-                                copy[idx].city = e.target.value;
-                                setEditOffices(copy);
-                              }}
-                              placeholder="e.g. Lahore"
-                              className="bg-white border-line h-9 text-xs"
-                            />
-                          </div>
+                        <div key={idx} className="p-4 border border-line rounded-2xl bg-slate-50/50 space-y-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-center">
+                            <div className="space-y-1">
+                              <Label className="text-[10px] uppercase font-bold text-slate-custom">City *</Label>
+                              <Input
+                                value={office.city}
+                                onChange={(e) => {
+                                  const copy = [...editOffices];
+                                  copy[idx].city = e.target.value;
+                                  setEditOffices(copy);
+                                }}
+                                placeholder="e.g. Lahore"
+                                className="bg-white border-line h-9 text-xs"
+                              />
+                            </div>
 
-                          <div className="space-y-1">
-                            <Label className="text-[10px] uppercase font-bold text-slate-custom">Office # / Address</Label>
-                            <Input
-                              value={office.officeNumber}
-                              onChange={(e) => {
-                                const copy = [...editOffices];
-                                copy[idx].officeNumber = e.target.value;
-                                setEditOffices(copy);
-                              }}
-                              placeholder="e.g. Office 302, Building A"
-                              className="bg-white border-line h-9 text-xs"
-                            />
-                          </div>
+                            <div className="space-y-1">
+                              <Label className="text-[10px] uppercase font-bold text-slate-custom">Office # / Address</Label>
+                              <Input
+                                value={office.officeNumber}
+                                onChange={(e) => {
+                                  const copy = [...editOffices];
+                                  copy[idx].officeNumber = e.target.value;
+                                  setEditOffices(copy);
+                                }}
+                                placeholder="e.g. Office 302, Building A"
+                                className="bg-white border-line h-9 text-xs"
+                              />
+                            </div>
 
-                          <div className="space-y-1">
-                            <Label className="text-[10px] uppercase font-bold text-slate-custom">Block / Phase</Label>
-                            <Input
-                              value={office.block}
-                              onChange={(e) => {
-                                const copy = [...editOffices];
-                                copy[idx].block = e.target.value;
-                                setEditOffices(copy);
-                              }}
-                              placeholder="e.g. Block D"
-                              className="bg-white border-line h-9 text-xs"
-                            />
-                          </div>
+                            <div className="space-y-1">
+                              <Label className="text-[10px] uppercase font-bold text-slate-custom">Block / Phase</Label>
+                              <Input
+                                value={office.block}
+                                onChange={(e) => {
+                                  const copy = [...editOffices];
+                                  copy[idx].block = e.target.value;
+                                  setEditOffices(copy);
+                                }}
+                                placeholder="e.g. Block D"
+                                className="bg-white border-line h-9 text-xs"
+                              />
+                            </div>
 
-                          <div className="flex items-center gap-2">
-                            <div className="space-y-1 flex-1">
+                            <div className="space-y-1">
                               <Label className="text-[10px] uppercase font-bold text-slate-custom">Area / Sector</Label>
                               <Input
                                 value={office.area}
@@ -1586,14 +1706,61 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                                 className="bg-white border-line h-9 text-xs"
                               />
                             </div>
+                          </div>
+
+                          <div className="pt-2 border-t border-line/60 flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex flex-wrap items-center gap-2 flex-1">
+                              <div className="w-full sm:w-64">
+                                <Input
+                                  value={office.coordinates || ""}
+                                  onChange={(e) => {
+                                    const copy = [...editOffices];
+                                    copy[idx].coordinates = e.target.value;
+                                    setEditOffices(copy);
+                                  }}
+                                  placeholder="Coordinates (e.g. 31.4805, 74.3286)"
+                                  className="bg-white border-line h-8 text-xs font-mono"
+                                />
+                              </div>
+
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setMapPickerTarget({
+                                  type: "office",
+                                  index: idx,
+                                  coordinates: office.coordinates || "",
+                                  city: office.city || office.area || "Lahore",
+                                  label: `${office.city || 'Office'} Branch Location`
+                                })}
+                                className="h-8 px-3 text-xs font-bold rounded-lg bg-[#FBF9F4] hover:bg-[#F3EEDF] border-line text-navy-deep gap-1.5 cursor-pointer shadow-sm"
+                              >
+                                <MapPin className="w-3.5 h-3.5 text-amber" />
+                                {office.coordinates ? "Change Pin" : "Pick on map"}
+                              </Button>
+
+                              {office.coordinates && (
+                                <a
+                                  href={`https://maps.google.com/?q=${office.coordinates}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-slate-custom hover:text-amber-deep flex items-center gap-1 font-semibold underline"
+                                >
+                                  <span>View on Google Maps</span>
+                                  <ExternalLink className="w-3 h-3" />
+                                </a>
+                              )}
+                            </div>
+
                             <Button
                               type="button"
                               variant="ghost"
                               size="sm"
                               onClick={() => setEditOffices(editOffices.filter((_, i) => i !== idx))}
-                              className="h-9 px-2 text-rose-600 hover:bg-rose-50 rounded-lg mt-4"
+                              className="h-8 px-2.5 text-rose-600 hover:bg-rose-50 rounded-lg text-xs gap-1"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3.5 h-3.5" /> Remove Location
                             </Button>
                           </div>
                         </div>
@@ -1769,6 +1936,26 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
           )}
         </DialogContent>
       </Dialog>
+
+      {mapPickerTarget && (
+        <LocationPickerModal
+          isOpen={true}
+          onClose={() => setMapPickerTarget(null)}
+          initialCoordinates={mapPickerTarget.coordinates}
+          defaultCity={mapPickerTarget.city}
+          locationLabel={mapPickerTarget.label || "Office Location"}
+          onSave={(coords) => {
+            if (mapPickerTarget.type === "main") {
+              setEditFormData((prev: any) => ({ ...prev, coordinates: coords }));
+            } else if (mapPickerTarget.type === "office" && mapPickerTarget.index !== undefined) {
+              const copy = [...editOffices];
+              copy[mapPickerTarget.index].coordinates = coords;
+              setEditOffices(copy);
+            }
+            setMapPickerTarget(null);
+          }}
+        />
+      )}
 
       {/* DELETE CONFIRMATION DIALOG */}
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
