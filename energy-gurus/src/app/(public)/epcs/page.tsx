@@ -52,6 +52,7 @@ const getInstallers = unstable_cache(
     const conditions = [
       eq(users.isActive, true),
       eq(users.role, "epc"),
+      eq(epcInstallers.status, "live"),
     ] as any[];
 
     if (q) {

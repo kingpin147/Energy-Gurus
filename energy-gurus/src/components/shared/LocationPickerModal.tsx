@@ -21,6 +21,7 @@ import {
   ExternalLink,
   Navigation,
   Building2,
+  X,
   Map as MapIcon
 } from "lucide-react";
 import { toast } from "sonner";
@@ -124,7 +125,7 @@ export function LocationPickerModal({
         }).addTo(mapInstance);
 
         markerInstance = L.marker([startLat, startLng], { draggable: true }).addTo(mapInstance);
-        markerInstance.bindPopup(`<b>${locationLabel}</b><br/>Drag pin or click map to move`).openPopup();
+        markerInstance.bindPopup(`<div style="font-family: inherit; font-size: 12px; line-height: 1.4; padding: 2px;"><strong>${locationLabel}</strong><br/><span style="color:#64748B;font-size:11px;">Drag pin or click map to move</span></div>`);
 
         markerInstance.on("dragend", () => {
           const pos = markerInstance.getLatLng();
@@ -144,7 +145,11 @@ export function LocationPickerModal({
         // Invalidate map size after modal animation finishes
         setTimeout(() => {
           mapInstance.invalidateSize();
-        }, 300);
+        }, 200);
+
+        setTimeout(() => {
+          mapInstance.invalidateSize();
+        }, 500);
       }
     };
 
@@ -165,7 +170,6 @@ export function LocationPickerModal({
     if (mapRef.current && markerRef.current) {
       markerRef.current.setLatLng([newLat, newLng]);
       mapRef.current.setView([newLat, newLng], zoom);
-      markerRef.current.openPopup();
     }
   };
 
@@ -234,41 +238,52 @@ export function LocationPickerModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-3xl p-0 overflow-hidden bg-white text-ink border border-line rounded-2xl shadow-2xl">
+      <DialogContent
+        showCloseButton={false}
+        className="w-[96vw] sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl max-h-[94vh] sm:max-h-[90vh] p-0 [&>div]:p-0 overflow-hidden bg-white text-ink border border-line rounded-2xl shadow-2xl flex flex-col"
+      >
         {/* Header */}
-        <div className="bg-navy-deep text-white p-5 flex items-center justify-between border-b border-navy-soft">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="p-1.5 bg-amber rounded-lg text-ink font-bold">
-                <MapPin className="w-4 h-4 text-white" />
-              </span>
-              <DialogTitle className="text-lg font-bold font-fraunces text-white">
+        <div className="bg-navy-deep text-white px-4 sm:px-6 py-4 flex items-center justify-between border-b border-navy-soft shrink-0">
+          <div className="flex items-center gap-2.5">
+            <span className="p-2 bg-amber rounded-xl text-ink font-bold shadow-sm shrink-0">
+              <MapPin className="w-4 h-4 text-white" />
+            </span>
+            <div>
+              <DialogTitle className="text-base sm:text-lg font-bold font-fraunces text-white leading-tight">
                 Pin Exact Location on Map
               </DialogTitle>
+              <DialogDescription className="text-paper/70 text-xs mt-0.5">
+                Click on the map or drag the pin marker to set coordinates for {locationLabel}.
+              </DialogDescription>
             </div>
-            <DialogDescription className="text-paper/70 text-xs mt-1">
-              Click anywhere on the map or drag the pin marker to set the exact coordinates for {locationLabel}.
-            </DialogDescription>
           </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors shrink-0"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        <div className="p-5 space-y-4">
+        <div className="p-3 sm:p-5 space-y-3 sm:space-y-4 flex-1 overflow-y-auto">
           {/* Search bar & GPS button */}
-          <div className="flex flex-col sm:flex-row items-center gap-2">
-            <form onSubmit={handleSearch} className="flex-1 flex items-center gap-2 w-full">
-              <div className="relative flex-1">
-                <Search className="w-4 h-4 text-slate-custom absolute left-3 top-1/2 -translate-y-1/2" />
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <form onSubmit={handleSearch} className="flex-1 flex items-center gap-2">
+              <div className="relative flex-1 min-w-0">
+                <Search className="w-4 h-4 text-slate-custom absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search city, area, or society (e.g. DHA Phase 4, Lahore)..."
-                  className="pl-9 h-10 text-xs bg-slate-50 border-line rounded-xl"
+                  placeholder="Search city, area, society (e.g. DHA Phase 4, Lahore)..."
+                  className="pl-9 h-9 sm:h-10 text-xs bg-slate-50 border-line rounded-xl w-full"
                 />
               </div>
               <Button
                 type="submit"
                 disabled={isSearching}
-                className="bg-navy-deep hover:bg-ink text-white text-xs font-bold h-10 px-4 rounded-xl gap-1.5"
+                className="bg-navy-deep hover:bg-ink text-white text-xs font-bold h-9 sm:h-10 px-3.5 sm:px-4 rounded-xl gap-1.5 shrink-0"
               >
                 {isSearching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
                 Search
@@ -280,7 +295,7 @@ export function LocationPickerModal({
               variant="outline"
               disabled={isGeolocating}
               onClick={handleUseCurrentLocation}
-              className="w-full sm:w-auto h-10 text-xs font-bold rounded-xl border-line text-slate-700 hover:text-ink gap-1.5"
+              className="h-9 sm:h-10 text-xs font-bold rounded-xl border-line text-slate-700 hover:text-ink gap-1.5 shrink-0"
             >
               {isGeolocating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Crosshair className="w-3.5 h-3.5 text-amber" />}
               Use My GPS
@@ -288,7 +303,10 @@ export function LocationPickerModal({
           </div>
 
           {/* Quick city jump pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+          <div
+            className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs [&::-webkit-scrollbar]:hidden"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
             <span className="text-[11px] font-bold text-slate-custom uppercase tracking-wider shrink-0 flex items-center gap-1">
               <Building2 className="w-3 h-3 text-slate-400" /> Jump to:
             </span>
@@ -297,7 +315,7 @@ export function LocationPickerModal({
                 key={city}
                 type="button"
                 onClick={() => setLocation(cLat, cLng, 14)}
-                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-amber/20 hover:text-amber-deep text-slate-700 font-semibold text-[11px] transition-colors whitespace-nowrap cursor-pointer"
+                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-amber/20 hover:text-amber-deep text-slate-700 font-semibold text-[11px] transition-colors whitespace-nowrap cursor-pointer shrink-0"
               >
                 {city}
               </button>
@@ -308,17 +326,16 @@ export function LocationPickerModal({
           <div className="relative rounded-xl overflow-hidden border border-line shadow-inner">
             <div
               ref={mapContainerRef}
-              className="w-full h-[360px] bg-slate-100 z-10"
-              style={{ minHeight: "360px" }}
+              className="w-full h-[260px] sm:h-[340px] md:h-[400px] lg:h-[440px] bg-slate-100 z-10"
             />
-            <div className="absolute top-2 right-2 z-[400] bg-white/95 backdrop-blur px-3 py-1.5 rounded-lg border border-line text-[11px] font-semibold text-slate-700 shadow-sm pointer-events-none">
+            <div className="absolute top-2 right-2 z-[400] bg-white/95 backdrop-blur px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-line text-[10px] sm:text-[11px] font-semibold text-slate-700 shadow-sm pointer-events-none">
               👆 Click map or drag pin
             </div>
           </div>
 
           {/* Coordinates readout and manual adjust */}
-          <div className="bg-slate-50 border border-line rounded-xl p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="grid grid-cols-2 gap-3 w-full sm:w-auto">
+          <div className="bg-slate-50 border border-line rounded-xl p-3 sm:p-3.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 w-full sm:w-auto">
               <div>
                 <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-custom">Latitude</Label>
                 <Input
@@ -329,7 +346,7 @@ export function LocationPickerModal({
                     const v = parseFloat(e.target.value);
                     if (!isNaN(v)) setLocation(v, lng, mapRef.current?.getZoom() || 15);
                   }}
-                  className="h-8 text-xs bg-white border-line rounded-lg w-full sm:w-36 font-mono font-bold"
+                  className="h-8 sm:h-9 text-xs bg-white border-line rounded-lg w-full sm:w-36 font-mono font-bold"
                 />
               </div>
               <div>
@@ -342,12 +359,12 @@ export function LocationPickerModal({
                     const v = parseFloat(e.target.value);
                     if (!isNaN(v)) setLocation(lat, v, mapRef.current?.getZoom() || 15);
                   }}
-                  className="h-8 text-xs bg-white border-line rounded-lg w-full sm:w-36 font-mono font-bold"
+                  className="h-8 sm:h-9 text-xs bg-white border-line rounded-lg w-full sm:w-36 font-mono font-bold"
                 />
               </div>
             </div>
 
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start">
               <a
                 href={`https://maps.google.com/?q=${lat},${lng}`}
                 target="_blank"
@@ -362,23 +379,23 @@ export function LocationPickerModal({
         </div>
 
         {/* Footer */}
-        <div className="bg-slate-50 border-t border-line p-4 flex items-center justify-between gap-3">
-          <p className="text-xs text-slate-custom font-medium">
+        <div className="bg-slate-50 border-t border-line px-4 sm:px-6 py-3.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
+          <p className="text-xs text-slate-custom font-medium text-center sm:text-left">
             Selected: <span className="font-mono font-bold text-ink">{lat.toFixed(6)}, {lng.toFixed(6)}</span>
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-end">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
-              className="h-9 px-4 text-xs font-bold rounded-xl border-line"
+              className="flex-1 sm:flex-initial h-9 px-4 text-xs font-bold rounded-xl border-line"
             >
               Cancel
             </Button>
             <Button
               type="button"
               onClick={handleConfirm}
-              className="h-9 px-5 text-xs font-bold rounded-xl bg-amber hover:bg-amber-deep text-ink gap-1.5 shadow-sm"
+              className="flex-1 sm:flex-initial h-9 px-5 text-xs font-bold rounded-xl bg-amber hover:bg-amber-deep text-ink gap-1.5 shadow-sm"
             >
               <Check className="w-4 h-4" />
               Save Pin Location
