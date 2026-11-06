@@ -3,14 +3,68 @@
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { adminUpdateEpcStatusAction } from "@/lib/actions/admin-epc-actions";
-import { Eye, ExternalLink, Loader2, CheckCircle2 } from "lucide-react";
+import { adminUpdateEpcStatusAction, adminSaveEgTeamRatingsAction } from "@/lib/actions/admin-epc-actions";
+import { Eye, ExternalLink, Loader2, CheckCircle2, Award, ShieldCheck, Star } from "lucide-react";
 
-export function AdminReviewSidebar({ epcId }: { epcId: string }) {
+interface AdminReviewSidebarProps {
+  epcId: string;
+  initialEgTeamRatings?: {
+    physicalVerification?: number;
+    officeVisited?: number;
+    siteVisited?: number;
+    projectsVerified?: number;
+    afterSalesSystem?: number;
+  } | null;
+  initialEgRating?: string | null;
+}
+
+export function AdminReviewSidebar({ epcId, initialEgTeamRatings, initialEgRating }: AdminReviewSidebarProps) {
   const [decision, setDecision] = useState<string | null>(null);
   const [internalNote, setInternalNote] = useState("");
   const [loading, setLoading] = useState(false);
+  const [ratingSaving, setRatingSaving] = useState(false);
   const router = useRouter();
+
+  // 5 Grounds Rating State (1 to 10)
+  const [physicalVerification, setPhysicalVerification] = useState<number>(initialEgTeamRatings?.physicalVerification ?? 9);
+  const [officeVisited, setOfficeVisited] = useState<number>(initialEgTeamRatings?.officeVisited ?? 9);
+  const [siteVisited, setSiteVisited] = useState<number>(initialEgTeamRatings?.siteVisited ?? 9);
+  const [projectsVerified, setProjectsVerified] = useState<number>(initialEgTeamRatings?.projectsVerified ?? 9);
+  const [afterSalesSystem, setAfterSalesSystem] = useState<number>(initialEgTeamRatings?.afterSalesSystem ?? 9);
+  const [currentEgRating, setCurrentEgRating] = useState<string>(initialEgRating ?? "9.0");
+
+  const computedAverage = (
+    (physicalVerification + officeVisited + siteVisited + projectsVerified + afterSalesSystem) / 5
+  ).toFixed(1);
+
+  const handleSaveRatings = async () => {
+    setRatingSaving(true);
+    try {
+      const res = await adminSaveEgTeamRatingsAction(
+        epcId,
+        {
+          physicalVerification,
+          officeVisited,
+          siteVisited,
+          projectsVerified,
+          afterSalesSystem,
+        },
+        internalNote
+      );
+
+      if (res.success) {
+        setCurrentEgRating(res.score || computedAverage);
+        toast.success(res.message);
+        router.refresh();
+      } else {
+        toast.error(res.message);
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to save ratings");
+    } finally {
+      setRatingSaving(false);
+    }
+  };
 
   const handleDecision = async (type: string) => {
     setLoading(true);
@@ -74,6 +128,109 @@ export function AdminReviewSidebar({ epcId }: { epcId: string }) {
         </button>
       </div>
 
+      {/* EnergyGurus Team Rating Card (5 Grounds - 1 to 10) */}
+      <div className="sidebar-card bg-white border-2 border-amber/30 rounded-lg p-5 shadow-sm space-y-3">
+        <div className="flex items-center justify-between border-b border-line pb-2.5">
+          <div className="flex items-center gap-2">
+            <Award className="w-4 h-4 text-amber-deep" />
+            <h3 className="text-[0.92rem] text-navy-deep font-bold">EnergyGurus Team Assessment</h3>
+          </div>
+          <span className="font-fraunces text-base font-bold text-amber-deep bg-amber/15 px-2.5 py-0.5 rounded border border-amber/40">
+            {computedAverage} / 10
+          </span>
+        </div>
+        <p className="text-[11px] text-slate-custom leading-tight">
+          Rated on 5 grounds (Duly Verified by Supervisor Account). 1 is lowest, 10 is best.
+        </p>
+
+        <div className="space-y-2.5 text-xs pt-1">
+          <div>
+            <div className="flex justify-between font-semibold mb-1">
+              <span>1. Physical Verification (Certs/AEDB/PEC/ISO)</span>
+              <span className="font-bold text-amber-deep">{physicalVerification}/10</span>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="10"
+              value={physicalVerification}
+              onChange={(e) => setPhysicalVerification(Number(e.target.value))}
+              className="w-full accent-amber cursor-pointer"
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between font-semibold mb-1">
+              <span>2. Office Visited</span>
+              <span className="font-bold text-amber-deep">{officeVisited}/10</span>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="10"
+              value={officeVisited}
+              onChange={(e) => setOfficeVisited(Number(e.target.value))}
+              className="w-full accent-amber cursor-pointer"
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between font-semibold mb-1">
+              <span>3. Active Sites Visited (Min 2 Sites)</span>
+              <span className="font-bold text-amber-deep">{siteVisited}/10</span>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="10"
+              value={siteVisited}
+              onChange={(e) => setSiteVisited(Number(e.target.value))}
+              className="w-full accent-amber cursor-pointer"
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between font-semibold mb-1">
+              <span>4. Projects &amp; Testimonials Verified Genuine</span>
+              <span className="font-bold text-amber-deep">{projectsVerified}/10</span>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="10"
+              value={projectsVerified}
+              onChange={(e) => setProjectsVerified(Number(e.target.value))}
+              className="w-full accent-amber cursor-pointer"
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between font-semibold mb-1">
+              <span>5. After Sales System</span>
+              <span className="font-bold text-amber-deep">{afterSalesSystem}/10</span>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="10"
+              value={afterSalesSystem}
+              onChange={(e) => setAfterSalesSystem(Number(e.target.value))}
+              className="w-full accent-amber cursor-pointer"
+            />
+          </div>
+        </div>
+
+        <button
+          type="button"
+          disabled={ratingSaving}
+          onClick={handleSaveRatings}
+          className="w-full mt-2 py-2 px-3 bg-navy hover:bg-navy-deep text-white rounded text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+        >
+          {ratingSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />}
+          <span>Save Assessment ({computedAverage}/10)</span>
+        </button>
+      </div>
+
       <div className="sidebar-card bg-white border border-line rounded-lg p-5 shadow-sm">
         <h3 className="text-[0.92rem] text-ink mb-3.5 font-semibold">Verification Checklist</h3>
         <ul className="checklist space-y-2">
@@ -92,7 +249,7 @@ export function AdminReviewSidebar({ epcId }: { epcId: string }) {
           <textarea 
             value={internalNote}
             onChange={(e) => setInternalNote(e.target.value)}
-            placeholder="e.g. Confirmed AEDB licence via public registry..."
+            placeholder="e.g. Confirmed AEDB licence via public registry, sites physically inspected..."
             className="w-full min-h-[90px] p-3 border border-line rounded bg-paper text-[0.88rem] text-graphite resize-y focus:outline-none focus:ring-2 focus:ring-amber"
           ></textarea>
         </div>

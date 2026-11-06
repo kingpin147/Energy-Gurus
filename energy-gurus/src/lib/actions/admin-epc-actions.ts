@@ -424,3 +424,86 @@ export async function adminUpdateEpcStatusAction(
     return { success: false, message: "Failed to update status. Please try again." };
   }
 }
+
+/**
+ * EnergyGurus Team Rating on 5 Grounds (Duly Verified by Supervisor Account)
+ * 1. Physically Verification of Brand Certifications, Memberships (AEDB/PEC/ISO etc.) - 1 to 10
+ * 2. Office Visited Rating - 1 to 10
+ * 3. At least two site visited – Active Installations (Site Design & Quality) - 1 to 10
+ * 4. Projects Pictures, Videos & Customer Testimonials verified as genuine - 1 to 10
+ * 5. After Sales System - 1 to 10
+ */
+export async function adminSaveEgTeamRatingsAction(
+  epcId: string,
+  ratings: {
+    physicalVerification: number;
+    officeVisited: number;
+    siteVisited: number;
+    projectsVerified: number;
+    afterSalesSystem: number;
+  },
+  supervisorNote?: string
+) {
+  const role = await getUserRole();
+  if (role !== "super-admin" && role !== "admin") {
+    return { success: false, message: "Unauthorized. Admin/Supervisor role required." };
+  }
+
+  try {
+    const p = Math.min(10, Math.max(1, Number(ratings.physicalVerification) || 10));
+    const o = Math.min(10, Math.max(1, Number(ratings.officeVisited) || 10));
+    const s = Math.min(10, Math.max(1, Number(ratings.siteVisited) || 10));
+    const pv = Math.min(10, Math.max(1, Number(ratings.projectsVerified) || 10));
+    const a = Math.min(10, Math.max(1, Number(ratings.afterSalesSystem) || 10));
+
+    const avgScore = ((p + o + s + pv + a) / 5).toFixed(1);
+
+    const egTeamRatingsObj = {
+      physicalVerification: p,
+      officeVisited: o,
+      siteVisited: s,
+      projectsVerified: pv,
+      afterSalesSystem: a,
+    };
+
+    const { userId } = await auth();
+
+    const [existing] = await db
+      .select({ approvalHistory: epcInstallers.approvalHistory })
+      .from(epcInstallers)
+      .where(eq(epcInstallers.id, epcId));
+
+    const approvalHistory = Array.isArray(existing?.approvalHistory) ? existing.approvalHistory : [];
+    approvalHistory.push({
+      date: new Date().toISOString(),
+      action: `EnergyGurus Team Assessment recorded: ${avgScore}/10 (Supervisor Verified)`,
+      note: supervisorNote || undefined,
+      user: userId || "supervisor",
+    });
+
+    await db
+      .update(epcInstallers)
+      .set({
+        egRating: avgScore,
+        egTeamRatings: egTeamRatingsObj,
+        approvalHistory,
+        updatedAt: new Date(),
+      })
+      .where(eq(epcInstallers.id, epcId));
+
+    revalidatePath("/dashboard/admin/onboard-epc");
+    revalidatePath(`/dashboard/admin/onboard-epc/${epcId}`);
+    revalidatePath("/epcs");
+    revalidatePath(`/epcs/${epcId}`);
+    revalidatePath("/", "layout");
+
+    return {
+      success: true,
+      score: avgScore,
+      message: `EnergyGurus Team rating of ${avgScore}/10 successfully verified and saved by Supervisor.`,
+    };
+  } catch (error: any) {
+    console.error("Error saving EnergyGurus team ratings:", error);
+    return { success: false, message: "Failed to save EnergyGurus team ratings." };
+  }
+}

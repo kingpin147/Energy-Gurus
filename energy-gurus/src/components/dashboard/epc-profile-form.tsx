@@ -33,6 +33,7 @@ interface EpcProfileFormProps {
     defaultTeam?: any[];
     defaultAbout: string;
     defaultWebsite: string;
+    isLocked?: boolean;
 }
 
 export function EpcProfileForm({ 
@@ -58,7 +59,8 @@ export function EpcProfileForm({
     defaultBatteryCertDocuments = [],
     defaultTeam = [],
     defaultAbout, 
-    defaultWebsite 
+    defaultWebsite,
+    isLocked = false,
 }: EpcProfileFormProps) {
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
     const [errorMsg, setErrorMsg] = useState("");
@@ -181,6 +183,19 @@ export function EpcProfileForm({
         <form onSubmit={handleSubmit} className="space-y-4">
             <input type="hidden" name="id" value={epcId} />
 
+            {isLocked && (
+                <div className="p-4 bg-amber/10 border border-amber/30 rounded-2xl flex items-start gap-3 text-ink mb-6">
+                    <AlertCircle className="w-5 h-5 text-amber-deep shrink-0 mt-0.5" />
+                    <div>
+                        <h4 className="font-bold text-sm text-navy-deep">Profile is Live — Edit Rights Managed by Admin</h4>
+                        <p className="text-xs text-slate-custom mt-1 leading-relaxed">
+                            Your installer profile is live on the EnergyGurus Directory. Per platform verification standards, edit rights are exclusively available with EnergyGurus administrators after going live. To request changes, please contact EnergyGurus Support.
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            <fieldset disabled={isLocked} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label className="block text-xs font-bold uppercase tracking-widest opacity-60 mb-2">
@@ -512,18 +527,21 @@ export function EpcProfileForm({
                     className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
                 />
             </div>
+            </fieldset>
 
             {/* Submit Button */}
             <button
                 type="submit"
-                disabled={status === "loading"}
-                className="w-full bg-amber text-ink h-12 rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+                disabled={status === "loading" || isLocked}
+                className="w-full bg-amber text-ink h-12 rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
                 {status === "loading" ? (
                     <>
                         <Loader2 className="w-4 h-4 animate-spin" />
                         Saving Profile...
                     </>
+                ) : isLocked ? (
+                    "Editing Locked (Profile is Live)"
                 ) : (
                     "Save Changes"
                 )}

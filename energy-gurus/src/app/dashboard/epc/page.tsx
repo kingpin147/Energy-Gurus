@@ -157,6 +157,7 @@ export default async function EpcDashboard() {
                   defaultTeam={(epc as any).team || []}
                   defaultAbout={epc.about || ""}
                   defaultWebsite={epc.website || ""}
+                  isLocked={epc.status === "live" && role !== "admin" && role !== "super-admin"}
                 />
               </CardContent>
             </Card>

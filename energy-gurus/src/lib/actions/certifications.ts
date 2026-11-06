@@ -72,9 +72,20 @@ export async function submitCertificationAction(formData: FormData) {
 }
 
 /**
- * Brand Partner approves the certification with note
+ * Brand Partner approves the certification with note and 3-grounds rating:
+ * 1. Quality of Installation (1-5 Star)
+ * 2. Quality of After-Sales Services (1-5 Star)
+ * 3. Active Participation in Training Sessions (1-5 Star)
  */
-export async function brandApproveCertificationAction(certId: string, notes: string, rating?: string) {
+export async function brandApproveCertificationAction(
+  certId: string,
+  notes: string,
+  ratings?: {
+    installationQuality: number;
+    afterSalesQuality: number;
+    trainingParticipation: number;
+  } | string
+) {
   try {
     const { userId: clerkId } = await auth();
     if (!clerkId) return { success: false, message: "Unauthorized" };
@@ -86,13 +97,32 @@ export async function brandApproveCertificationAction(certId: string, notes: str
 
     if (!cert) return { success: false, message: "Certification not found" };
 
+    let brandRatingsObj: { installationQuality: number; afterSalesQuality: number; trainingParticipation: number } | undefined = undefined;
+    let computedRating = "4.8";
+
+    if (ratings && typeof ratings === "object") {
+      const qInstall = Math.min(5, Math.max(1, Number(ratings.installationQuality) || 5));
+      const qAfterSales = Math.min(5, Math.max(1, Number(ratings.afterSalesQuality) || 5));
+      const qTraining = Math.min(5, Math.max(1, Number(ratings.trainingParticipation) || 5));
+      
+      brandRatingsObj = {
+        installationQuality: qInstall,
+        afterSalesQuality: qAfterSales,
+        trainingParticipation: qTraining,
+      };
+      computedRating = ((qInstall + qAfterSales + qTraining) / 3).toFixed(1);
+    } else if (typeof ratings === "string") {
+      computedRating = ratings;
+    }
+
     await db
       .update(installerCertifications)
       .set({
         brandStatus: "approved",
         brandApprovedAt: new Date(),
-        brandNotes: notes,
-        brandRating: rating || "4.8",
+        brandNotes: notes || "Approved by Brand Partner",
+        brandRating: computedRating,
+        brandRatings: brandRatingsObj,
         status: "pending_admin",
         updatedAt: new Date()
       })
@@ -100,8 +130,12 @@ export async function brandApproveCertificationAction(certId: string, notes: str
 
     revalidatePath("/dashboard/brand");
     revalidatePath("/dashboard/admin/certifications");
+    revalidatePath("/epcs");
 
-    return { success: true, message: "Approved by Brand. Transferred to EnergyGurus for final confirmation." };
+    return { 
+      success: true, 
+      message: `Approved by Brand (${computedRating} ★ avg). Transferred to EnergyGurus for final review & confirmation.` 
+    };
   } catch (error: any) {
     console.error("[brandApproveCertificationAction Error]:", error);
     return { success: false, message: "Failed to approve certification. Please try again." };

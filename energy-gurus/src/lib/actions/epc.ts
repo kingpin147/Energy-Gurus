@@ -90,6 +90,11 @@ export async function updateEpcProfile(data: FormData | Partial<typeof epcInstal
 
   if (!existingEpc) throw new Error("EPC profile not found");
 
+  // Prevent installers from editing if their profile is already live (edit rights reserved for EnergyGurus admin)
+  if (!isAdmin && existingEpc.status === "live") {
+    throw new Error("Profile is live. Edit rights are exclusively managed by EnergyGurus administrators.");
+  }
+
   await db.update(epcInstallers)
     .set({ ...updateData, updatedAt: new Date() })
     .where(eq(epcInstallers.id, existingEpc.id));

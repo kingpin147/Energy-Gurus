@@ -319,3 +319,60 @@ export async function deleteProductModel(productId: string) {
   revalidatePath(`/brands/${product.brandId}`, "page");
   revalidatePath("/dashboard/brand", "page");
 }
+
+/**
+ * Brand submits News & Updates (Product Launch, Outlet Opening, Special Project, Announcement, Event)
+ * Duly submitted for review and approval by energygurus.online administrators.
+ */
+export async function submitBrandNewsAction(formData: FormData) {
+  try {
+    const { userId: clerkId } = await auth();
+    if (!clerkId) return { success: false, message: "Unauthorized. Please sign in." };
+
+    const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId)).limit(1);
+    if (!user) return { success: false, message: "User account not found." };
+
+    const title = (formData.get("title") as string)?.trim();
+    const category = (formData.get("category") as string)?.trim() || "Announcement";
+    const content = (formData.get("content") as string)?.trim();
+    const imageUrl = (formData.get("imageUrl") as string)?.trim() || null;
+
+    if (!title || !content) {
+      return { success: false, message: "Title and content details are required." };
+    }
+
+    const { news } = await import("@/db/schema");
+    const { generateUniqueNewsSlug } = await import("@/lib/utils/slug");
+
+    const slug = await generateUniqueNewsSlug(title);
+
+    const [newArticle] = await db
+      .insert(news)
+      .values({
+        slug,
+        title,
+        content,
+        category,
+        imageUrl,
+        authorId: user.id,
+        authorName: user.name || "Brand Partner",
+        status: "pending_review",
+        isPublished: false,
+        publishedAt: null,
+      })
+      .returning();
+
+    revalidatePath("/dashboard/brand");
+    revalidatePath("/dashboard/moderation");
+    revalidatePath("/news");
+
+    return {
+      success: true,
+      message: "News & Update submitted successfully for EnergyGurus admin review. It will go live once approved.",
+      article: newArticle
+    };
+  } catch (error: any) {
+    console.error("[submitBrandNewsAction Error]:", error);
+    return { success: false, message: error?.message || "Failed to submit news update." };
+  }
+}

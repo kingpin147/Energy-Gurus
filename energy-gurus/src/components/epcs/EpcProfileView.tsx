@@ -749,12 +749,23 @@ export function EpcProfileView({
                   </span>
                 </div>
                 {installer.egRating ? (
-                  <div className="licence-row">
-                    <div className="licence-name">EnergyGurus Team Assessment</div>
-                    <span style={{ color: "var(--amber-deep)", fontWeight: "600", fontSize: "14px" }}>
-                      {installer.egRating} / 10
-                    </span>
-                  </div>
+                  <>
+                    <div className="licence-row">
+                      <div className="licence-name">EnergyGurus Team Assessment</div>
+                      <span style={{ color: "var(--amber-deep)", fontWeight: "600", fontSize: "14px" }}>
+                        {installer.egRating} / 10
+                      </span>
+                    </div>
+                    {installer.egTeamRatings ? (
+                      <div style={{ background: "var(--cream, #FBF8F3)", padding: "10px 14px", borderRadius: "8px", fontSize: "11px", color: "var(--graphite, #4A5568)", marginTop: "4px", marginBottom: "8px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                        <div>Physical Verification: <b>{installer.egTeamRatings.physicalVerification}/10</b></div>
+                        <div>Office Visited: <b>{installer.egTeamRatings.officeVisited}/10</b></div>
+                        <div>Sites Visited: <b>{installer.egTeamRatings.siteVisited}/10</b></div>
+                        <div>Projects Genuine: <b>{installer.egTeamRatings.projectsVerified}/10</b></div>
+                        <div style={{ gridColumn: "span 2" }}>After Sales System: <b>{installer.egTeamRatings.afterSalesSystem}/10</b></div>
+                      </div>
+                    ) : null}
+                  </>
                 ) : null}
                 <div className="licence-row">
                   <div className="licence-name">Platform Tier</div>

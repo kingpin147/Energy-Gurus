@@ -26,10 +26,15 @@ import {
   Eye,
   MapPin,
   Phone,
-  Mail
+  Mail,
+  Newspaper,
+  Award,
+  Star,
+  Lock
 } from "lucide-react";
 import { useR2Upload } from "@/lib/hooks/use-r2-upload";
-import { updateBrandProfile, submitBrandForReviewAction, addProductModel, deleteProductModel } from "@/lib/actions/brand";
+import { updateBrandProfile, submitBrandForReviewAction, addProductModel, deleteProductModel, submitBrandNewsAction } from "@/lib/actions/brand";
+import { brandApproveCertificationAction, rejectCertificationAction } from "@/lib/actions/certifications";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -37,12 +42,16 @@ interface BrandSubmissionEditorProps {
   brand: any;
   products: any[];
   currentUser: any;
+  brandArticles?: any[];
+  brandCertifications?: any[];
 }
 
 export function BrandSubmissionEditor({
   brand,
   products: initialProducts,
-  currentUser
+  currentUser,
+  brandArticles = [],
+  brandCertifications = []
 }: BrandSubmissionEditorProps) {
   const router = useRouter();
   const { uploadFile, isUploading } = useR2Upload();
@@ -50,6 +59,30 @@ export function BrandSubmissionEditor({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [actionFeedback, setActionFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [activeTab, setActiveTab] = useState("sec-profile");
+
+  const isAdmin = currentUser?.role === "admin" || currentUser?.role === "super-admin";
+  const status = brand.status || "live";
+  const isLiveLocked = status === "live" && !isAdmin;
+
+  // News & Updates State
+  const [articles, setArticles] = useState<any[]>(brandArticles);
+  const [showAddNews, setShowAddNews] = useState(false);
+  const [newsTitle, setNewsTitle] = useState("");
+  const [newsCategory, setNewsCategory] = useState("Product Launch");
+  const [newsContent, setNewsContent] = useState("");
+  const [newsImageFile, setNewsImageFile] = useState<File | null>(null);
+  const [isSubmittingNews, setIsSubmittingNews] = useState(false);
+
+  // Installer Certifications Review & Rating State
+  const [certsList, setCertsList] = useState<any[]>(brandCertifications);
+  const [ratingCertId, setRatingCertId] = useState<string | null>(null);
+  const [qInstallation, setQInstallation] = useState<number>(5);
+  const [qAfterSales, setQAfterSales] = useState<number>(5);
+  const [qTraining, setQTraining] = useState<number>(5);
+  const [certNotes, setCertNotes] = useState("");
+  const [isProcessingCert, setIsProcessingCert] = useState(false);
+  const [rejectingCertId, setRejectingCertId] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   const scrollToSection = (id: string) => {
     setActiveTab(id);
@@ -247,11 +280,144 @@ export function BrandSubmissionEditor({
     }
   };
 
-  const status = brand.status || "live";
+  // Submit Brand News & Updates
+  const handlePostNews = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsTitle.trim() || !newsContent.trim()) {
+      toast.error("Please provide both title and details for the announcement.");
+      return;
+    }
+
+    setIsSubmittingNews(true);
+    try {
+      let imageUrl: string | null = null;
+      if (newsImageFile) {
+        toast.info("Uploading announcement image to R2...");
+        const res = await uploadFile(newsImageFile, "brand-news");
+        imageUrl = res.publicUrl;
+      }
+
+      const fd = new FormData();
+      fd.append("title", newsTitle.trim());
+      fd.append("category", newsCategory);
+      fd.append("content", newsContent.trim());
+      if (imageUrl) fd.append("imageUrl", imageUrl);
+
+      const res = await submitBrandNewsAction(fd);
+      if (res.success) {
+        toast.success(res.message);
+        if (res.article) {
+          setArticles([res.article, ...articles]);
+        }
+        setShowAddNews(false);
+        setNewsTitle("");
+        setNewsContent("");
+        setNewsImageFile(null);
+        router.refresh();
+      } else {
+        toast.error(res.message);
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to submit announcement");
+    } finally {
+      setIsSubmittingNews(false);
+    }
+  };
+
+  // Approve Installer Certification with 3 Grounds Rating
+  const handleApproveCert = async (certId: string) => {
+    setIsProcessingCert(true);
+    try {
+      const res = await brandApproveCertificationAction(
+        certId,
+        certNotes || "Approved by Brand Partner",
+        {
+          installationQuality: qInstallation,
+          afterSalesQuality: qAfterSales,
+          trainingParticipation: qTraining,
+        }
+      );
+      if (res.success) {
+        toast.success(res.message);
+        setCertsList((prev) =>
+          prev.map((c) =>
+            c.id === certId
+              ? {
+                  ...c,
+                  brandStatus: "approved",
+                  brandRating: ((qInstallation + qAfterSales + qTraining) / 3).toFixed(1),
+                  brandRatings: {
+                    installationQuality: qInstallation,
+                    afterSalesQuality: qAfterSales,
+                    trainingParticipation: qTraining,
+                  },
+                  brandNotes: certNotes,
+                  status: "pending_admin",
+                }
+              : c
+          )
+        );
+        setRatingCertId(null);
+        setCertNotes("");
+        router.refresh();
+      } else {
+        toast.error(res.message);
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to approve certification");
+    } finally {
+      setIsProcessingCert(false);
+    }
+  };
+
+  // Reject Installer Certification
+  const handleRejectCert = async (certId: string) => {
+    if (!rejectReason.trim()) {
+      toast.error("Please provide a reason for rejection.");
+      return;
+    }
+    setIsProcessingCert(true);
+    try {
+      const res = await rejectCertificationAction(certId, rejectReason, true);
+      if (res.success) {
+        toast.success(res.message);
+        setCertsList((prev) =>
+          prev.map((c) =>
+            c.id === certId ? { ...c, brandStatus: "rejected", status: "rejected" } : c
+          )
+        );
+        setRejectingCertId(null);
+        setRejectReason("");
+        router.refresh();
+      } else {
+        toast.error(res.message);
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to reject certification");
+    } finally {
+      setIsProcessingCert(false);
+    }
+  };
+
   const approvalHistory = (brand.approvalHistory as any[]) || [];
 
   return (
     <div className="bg-cream text-ink min-h-screen pb-24">
+
+      {/* Profile Live & Locked Banner for Non-Admins */}
+      {isLiveLocked && (
+        <div className="bg-amber/15 border-b border-amber/40 text-navy-deep p-4 shadow-sm animate-in fade-in">
+          <div className="max-w-[1180px] mx-auto flex items-start gap-3 px-5 md:px-8">
+            <Lock className="w-5 h-5 text-amber-deep shrink-0 mt-0.5" />
+            <div>
+              <b className="font-bold text-sm block">Profile is Live &amp; Published</b>
+              <p className="text-xs text-slate-custom mt-0.5">
+                In accordance with platform integrity regulations, live brand profile edit rights are exclusively managed by EnergyGurus.online administrators. You can still post updates to <b>News &amp; Updates</b> and review <b>Certified Installers</b> below. To request changes to your brand profile, please contact EnergyGurus Support.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Changes Requested Banner */}
       {status === "changes_requested" && (
@@ -301,23 +467,32 @@ export function BrandSubmissionEditor({
           </div>
 
           <div className="flex items-center gap-2.5">
-            <button
-              onClick={handleSaveDraft}
-              disabled={isSaving || isUploading}
-              className="px-4 py-2 text-xs font-bold bg-navy text-white hover:bg-navy-deep rounded-[3px] transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
-            >
-              {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-              Save Draft
-            </button>
+            {isLiveLocked ? (
+              <span className="px-4 py-2 text-xs font-bold bg-amber/15 text-navy-deep border border-amber/40 rounded-[3px] inline-flex items-center gap-1.5 shadow-xs">
+                <Lock className="w-3.5 h-3.5 text-amber-deep" />
+                Live Profile (Admin Controlled)
+              </span>
+            ) : (
+              <>
+                <button
+                  onClick={handleSaveDraft}
+                  disabled={isSaving || isUploading}
+                  className="px-4 py-2 text-xs font-bold bg-navy text-white hover:bg-navy-deep rounded-[3px] transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
+                >
+                  {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                  Save Draft
+                </button>
 
-            <button
-              onClick={handleSubmitForReview}
-              disabled={isSubmitting || isUploading}
-              className="px-5 py-2 text-xs font-bold bg-amber hover:bg-amber-deep text-navy-deep rounded-[3px] transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
-            >
-              {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-              Submit for Review
-            </button>
+                <button
+                  onClick={handleSubmitForReview}
+                  disabled={isSubmitting || isUploading}
+                  className="px-5 py-2 text-xs font-bold bg-amber hover:bg-amber-deep text-navy-deep rounded-[3px] transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
+                >
+                  {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                  Submit for Review
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -330,6 +505,8 @@ export function BrandSubmissionEditor({
           {[
             { id: "sec-profile", label: "Core Profile & Story", count: null },
             { id: "sec-products", label: "Products", count: productsList.length },
+            { id: "sec-news", label: "News & Updates", count: articles.length },
+            { id: "sec-installer-certs", label: "Certified Installers & Rating", count: certsList.filter(c => c.brandStatus === 'pending').length || null },
             { id: "sec-distributors", label: "Distributors", count: distributors.length },
             { id: "sec-retailers", label: "Retailers & Dealers", count: retailers.length },
             { id: "sec-centres", label: "Service Centres", count: serviceCentres.length },
@@ -379,6 +556,7 @@ export function BrandSubmissionEditor({
               </p>
             </div>
 
+            <fieldset disabled={isLiveLocked} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-navy-deep mb-1">Brand Name</label>
@@ -524,6 +702,7 @@ export function BrandSubmissionEditor({
                 </div>
               </div>
             </div>
+            </fieldset>
           </section>
 
           {/* SECTION 2: PRODUCTS */}
@@ -538,13 +717,15 @@ export function BrandSubmissionEditor({
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setShowAddProduct(!showAddProduct)}
-                className="px-3.5 py-1.5 bg-amber hover:bg-amber-deep text-navy-deep font-bold text-xs rounded-[3px] inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
-              >
-                <Plus className="w-3.5 h-3.5" /> Add New Model
-              </button>
+              {!isLiveLocked && (
+                <button
+                  type="button"
+                  onClick={() => setShowAddProduct(!showAddProduct)}
+                  className="px-3.5 py-1.5 bg-amber hover:bg-amber-deep text-navy-deep font-bold text-xs rounded-[3px] inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Add New Model
+                </button>
+              )}
             </div>
 
             {/* Add Product Inline Form */}
@@ -695,24 +876,490 @@ export function BrandSubmissionEditor({
                         <FileText className="w-3.5 h-3.5" /> Datasheet
                       </a>
                     )}
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (confirm(`Delete product ${prod.name}?`)) {
-                          await deleteProductModel(prod.id);
-                          setProductsList(productsList.filter((p) => p.id !== prod.id));
-                          toast.success("Product deleted");
-                        }
-                      }}
-                      className="p-1.5 text-danger hover:bg-danger-bg rounded cursor-pointer"
-                      title="Delete Product"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {!isLiveLocked && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (confirm(`Delete product ${prod.name}?`)) {
+                            await deleteProductModel(prod.id);
+                            setProductsList(productsList.filter((p) => p.id !== prod.id));
+                            toast.success("Product deleted");
+                          }
+                        }}
+                        className="p-1.5 text-danger hover:bg-danger-bg rounded cursor-pointer"
+                        title="Delete Product"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
+          </section>
+
+          {/* SECTION: NEWS & UPDATES */}
+          <section id="sec-news" className="bg-white border border-line rounded-[4px] p-6 md:p-8 shadow-sm space-y-6 scroll-mt-24">
+            <div className="flex items-center justify-between border-b border-line pb-4 flex-wrap gap-2">
+              <div>
+                <h2 className="font-fraunces text-lg font-bold text-navy-deep flex items-center gap-2">
+                  <Newspaper className="w-5 h-5 text-amber-deep" />
+                  News &amp; Updates ({articles.length})
+                </h2>
+                <p className="text-xs text-slate-custom mt-1">
+                  Post pictures and details about product launches, outlet openings, special projects, announcements, and events.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowAddNews(!showAddNews)}
+                className="px-3.5 py-1.5 bg-navy hover:bg-navy-deep text-white text-xs font-bold rounded-[3px] transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                {showAddNews ? "Cancel" : "Post Announcement"}
+              </button>
+            </div>
+
+            <div className="bg-cream/60 border border-line/60 rounded p-3.5 text-xs text-slate-custom space-y-1">
+              <p className="font-bold text-navy-deep">Editorial &amp; Review Policy</p>
+              <p>
+                All brand announcements are submitted for review and approval by <b>energygurus.online</b> administrators before appearing on the live platform. Once published, edit rights remain exclusively with EnergyGurus administrators to maintain journalistic integrity.
+              </p>
+            </div>
+
+            {/* Post Announcement Form */}
+            {showAddNews && (
+              <form onSubmit={handlePostNews} className="bg-paper border border-line rounded-[4px] p-5 space-y-4 animate-in fade-in">
+                <h3 className="font-bold text-sm text-navy-deep">Create New Announcement / News Update</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-navy-deep mb-1">
+                      Category <span className="text-danger">*</span>
+                    </label>
+                    <select
+                      value={newsCategory}
+                      onChange={(e) => setNewsCategory(e.target.value)}
+                      className="w-full text-xs p-2.5 bg-white border border-line rounded-[3px] text-ink focus:border-amber focus:outline-none"
+                    >
+                      <option value="Product Launch">Product Launch</option>
+                      <option value="Outlet Opening">Outlet Opening</option>
+                      <option value="Special Projects Go Live">Special Projects Go Live</option>
+                      <option value="Announcement">Announcement</option>
+                      <option value="Events">Events</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-navy-deep mb-1">
+                      Title <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Launching our New 10kW Hybrid Inverter Series"
+                      value={newsTitle}
+                      onChange={(e) => setNewsTitle(e.target.value)}
+                      className="w-full text-xs p-2.5 bg-white border border-line rounded-[3px] text-ink focus:border-amber focus:outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-navy-deep mb-1">
+                    Announcement Picture / Banner
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setNewsImageFile(e.target.files?.[0] || null)}
+                    className="w-full text-xs p-2 bg-white border border-line rounded-[3px] text-slate-custom file:mr-3 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-cream file:text-navy-deep hover:file:bg-amber/20"
+                  />
+                  <span className="text-[11px] text-slate-custom mt-0.5 block">High-resolution banner of the product, store, or event (PNG/JPG).</span>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-navy-deep mb-1">
+                    Details &amp; Description <span className="text-danger">*</span>
+                  </label>
+                  <textarea
+                    rows={4}
+                    placeholder="Provide full details, specifications, dates, locations, or notes about this announcement..."
+                    value={newsContent}
+                    onChange={(e) => setNewsContent(e.target.value)}
+                    className="w-full text-xs p-2.5 bg-white border border-line rounded-[3px] text-ink focus:border-amber focus:outline-none resize-y"
+                    required
+                  ></textarea>
+                </div>
+
+                <div className="flex justify-end gap-2.5 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddNews(false)}
+                    className="px-4 py-2 text-xs font-bold border border-line hover:bg-cream rounded transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmittingNews}
+                    className="px-5 py-2 text-xs font-bold bg-amber hover:bg-amber-deep text-navy-deep rounded transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
+                  >
+                    {isSubmittingNews ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                    Submit for EnergyGurus Review
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Articles List */}
+            {articles.length === 0 ? (
+              <p className="text-xs text-slate-custom italic py-2">
+                No news updates or announcements posted yet. Click &quot;Post Announcement&quot; above to submit your first update.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {articles.map((art) => (
+                  <div
+                    key={art.id}
+                    className="flex flex-col sm:flex-row items-start justify-between gap-4 p-4 border border-line rounded-[4px] bg-paper/50 hover:bg-paper transition-colors"
+                  >
+                    <div className="flex items-start gap-3">
+                      {art.imageUrl ? (
+                        <div className="w-16 h-16 rounded overflow-hidden relative shrink-0 border border-line bg-white">
+                          <Image
+                            src={art.imageUrl}
+                            alt={art.title}
+                            fill
+                            sizes="64px"
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-16 rounded bg-cream border border-line flex items-center justify-center shrink-0 text-slate-custom">
+                          <Newspaper className="w-6 h-6 text-slate-400" />
+                        </div>
+                      )}
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-cream border border-line text-navy-deep">
+                            {art.category}
+                          </span>
+                          <span className="text-[11px] text-slate-custom">
+                            {new Date(art.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <h4 className="font-bold text-sm text-navy-deep mt-1">{art.title}</h4>
+                        <p className="text-xs text-slate-custom mt-1 line-clamp-2">{art.content}</p>
+                      </div>
+                    </div>
+
+                    <div className="shrink-0 sm:self-center">
+                      {art.status === "published" ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-good bg-good-bg border border-good/30 px-2.5 py-1 rounded-full">
+                          <CheckCircle2 className="w-3 h-3" /> Live &amp; Published
+                        </span>
+                      ) : art.status === "pending_review" ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-deep bg-amber/15 border border-amber/30 px-2.5 py-1 rounded-full">
+                          <Clock className="w-3 h-3" /> Under Admin Review
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-custom bg-cream border border-line px-2.5 py-1 rounded-full">
+                          Draft
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* SECTION: CERTIFIED INSTALLERS & RATING */}
+          <section id="sec-installer-certs" className="bg-white border border-line rounded-[4px] p-6 md:p-8 shadow-sm space-y-6 scroll-mt-24">
+            <div className="border-b border-line pb-4">
+              <h2 className="font-fraunces text-lg font-bold text-navy-deep flex items-center gap-2">
+                <Award className="w-5 h-5 text-amber-deep" />
+                Certified Installers &amp; Brand Ratings ({certsList.length})
+              </h2>
+              <p className="text-xs text-slate-custom mt-1">
+                Verify and rate EPC installers claiming authorization for your brand. Approved claims directly define installer tier categorization on EnergyGurus.
+              </p>
+            </div>
+
+            <div className="bg-cream/60 border border-line/60 rounded p-3.5 text-xs text-slate-custom space-y-1">
+              <p className="font-bold text-navy-deep">Installer Categorization &amp; Rating Mechanism</p>
+              <p>
+                First, certifications and 3-ground ratings are reviewed &amp; approved by you (the brand). Final approval is given by energygurus.online, which unlocks installer category badges:
+              </p>
+              <ul className="list-disc list-inside text-[11px] pt-1 space-y-0.5 text-ink/80">
+                <li><b>Silver:</b> 1 - 2 Brand Certifications</li>
+                <li><b>Gold:</b> 3 - 4 Brand Certifications</li>
+                <li><b>Diamond:</b> 5 - 6 Brand Certifications</li>
+                <li><b>Platinum:</b> 7 - 8+ Brand Certifications</li>
+              </ul>
+            </div>
+
+            {certsList.length === 0 ? (
+              <p className="text-xs text-slate-custom italic py-2">
+                No installers have submitted certification claims for {brandName || "your brand"} yet.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {certsList.map((cert) => {
+                  const isRatingThis = ratingCertId === cert.id;
+                  const isRejectingThis = rejectingCertId === cert.id;
+                  const avgRating = ((qInstallation + qAfterSales + qTraining) / 3).toFixed(1);
+
+                  return (
+                    <div
+                      key={cert.id}
+                      className="border border-line rounded-[4px] p-5 bg-paper/30 space-y-4"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-line">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-cream border border-line flex items-center justify-center font-bold text-xs text-navy-deep shrink-0">
+                            {cert.installerName.slice(0, 2).toUpperCase()}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-sm text-navy-deep">{cert.installerName}</h4>
+                            <p className="text-xs text-slate-custom">
+                              {cert.installerCity || "Pakistan"} · Current Tier:{" "}
+                              <span className="font-semibold text-ink capitalize">
+                                {cert.installerTier || "Unverified"}
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+
+                        <div>
+                          {cert.brandStatus === "approved" ? (
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-good bg-good-bg border border-good/30 px-3 py-1 rounded-full">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              Approved by Brand ({cert.brandRating || "5.0"} ★)
+                            </span>
+                          ) : cert.brandStatus === "rejected" ? (
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-danger bg-danger-bg border border-danger/30 px-3 py-1 rounded-full">
+                              <AlertTriangle className="w-3.5 h-3.5" />
+                              Claim Rejected
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-deep bg-amber/15 border border-amber/40 px-3 py-1 rounded-full">
+                              <Clock className="w-3.5 h-3.5" />
+                              Pending Your Review
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div>
+                          <span className="text-slate-custom block text-[11px]">Claimed Certified Since:</span>
+                          <span className="font-bold text-ink">{cert.certifiedSince || "Not specified"}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-custom block text-[11px]">Uploaded Certificate Proof:</span>
+                          {cert.proofUrl ? (
+                            <a
+                              href={cert.proofUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-amber-deep hover:underline font-bold inline-flex items-center gap-1"
+                            >
+                              <span>View Certificate Document</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          ) : (
+                            <span className="text-slate-custom italic">None attached</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Display already approved ratings */}
+                      {cert.brandStatus === "approved" && (
+                        <div className="bg-cream p-3 rounded border border-line text-xs space-y-1">
+                          <p className="font-bold text-navy-deep">Brand Ratings Given:</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-[11px]">
+                            <div>Quality of Installation: <b>{cert.brandRatings?.installationQuality ?? cert.brandRating ?? 5} / 5 ★</b></div>
+                            <div>After-Sales Services: <b>{cert.brandRatings?.afterSalesQuality ?? cert.brandRating ?? 5} / 5 ★</b></div>
+                            <div>Training Participation: <b>{cert.brandRatings?.trainingParticipation ?? cert.brandRating ?? 5} / 5 ★</b></div>
+                          </div>
+                          {cert.brandNotes && (
+                            <p className="text-[11px] text-slate-custom pt-1">
+                              Note: &quot;{cert.brandNotes}&quot;
+                            </p>
+                          )}
+                          <div className="pt-1 text-[11px]">
+                            EnergyGurus Confirmation Status:{" "}
+                            <b>{cert.adminStatus === "approved" ? "Confirmed (Live)" : "Pending Admin Confirmation"}</b>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Interactive Rating Form for Pending Certifications */}
+                      {cert.brandStatus === "pending" && !isRatingThis && !isRejectingThis && (
+                        <div className="flex items-center gap-3 pt-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRatingCertId(cert.id);
+                              setRejectingCertId(null);
+                            }}
+                            className="px-4 py-2 text-xs font-bold bg-amber hover:bg-amber-deep text-navy-deep rounded transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
+                          >
+                            <Star className="w-3.5 h-3.5 fill-current" />
+                            Rate &amp; Approve Installer
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRejectingCertId(cert.id);
+                              setRatingCertId(null);
+                            }}
+                            className="px-4 py-2 text-xs font-bold border border-danger/40 text-danger hover:bg-danger-bg rounded transition-colors cursor-pointer"
+                          >
+                            Reject Claim
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Rating Form Mode */}
+                      {isRatingThis && (
+                        <div className="bg-white border-2 border-amber/40 rounded p-4 space-y-4 animate-in fade-in">
+                          <div className="flex items-center justify-between border-b border-line pb-2">
+                            <h4 className="font-bold text-xs text-navy-deep uppercase tracking-wider">
+                              Rate Installer Across 3 Brand Grounds (1 to 5 Stars)
+                            </h4>
+                            <span className="font-bold text-xs text-amber-deep bg-amber/15 px-2 py-0.5 rounded border border-amber/30">
+                              Average: {avgRating} ★
+                            </span>
+                          </div>
+
+                          <div className="space-y-3 text-xs">
+                            <div>
+                              <div className="flex justify-between font-semibold mb-1">
+                                <span>1. Quality of Installation</span>
+                                <span className="font-bold text-amber-deep">{qInstallation} / 5 ★</span>
+                              </div>
+                              <input
+                                type="range"
+                                min="1"
+                                max="5"
+                                value={qInstallation}
+                                onChange={(e) => setQInstallation(Number(e.target.value))}
+                                className="w-full accent-amber cursor-pointer"
+                              />
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between font-semibold mb-1">
+                                <span>2. Quality of After-Sales Services</span>
+                                <span className="font-bold text-amber-deep">{qAfterSales} / 5 ★</span>
+                              </div>
+                              <input
+                                type="range"
+                                min="1"
+                                max="5"
+                                value={qAfterSales}
+                                onChange={(e) => setQAfterSales(Number(e.target.value))}
+                                className="w-full accent-amber cursor-pointer"
+                              />
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between font-semibold mb-1">
+                                <span>3. Active Participation in Training Sessions</span>
+                                <span className="font-bold text-amber-deep">{qTraining} / 5 ★</span>
+                              </div>
+                              <input
+                                type="range"
+                                min="1"
+                                max="5"
+                                value={qTraining}
+                                onChange={(e) => setQTraining(Number(e.target.value))}
+                                className="w-full accent-amber cursor-pointer"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-bold text-navy-deep mb-1">
+                                Brand Verification Notes / Remarks
+                              </label>
+                              <textarea
+                                rows={2}
+                                placeholder="e.g. Completed 2026 authorized product training course and verified 5 commercial installations."
+                                value={certNotes}
+                                onChange={(e) => setCertNotes(e.target.value)}
+                                className="w-full text-xs p-2.5 bg-paper border border-line rounded focus:border-amber focus:outline-none"
+                              ></textarea>
+                            </div>
+                          </div>
+
+                          <div className="flex justify-end gap-2.5 pt-2">
+                            <button
+                              type="button"
+                              onClick={() => setRatingCertId(null)}
+                              className="px-3.5 py-1.5 text-xs font-bold border border-line hover:bg-cream rounded transition-colors cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              disabled={isProcessingCert}
+                              onClick={() => handleApproveCert(cert.id)}
+                              className="px-4 py-1.5 text-xs font-bold bg-amber hover:bg-amber-deep text-navy-deep rounded transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
+                            >
+                              {isProcessingCert ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                              Confirm &amp; Submit Rating ({avgRating} ★)
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Reject Form Mode */}
+                      {isRejectingThis && (
+                        <div className="bg-white border-2 border-danger/30 rounded p-4 space-y-3 animate-in fade-in">
+                          <h4 className="font-bold text-xs text-danger uppercase tracking-wider">
+                            Reject Certification Claim
+                          </h4>
+                          <div>
+                            <label className="block text-xs font-bold text-navy-deep mb-1">
+                              Reason for Rejection <span className="text-danger">*</span>
+                            </label>
+                            <textarea
+                              rows={2}
+                              placeholder="e.g. Expired credentials, no record of certificate issue in local distributor records..."
+                              value={rejectReason}
+                              onChange={(e) => setRejectReason(e.target.value)}
+                              className="w-full text-xs p-2.5 bg-paper border border-line rounded focus:border-danger focus:outline-none"
+                              required
+                            ></textarea>
+                          </div>
+                          <div className="flex justify-end gap-2.5">
+                            <button
+                              type="button"
+                              onClick={() => setRejectingCertId(null)}
+                              className="px-3.5 py-1.5 text-xs font-bold border border-line hover:bg-cream rounded transition-colors cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              disabled={isProcessingCert}
+                              onClick={() => handleRejectCert(cert.id)}
+                              className="px-4 py-1.5 text-xs font-bold bg-danger hover:bg-danger/90 text-white rounded transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
+                            >
+                              {isProcessingCert ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                              Confirm Rejection
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </section>
 
           {/* SECTION 3: DISTRIBUTORS */}
@@ -727,20 +1374,23 @@ export function BrandSubmissionEditor({
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setDistributors([
-                    ...distributors,
-                    { name: "", city: "Lahore", territory: "Nationwide", contactPerson: "", phone: "", email: "", address: "" }
-                  ])
-                }
-                className="px-3.5 py-1.5 bg-amber hover:bg-amber-deep text-navy-deep font-bold text-xs rounded-[3px] inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
-              >
-                <Plus className="w-3.5 h-3.5" /> Add Distributor
-              </button>
+              {!isLiveLocked && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setDistributors([
+                      ...distributors,
+                      { name: "", city: "Lahore", territory: "Nationwide", contactPerson: "", phone: "", email: "", address: "" }
+                    ])
+                  }
+                  className="px-3.5 py-1.5 bg-amber hover:bg-amber-deep text-navy-deep font-bold text-xs rounded-[3px] inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Add Distributor
+                </button>
+              )}
             </div>
 
+            <fieldset disabled={isLiveLocked} className="space-y-4">
             <div className="space-y-4">
               {distributors.map((dist, idx) => (
                 <div key={idx} className="p-4 bg-paper border border-line rounded-[3px] space-y-3 relative">
@@ -748,13 +1398,15 @@ export function BrandSubmissionEditor({
                     <span className="text-[11px] font-bold text-amber-deep uppercase tracking-wider">
                       Distributor #{idx + 1}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => setDistributors(distributors.filter((_, i) => i !== idx))}
-                      className="text-danger hover:text-red-700 text-xs font-semibold cursor-pointer flex items-center gap-1"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" /> Remove
-                    </button>
+                    {!isLiveLocked && (
+                      <button
+                        type="button"
+                        onClick={() => setDistributors(distributors.filter((_, i) => i !== idx))}
+                        className="text-danger hover:text-red-700 text-xs font-semibold cursor-pointer flex items-center gap-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Remove
+                      </button>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -853,6 +1505,7 @@ export function BrandSubmissionEditor({
                 </div>
               ))}
             </div>
+            </fieldset>
           </section>
 
           {/* SECTION 4: RETAILERS & DEALERS */}
@@ -860,26 +1513,30 @@ export function BrandSubmissionEditor({
             <div className="flex items-center justify-between border-b border-line pb-4 flex-wrap gap-2">
               <div>
                 <h2 className="font-fraunces text-lg font-bold text-navy-deep">
-                  4. Authorized Retailers & Solar Shops ({retailers.length})
+                  4. Authorized Retailers &amp; Solar Shops ({retailers.length})
                 </h2>
                 <p className="text-xs text-slate-custom mt-1">
                   Verified retail partner shops, market dealers, and local authorized stockists.
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setRetailers([
-                    ...retailers,
-                    { name: "", city: "Lahore", address: "", phone: "", whatsapp: "", mapUrl: "" }
-                  ])
-                }
-                className="px-3.5 py-1.5 bg-amber hover:bg-amber-deep text-navy-deep font-bold text-xs rounded-[3px] inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
-              >
-                <Plus className="w-3.5 h-3.5" /> Add Retailer
-              </button>
+              {!isLiveLocked && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setRetailers([
+                      ...retailers,
+                      { name: "", city: "Lahore", address: "", phone: "", whatsapp: "", mapUrl: "" }
+                    ])
+                  }
+                  className="px-3.5 py-1.5 bg-amber hover:bg-amber-deep text-navy-deep font-bold text-xs rounded-[3px] inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Add Retailer
+                </button>
+              )}
             </div>
+
+            <fieldset disabled={isLiveLocked} className="space-y-4">
 
             {retailers.length === 0 ? (
               <p className="text-xs text-slate-custom italic py-2">
@@ -893,13 +1550,15 @@ export function BrandSubmissionEditor({
                       <span className="text-[11px] font-bold text-amber-deep uppercase tracking-wider">
                         Retailer / Dealer #{idx + 1}
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => setRetailers(retailers.filter((_, i) => i !== idx))}
-                        className="text-danger hover:text-red-700 text-xs font-semibold cursor-pointer flex items-center gap-1"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" /> Remove
-                      </button>
+                      {!isLiveLocked && (
+                        <button
+                          type="button"
+                          onClick={() => setRetailers(retailers.filter((_, i) => i !== idx))}
+                          className="text-danger hover:text-red-700 text-xs font-semibold cursor-pointer flex items-center gap-1"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Remove
+                        </button>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -992,6 +1651,7 @@ export function BrandSubmissionEditor({
                 ))}
               </div>
             )}
+            </fieldset>
           </section>
 
           {/* SECTION 5: SERVICE CENTRES */}
@@ -999,27 +1659,30 @@ export function BrandSubmissionEditor({
             <div className="flex items-center justify-between border-b border-line pb-4 flex-wrap gap-2">
               <div>
                 <h2 className="font-fraunces text-lg font-bold text-navy-deep">
-                  5. Flagship Stores & Service Centres ({serviceCentres.length})
+                  5. Flagship Stores &amp; Service Centres ({serviceCentres.length})
                 </h2>
                 <p className="text-xs text-slate-custom mt-1">
                   Official repair, RMA collection, and in-person diagnostics locations.
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setServiceCentres([
-                    ...serviceCentres,
-                    { name: "", type: "Flagship Service Centre", city: "Lahore", address: "", phone: "", hours: "Mon-Sat: 9am-6pm", services: ["Diagnostics", "Component Replacement", "RMA Claim Handover"] }
-                  ])
-                }
-                className="px-3.5 py-1.5 bg-amber hover:bg-amber-deep text-navy-deep font-bold text-xs rounded-[3px] inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
-              >
-                <Plus className="w-3.5 h-3.5" /> Add Service Centre
-              </button>
+              {!isLiveLocked && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setServiceCentres([
+                      ...serviceCentres,
+                      { name: "", type: "Flagship Service Centre", city: "Lahore", address: "", phone: "", hours: "Mon-Sat: 9am-6pm", services: ["Diagnostics", "Component Replacement", "RMA Claim Handover"] }
+                    ])
+                  }
+                  className="px-3.5 py-1.5 bg-amber hover:bg-amber-deep text-navy-deep font-bold text-xs rounded-[3px] inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Add Service Centre
+                </button>
+              )}
             </div>
 
+            <fieldset disabled={isLiveLocked} className="space-y-4">
             <div className="space-y-4">
               {serviceCentres.map((centre, idx) => (
                 <div key={idx} className="p-4 bg-paper border border-line rounded-[3px] space-y-3">
@@ -1027,13 +1690,15 @@ export function BrandSubmissionEditor({
                     <span className="text-[11px] font-bold text-amber-deep uppercase tracking-wider">
                       Location #{idx + 1}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => setServiceCentres(serviceCentres.filter((_, i) => i !== idx))}
-                      className="text-danger hover:text-red-700 text-xs font-semibold cursor-pointer flex items-center gap-1"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" /> Remove
-                    </button>
+                    {!isLiveLocked && (
+                      <button
+                        type="button"
+                        onClick={() => setServiceCentres(serviceCentres.filter((_, i) => i !== idx))}
+                        className="text-danger hover:text-red-700 text-xs font-semibold cursor-pointer flex items-center gap-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Remove
+                      </button>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -1109,6 +1774,7 @@ export function BrandSubmissionEditor({
                 </div>
               ))}
             </div>
+            </fieldset>
           </section>
 
           {/* SECTION 6: LOCAL PAKISTAN TEAM */}
@@ -1116,27 +1782,30 @@ export function BrandSubmissionEditor({
             <div className="flex items-center justify-between border-b border-line pb-4 flex-wrap gap-2">
               <div>
                 <h2 className="font-fraunces text-lg font-bold text-navy-deep">
-                  6. Local Pakistan Team & Key Representatives ({team.length})
+                  6. Local Pakistan Team &amp; Key Representatives ({team.length})
                 </h2>
                 <p className="text-xs text-slate-custom mt-1">
                   Country managers, sales directors, and technical support leads based in Pakistan.
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setTeam([
-                    ...team,
-                    { name: "", designation: "Country Manager - Pakistan", email: "", phone: "", linkedIn: "", photoUrl: "" }
-                  ])
-                }
-                className="px-3.5 py-1.5 bg-amber hover:bg-amber-deep text-navy-deep font-bold text-xs rounded-[3px] inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
-              >
-                <Plus className="w-3.5 h-3.5" /> Add Team Member
-              </button>
+              {!isLiveLocked && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setTeam([
+                      ...team,
+                      { name: "", designation: "Country Manager - Pakistan", email: "", phone: "", linkedIn: "", photoUrl: "" }
+                    ])
+                  }
+                  className="px-3.5 py-1.5 bg-amber hover:bg-amber-deep text-navy-deep font-bold text-xs rounded-[3px] inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Add Team Member
+                </button>
+              )}
             </div>
 
+            <fieldset disabled={isLiveLocked} className="space-y-4">
             {team.length === 0 ? (
               <p className="text-xs text-slate-custom italic py-2">
                 No team members listed yet. Click &quot;Add Team Member&quot; above to list key representatives in Pakistan.
@@ -1149,13 +1818,15 @@ export function BrandSubmissionEditor({
                       <span className="text-[11px] font-bold text-amber-deep uppercase tracking-wider">
                         Team Member #{idx + 1}
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => setTeam(team.filter((_, i) => i !== idx))}
-                        className="text-danger hover:text-red-700 text-xs font-semibold cursor-pointer flex items-center gap-1"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" /> Remove
-                      </button>
+                      {!isLiveLocked && (
+                        <button
+                          type="button"
+                          onClick={() => setTeam(team.filter((_, i) => i !== idx))}
+                          className="text-danger hover:text-red-700 text-xs font-semibold cursor-pointer flex items-center gap-1"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Remove
+                        </button>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -1234,6 +1905,7 @@ export function BrandSubmissionEditor({
                 ))}
               </div>
             )}
+            </fieldset>
           </section>
 
           {/* SECTION 7: APPROVAL HISTORY */}

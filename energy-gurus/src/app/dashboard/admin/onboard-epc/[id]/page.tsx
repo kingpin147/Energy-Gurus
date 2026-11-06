@@ -358,7 +358,11 @@ export default async function AdminReviewPage({ params }: { params: Promise<{ id
         </div>
 
         {/* Sidebar */}
-        <AdminReviewSidebar epcId={epc.id} />
+        <AdminReviewSidebar
+          epcId={epc.id}
+          initialEgTeamRatings={epc.egTeamRatings}
+          initialEgRating={epc.egRating}
+        />
       </div>
     </div>
   );
