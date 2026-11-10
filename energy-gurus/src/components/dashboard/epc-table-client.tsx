@@ -49,6 +49,7 @@ import { toast } from "sonner";
 import { MultiPhotoUpload, MultiDocumentUpload, SinglePhotoUpload } from "@/components/dashboard/multi-media-upload";
 import { useR2Upload } from "@/lib/hooks/use-r2-upload";
 import { LocationPickerModal } from "@/components/shared/LocationPickerModal";
+import { ServiceAreasInput } from "@/components/shared/ServiceAreasInput";
 import {
   getEpcFullDetails,
   adminUpdateEpcInstaller,
@@ -66,6 +67,7 @@ type EpcListItem = {
   area: string | null;
   city: string | null;
   country: string | null;
+  serviceAreas?: string[] | null;
   website: string | null;
   logoUrl: string | null;
   tier: string | null;
@@ -217,6 +219,7 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
       area: epc.area || "",
       city: epc.city || "",
       country: epc.country || "Pakistan",
+      serviceAreas: Array.isArray((epc as any).serviceAreas) ? (epc as any).serviceAreas : [],
       website: epc.website || "",
       facebook: existingSocial.facebook || "",
       instagram: existingSocial.instagram || "",
@@ -249,6 +252,7 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
       if (fullDetails) {
         if (Array.isArray(fullDetails.team)) setEditTeam(fullDetails.team);
         if (fullDetails.coordinates) setEditFormData((prev: any) => ({ ...prev, coordinates: fullDetails.coordinates || "" }));
+        if (Array.isArray(fullDetails.serviceAreas)) setEditFormData((prev: any) => ({ ...prev, serviceAreas: fullDetails.serviceAreas }));
         if (Array.isArray(fullDetails.offices)) {
           setEditOffices(
             fullDetails.offices.map((o: any) => ({
@@ -363,6 +367,7 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
       area: editFormData.area,
       city: editFormData.city,
       country: editFormData.country,
+      serviceAreas: Array.isArray(editFormData.serviceAreas) ? editFormData.serviceAreas : [],
       coordinates: editFormData.coordinates || null,
       website: editFormData.website,
       socialLinks: socialLinksPayload,
@@ -773,6 +778,16 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                               {viewData.city ? `, ${viewData.city}` : ""}
                               {viewData.country ? `, ${viewData.country}` : ""}
                             </span>
+                          </span>
+                        </div>
+
+                        <div>
+                          <span className="text-xs font-bold text-slate-custom block uppercase">Service Areas</span>
+                          <span className="text-ink font-medium flex items-center gap-1.5 mt-0.5">
+                            <Globe className="w-3.5 h-3.5 text-amber shrink-0" />
+                            {viewData.serviceAreas && viewData.serviceAreas.length > 0
+                              ? viewData.serviceAreas.join(", ")
+                              : (viewData.city ? `Serving ${viewData.city}` : "Serving Pakistan")}
                           </span>
                         </div>
 
@@ -1317,6 +1332,17 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                         value={editFormData.area}
                         onChange={(e) => setEditFormData({ ...editFormData, area: e.target.value })}
                         className="bg-slate-50 border-line"
+                      />
+                    </div>
+
+                    <div className="space-y-2 md:col-span-2 p-4 bg-slate-50/70 border border-line rounded-2xl">
+                      <Label className="text-xs font-bold uppercase text-navy-deep">Service Areas &amp; Coverage</Label>
+                      <p className="text-xs text-slate-custom">
+                        Specify all the cities this company installs and services. Select &quot;All Over Pakistan&quot; for nationwide coverage, or select multiple specific cities.
+                      </p>
+                      <ServiceAreasInput
+                        value={editFormData.serviceAreas || []}
+                        onChange={(newAreas) => setEditFormData({ ...editFormData, serviceAreas: newAreas })}
                       />
                     </div>
 

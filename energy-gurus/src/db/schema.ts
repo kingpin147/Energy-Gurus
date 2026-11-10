@@ -44,6 +44,7 @@ export const epcInstallers = pgTable('epc_installers', {
   area: text('area'),
   city: text('city'),
   country: text('country').default('Pakistan'),
+  serviceAreas: jsonb('service_areas').$type<string[]>().default([]),
   coordinates: text('coordinates'),
   contactNo: text('contact_no'),
   whatsapp: text('whatsapp'),

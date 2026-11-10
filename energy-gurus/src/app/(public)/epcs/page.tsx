@@ -84,6 +84,9 @@ const getInstallers = unstable_cache(
         website: epcInstallers.website,
         socialLinks: epcInstallers.socialLinks,
         isVerified: epcInstallers.isVerified,
+        tier: epcInstallers.tier,
+        yearsInBusiness: epcInstallers.yearsInBusiness,
+        serviceAreas: epcInstallers.serviceAreas,
         createdAt: epcInstallers.createdAt,
         avgRating: sql<number>`COALESCE(CAST(AVG(${reviews.rating}) AS FLOAT), 0)`.as("avg_rating"),
         reviewCount: sql<number>`COUNT(DISTINCT ${reviews.id})`.as("review_count"),
@@ -181,8 +184,25 @@ export default async function EpcListingPage({
       {/* Filters + List Wrapper */}
       <InstallerFilters totalCount={installers.length}>
         {installers.map((installer) => {
-          const yearsInBusiness = Math.max(1, new Date().getFullYear() - new Date(installer.createdAt).getFullYear());
-          const locationText = installer.primaryCity ? `Serving ${installer.primaryCity}` : "Serving Pakistan";
+          const rawYears = installer.yearsInBusiness;
+          const currentYear = new Date().getFullYear();
+          let yearsInBusiness = 1;
+          if (rawYears && rawYears > 0) {
+            yearsInBusiness = rawYears > 1900 ? Math.max(1, currentYear - rawYears) : rawYears;
+          } else if (installer.createdAt) {
+            yearsInBusiness = Math.max(1, currentYear - new Date(installer.createdAt).getFullYear());
+          }
+
+          const rawAreas = Array.isArray((installer as any).serviceAreas) ? (installer as any).serviceAreas : [];
+          const isNationwide = rawAreas.includes("All Over Pakistan");
+          let locationText = "Serving Pakistan";
+          if (isNationwide) {
+            locationText = "Serving All Over Pakistan";
+          } else if (rawAreas.length > 0) {
+            locationText = `Serving ${rawAreas.join(", ")}`;
+          } else if (installer.primaryCity) {
+            locationText = `Serving ${installer.primaryCity}`;
+          }
           const slug = installer.slug || slugify(installer.companyName) || installer.id;
 
           return (
@@ -216,11 +236,21 @@ export default async function EpcListingPage({
                     <h3 className="font-space-grotesk font-semibold text-base md:text-lg text-ink group-hover:text-amber transition-colors truncate">
                       {installer.companyName}
                     </h3>
-                    {installer.isVerified && (
+                    {installer.tier && installer.tier !== "unverified" ? (
+                      <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1 ${
+                        installer.tier === "platinum" ? "bg-purple-100 text-purple-800 border border-purple-300" :
+                        installer.tier === "diamond" ? "bg-cyan-100 text-cyan-800 border border-cyan-300" :
+                        installer.tier === "gold" ? "bg-amber/20 text-amber-deep border border-amber/40" :
+                        installer.tier === "silver" ? "bg-slate-200 text-slate-800 border border-slate-300" :
+                        "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                      }`}>
+                        ★ {installer.tier.charAt(0).toUpperCase() + installer.tier.slice(1)} Installer
+                      </span>
+                    ) : installer.isVerified ? (
                       <span className="text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
                         ★ Verified
                       </span>
-                    )}
+                    ) : null}
                   </div>
 
                   <div className="text-xs text-slate-custom flex items-center gap-1.5 flex-wrap mt-1">
@@ -237,7 +267,7 @@ export default async function EpcListingPage({
 
                   {/* Sector & Certification Badges */}
                   <div className="flex flex-wrap gap-1.5 mt-2.5">
-                    {(installer.sectors as string[])?.slice(0, 3).map((sector, i) => (
+                    {Array.isArray(installer.sectors) && installer.sectors.map((sector: string, i: number) => (
                       <span
                         key={`sector-${i}`}
                         className="text-[11px] font-medium bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-full"
@@ -245,7 +275,7 @@ export default async function EpcListingPage({
                         {sector}
                       </span>
                     ))}
-                    {(installer.certifications as string[])?.slice(0, 2).map((cert, i) => (
+                    {Array.isArray(installer.certifications) && installer.certifications.map((cert: string, i: number) => (
                       <span
                         key={`cert-${i}`}
                         className="text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full"

@@ -141,7 +141,6 @@ export function InstallerFilters({ totalCount, children }: InstallerFiltersProps
                 "AEDB Licence",
                 "PEC Licence",
                 "Manufacturer Certified",
-                "PSA - Energy Nexus Certified",
               ].map((cert) => {
                 const isChecked = currentCerts.includes(cert);
                 return (

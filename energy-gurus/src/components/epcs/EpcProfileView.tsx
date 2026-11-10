@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { ContactForm } from "@/components/forms/contact-form";
 import { trackEngagement } from "@/components/shared/AnalyticsTracker";
-import { FileText, ExternalLink, ShieldCheck, Award, CheckCircle2 } from "lucide-react";
+import { FileText, ExternalLink, ShieldCheck, Award, CheckCircle2, Camera, ChevronLeft, ChevronRight, X, Briefcase } from "lucide-react";
 
 // Known brand keywords to automatically separate equipment brands from regulatory licenses
 const KNOWN_BRANDS = [
@@ -68,6 +68,12 @@ function getBrandCategory(brandName: string): string {
   return "Inverters";
 }
 
+function isImageUrl(url: string): boolean {
+  if (!url || typeof url !== "string") return false;
+  const clean = url.split("?")[0].toLowerCase();
+  return clean.endsWith(".jpg") || clean.endsWith(".jpeg") || clean.endsWith(".png") || clean.endsWith(".webp") || clean.endsWith(".gif") || clean.startsWith("blob:") || clean.includes("picsum.photos");
+}
+
 export function EpcProfileView({
   installer,
   offices,
@@ -78,9 +84,78 @@ export function EpcProfileView({
   isPreview = false
 }: any) {
   const [activeTab, setActiveTab] = useState("profile");
+  const [lightbox, setLightbox] = useState<{
+    title: string;
+    photos: string[];
+    index: number;
+  } | null>(null);
 
   const primaryCity = offices[0]?.city || installer.city || "Lahore";
-  const yearsInBusiness = Math.max(1, new Date().getFullYear() - new Date(installer.createdAt).getFullYear());
+  
+  // Dynamic calculation for years in business and established year
+  const rawYears = installer.yearsInBusiness;
+  const currentYear = new Date().getFullYear();
+  let dynamicYearsInBusiness = 1;
+  let dynamicEstablishedYear = "2020";
+
+  if (rawYears && rawYears > 0) {
+    if (rawYears > 1900) {
+      dynamicEstablishedYear = String(rawYears);
+      dynamicYearsInBusiness = Math.max(1, currentYear - rawYears);
+    } else {
+      dynamicYearsInBusiness = rawYears;
+      dynamicEstablishedYear = String(currentYear - rawYears);
+    }
+  } else if (installer.createdAt) {
+    dynamicYearsInBusiness = Math.max(1, currentYear - new Date(installer.createdAt).getFullYear());
+    dynamicEstablishedYear = String(currentYear - dynamicYearsInBusiness);
+  }
+
+  // 1. Company showcase photos (office facilities, corporate team, operations) -> shown under PROFILE tab
+  const companyPhotos: string[] = (
+    Array.isArray(installer.photos)
+      ? (installer.photos as any[])
+      : typeof installer.photos === "string"
+        ? (() => { try { const p = JSON.parse(installer.photos); return Array.isArray(p) ? p : [installer.photos]; } catch { return [installer.photos]; } })()
+        : []
+  ).filter((p: any): p is string => typeof p === "string" && p.trim().length > 0);
+
+  // 2. Project & Site Installation photos -> shown under PROJECTS tab
+  const portfolioPhotos: string[] = (
+    Array.isArray(installer.portfolio)
+      ? (installer.portfolio as any[])
+      : typeof installer.portfolio === "string"
+        ? (() => { try { const p = JSON.parse(installer.portfolio); return Array.isArray(p) ? p : [installer.portfolio]; } catch { return [installer.portfolio]; } })()
+        : []
+  ).filter((p: any): p is string => typeof p === "string" && p.trim().length > 0);
+
+  const projectArrayImages: string[] = (projects || [])
+    .flatMap((p: any) => (Array.isArray(p.images) ? p.images : (p.imageUrl ? [p.imageUrl] : [])))
+    .filter((p: any): p is string => typeof p === "string" && p.trim().length > 0);
+
+  const allProjectPhotos: string[] = Array.from(
+    new Set([...portfolioPhotos, ...projectArrayImages])
+  );
+
+  const totalProjectsCount = (projects?.length || 0) + (portfolioPhotos.length > 0 && (!projects || projects.length === 0) ? portfolioPhotos.length : 0);
+
+  const currentLightboxPhoto = lightbox && lightbox.photos[lightbox.index] ? lightbox.photos[lightbox.index] : null;
+
+  // Keyboard navigation for photo gallery
+  useEffect(() => {
+    if (!lightbox) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft" && lightbox.index > 0) {
+        setLightbox(prev => (prev && prev.index > 0 ? { ...prev, index: prev.index - 1 } : prev));
+      } else if (e.key === "ArrowRight" && lightbox.index < lightbox.photos.length - 1) {
+        setLightbox(prev => (prev && prev.index < prev.photos.length - 1 ? { ...prev, index: prev.index + 1 } : prev));
+      } else if (e.key === "Escape") {
+        setLightbox(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lightbox]);
 
   const brandsCertified = Array.isArray(installer.brandsCertified) ? installer.brandsCertified : [];
   const solarBrands = Array.isArray(installer.solarBrands) ? installer.solarBrands : [];
@@ -146,16 +221,35 @@ export function EpcProfileView({
 
   const whatsappNumber = installer.whatsapp || (installer.contactNo && installer.contactNo.replace(/[^0-9]/g, "").length >= 10 ? installer.contactNo : null);
 
+  const rawServiceAreas = Array.isArray(installer.serviceAreas) ? installer.serviceAreas : [];
+  const isNationwide = rawServiceAreas.includes("All Over Pakistan");
+
   const officeCities = Array.from(
     new Set(
       [
+        ...(rawServiceAreas.length > 0 ? rawServiceAreas : []),
         installer.city,
         ...offices.map((o: any) => o.city),
         installer.area
       ].filter(Boolean)
     )
   );
-  const serviceAreasStr = officeCities.length > 0 ? officeCities.join(", ") : `${primaryCity}, Pakistan`;
+
+  let serviceAreasStr = "All Over Pakistan (Nationwide Coverage)";
+  if (isNationwide) {
+    const specificCities = rawServiceAreas.filter((a: string) => a !== "All Over Pakistan");
+    serviceAreasStr = specificCities.length > 0 
+      ? `All Over Pakistan (Major Hubs: ${specificCities.join(", ")})` 
+      : "All Over Pakistan (Nationwide Coverage)";
+  } else if (rawServiceAreas.length > 0) {
+    serviceAreasStr = rawServiceAreas.join(", ");
+  } else {
+    serviceAreasStr = officeCities.length > 0 ? officeCities.join(", ") : `${primaryCity}, Pakistan`;
+  }
+
+  const servingText = isNationwide 
+    ? "All Over Pakistan" 
+    : (rawServiceAreas.length > 0 ? rawServiceAreas.slice(0, 3).join(", ") : primaryCity);
 
   const socialLinksObj: Record<string, string> = {};
   if (Array.isArray(installer.socialLinks)) {
@@ -235,7 +329,7 @@ export function EpcProfileView({
                   <path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" stroke="currentColor" strokeWidth="1.5" />
                   <circle cx="12" cy="9" r="2.4" stroke="currentColor" strokeWidth="1.5" />
                 </svg>
-                {installer.address || `${primaryCity}, ${installer.country || "Pakistan"}`} · serving {primaryCity}
+                {installer.address || `${primaryCity}, ${installer.country || "Pakistan"}`} · serving {servingText}
               </div>
               <div className="rating-row">
                 <div className="rating-block">
@@ -284,7 +378,7 @@ export function EpcProfileView({
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[500px] rounded-[4px] p-0 overflow-hidden border border-line text-ink bg-white">
                   <div className="bg-navy-deep p-6 text-white">
-                    <h3 className="text-xl font-bold font-fraunces">Contact {installer.companyName}</h3>
+                    <DialogTitle className="text-xl font-bold font-fraunces text-white">Contact {installer.companyName}</DialogTitle>
                     <p className="text-paper/70 text-xs mt-1">Send a direct inquiry for your solar installation project.</p>
                   </div>
                   <div className="p-6 bg-white">
@@ -313,7 +407,7 @@ export function EpcProfileView({
             <button className={`tab ${activeTab === "certifications" ? "active" : ""}`} onClick={() => setActiveTab("certifications")}>
               Certifications &amp; Brands
             </button>
-            <button className={`tab ${activeTab === "projects" ? "active" : ""}`} onClick={() => setActiveTab("projects")}>Projects ({projects?.length || 0})</button>
+            <button className={`tab ${activeTab === "projects" ? "active" : ""}`} onClick={() => setActiveTab("projects")}>Projects ({totalProjectsCount})</button>
             <button className={`tab ${activeTab === "reviews" ? "active" : ""}`} onClick={() => setActiveTab("reviews")}>Reviews ({count || 0})</button>
           </div>
         </nav>
@@ -341,11 +435,7 @@ export function EpcProfileView({
                     </div>
                     <div className="fact">
                       <dt>Established</dt>
-                      <dd>
-                        {installer.yearsInBusiness
-                          ? `${new Date().getFullYear() - installer.yearsInBusiness}`
-                          : (yearsInBusiness ? `${new Date().getFullYear() - yearsInBusiness}` : "2016")}
-                      </dd>
+                      <dd>{dynamicEstablishedYear}</dd>
                     </div>
                     <div className="fact">
                       <dt>Technical team size</dt>
@@ -465,6 +555,55 @@ export function EpcProfileView({
                 </div>
               </div>
             </div>
+
+            {/* COMPANY PHOTOS & GALLERY */}
+            {companyPhotos.length > 0 && (
+              <div className="card" style={{ marginTop: "24px" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", paddingBottom: "12px", borderBottom: "1px solid var(--line)" }}>
+                  <div>
+                    <h2 style={{ fontSize: "18px", fontWeight: "600", color: "var(--navy-deep)", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+                      <Camera className="w-5 h-5 text-amber" />
+                      Company Photos
+                    </h2>
+                    <p style={{ fontSize: "13px", color: "var(--ink-soft)", marginTop: "4px" }}>
+                      Showcase gallery of office facilities, team, and corporate operations.
+                    </p>
+                  </div>
+                  <span style={{ fontSize: "12px", fontWeight: "600", background: "rgba(224, 167, 59, 0.15)", color: "var(--navy-deep)", padding: "4px 10px", borderRadius: "999px", border: "1px solid rgba(224, 167, 59, 0.3)" }}>
+                    {companyPhotos.length} {companyPhotos.length === 1 ? "Photo" : "Photos"}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {companyPhotos.map((photoUrl, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setLightbox({
+                        title: `${installer.companyName} — Company Photos`,
+                        photos: companyPhotos,
+                        index: idx
+                      })}
+                      className="group relative aspect-[4/3] rounded-lg overflow-hidden border border-line bg-paper/40 hover:border-amber hover:shadow-md transition-all text-left focus:outline-none focus:ring-2 focus:ring-amber/40 cursor-pointer"
+                    >
+                      <Image
+                        src={photoUrl}
+                        alt={`${installer.companyName} photo ${idx + 1}`}
+                        fill
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        unoptimized={photoUrl.startsWith("http")}
+                      />
+                      <div className="absolute inset-0 bg-navy-deep/0 group-hover:bg-navy-deep/20 transition-colors flex items-center justify-center">
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-navy-deep/80 text-white text-xs font-semibold px-2.5 py-1 rounded shadow">
+                          View
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
 
           {/* TEAM */}
@@ -639,23 +778,64 @@ export function EpcProfileView({
                 {/* Uploaded Brand Certification Documents */}
                 {allEquipmentDocs.length > 0 && (
                   <div style={{ marginTop: "24px", paddingTop: "16px", borderTop: "1px solid var(--line)" }}>
-                    <h3 style={{ fontSize: "14px", fontWeight: "600", color: "var(--navy-deep)", marginBottom: "10px" }}>
-                      OEM Authorization Letters &amp; Certificates ({allEquipmentDocs.length})
-                    </h3>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                      {allEquipmentDocs.map((url: string, idx: number) => (
-                        <a
-                          key={idx}
-                          href={url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-paper hover:bg-slate-100 border border-line rounded-[4px] text-xs font-semibold text-slate-700 transition-colors"
-                        >
-                          <FileText className="w-3.5 h-3.5 text-amber" />
-                          <span>Certificate {idx + 1}</span>
-                          <ExternalLink className="w-3 h-3 text-slate-400" />
-                        </a>
-                      ))}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+                      <h3 style={{ fontSize: "14px", fontWeight: "600", color: "var(--navy-deep)", margin: 0 }}>
+                        OEM Authorization Letters &amp; Certificates ({allEquipmentDocs.length})
+                      </h3>
+                      <span className="text-xs text-ink-soft">Manufacturer Verified</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {allEquipmentDocs.map((url: string, idx: number) => {
+                        const isImg = isImageUrl(url);
+                        return isImg ? (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              const imgDocs = allEquipmentDocs.filter(isImageUrl);
+                              const imgIdx = imgDocs.indexOf(url);
+                              setLightbox({
+                                title: `${installer.companyName} — OEM Brand Certificates`,
+                                photos: imgDocs,
+                                index: Math.max(0, imgIdx)
+                              });
+                            }}
+                            className="group relative aspect-[4/3] rounded-lg overflow-hidden border border-line bg-paper/50 hover:border-amber hover:shadow-md transition-all text-left cursor-pointer"
+                          >
+                            <Image
+                              src={url}
+                              alt={`OEM Certificate ${idx + 1}`}
+                              fill
+                              sizes="(max-width: 640px) 50vw, 33vw"
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                              unoptimized={url.startsWith("http")}
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent flex flex-col justify-end p-2.5">
+                              <span className="text-[11px] font-semibold text-white drop-shadow truncate">
+                                Certificate {idx + 1}
+                              </span>
+                              <span className="text-[9.5px] text-amber drop-shadow font-medium">Click to view ↗</span>
+                            </div>
+                          </button>
+                        ) : (
+                          <a
+                            key={idx}
+                            href={url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex flex-col items-center justify-center p-3 rounded-lg border border-line bg-paper/60 hover:bg-slate-100 hover:border-amber transition-all text-center gap-1.5"
+                          >
+                            <FileText className="w-6 h-6 text-amber" />
+                            <span className="text-xs font-semibold text-navy-deep truncate max-w-full">
+                              Certificate {idx + 1}
+                            </span>
+                            <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                              View PDF <ExternalLink className="w-2.5 h-2.5" />
+                            </span>
+                          </a>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -717,23 +897,64 @@ export function EpcProfileView({
                 {/* Uploaded Company Licence & Legal Documents */}
                 {licenceDocuments.length > 0 && (
                   <div style={{ marginTop: "24px", paddingTop: "16px", borderTop: "1px solid var(--line)" }}>
-                    <h3 style={{ fontSize: "14px", fontWeight: "600", color: "var(--navy-deep)", marginBottom: "10px" }}>
-                      Verified Company Legal Documents ({licenceDocuments.length})
-                    </h3>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                      {licenceDocuments.map((url: string, idx: number) => (
-                        <a
-                          key={idx}
-                          href={url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-paper hover:bg-blue-50 border border-line rounded-[4px] text-xs font-semibold text-blue-600 transition-colors"
-                        >
-                          <FileText className="w-3.5 h-3.5 text-blue-600" />
-                          <span>Legal Document {idx + 1}</span>
-                          <ExternalLink className="w-3 h-3 text-slate-400" />
-                        </a>
-                      ))}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+                      <h3 style={{ fontSize: "14px", fontWeight: "600", color: "var(--navy-deep)", margin: 0 }}>
+                        Verified Company Legal Documents ({licenceDocuments.length})
+                      </h3>
+                      <span className="text-xs text-ink-soft">PEC / AEDB / SECP</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {licenceDocuments.map((url: string, idx: number) => {
+                        const isImg = isImageUrl(url);
+                        return isImg ? (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              const imgDocs = licenceDocuments.filter(isImageUrl);
+                              const imgIdx = imgDocs.indexOf(url);
+                              setLightbox({
+                                title: `${installer.companyName} — Regulatory Licences & Legal Documents`,
+                                photos: imgDocs,
+                                index: Math.max(0, imgIdx)
+                              });
+                            }}
+                            className="group relative aspect-[4/3] rounded-lg overflow-hidden border border-line bg-paper/50 hover:border-blue-500 hover:shadow-md transition-all text-left cursor-pointer"
+                          >
+                            <Image
+                              src={url}
+                              alt={`Legal Document ${idx + 1}`}
+                              fill
+                              sizes="(max-width: 640px) 50vw, 33vw"
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                              unoptimized={url.startsWith("http")}
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent flex flex-col justify-end p-2.5">
+                              <span className="text-[11px] font-semibold text-white drop-shadow truncate">
+                                Official License {idx + 1}
+                              </span>
+                              <span className="text-[9.5px] text-blue-300 drop-shadow font-medium">Click to view ↗</span>
+                            </div>
+                          </button>
+                        ) : (
+                          <a
+                            key={idx}
+                            href={url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex flex-col items-center justify-center p-3 rounded-lg border border-line bg-paper/60 hover:bg-blue-50 hover:border-blue-400 transition-all text-center gap-1.5"
+                          >
+                            <FileText className="w-6 h-6 text-blue-600" />
+                            <span className="text-xs font-semibold text-navy-deep truncate max-w-full">
+                              Legal Document {idx + 1}
+                            </span>
+                            <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                              View PDF <ExternalLink className="w-2.5 h-2.5" />
+                            </span>
+                          </a>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -776,7 +997,7 @@ export function EpcProfileView({
                 <div className="licence-row">
                   <div className="licence-name">Years in Business</div>
                   <span style={{ color: "var(--navy-deep)", fontWeight: "600", fontSize: "14px" }}>
-                    {installer.yearsInBusiness || yearsInBusiness} Years
+                    {dynamicYearsInBusiness} Years
                   </span>
                 </div>
               </div>
@@ -785,29 +1006,116 @@ export function EpcProfileView({
 
           {/* PROJECTS */}
           <section className={`panel ${activeTab === "projects" ? "active" : ""}`} id="projects">
-            <div className="project-grid">
-              {projects && projects.length > 0 ? (
-                projects.map((project: any, i: number) => (
-                  <div key={i} className="project-card">
-                    <div className="project-media">
-                      {project.images && project.images[0] && (
-                        <Image src={project.images[0]} alt={project.name} fill className="object-cover" />
-                      )}
-                      <span className="project-size-tag">{project.systemSize || "10 kW"} · {project.segmentType?.[0] || "Residential"}</span>
-                    </div>
-                    <div className="project-body">
-                      <h4>{project.name}</h4>
-                      <div className="project-meta">{project.installationDate ? new Date(project.installationDate).toISOString().split('T')[0] : ""} · {project.city || primaryCity}</div>
-                      <p>{project.description || `${project.systemType || "Hybrid"} system installed.`}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="col-span-full">
-                  <p className="text-slate-custom text-sm">No projects listed yet.</p>
-                </div>
-              )}
+            <div className="section-head" style={{ marginBottom: "20px" }}>
+              <h2 style={{ fontSize: "19px", fontWeight: "600", color: "var(--navy-deep)" }}>
+                Projects &amp; Completed Installations
+              </h2>
+              <p style={{ fontSize: "13.5px", color: "var(--ink-soft)", marginTop: "4px" }}>
+                Solar installation sites, system commissioning, and residential &amp; commercial portfolio by {installer.companyName}.
+              </p>
             </div>
+
+            {/* Formal Projects (if any) */}
+            {projects && projects.length > 0 && (
+              <div className="project-grid" style={{ marginBottom: allProjectPhotos.length > 0 ? "28px" : "0" }}>
+                {projects.map((project: any, i: number) => {
+                  const projectImages: string[] = Array.isArray(project.images)
+                    ? project.images
+                    : (project.imageUrl ? [project.imageUrl] : []);
+                  return (
+                    <div key={i} className="project-card">
+                      <div
+                        className="project-media"
+                        style={{ cursor: projectImages.length > 0 ? "pointer" : "default" }}
+                        onClick={() => {
+                          if (projectImages.length > 0) {
+                            setLightbox({
+                              title: `${installer.companyName} — ${project.name}`,
+                              photos: projectImages,
+                              index: 0
+                            });
+                          }
+                        }}
+                      >
+                        {projectImages.length > 0 ? (
+                          <Image src={projectImages[0]} alt={project.name} fill className="object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400">
+                            <Briefcase className="w-8 h-8 opacity-40" />
+                          </div>
+                        )}
+                        <span className="project-size-tag">
+                          {project.systemSize || "10 kW"} · {project.segmentType?.[0] || "Residential"}
+                        </span>
+                      </div>
+                      <div className="project-body">
+                        <h4>{project.name}</h4>
+                        <div className="project-meta">
+                          {project.installationDate ? new Date(project.installationDate).toISOString().split('T')[0] : ""} · {project.city || primaryCity}
+                        </div>
+                        <p>{project.description || `${project.systemType || "Hybrid"} system installed.`}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Site & Project Installations Photo Gallery */}
+            {allProjectPhotos.length > 0 && (
+              <div className="card" style={{ marginTop: projects && projects.length > 0 ? "24px" : "0" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", paddingBottom: "12px", borderBottom: "1px solid var(--line)" }}>
+                  <div>
+                    <h3 style={{ fontSize: "17px", fontWeight: "600", color: "var(--navy-deep)", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+                      <Briefcase className="w-5 h-5 text-amber" />
+                      Completed Installations &amp; Site Gallery
+                    </h3>
+                    <p style={{ fontSize: "13px", color: "var(--ink-soft)", marginTop: "3px" }}>
+                      On-site photos of rooftop solar arrays, inverters, and battery storage setups.
+                    </p>
+                  </div>
+                  <span style={{ fontSize: "12px", fontWeight: "600", background: "rgba(224, 167, 59, 0.15)", color: "var(--navy-deep)", padding: "4px 10px", borderRadius: "999px", border: "1px solid rgba(224, 167, 59, 0.3)" }}>
+                    {allProjectPhotos.length} {allProjectPhotos.length === 1 ? "Photo" : "Photos"}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {allProjectPhotos.map((photoUrl, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setLightbox({
+                        title: `${installer.companyName} — Projects & Site Installations`,
+                        photos: allProjectPhotos,
+                        index: idx
+                      })}
+                      className="group relative aspect-[4/3] rounded-lg overflow-hidden border border-line bg-paper/40 hover:border-amber hover:shadow-md transition-all text-left focus:outline-none focus:ring-2 focus:ring-amber/40 cursor-pointer"
+                    >
+                      <Image
+                        src={photoUrl}
+                        alt={`${installer.companyName} installation photo ${idx + 1}`}
+                        fill
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        unoptimized={photoUrl.startsWith("http")}
+                      />
+                      <div className="absolute inset-0 bg-navy-deep/0 group-hover:bg-navy-deep/20 transition-colors flex items-center justify-center">
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-navy-deep/80 text-white text-xs font-semibold px-2.5 py-1 rounded shadow">
+                          View
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Empty state if neither formal projects nor portfolio images exist */}
+            {(!projects || projects.length === 0) && allProjectPhotos.length === 0 && (
+              <div className="card p-8 text-center">
+                <p className="text-slate-custom text-sm">No completed installations or projects listed yet.</p>
+              </div>
+            )}
           </section>
 
           {/* REVIEWS */}
@@ -841,6 +1149,108 @@ export function EpcProfileView({
 
         </div>
       </main>
+
+      {/* Universal Lightbox Dialog */}
+      <Dialog
+        open={lightbox !== null}
+        onOpenChange={(open) => !open && setLightbox(null)}
+      >
+        <DialogContent
+          showCloseButton={false}
+          className="w-[96vw] sm:max-w-[94vw] md:max-w-[90vw] lg:max-w-6xl xl:max-w-7xl h-[88vh] max-h-[92vh] p-0 bg-navy-deep/98 border border-white/10 text-white rounded-2xl overflow-hidden shadow-2xl flex flex-col [&>div]:p-0 [&>div]:h-full [&>div]:flex [&>div]:flex-col"
+        >
+          <DialogTitle className="sr-only">
+            {lightbox?.title || `${installer.companyName} Gallery`}
+          </DialogTitle>
+          {lightbox && currentLightboxPhoto && (
+            <div className="relative w-full h-full flex flex-col bg-navy-deep select-none">
+              {/* Header Bar */}
+              <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-black/40 shrink-0 z-20">
+                <div className="flex items-center gap-2.5">
+                  <Camera className="w-4 h-4 text-amber" />
+                  <span className="text-sm font-semibold tracking-wide text-white truncate max-w-[240px] sm:max-w-md">
+                    {lightbox.title}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/10 text-paper/90 border border-white/15">
+                    {lightbox.index + 1} / {lightbox.photos.length}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setLightbox(null)}
+                    className="p-1.5 rounded-full text-white/70 hover:text-white hover:bg-white/15 transition-all cursor-pointer focus:outline-none"
+                    aria-label="Close photo viewer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Main Image Container with Navigation Arrows */}
+              <div className="relative flex-1 w-full min-h-0 flex items-center justify-center p-2 sm:p-6 bg-black/50 overflow-hidden">
+                <Image
+                  src={currentLightboxPhoto}
+                  alt={`${lightbox.title} - photo ${lightbox.index + 1}`}
+                  fill
+                  priority
+                  className="object-contain"
+                  unoptimized={currentLightboxPhoto.startsWith("http")}
+                />
+
+                {/* Left arrow: ONLY shown when not on the first image */}
+                {lightbox.index > 0 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLightbox(prev => prev && prev.index > 0 ? { ...prev, index: prev.index - 1 } : prev);
+                    }}
+                    className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/70 hover:bg-black/90 text-white border border-white/30 flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all cursor-pointer"
+                    aria-label="Previous photo"
+                  >
+                    <ChevronLeft className="w-6 h-6 sm:w-7 sm:h-7" />
+                  </button>
+                )}
+
+                {/* Right arrow: ONLY shown when not on the last image */}
+                {lightbox.index < lightbox.photos.length - 1 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLightbox(prev => prev && prev.index < prev.photos.length - 1 ? { ...prev, index: prev.index + 1 } : prev);
+                    }}
+                    className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/70 hover:bg-black/90 text-white border border-white/30 flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all cursor-pointer"
+                    aria-label="Next photo"
+                  >
+                    <ChevronRight className="w-6 h-6 sm:w-7 sm:h-7" />
+                  </button>
+                )}
+              </div>
+
+              {/* Footer Bar with Navigation Hint & Quick Jump Dots/Thumbnails */}
+              <div className="px-5 py-2.5 border-t border-white/10 bg-black/40 flex items-center justify-between text-xs text-paper/70 shrink-0">
+                <span className="hidden sm:inline">Use Left &amp; Right arrow keys to navigate</span>
+                <span className="text-[11px] text-paper/50 sm:hidden">Tap arrows to navigate</span>
+                <div className="flex items-center gap-1.5 overflow-x-auto max-w-[50vw]">
+                  {lightbox.photos.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setLightbox(prev => prev ? { ...prev, index: i } : null)}
+                      className={`h-2 rounded-full transition-all cursor-pointer ${
+                        i === lightbox.index ? "w-6 bg-amber" : "w-2 bg-white/30 hover:bg-white/60"
+                      }`}
+                      aria-label={`Jump to photo ${i + 1}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

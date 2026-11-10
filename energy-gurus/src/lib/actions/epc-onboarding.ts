@@ -93,6 +93,9 @@ export async function onboardEpcInstaller(formData: FormData) {
         const batteryCertDocsStr = formData.get("batteryCertDocuments") as string;
         const batteryCertDocuments = batteryCertDocsStr ? JSON.parse(batteryCertDocsStr) : [];
 
+        const serviceAreasStr = formData.get("serviceAreas") as string;
+        const serviceAreas = serviceAreasStr ? JSON.parse(serviceAreasStr) : (formData.getAll("serviceAreas") as string[]);
+
         // Social Links
         const socialLinks: { platform: string; url: string }[] = [];
         const website = formData.get("website") as string;
@@ -121,6 +124,7 @@ export async function onboardEpcInstaller(formData: FormData) {
             area: formData.get("area") as string || null,
             city: formData.get("city") as string || null,
             country: formData.get("country") as string || 'Pakistan',
+            serviceAreas: serviceAreas || [],
             coordinates: formData.get("coordinates") as string || null,
             website: website || null,
             socialLinks: socialLinks,

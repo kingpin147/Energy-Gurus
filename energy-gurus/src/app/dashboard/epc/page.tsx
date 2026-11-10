@@ -145,6 +145,7 @@ export default async function EpcDashboard() {
                   defaultArea={epc.area || ""}
                   defaultCity={epc.city || ""}
                   defaultCountry={epc.country || "Pakistan"}
+                  defaultServiceAreas={epc.serviceAreas || []}
                   defaultSectors={epc.sectors || []}
                   defaultCertifications={(epc as any).certifications || []}
                   defaultSolarBrands={(epc as any).solarBrands || []}

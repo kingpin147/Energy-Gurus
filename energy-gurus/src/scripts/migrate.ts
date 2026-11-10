@@ -35,6 +35,7 @@ async function run() {
     await sql`ALTER TABLE epc_installers ADD COLUMN IF NOT EXISTS solar_cert_documents jsonb DEFAULT '[]'::jsonb;`;
     await sql`ALTER TABLE epc_installers ADD COLUMN IF NOT EXISTS inverter_cert_documents jsonb DEFAULT '[]'::jsonb;`;
     await sql`ALTER TABLE epc_installers ADD COLUMN IF NOT EXISTS battery_cert_documents jsonb DEFAULT '[]'::jsonb;`;
+    await sql`ALTER TABLE epc_installers ADD COLUMN IF NOT EXISTS service_areas jsonb DEFAULT '[]'::jsonb;`;
     console.log("Success: new epc_installers columns added.");
   } catch (err: any) {
     console.error("Error adding new epc_installers columns:", err.message);

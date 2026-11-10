@@ -114,6 +114,30 @@ export default async function AdminReviewPage({ params }: { params: Promise<{ id
                 <div className="field-row"><label>Area / Society</label><div className="val">{epc.area || "N/A"}</div></div>
                 <div className="field-row"><label>City</label><div className="val">{epc.city || "N/A"}</div></div>
                 <div className="field-row"><label>Country</label><div className="val">{epc.country || "Pakistan"}</div></div>
+                <div className="field-row full">
+                  <label>Service Areas &amp; Coverage</label>
+                  <div className="val">
+                    {(epc as any).serviceAreas && (epc as any).serviceAreas.length > 0 ? (
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {(epc as any).serviceAreas.map((area: string, i: number) => (
+                          <span
+                            key={i}
+                            className={`inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-md font-semibold border ${
+                              area === "All Over Pakistan"
+                                ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                                : "bg-paper text-navy-deep border-line"
+                            }`}
+                          >
+                            <MapPin className="w-3 h-3 text-amber shrink-0" />
+                            {area}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      epc.city ? `Serving ${epc.city}` : "Not specified (Defaults to Head Office City)"
+                    )}
+                  </div>
+                </div>
               </div>
               
               {offices.length > 0 && (

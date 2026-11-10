@@ -55,6 +55,7 @@ export async function getAllEpcInstallers() {
       area: epcInstallers.area,
       city: epcInstallers.city,
       country: epcInstallers.country,
+      serviceAreas: epcInstallers.serviceAreas,
       website: epcInstallers.website,
       logoUrl: epcInstallers.logoUrl,
       tier: epcInstallers.tier,
@@ -156,6 +157,7 @@ export async function adminUpdateEpcInstaller(epcId: string, data: {
   businessType?: string | null;
   whatsapp?: string | null;
   coordinates?: string | null;
+  serviceAreas?: string[];
   photos?: string[];
   solarCertDocuments?: string[];
   inverterCertDocuments?: string[];
@@ -197,6 +199,7 @@ export async function adminUpdateEpcInstaller(epcId: string, data: {
         area: data.area ?? null,
         city: data.city ?? null,
         country: data.country ?? 'Pakistan',
+        serviceAreas: data.serviceAreas ?? existing.serviceAreas ?? [],
         coordinates: data.coordinates ?? null,
         website: data.website ?? null,
         tier: data.tier ?? 'bronze',

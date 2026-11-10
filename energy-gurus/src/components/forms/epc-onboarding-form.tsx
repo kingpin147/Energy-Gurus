@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { CheckCircle2, X, Plus, FileText, Trash2, MapPin } from 'lucide-react';
 import { LocationPickerModal } from '@/components/shared/LocationPickerModal';
+import { ServiceAreasInput } from '@/components/shared/ServiceAreasInput';
 
 const DEFAULT_SECTORS = ['Residential', 'Commercial', 'Industrial', 'Agriculture'];
 const DEFAULT_CERTIFICATIONS = ['AEDB Licence', 'PEC Licence'];
@@ -65,6 +66,9 @@ export function EpcOnboardingForm({ isPublic = false }: { isPublic?: boolean } =
 
     // Exactly 2 tiers as per design: Silver and Gold
     const [selectedTier, setSelectedTier] = useState<'silver'|'gold'>('silver');
+
+    // Service Areas state
+    const [serviceAreas, setServiceAreas] = useState<string[]>(['Lahore']);
 
     // Brand states
     const [solarBrands, setSolarBrands] = useState<string[]>([]);
@@ -154,6 +158,7 @@ export function EpcOnboardingForm({ isPublic = false }: { isPublic?: boolean } =
         formData.append("inverterCertDocuments", JSON.stringify(inverterCertDocs.map(d => d.url)));
         formData.append("batteryCertDocuments", JSON.stringify(batteryCertDocs.map(d => d.url)));
         formData.append("tier", selectedTier);
+        formData.append("serviceAreas", JSON.stringify(serviceAreas));
         selectedSectors.forEach(s => formData.append("sectors", s));
         selectedCerts.forEach(c => formData.append("certifications", c));
         solarBrands.forEach(b => formData.append("solarBrands", b));
@@ -354,6 +359,17 @@ export function EpcOnboardingForm({ isPublic = false }: { isPublic?: boolean } =
                             </button>
                         </div>
                         <p className="hint">Optional — helps customers find you accurately on the map. Click &quot;Pick on map&quot; to drop a pin.</p>
+                    </div>
+
+                    <div className="field full" style={{ marginTop: '16px' }}>
+                        <label>Service Areas &amp; Coverage</label>
+                        <p className="hint" style={{ margin: '-2px 0 10px' }}>
+                            Specify the cities your company installs and services. Select &quot;All Over Pakistan&quot; for nationwide coverage, or select multiple specific cities.
+                        </p>
+                        <ServiceAreasInput
+                            value={serviceAreas}
+                            onChange={setServiceAreas}
+                        />
                     </div>
                 </div>
 

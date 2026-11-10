@@ -7,6 +7,7 @@ import { useR2Upload } from "@/lib/hooks/use-r2-upload";
 import { UploadZone } from "@/components/ui/upload-zone";
 import { MultiPhotoUpload, MultiDocumentUpload } from "@/components/dashboard/multi-media-upload";
 import { Input } from "@/components/ui/input";
+import { ServiceAreasInput } from "@/components/shared/ServiceAreasInput";
 import { toast } from "sonner";
 
 interface EpcProfileFormProps {
@@ -21,6 +22,7 @@ interface EpcProfileFormProps {
     defaultArea?: string;
     defaultCity?: string;
     defaultCountry?: string;
+    defaultServiceAreas?: string[];
     defaultSectors?: string[];
     defaultCertifications?: string[];
     defaultSolarBrands?: string[];
@@ -48,6 +50,7 @@ export function EpcProfileForm({
     defaultArea = "",
     defaultCity = "",
     defaultCountry = "Pakistan",
+    defaultServiceAreas = [],
     defaultSectors = [], 
     defaultCertifications = [], 
     defaultSolarBrands = [],
@@ -76,6 +79,7 @@ export function EpcProfileForm({
     const [area, setArea] = useState(defaultArea || "");
     const [city, setCity] = useState(defaultCity || "");
     const [country, setCountry] = useState(defaultCountry || "Pakistan");
+    const [serviceAreas, setServiceAreas] = useState<string[]>(defaultServiceAreas || []);
     const [about, setAbout] = useState(defaultAbout || "");
     const [website, setWebsite] = useState(defaultWebsite || "");
 
@@ -154,6 +158,7 @@ export function EpcProfileForm({
             formData.set("country", country.trim() || "Pakistan");
             formData.set("about", about.trim());
             formData.set("website", website.trim());
+            formData.set("serviceAreas", JSON.stringify(serviceAreas));
 
             formData.set("sectors", JSON.stringify(selectedSectors));
             formData.set("certifications", JSON.stringify(selectedCertifications));
@@ -299,6 +304,19 @@ export function EpcProfileForm({
                         value={country}
                         onChange={(e) => setCountry(e.target.value)}
                         className="w-full border rounded-xl p-3 bg-paper/5 focus:ring-2 focus:ring-primary outline-none"
+                    />
+                </div>
+                <div className="md:col-span-2 p-4 bg-slate-50/60 rounded-2xl border border-line space-y-2">
+                    <label className="block text-xs font-bold uppercase tracking-widest text-navy-deep">
+                        Service Areas &amp; Coverage
+                    </label>
+                    <p className="text-xs text-slate-custom">
+                        Specify all the cities your company installs and services. Select &quot;All Over Pakistan&quot; for nationwide service coverage, or select multiple specific cities.
+                    </p>
+                    <ServiceAreasInput
+                        value={serviceAreas}
+                        onChange={setServiceAreas}
+                        disabled={isLocked}
                     />
                 </div>
             </div>
