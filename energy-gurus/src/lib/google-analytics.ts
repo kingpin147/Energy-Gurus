@@ -340,7 +340,7 @@ export async function fetchGoogleAnalyticsDashboardData(): Promise<GAResponse> {
     };
 
     // 1. Parse Overview by dateRange
-    overviewReport[0]?.rows?.forEach((row) => {
+    overviewReport[0]?.rows?.forEach((row: any) => {
       const range = (row.dimensionValues?.[0]?.value as "7d" | "14d" | "30d") || "30d";
       if (ranges[range]) {
         const engRate = Number(row.metricValues?.[5]?.value || 0);
@@ -358,7 +358,7 @@ export async function fetchGoogleAnalyticsDashboardData(): Promise<GAResponse> {
     });
 
     // 2. Parse Top Pages with full metrics
-    pagesReport[0]?.rows?.forEach((row) => {
+    pagesReport[0]?.rows?.forEach((row: any) => {
       const dimCount = row.dimensionValues?.length || 0;
       const range = (row.dimensionValues?.[dimCount - 1]?.value as "7d" | "14d" | "30d") || "30d";
       if (ranges[range] && ranges[range].topPages.length < 10) {
@@ -382,7 +382,7 @@ export async function fetchGoogleAnalyticsDashboardData(): Promise<GAResponse> {
     });
 
     // 3. Parse Countries
-    countriesReport[0]?.rows?.forEach((row) => {
+    countriesReport[0]?.rows?.forEach((row: any) => {
       const dimCount = row.dimensionValues?.length || 0;
       const range = (row.dimensionValues?.[dimCount - 1]?.value as "7d" | "14d" | "30d") || "30d";
       const name = row.dimensionValues?.[0]?.value || "Unknown";
@@ -396,7 +396,7 @@ export async function fetchGoogleAnalyticsDashboardData(): Promise<GAResponse> {
     });
 
     // 4. Parse Cities
-    citiesReport[0]?.rows?.forEach((row) => {
+    citiesReport[0]?.rows?.forEach((row: any) => {
       const dimCount = row.dimensionValues?.length || 0;
       const range = (row.dimensionValues?.[dimCount - 1]?.value as "7d" | "14d" | "30d") || "30d";
       const name = row.dimensionValues?.[0]?.value || "Unknown";
@@ -410,7 +410,7 @@ export async function fetchGoogleAnalyticsDashboardData(): Promise<GAResponse> {
     });
 
     // 5. Parse Regions / Provinces
-    regionsReport[0]?.rows?.forEach((row) => {
+    regionsReport[0]?.rows?.forEach((row: any) => {
       const dimCount = row.dimensionValues?.length || 0;
       const range = (row.dimensionValues?.[dimCount - 1]?.value as "7d" | "14d" | "30d") || "30d";
       const name = row.dimensionValues?.[0]?.value || "Unknown";
@@ -424,7 +424,7 @@ export async function fetchGoogleAnalyticsDashboardData(): Promise<GAResponse> {
     });
 
     // 6. Parse Channels
-    channelsReport[0]?.rows?.forEach((row) => {
+    channelsReport[0]?.rows?.forEach((row: any) => {
       const dimCount = row.dimensionValues?.length || 0;
       const range = (row.dimensionValues?.[dimCount - 1]?.value as "7d" | "14d" | "30d") || "30d";
       const channel = row.dimensionValues?.[0]?.value || "Direct";
@@ -448,7 +448,7 @@ export async function fetchGoogleAnalyticsDashboardData(): Promise<GAResponse> {
     });
 
     // 7. Parse Devices and calculate percentage share
-    devicesReport[0]?.rows?.forEach((row) => {
+    devicesReport[0]?.rows?.forEach((row: any) => {
       const dimCount = row.dimensionValues?.length || 0;
       const range = (row.dimensionValues?.[dimCount - 1]?.value as "7d" | "14d" | "30d") || "30d";
       const category = (row.dimensionValues?.[0]?.value || "desktop").toLowerCase();
@@ -473,7 +473,7 @@ export async function fetchGoogleAnalyticsDashboardData(): Promise<GAResponse> {
     });
 
     // 8. Parse Daily Trends
-    const dailyTrends: GADailyTrend[] = (trendsReport[0]?.rows || []).map((row) => {
+    const dailyTrends: GADailyTrend[] = (trendsReport[0]?.rows || []).map((row: any) => {
       const rawDate = row.dimensionValues?.[0]?.value || "";
       let label = rawDate;
       if (rawDate.length === 8) {
@@ -492,7 +492,7 @@ export async function fetchGoogleAnalyticsDashboardData(): Promise<GAResponse> {
     });
 
     // 9. Parse Multi-Channel Traffic (Google, Facebook/Instagram, TikTok, YouTube, LinkedIn, Direct)
-    multiChannelReport[0]?.rows?.forEach((row) => {
+    multiChannelReport[0]?.rows?.forEach((row: any) => {
       const dimCount = row.dimensionValues?.length || 0;
       const range = (row.dimensionValues?.[dimCount - 1]?.value as "7d" | "14d" | "30d") || "30d";
       const source = (row.dimensionValues?.[0]?.value || "direct").toLowerCase();

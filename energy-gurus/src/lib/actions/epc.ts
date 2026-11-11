@@ -47,6 +47,7 @@ export async function updateEpcProfile(data: FormData | Partial<typeof epcInstal
     ...(data.has("country") ? { country: (data.get("country") as string)?.trim() || "Pakistan" } : {}),
     ...(data.has("serviceAreas") ? { serviceAreas: parseJsonArray(data.get("serviceAreas"), []) } : {}),
     ...(data.has("coordinates") ? { coordinates: (data.get("coordinates") as string)?.trim() || undefined } : {}),
+    ...(data.has("serviceAreas") ? { serviceAreas: parseJsonArray(data.get("serviceAreas"), []) } : {}),
     ...(data.has("logoUrl") ? { logoUrl: (data.get("logoUrl") as string)?.trim() || undefined } : {}),
     ...(data.has("about") ? { about: (data.get("about") as string)?.trim() || undefined } : {}),
     ...(data.has("website") ? { website: (data.get("website") as string)?.trim() || undefined } : {}),

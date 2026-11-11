@@ -2,7 +2,9 @@
 
 import { useState, useRef } from "react";
 import { addEpcProject, updateEpcProject, deleteEpcProject } from "@/lib/actions/epc";
-import { Plus, Trash2, Zap, Loader2, Image as ImageIcon, Video as VideoIcon, LayoutGrid, Edit2, X, Upload } from "lucide-react";
+import { Plus, Trash2, Zap, Loader2, Image as ImageIcon, Video as VideoIcon, LayoutGrid, Edit2, X, Upload, MapPin } from "lucide-react";
+import { MultiCitySelect } from "@/components/dashboard/multi-city-select";
+import { ProjectMediaUpload } from "@/components/dashboard/project-media-upload";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useR2Upload } from "@/lib/hooks/use-r2-upload";
@@ -13,6 +15,7 @@ interface Project {
     id: string;
     name: string;
     city: string | null;
+    cities?: string[] | null;
     segmentType: any;
     systemSize: string | null;
     systemType: string | null;
@@ -43,6 +46,8 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
     const [uploadedImages, setUploadedImages] = useState<string[]>([]);
     const [uploadedVideos, setUploadedVideos] = useState<string[]>([]);
     const [selectedSegments, setSelectedSegments] = useState<string[]>([]);
+    const [selectedCities, setSelectedCities] = useState<string[]>([]);
+    const [youtubeUrlState, setYoutubeUrlState] = useState("");
 
     const { uploadFile, isUploading } = useR2Upload();
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -52,6 +57,8 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
         setUploadedImages([]);
         setUploadedVideos([]);
         setSelectedSegments([]);
+        setSelectedCities([]);
+        setYoutubeUrlState("");
         setIsFormOpen(true);
     };
 
@@ -59,6 +66,11 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
         setEditingProject(project);
         setUploadedImages(project.images || []);
         setUploadedVideos(project.videos || []);
+        const projectCities = Array.isArray(project.cities) && project.cities.length > 0
+          ? project.cities
+          : (project.city ? project.city.split(',').map(s => s.trim()).filter(Boolean) : []);
+        setSelectedCities(projectCities);
+        setYoutubeUrlState(project.youtubeUrl || "");
         
         let defaultSegments: string[] = [];
         if (project.segmentType) {
@@ -100,7 +112,7 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
         try {
             const projectData = {
                 name: formData.get("name") as string,
-                city: formData.get("city") as string,
+                city: selectedCities.join(", "), cities: selectedCities,
                 segmentType: selectedSegments,
                 systemSize: formData.get("systemSize") as string,
                 systemType: formData.get("systemType") as string,
@@ -109,7 +121,7 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
                 solarPanelModel: formData.get("solarPanelModel") as string,
                 images: uploadedImages,
                 videos: uploadedVideos,
-                youtubeUrl: formData.get("youtubeUrl") as string,
+                youtubeUrl: youtubeUrlState || (formData.get("youtubeUrl") as string) || "",
                 installationDate: formData.get("installationDate") as string,
                 customerName: formData.get("customerName") as string,
                 companyName: formData.get("companyName") as string,
@@ -129,6 +141,8 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
             setEditingProject(null);
             setUploadedImages([]);
             setUploadedVideos([]);
+            setSelectedCities([]);
+            setYoutubeUrlState("");
             router.refresh();
         } catch (err) {
             console.error(err);
@@ -189,14 +203,16 @@ export function ProjectManagement({ epcId, initialProjects }: ProjectManagementP
                                         <input name="name" defaultValue={editingProject?.name || ""} placeholder="e.g. 10kW Residential Installation" className="w-full border rounded-2xl p-4 bg-paper outline-none" required />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="col-span-2 sm:col-span-1 space-y-4">
-                                            <div>
-                                                <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">City</label>
-                                                <input name="city" defaultValue={editingProject?.city || ""} placeholder="Islamabad" className="w-full border rounded-2xl p-4 bg-paper outline-none" />
-                                            </div>
-                                            <div>
-                                                <label className="text-[10px] font-black uppercase tracking-widest mb-2 block">Country</label>
-                                                <input name="country" defaultValue={editingProject?.country || "Pakistan"} className="w-full border rounded-2xl p-4 bg-paper outline-none" />
+                                        <div className="col-span-2 space-y-3">
+                                            <MultiCitySelect
+                                                label="Project Location(s) & Coverage"
+                                                description="Specify multiple cities or select 'All Over Pakistan' for nationwide rollout."
+                                                value={selectedCities}
+                                                onChange={setSelectedCities}
+                                                compact={true}
+                                            />
+                                            <div className="hidden">
+                                                <input name="country" defaultValue={editingProject?.country || "Pakistan"} />
                                             </div>
                                         </div>
                                         <div className="col-span-2">

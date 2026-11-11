@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { epcInstallers, epcOffices, epcProjects, users, reviews } from "@/db/schema";
+import { epcInstallers, epcOffices, epcProjects, users, reviews, installerCertifications } from "@/db/schema";
 import { eq, desc, and, isNull } from "drizzle-orm";
 import { getUserRole } from "@/lib/roles";
 import { revalidatePath } from "next/cache";
@@ -125,11 +125,17 @@ export async function getEpcFullDetails(epcId: string) {
     .leftJoin(users, eq(users.id, reviews.authorId))
     .where(eq(reviews.targetId, epcId));
 
+  const certs = await db
+    .select()
+    .from(installerCertifications)
+    .where(eq(installerCertifications.installerId, epcId));
+
   return {
     ...epc,
     offices,
     projects,
     reviews: epcReviews,
+    certificationsList: certs,
   };
 }
 
@@ -143,7 +149,7 @@ export async function adminUpdateEpcInstaller(epcId: string, data: {
   city?: string | null;
   country?: string | null;
   website?: string | null;
-  tier?: 'bronze' | 'silver' | 'gold';
+  tier?: 'unverified' | 'bronze' | 'silver' | 'gold' | 'diamond' | 'platinum';
   isVerified?: boolean;
   yearsInBusiness?: number | null;
   regNumber?: string | null;
@@ -167,7 +173,7 @@ export async function adminUpdateEpcInstaller(epcId: string, data: {
   socialLinks?: { platform: string; url: string }[];
   team?: { name: string; designation: string; linkedIn: string; imageUrl: string }[];
   offices?: { officeNumber?: string; block?: string | null; address?: string; area?: string; city: string; country?: string; coordinates?: string; }[];
-  projects?: { name: string; entryType?: 'project' | 'testimonial'; customerName?: string; companyName?: string; installationDate?: string; city?: string; country?: string; segmentType?: string[]; systemSize?: string; systemType?: string; inverterModel?: string | null; batteryModel?: string | null; solarPanelModel?: string | null; description?: string; youtubeUrl?: string }[];
+  projects?: { name: string; entryType?: 'project' | 'testimonial'; customerName?: string; companyName?: string; installationDate?: string; city?: string; cities?: string[]; country?: string; segmentType?: string[]; systemSize?: string; systemType?: string; inverterModel?: string | null; batteryModel?: string | null; solarPanelModel?: string | null; description?: string; youtubeUrl?: string; images?: string[]; videos?: string[]; }[];
 }) {
   const role = await getUserRole();
   if (role !== "super-admin" && role !== "admin") {
@@ -259,7 +265,10 @@ export async function adminUpdateEpcInstaller(epcId: string, data: {
             customerName: p.customerName || null,
             companyName: p.companyName || null,
             installationDate: p.installationDate || null,
-            city: p.city || null,
+            city: p.city || (Array.isArray(p.cities) && p.cities.length > 0 ? p.cities.join(', ') : null),
+            cities: Array.isArray(p.cities) && p.cities.length > 0
+              ? p.cities
+              : (p.city ? p.city.split(',').map((s) => s.trim()).filter(Boolean) : []),
             country: p.country || null,
             segmentType: Array.isArray(p.segmentType) ? p.segmentType : [],
             systemSize: p.systemSize || null,
@@ -269,6 +278,8 @@ export async function adminUpdateEpcInstaller(epcId: string, data: {
             solarPanelModel: p.solarPanelModel || null,
             description: p.description || null,
             youtubeUrl: p.youtubeUrl || null,
+            images: Array.isArray(p.images) ? p.images : [],
+            videos: Array.isArray(p.videos) ? p.videos : [],
           }));
         if (projectRecords.length > 0) {
           await db.insert(epcProjects).values(projectRecords);

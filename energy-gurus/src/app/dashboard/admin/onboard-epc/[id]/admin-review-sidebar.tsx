@@ -70,7 +70,11 @@ export function AdminReviewSidebar({ epcId, initialEgTeamRatings, initialEgRatin
     setLoading(true);
     try {
       let res;
-      if (type === "approved-gold") {
+      if (type === "approved-platinum") {
+        res = await adminUpdateEpcStatusAction(epcId, "live", internalNote, "platinum");
+      } else if (type === "approved-diamond") {
+        res = await adminUpdateEpcStatusAction(epcId, "live", internalNote, "diamond");
+      } else if (type === "approved-gold") {
         res = await adminUpdateEpcStatusAction(epcId, "live", internalNote, "gold");
       } else if (type === "approved-silver") {
         res = await adminUpdateEpcStatusAction(epcId, "live", internalNote, "silver");
@@ -104,8 +108,10 @@ export function AdminReviewSidebar({ epcId, initialEgTeamRatings, initialEgRatin
           decision === "rejected" ? "rejected bg-[rgba(179,67,43,0.08)] text-[#B3432B]" :
           "changes bg-[rgba(232,163,61,0.12)] text-[#a3711c]"
         } p-3.5 rounded-md text-[0.88rem] font-semibold text-center mb-4 border border-line`}>
-          {decision === "approved-gold" && "✓ Approved for Gold Verification — Profile is now LIVE on the Installer Directory."}
-          {decision === "approved-silver" && "✓ Approved for Silver Verification — Profile is now LIVE on the Installer Directory."}
+          {decision === "approved-platinum" && "★ Approved for Platinum Verification (7+ brand certs) — Profile is now LIVE on the Installer Directory."}
+          {decision === "approved-diamond" && "◆ Approved for Diamond Verification (5–6 brand certs) — Profile is now LIVE on the Installer Directory."}
+          {decision === "approved-gold" && "★ Approved for Gold Verification (3–4 brand certs) — Profile is now LIVE on the Installer Directory."}
+          {decision === "approved-silver" && "✓ Approved for Silver Verification (1–2 brand certs) — Profile is now LIVE on the Installer Directory."}
           {decision === "changes" && "↺ Changes requested — Applicant notified to resubmit missing items."}
           {decision === "rejected" && "✕ Application rejected — Kept private and applicant notified."}
         </div>
@@ -259,17 +265,31 @@ export function AdminReviewSidebar({ epcId, initialEgTeamRatings, initialEgRatin
         <h3 className="text-[0.92rem] text-ink mb-1 font-semibold">Decision</h3>
         <button 
           disabled={loading}
-          className="action-btn w-full p-3 rounded text-[0.9rem] font-semibold text-center bg-amber text-ink hover:bg-[#f2b458] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer" 
-          onClick={() => handleDecision("approved-gold")}
+          className="action-btn w-full p-2.5 rounded-lg text-xs font-bold text-center bg-purple-700 text-white hover:bg-purple-800 shadow-xs transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer" 
+          onClick={() => handleDecision("approved-platinum")}
         >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "✓ Approve — Gold Tier"}
+          {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "★ Approve — Platinum Tier (7+ Certs)"}
         </button>
         <button 
           disabled={loading}
-          className="action-btn w-full p-3 rounded text-[0.9rem] font-semibold text-center bg-teal text-white hover:bg-[#255950] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer" 
+          className="action-btn w-full p-2.5 rounded-lg text-xs font-bold text-center bg-cyan-700 text-white hover:bg-cyan-800 shadow-xs transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer" 
+          onClick={() => handleDecision("approved-diamond")}
+        >
+          {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "◆ Approve — Diamond Tier (5–6 Certs)"}
+        </button>
+        <button 
+          disabled={loading}
+          className="action-btn w-full p-2.5 rounded-lg text-xs font-bold text-center bg-amber text-ink hover:bg-[#f2b458] shadow-xs transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer" 
+          onClick={() => handleDecision("approved-gold")}
+        >
+          {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "★ Approve — Gold Tier (3–4 Certs)"}
+        </button>
+        <button 
+          disabled={loading}
+          className="action-btn w-full p-2.5 rounded-lg text-xs font-bold text-center bg-teal text-white hover:bg-[#255950] shadow-xs transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer" 
           onClick={() => handleDecision("approved-silver")}
         >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "✓ Approve — Silver Tier Only"}
+          {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "✓ Approve — Silver Tier (1–2 Certs)"}
         </button>
         <button 
           disabled={loading}

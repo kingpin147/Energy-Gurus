@@ -6,10 +6,10 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 
 export const runtime = "nodejs";
 
-const MAX_SIZE_BYTES = 50 * 1024 * 1024; // 50 MB
+const MAX_SIZE_BYTES = 100 * 1024 * 1024; // 100 MB
 
 const ALLOWED_FOLDERS = [
-    "epc-logos", "epc-photos", "epc-projects", "epc-portfolios", "epc-portfolio", "epc-documents", "epc-brand-certs", "epc-team",
+    "epc-logos", "epc-photos", "epc-projects", "epc-project-images", "epc-project-videos", "epc-portfolios", "epc-portfolio", "epc-documents", "epc-brand-certs", "epc-team",
     "brand-logos", "brand-gallery", "brand-documents", "brand-team", "brand-proofs",
     "product-images", "product-datasheets", "product-manuals",
     "podcast-thumbnails", "uploads",
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
             }
 
             if (file.size > MAX_SIZE_BYTES) {
-                return new NextResponse("File too large (max 50 MB)", { status: 413 });
+                return new NextResponse("File too large (max 100 MB)", { status: 413 });
             }
 
             const ext = sanitizeExtension(file.name);
@@ -130,7 +130,7 @@ export async function POST(req: Request) {
             const arrayBuffer = await req.arrayBuffer();
 
             if (arrayBuffer.byteLength > MAX_SIZE_BYTES) {
-                return new NextResponse("File too large (max 50 MB)", { status: 413 });
+                return new NextResponse("File too large (max 100 MB)", { status: 413 });
             }
 
             const bucketName = process.env.R2_BUCKET_NAME!;

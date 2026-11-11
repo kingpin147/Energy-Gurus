@@ -107,6 +107,7 @@ export const epcProjects = pgTable('epc_projects', {
   country: text('country'),
   description: text('description'),
   city: text('city'),
+  cities: jsonb('cities').$type<string[]>().default([]),
   segmentType: jsonb('segment_type').$type<string[]>().default([]), // Residential, Commercial, etc. (Multi-select)
   systemSize: text('system_size'), // e.g. "10kW"
   systemType: text('system_type'), // Hybrid, Grid Tied, etc.

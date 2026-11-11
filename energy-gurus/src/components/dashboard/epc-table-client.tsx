@@ -46,7 +46,10 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { MultiPhotoUpload, MultiDocumentUpload, SinglePhotoUpload } from "@/components/dashboard/multi-media-upload";
+import { MultiPhotoUpload, MultiDocumentUpload, SinglePhotoUpload, ImageLightboxModal, LightboxState } from "@/components/dashboard/multi-media-upload";
+import { MultiCitySelect } from "@/components/dashboard/multi-city-select";
+import { ProjectMediaUpload } from "@/components/dashboard/project-media-upload";
+import { TierSelectorCard } from "@/components/dashboard/tier-selector-card";
 import { useR2Upload } from "@/lib/hooks/use-r2-upload";
 import { LocationPickerModal } from "@/components/shared/LocationPickerModal";
 import { ServiceAreasInput } from "@/components/shared/ServiceAreasInput";
@@ -82,6 +85,7 @@ type EpcListItem = {
   about: string | null;
   team: any;
   licenceDocuments: any;
+  certificationsList?: any[];
   photos?: string[] | null;
   solarCertDocuments?: string[] | null;
   inverterCertDocuments?: string[] | null;
@@ -115,6 +119,7 @@ type ProjectInput = {
   companyName?: string;
   installationDate?: string;
   city?: string;
+  cities?: string[];
   country?: string;
   segmentType?: string[];
   systemSize?: string;
@@ -124,6 +129,8 @@ type ProjectInput = {
   solarPanelModel?: string;
   description?: string;
   youtubeUrl?: string;
+  images?: string[];
+  videos?: string[];
 };
 
 export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) {
@@ -226,6 +233,7 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
       linkedin: existingSocial.linkedin || "",
       youtube: existingSocial.youtube || "",
       tier: epc.tier || "bronze",
+      certificationsList: Array.isArray((epc as any).certificationsList) ? (epc as any).certificationsList : [],
       isVerified: epc.isVerified ?? false,
       yearsInBusiness: epc.yearsInBusiness ?? 0,
       regNumber: epc.regNumber || "",
@@ -274,6 +282,9 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
               companyName: p.companyName || "",
               installationDate: p.installationDate || "",
               city: p.city || "",
+              cities: Array.isArray(p.cities) && p.cities.length > 0
+                ? p.cities
+                : (p.city ? p.city.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
               country: p.country || "Pakistan",
               segmentType: Array.isArray(p.segmentType) ? p.segmentType : [],
               systemSize: p.systemSize || "",
@@ -283,6 +294,8 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
               solarPanelModel: p.solarPanelModel || "",
               description: p.description || "",
               youtubeUrl: p.youtubeUrl || "",
+              images: Array.isArray(p.images) ? p.images : [],
+              videos: Array.isArray(p.videos) ? p.videos : [],
             }))
           );
         }
@@ -291,6 +304,12 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
           fullDetails.socialLinks.forEach((item: any) => {
             if (item?.platform && item?.url) loadedSocial[item.platform.toLowerCase()] = item.url;
           });
+        }
+        if (Array.isArray(fullDetails.serviceAreas)) {
+          setEditFormData((prev: any) => ({ ...prev, serviceAreas: fullDetails.serviceAreas }));
+        }
+        if (Array.isArray(fullDetails.certificationsList)) {
+          setEditFormData((prev: any) => ({ ...prev, certificationsList: fullDetails.certificationsList }));
         }
         setEditFormData((prev: any) => ({
           ...prev,
@@ -372,7 +391,7 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
       website: editFormData.website,
       socialLinks: socialLinksPayload,
       logoUrl: editFormData.logoUrl || null,
-      tier: editFormData.tier as 'bronze' | 'silver' | 'gold',
+      tier: editFormData.tier as any,
       isVerified: editFormData.isVerified,
       yearsInBusiness: parseInt(editFormData.yearsInBusiness) || 0,
       regNumber: editFormData.regNumber,
@@ -401,7 +420,10 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
         customerName: p.customerName || undefined,
         companyName: p.companyName || undefined,
         installationDate: p.installationDate || undefined,
-        city: p.city || undefined,
+        city: p.city || (Array.isArray(p.cities) && p.cities.length > 0 ? p.cities.join(', ') : undefined),
+        cities: Array.isArray(p.cities) && p.cities.length > 0
+          ? p.cities
+          : (p.city ? p.city.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
         country: p.country || "Pakistan",
         segmentType: Array.isArray(p.segmentType) ? p.segmentType : [],
         systemSize: p.systemSize || undefined,
@@ -411,6 +433,8 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
         solarPanelModel: p.solarPanelModel || undefined,
         description: p.description || undefined,
         youtubeUrl: p.youtubeUrl || undefined,
+        images: Array.isArray(p.images) ? p.images : [],
+        videos: Array.isArray(p.videos) ? p.videos : [],
       })),
     };
 
@@ -482,9 +506,12 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
               className="h-10 text-xs rounded-xl bg-slate-50 border border-line px-3 font-medium text-ink focus:outline-none focus:ring-2 focus:ring-amber/30"
             >
               <option value="all">All Tiers</option>
-              <option value="gold">Gold</option>
+              <option value="platinum">★ Platinum</option>
+              <option value="diamond">◆ Diamond</option>
+              <option value="gold">★ Gold</option>
               <option value="silver">Silver</option>
               <option value="bronze">Bronze</option>
+              <option value="unverified">Unverified</option>
             </select>
           </div>
 
@@ -1138,23 +1165,90 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                      {viewData.projects.map((proj: any) => (
-                        <div key={proj.id} className="p-5 border border-line rounded-2xl bg-white space-y-3 shadow-sm flex flex-col justify-between">
-                          <div>
-                            <div className="flex items-center justify-between gap-2 mb-1.5">
-                              <h4 className="font-bold text-ink text-base">{proj.name}</h4>
-                              {proj.systemSize && <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 font-bold">{proj.systemSize}</Badge>}
+                      {viewData.projects.map((proj: any) => {
+                        const projectCities = Array.isArray(proj.cities) && proj.cities.length > 0
+                          ? proj.cities
+                          : (proj.city ? proj.city.split(',').map((s: string) => s.trim()).filter(Boolean) : []);
+                        const projectImages = Array.isArray(proj.images) ? proj.images : [];
+                        const projectVideos = Array.isArray(proj.videos) ? proj.videos : [];
+
+                        return (
+                          <div key={proj.id} className="p-5 border border-line rounded-2xl bg-white space-y-3 shadow-sm flex flex-col justify-between">
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <h4 className="font-bold text-ink text-base">{proj.name}</h4>
+                                {proj.systemSize && (
+                                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 font-bold shrink-0">
+                                    {proj.systemSize}
+                                  </Badge>
+                                )}
+                              </div>
+
+                              {proj.customerName && (
+                                <p className="text-xs font-medium text-slate-custom">
+                                  Client: <strong className="text-ink">{proj.customerName}</strong> {proj.companyName ? `(${proj.companyName})` : ''}
+                                </p>
+                              )}
+
+                              {/* City badges */}
+                              {projectCities.length > 0 && (
+                                <div className="flex flex-wrap gap-1 pt-1">
+                                  {projectCities.map((c: string, cIdx: number) => (
+                                    <span key={cIdx} className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+                                      📍 {c}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+
+                              {proj.description && (
+                                <p className="text-xs text-slate-700 leading-relaxed mt-2 line-clamp-3">
+                                  {proj.description}
+                                </p>
+                              )}
+
+                              {/* Project Images Thumbnails */}
+                              {projectImages.length > 0 && (
+                                <div className="pt-2">
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-custom block mb-1.5">
+                                    Project Photos ({projectImages.length}/3)
+                                  </span>
+                                  <div className="flex items-center gap-2">
+                                    {projectImages.map((pImg: string, pIdx: number) => (
+                                      <a
+                                        key={pIdx}
+                                        href={pImg}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="w-14 h-14 rounded-xl border border-line overflow-hidden block bg-slate-100 shrink-0 hover:ring-2 hover:ring-amber transition-all"
+                                      >
+                                        <img src={pImg} alt="Project" className="w-full h-full object-cover" />
+                                      </a>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Project Video */}
+                              {projectVideos.length > 0 && (
+                                <div className="pt-2">
+                                  <video
+                                    src={projectVideos[0]}
+                                    controls
+                                    className="w-full max-h-32 rounded-xl bg-black"
+                                  />
+                                </div>
+                              )}
                             </div>
-                            {proj.customerName && <p className="text-xs font-medium text-slate-custom">Client: {proj.customerName} {proj.companyName ? `(${proj.companyName})` : ''}</p>}
-                            {proj.description && <p className="text-xs text-slate-700 leading-relaxed mt-2 line-clamp-4">{proj.description}</p>}
+
+                            {proj.youtubeUrl && (
+                              <a href={proj.youtubeUrl} target="_blank" rel="noreferrer" className="text-xs font-bold text-red-600 hover:underline flex items-center gap-1.5 pt-2 border-t border-line">
+                                <ExternalLink className="w-3.5 h-3.5" /> Watch YouTube Video
+                              </a>
+                            )}
                           </div>
-                          {proj.youtubeUrl && (
-                            <a href={proj.youtubeUrl} target="_blank" rel="noreferrer" className="text-xs font-bold text-red-600 hover:underline flex items-center gap-1.5 pt-2 border-t border-line">
-                              <ExternalLink className="w-3.5 h-3.5" /> Watch Project Video
-                            </a>
-                          )}
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </TabsContent>
@@ -1447,19 +1541,6 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                         value={editFormData.serviceAreas || []}
                         onChange={(newAreas) => setEditFormData({ ...editFormData, serviceAreas: newAreas })}
                       />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-bold uppercase text-slate-custom">Tier</Label>
-                      <select
-                        value={editFormData.tier}
-                        onChange={(e) => setEditFormData({ ...editFormData, tier: e.target.value })}
-                        className="w-full h-10 rounded-xl bg-slate-50 border border-line px-3 text-sm font-medium focus:outline-none"
-                      >
-                        <option value="bronze">Bronze</option>
-                        <option value="silver">Silver</option>
-                        <option value="gold">Gold</option>
-                      </select>
                     </div>
 
                     <div className="space-y-1.5">
@@ -1945,92 +2026,86 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                             <Trash2 className="w-4 h-4" />
                           </button>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div className="space-y-1">
-                              <Label className="text-[10px] uppercase font-bold text-slate-custom">Project / Company Name *</Label>
-                              <Input
-                                value={proj.name}
-                                onChange={(e) => {
+                          <div className="space-y-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                              <div className="space-y-1">
+                                <Label className="text-[10px] uppercase font-bold text-slate-custom">Project / Company Name *</Label>
+                                <Input
+                                  value={proj.name}
+                                  onChange={(e) => {
+                                    const copy = [...editProjects];
+                                    copy[idx].name = e.target.value;
+                                    setEditProjects(copy);
+                                  }}
+                                  placeholder="e.g. 50kW Commercial Solar"
+                                  className="bg-white border-line h-9 text-xs font-bold"
+                                />
+                              </div>
+
+                              <div className="space-y-1">
+                                <Label className="text-[10px] uppercase font-bold text-slate-custom">Client / Customer Name</Label>
+                                <Input
+                                  value={proj.customerName}
+                                  onChange={(e) => {
+                                    const copy = [...editProjects];
+                                    copy[idx].customerName = e.target.value;
+                                    setEditProjects(copy);
+                                  }}
+                                  placeholder="e.g. Tariq Textiles / CM Punjab"
+                                  className="bg-white border-line h-9 text-xs"
+                                />
+                              </div>
+
+                              <div className="space-y-1">
+                                <Label className="text-[10px] uppercase font-bold text-slate-custom">System Size</Label>
+                                <Input
+                                  value={proj.systemSize}
+                                  onChange={(e) => {
+                                    const copy = [...editProjects];
+                                    copy[idx].systemSize = e.target.value;
+                                    setEditProjects(copy);
+                                  }}
+                                  placeholder="e.g. 20kW Hybrid / 2kW"
+                                  className="bg-white border-line h-9 text-xs"
+                                />
+                              </div>
+
+                              <div className="space-y-1">
+                                <Label className="text-[10px] uppercase font-bold text-slate-custom">Installation Date</Label>
+                                <Input
+                                  value={proj.installationDate}
+                                  onChange={(e) => {
+                                    const copy = [...editProjects];
+                                    copy[idx].installationDate = e.target.value;
+                                    setEditProjects(copy);
+                                  }}
+                                  placeholder="e.g. 2025 / Jan 2024"
+                                  className="bg-white border-line h-9 text-xs"
+                                />
+                              </div>
+                            </div>
+
+                            {/* MULTI CITIES SELECTOR FOR PROJECT */}
+                            <div>
+                              <MultiCitySelect
+                                label="Project Location(s) & Coverage"
+                                description="Specify multiple cities or select 'All Over Pakistan' for nationwide rollout."
+                                value={
+                                  Array.isArray(proj.cities) && proj.cities.length > 0
+                                    ? proj.cities
+                                    : (proj.city ? proj.city.split(',').map((s) => s.trim()).filter(Boolean) : [])
+                                }
+                                onChange={(cities) => {
                                   const copy = [...editProjects];
-                                  copy[idx].name = e.target.value;
+                                  copy[idx].cities = cities;
+                                  copy[idx].city = cities.join(', ');
                                   setEditProjects(copy);
                                 }}
-                                placeholder="e.g. 50kW Commercial Solar"
-                                className="bg-white border-line h-9 text-xs"
+                                compact={true}
                               />
                             </div>
 
                             <div className="space-y-1">
-                              <Label className="text-[10px] uppercase font-bold text-slate-custom">Client / Customer Name</Label>
-                              <Input
-                                value={proj.customerName}
-                                onChange={(e) => {
-                                  const copy = [...editProjects];
-                                  copy[idx].customerName = e.target.value;
-                                  setEditProjects(copy);
-                                }}
-                                placeholder="e.g. Tariq Textiles"
-                                className="bg-white border-line h-9 text-xs"
-                              />
-                            </div>
-
-                            <div className="space-y-1">
-                              <Label className="text-[10px] uppercase font-bold text-slate-custom">System Size</Label>
-                              <Input
-                                value={proj.systemSize}
-                                onChange={(e) => {
-                                  const copy = [...editProjects];
-                                  copy[idx].systemSize = e.target.value;
-                                  setEditProjects(copy);
-                                }}
-                                placeholder="e.g. 20kW Hybrid"
-                                className="bg-white border-line h-9 text-xs"
-                              />
-                            </div>
-
-                            <div className="space-y-1">
-                              <Label className="text-[10px] uppercase font-bold text-slate-custom">Installation Date</Label>
-                              <Input
-                                value={proj.installationDate}
-                                onChange={(e) => {
-                                  const copy = [...editProjects];
-                                  copy[idx].installationDate = e.target.value;
-                                  setEditProjects(copy);
-                                }}
-                                placeholder="e.g. Jan 2024"
-                                className="bg-white border-line h-9 text-xs"
-                              />
-                            </div>
-
-                            <div className="space-y-1">
-                              <Label className="text-[10px] uppercase font-bold text-slate-custom">City</Label>
-                              <Input
-                                value={proj.city}
-                                onChange={(e) => {
-                                  const copy = [...editProjects];
-                                  copy[idx].city = e.target.value;
-                                  setEditProjects(copy);
-                                }}
-                                placeholder="e.g. Faisalabad"
-                                className="bg-white border-line h-9 text-xs"
-                              />
-                            </div>
-
-                            <div className="space-y-1">
-                              <Label className="text-[10px] uppercase font-bold text-slate-custom">YouTube Video Link</Label>
-                              <Input
-                                value={proj.youtubeUrl}
-                                onChange={(e) => {
-                                  const copy = [...editProjects];
-                                  copy[idx].youtubeUrl = e.target.value;
-                                  setEditProjects(copy);
-                                }}
-                                placeholder="https://youtube.com/watch?v=..."
-                                className="bg-white border-line h-9 text-xs"
-                              />
-                            </div>
-
-                            <div className="space-y-1 sm:col-span-3">
                               <Label className="text-[10px] uppercase font-bold text-slate-custom">Project Description</Label>
                               <Textarea
                                 value={proj.description}
@@ -2040,10 +2115,33 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                                   setEditProjects(copy);
                                 }}
                                 rows={2}
-                                placeholder="Brief project summary..."
+                                placeholder="Brief project summary, scope, equipment details..."
                                 className="bg-white border-line text-xs"
                               />
                             </div>
+
+                            {/* PROJECT MEDIA UPLOAD: 3 PICTURES (10MB LIMIT, COMPRESSED) + 1 VIDEO (100MB LIMIT) */}
+                            <ProjectMediaUpload
+                              images={proj.images || []}
+                              onImagesChange={(images) => {
+                                const copy = [...editProjects];
+                                copy[idx].images = images;
+                                setEditProjects(copy);
+                              }}
+                              videoUrl={(proj.videos && proj.videos[0]) || ""}
+                              onVideoChange={(vUrl) => {
+                                const copy = [...editProjects];
+                                copy[idx].videos = vUrl ? [vUrl] : [];
+                                setEditProjects(copy);
+                              }}
+                              youtubeUrl={proj.youtubeUrl || ""}
+                              onYoutubeChange={(yUrl) => {
+                                const copy = [...editProjects];
+                                copy[idx].youtubeUrl = yUrl;
+                                setEditProjects(copy);
+                              }}
+                              projectIndex={idx}
+                            />
                           </div>
                         </div>
                       ))}
