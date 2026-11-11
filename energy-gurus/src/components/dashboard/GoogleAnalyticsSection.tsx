@@ -327,7 +327,7 @@ export function GoogleAnalyticsSection({ data }: Props) {
 
         <CardContent className="p-4 md:p-6 pt-4">
           {currentTrends.length > 0 ? (
-            <div className="relative w-full overflow-hidden select-none">
+            <div className="relative w-full select-none">
               <svg
                 ref={svgRef}
                 viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
@@ -463,37 +463,47 @@ export function GoogleAnalyticsSection({ data }: Props) {
               </svg>
 
               {/* Floating Tooltip Card */}
-              {hoveredIdx !== null && currentTrends[hoveredIdx] && viewPoints[hoveredIdx] && (
-                <div
-                  className="absolute pointer-events-none transition-transform duration-75 z-30"
-                  style={{
-                    left: `${(viewPoints[hoveredIdx].x / SVG_WIDTH) * 100}%`,
-                    top: "10px",
-                    transform: "translateX(-50%)",
-                  }}
-                >
-                  <div className="bg-navy-deep text-white px-3 py-2 rounded-xl shadow-xl border border-white/10 text-xs font-ibm-plex-mono whitespace-nowrap">
-                    <div className="font-bold text-slate-200 border-b border-white/10 pb-1 mb-1.5 flex items-center justify-between gap-4">
-                      <span>{currentTrends[hoveredIdx].label}</span>
-                      <span className="text-[10px] text-amber uppercase font-semibold">Telemetry</span>
-                    </div>
-                    <div className="flex items-center justify-between gap-4 text-[11px]">
-                      <span className="flex items-center gap-1.5 text-amber">
-                        <span className="w-2 h-2 rounded-full bg-amber" />
-                        Page Views:
-                      </span>
-                      <span className="font-bold font-mono">{currentTrends[hoveredIdx].views}</span>
-                    </div>
-                    <div className="flex items-center justify-between gap-4 text-[11px] mt-0.5">
-                      <span className="flex items-center gap-1.5 text-teal">
-                        <span className="w-2 h-2 rounded-full bg-teal" />
-                        Active Users:
-                      </span>
-                      <span className="font-bold font-mono text-white">{currentTrends[hoveredIdx].users}</span>
+              {hoveredIdx !== null && currentTrends[hoveredIdx] && viewPoints[hoveredIdx] && (() => {
+                const percentX = (viewPoints[hoveredIdx].x / SVG_WIDTH) * 100;
+                const transform =
+                  percentX > 75
+                    ? "translateX(calc(-100% - 12px))"
+                    : percentX < 20
+                    ? "translateX(12px)"
+                    : "translateX(-50%)";
+
+                return (
+                  <div
+                    className="absolute pointer-events-none transition-all duration-75 z-30"
+                    style={{
+                      left: `${percentX}%`,
+                      top: "10px",
+                      transform,
+                    }}
+                  >
+                    <div className="bg-navy-deep text-white px-3 py-2 rounded-xl shadow-xl border border-white/10 text-xs font-ibm-plex-mono whitespace-nowrap">
+                      <div className="font-bold text-slate-200 border-b border-white/10 pb-1 mb-1.5 flex items-center justify-between gap-4">
+                        <span>{currentTrends[hoveredIdx].label}</span>
+                        <span className="text-[10px] text-amber uppercase font-semibold">Telemetry</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-4 text-[11px]">
+                        <span className="flex items-center gap-1.5 text-amber">
+                          <span className="w-2 h-2 rounded-full bg-amber" />
+                          Page Views:
+                        </span>
+                        <span className="font-bold font-mono">{currentTrends[hoveredIdx].views}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-4 text-[11px] mt-0.5">
+                        <span className="flex items-center gap-1.5 text-teal">
+                          <span className="w-2 h-2 rounded-full bg-teal" />
+                          Active Users:
+                        </span>
+                        <span className="font-bold font-mono text-white">{currentTrends[hoveredIdx].users}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           ) : (
             <div className="py-12 text-center text-xs text-slate-custom font-ibm-plex-mono">
