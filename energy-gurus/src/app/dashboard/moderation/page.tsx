@@ -132,16 +132,16 @@ export default async function AdminModerationPage() {
   }
 
   return (
-    <div className="bg-cream min-h-screen text-ink pb-20">
+    <div className="min-h-screen text-ink pb-20 font-sans">
       {/* Header */}
-      <div className="bg-white border-b border-line py-8 shadow-sm">
-        <div className="max-w-[1180px] mx-auto px-5 md:px-8">
-          <div className="flex items-center gap-2 text-xs font-bold text-amber-deep uppercase tracking-wider mb-2">
-            <ShieldCheck className="w-4 h-4 text-amber-deep" />
+      <div className="bg-white border-b border-line/80 py-8 shadow-xs">
+        <div className="max-w-[1240px] mx-auto px-5 md:px-8">
+          <div className="flex items-center gap-2 text-[11px] font-bold text-amber uppercase tracking-wider font-ibm-plex-mono mb-2">
+            <ShieldCheck className="w-4 h-4 text-amber" />
             Central Moderation Portal
           </div>
-          <h1 className="font-fraunces text-2xl md:text-3xl font-bold text-navy-deep">
-            Submissions & Editorial Moderation
+          <h1 className="font-space-grotesk text-2xl md:text-3xl font-bold text-navy-deep tracking-tight">
+            Submissions &amp; Editorial Moderation
           </h1>
           <p className="text-xs md:text-sm text-slate-custom mt-1 max-w-2xl leading-relaxed">
             Review and approve solar brand profiles, contributing writer author credentials, and pending article submissions.
@@ -151,7 +151,7 @@ export default async function AdminModerationPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-[1180px] mx-auto px-5 md:px-8 py-8">
+      <div className="max-w-[1240px] mx-auto px-5 md:px-8 py-8">
         <ModerationPortalTabs
           brands={formattedBrands}
           writers={formattedWriters}

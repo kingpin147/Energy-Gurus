@@ -77,9 +77,8 @@ export default function Sidebar({ role }: { role: UserRole | null | undefined })
                     ? epcLinks
                     : [];
 
-
     return (
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
             {links.map((link) => (
                 <SidebarLink
                     key={link.href}
@@ -97,13 +96,18 @@ function SidebarLink({ href, icon, label, active = false }: { href: string, icon
     return (
         <Link
             href={href as any}
-            className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${active
-                ? "bg-ink text-white"
-                : "text-slate-custom hover:bg-paper hover:text-ink"
+            className={`group relative flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150 ${active
+                ? "bg-navy-deep text-white shadow-xs font-semibold"
+                : "text-slate-custom hover:bg-paper hover:text-navy-deep"
                 }`}
         >
-            {icon}
-            <span>{label}</span>
+            {active && (
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-amber rounded-r-full" />
+            )}
+            <span className={`transition-transform duration-150 group-hover:scale-110 ${active ? "text-amber" : "text-slate-400 group-hover:text-navy-deep"}`}>
+                {icon}
+            </span>
+            <span className="truncate">{label}</span>
         </Link>
     );
 }

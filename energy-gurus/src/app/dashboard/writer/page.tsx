@@ -23,13 +23,13 @@ export default async function WriterProfilePage() {
   }
 
   return (
-    <div className="p-4 md:p-8 space-y-8">
+    <div className="p-4 md:p-8 space-y-8 font-sans">
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 bg-amber text-ink rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-amber/20">
+        <div className="w-12 h-12 bg-amber text-navy-deep rounded-2xl flex items-center justify-center shrink-0 shadow-md">
           <UserCheck className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Contributing Writer Profile</h1>
+          <h1 className="font-space-grotesk text-2xl md:text-3xl font-bold tracking-tight text-navy-deep">Contributing Writer Profile</h1>
           <p className="text-slate-custom text-sm md:text-base">
             Set up your public author credentials, social handles, and professional bio.
           </p>

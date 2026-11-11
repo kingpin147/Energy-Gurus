@@ -301,7 +301,7 @@ export function ArticleModerationQueue({ articles }: { articles: ArticleModerati
       {/* Full Article Preview Dialog Modal */}
       {previewArticle && (
         <Dialog open={!!previewArticle} onOpenChange={(open) => !open && setPreviewArticle(null)}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-6 md:p-10 rounded-3xl bg-white border border-line">
+          <DialogContent className="w-[94vw] sm:max-w-4xl md:max-w-5xl lg:max-w-6xl max-h-[92vh] rounded-3xl bg-white border border-line">
             <DialogHeader className="space-y-3 border-b border-line pb-4">
               <div className="flex items-center gap-2">
                 <span className="font-mono text-[10px] uppercase tracking-wider text-teal bg-teal/10 px-2.5 py-0.5 rounded-full font-bold">

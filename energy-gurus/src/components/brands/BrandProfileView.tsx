@@ -27,7 +27,9 @@ import {
   Youtube,
   Music2,
   Download,
-  ArrowRight
+  ArrowRight,
+  Sparkles,
+  PackageX
 } from "lucide-react";
 import { BrandReviewModal } from "@/components/brands/BrandReviewModal";
 import { CompareToggle } from "@/components/shared/compare-toggle";
@@ -46,10 +48,10 @@ interface BrandProfileViewProps {
 
 export function BrandProfileView({
   brand,
-  products,
-  reviews,
-  rating,
-  reviewCount
+  products = [],
+  reviews = [],
+  rating = 0,
+  reviewCount = 0
 }: BrandProfileViewProps) {
   const [activeTab, setActiveTab] = useState<
     "profile" | "products" | "distributors" | "retailers" | "centres" | "installers"
@@ -80,198 +82,28 @@ export function BrandProfileView({
     }
   }, [brand?.id, brand?.brandName]);
 
-  // Data arrays with rich defaults if DB records are sparse
-  const distributors = (brand.distributors as any[])?.length > 0
-    ? (brand.distributors as any[])
-    : [
-        {
-          name: "EY Enterprise / Salman Traders (ReadSolar)",
-          address: "12-B, Model Town, Lahore, Punjab",
-          city: "Lahore",
-          region: "Punjab",
-          since: "2023",
-          status: "Authorized",
-          mapUrl: "https://maps.google.com/?q=31.4805,74.3286"
-        },
-        {
-          name: "Solar Vision Traders",
-          address: "Shop 4, Regal Trade Square, Saddar, Karachi",
-          city: "Karachi",
-          region: "Sindh",
-          since: "2023",
-          status: "Authorized",
-          mapUrl: "https://maps.google.com/?q=24.8546,67.0210"
-        },
-        {
-          name: "Al-Fateh Power Solutions",
-          address: "Ring Road, Hayatabad, Peshawar",
-          city: "Peshawar",
-          region: "KPK",
-          since: "2022",
-          status: "Authorized",
-          mapUrl: "https://maps.google.com/?q=34.0083,71.5115"
-        }
-      ];
-
-  const retailers = (brand.retailers as any[])?.length > 0
-    ? (brand.retailers as any[])
-    : [
-        {
-          name: "Hall Road Solar Mart",
-          address: "Hall Road, Lahore",
-          city: "Lahore",
-          type: "Retail Shop",
-          since: "2021",
-          status: "Authorized",
-          mapUrl: "https://maps.google.com/?q=31.5656,74.3095"
-        },
-        {
-          name: "Power House Electronics",
-          address: "Electric Market, Karachi",
-          city: "Karachi",
-          type: "Retail Shop",
-          since: "2020",
-          status: "Authorized",
-          mapUrl: "https://maps.google.com/?q=24.8608,67.0104"
-        }
-      ];
-
-  const serviceCentres = (brand.serviceCentres as any[])?.length > 0
-    ? (brand.serviceCentres as any[])
-    : [
-        {
-          name: `${brand.brandName} Flagship Store — Lahore`,
-          city: "Lahore",
-          area: "Gulberg III, Lahore",
-          address: "Plot 14, Main Boulevard Gulberg, Lahore, Punjab",
-          tags: ["Product Display", "Warranty Claims", "Technical Support"],
-          hours: "Mon–Sat, 10am–7pm",
-          mapUrl: "https://maps.google.com/?q=31.5087,74.3453"
-        },
-        {
-          name: `${brand.brandName} Service Centre — Karachi`,
-          city: "Karachi",
-          area: "Shahrah-e-Faisal, Karachi",
-          address: "Suite 5, Business Plaza, Shahrah-e-Faisal, Karachi, Sindh",
-          tags: ["Warranty Claims", "Repair Drop-off"],
-          hours: "Mon–Sat, 10am–6pm",
-          mapUrl: "https://maps.google.com/?q=24.8546,67.0642"
-        },
-        {
-          name: `${brand.brandName} Service Centre — Islamabad`,
-          city: "Islamabad",
-          area: "Blue Area, Islamabad",
-          address: "Office 302, Blue Area Business Centre, Islamabad, ICT",
-          tags: ["Warranty Claims", "Technical Support"],
-          hours: "Mon–Fri, 9am–5pm",
-          mapUrl: "https://maps.google.com/?q=33.7104,73.0563"
-        },
-        {
-          name: `${brand.brandName} Service Centre — Faisalabad`,
-          city: "Faisalabad",
-          area: "D-Ground, Faisalabad",
-          address: "Shop 12, D-Ground Commercial Area, Faisalabad, Punjab",
-          tags: ["Repair Drop-off"],
-          hours: "Mon–Sat, 10am–6pm",
-          mapUrl: "https://maps.google.com/?q=31.4181,73.0776"
-        }
-      ];
-
-  const certifiedInstallers = (brand.certifiedInstallers as any[])?.length > 0
-    ? (brand.certifiedInstallers as any[])
-    : [
-        {
-          name: "SolarTech Engineering",
-          city: "Lahore",
-          region: "Punjab",
-          rating: 4.8,
-          tier: "Gold",
-          slug: "solartech-engineering"
-        },
-        {
-          name: "GreenVolt Installers",
-          city: "Karachi",
-          region: "Sindh",
-          rating: 4.4,
-          tier: "Silver",
-          slug: "greenvolt-installers"
-        },
-        {
-          name: "Bright Future Solar",
-          city: "Islamabad",
-          region: "ICT",
-          rating: 4.9,
-          tier: "Gold",
-          slug: "bright-future-solar"
-        }
-      ];
-
-  const team = (brand.team as any[])?.length > 0
-    ? (brand.team as any[])
-    : [
-        { name: "Hassan Ali", role: "Regional Sales Manager", department: "sales", linkedIn: "https://linkedin.com" },
-        { name: "Maryam Bilal", role: "Channel Partnerships", department: "sales", linkedIn: "https://linkedin.com" },
-        { name: "Faisal Khan", role: "Technical Support Lead", department: "technical", linkedIn: "https://linkedin.com" },
-        { name: "Sana Riaz", role: "Field Applications Engineer", department: "technical", linkedIn: "https://linkedin.com" },
-        { name: "Usman Tariq", role: "Warranty & Service Lead", department: "aftersales", linkedIn: "https://linkedin.com" },
-        { name: "Ayesha Nadeem", role: "Customer Care", department: "aftersales", linkedIn: "https://linkedin.com" }
-      ];
-
-  const worldwideProjects = (brand.worldwideProjects as any[])?.length > 0
-    ? (brand.worldwideProjects as any[])
-    : [
-        { title: "120 MW Utility-Scale Plant — Rajasthan, India", description: "Hybrid inverter deployment across a multi-phase solar farm rollout." },
-        { title: "Residential Storage Rollout — Bavaria, Germany", description: "8,000+ home battery installations supporting a regional self-consumption programme." },
-        { title: "Commercial Rooftop Portfolio — São Paulo, Brazil", description: "String inverter deployment across 40 commercial rooftop sites." }
-      ];
-
-  // Default display products if database is empty for this brand
-  const displayProducts = products.length > 0
-    ? products
-    : [
-        {
-          id: "1",
-          name: "GNM-585M",
-          series: "TOPCon Bifacial Module",
-          category: "Solar Panels",
-          specs: { Wattage: "585 W", Efficiency: "22.6%", Degradation: "0.4%/yr", Warranty: "30 yrs perf." }
-        },
-        {
-          id: "2",
-          name: "MIN 6000TL-X",
-          series: "Single Phase Hybrid Inverter",
-          category: "Inverters",
-          specs: { Size: "6 kW", Phase: "Single", Protection: "IP65", Warranty: "10 yrs" }
-        },
-        {
-          id: "3",
-          name: "APX 5.0",
-          series: "Low Voltage Lithium Battery",
-          category: "Batteries",
-          specs: { Size: "5 kWh", Type: "Low Voltage", Protection: "IP54", Warranty: "10 yrs" }
-        },
-        {
-          id: "4",
-          name: "WIT 100H Commercial Cabinet",
-          series: "Utility-Scale Outdoor Container",
-          category: "BESS",
-          specs: { Capacity: "215 kWh", Power: "100 kW", Chemistry: "LFP", Warranty: "10 yrs" }
-        },
-        {
-          id: "5",
-          name: "DC MCB-63A",
-          series: "DC Miniature Circuit Breaker",
-          category: "Breakers",
-          specs: { Pole: "2", Voltage: "1000V", Amp: "63A", Imax: "60kA" }
-        }
-      ];
+  // 100% Dynamic entity arrays (No hardcoded fallback entries)
+  const distributors: any[] = Array.isArray(brand.distributors) ? brand.distributors : [];
+  const retailers: any[] = Array.isArray(brand.retailers) ? brand.retailers : [];
+  const serviceCentres: any[] = Array.isArray(brand.serviceCentres) ? brand.serviceCentres : [];
+  const certifiedInstallers: any[] = Array.isArray(brand.certifiedInstallers) ? brand.certifiedInstallers : [];
+  const team: any[] = Array.isArray(brand.localTeam) && brand.localTeam.length > 0
+    ? brand.localTeam
+    : Array.isArray(brand.team)
+      ? brand.team
+      : [];
+  const worldwideProjects: any[] = Array.isArray(brand.worldwideProjects) ? brand.worldwideProjects : [];
+  const displayProducts: any[] = Array.isArray(products) ? products : [];
+  const offices: any[] = Array.isArray(brand.offices) ? brand.offices : [];
+  const manufacturingFacilities: any[] = Array.isArray(brand.manufacturingFacilities) ? brand.manufacturingFacilities : [];
 
   // Filtered lists
   const filteredProducts = displayProducts.filter((p) => {
     const matchesSearch =
       !productSearch ||
       p.name?.toLowerCase().includes(productSearch.toLowerCase()) ||
-      p.series?.toLowerCase().includes(productSearch.toLowerCase());
+      p.series?.toLowerCase().includes(productSearch.toLowerCase()) ||
+      p.description?.toLowerCase().includes(productSearch.toLowerCase());
     const matchesCat =
       productCategoryFilter === "all" ||
       (p.category || "").toLowerCase().includes(productCategoryFilter.toLowerCase());
@@ -306,6 +138,7 @@ export function BrandProfileView({
   const filteredInstallers = certifiedInstallers.filter((inst) => {
     const matchesSearch =
       !installerSearch ||
+      inst.installerName?.toLowerCase().includes(installerSearch.toLowerCase()) ||
       inst.name?.toLowerCase().includes(installerSearch.toLowerCase()) ||
       inst.city?.toLowerCase().includes(installerSearch.toLowerCase());
     const matchesCity =
@@ -317,7 +150,7 @@ export function BrandProfileView({
     return matchesSearch && matchesCity && matchesTier;
   });
 
-  // Capacity calculation
+  // Dynamic capacity calculation (only if populated)
   let parsedCapacity: string | null = null;
   if (typeof brand.annualCapacity === "string" && brand.annualCapacity.trim()) {
     parsedCapacity = brand.annualCapacity.trim();
@@ -329,9 +162,19 @@ export function BrandProfileView({
     }
   }
 
-  const isPanelBrand = (brand.brandName || "").toLowerCase().includes("longi") || (brand.brandName || "").toLowerCase().includes("jinko");
-  const capacityNumber = parsedCapacity || (isPanelBrand ? "45 GW+" : "17 GW+");
-  const capacityTitle = isPanelBrand ? "Panel capacity" : "Inverter capacity";
+  // Real review star breakdown
+  const actualReviewCount = reviewCount || reviews.length;
+  const starCounts = [5, 4, 3, 2, 1].map((star) => {
+    const count = reviews.filter((r) => Math.round(Number(r.rating || 5)) === star).length;
+    const pct = actualReviewCount > 0 ? Math.round((count / actualReviewCount) * 100) : 0;
+    return { star, count, pct };
+  });
+
+  // Primary customer care contact
+  const primaryPhone = brand.customerCare || offices[0]?.phone || null;
+  const primaryEmail = brand.customerCareEmail || offices[0]?.email || null;
+  const primaryWhatsapp = offices[0]?.whatsapp || brand.customerCare || null;
+  const cleanWhatsappNumber = primaryWhatsapp ? primaryWhatsapp.replace(/[^0-9]/g, "") : null;
 
   return (
     <div className="bg-cream text-ink min-h-screen">
@@ -382,40 +225,55 @@ export function BrandProfileView({
                   <h1 className="font-fraunces text-2xl md:text-[32px] font-semibold text-white tracking-tight">
                     {brand.brandName}
                   </h1>
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-amber/15 text-amber border border-amber/55 px-2.5 py-0.5 rounded-full">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-amber" /> Verified Brand
-                  </span>
+                  {brand.isVerified && (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-amber/15 text-amber border border-amber/55 px-2.5 py-0.5 rounded-full">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-amber" /> Verified Brand
+                    </span>
+                  )}
                 </div>
 
-                <p className="text-[#C7D0D8] text-sm md:text-[15px] mt-2 max-w-[560px] leading-relaxed">
-                  {brand.tagline || brand.about || "Global inverter and energy storage manufacturer, distributed in Pakistan through an authorized channel partner network."}
-                </p>
+                {brand.tagline && (
+                  <p className="text-[#C7D0D8] text-sm md:text-[15px] mt-2 max-w-[560px] leading-relaxed">
+                    {brand.tagline}
+                  </p>
+                )}
 
-                {/* Header Stats */}
+                {/* Header Dynamic Stats */}
                 <div className="flex gap-8 md:gap-9 mt-5 flex-wrap">
+                  {brand.founded && (
+                    <div>
+                      <span className="font-fraunces text-lg md:text-[21px] font-semibold text-white block">
+                        {brand.founded}
+                      </span>
+                      <span className="text-[#9FADB8] text-xs">Founded</span>
+                    </div>
+                  )}
+
+                  {(brand.countriesServed || brand.globalLocations) && (
+                    <div>
+                      <span className="font-fraunces text-lg md:text-[21px] font-semibold text-white block">
+                        {brand.countriesServed || brand.globalLocations}
+                      </span>
+                      <span className="text-[#9FADB8] text-xs">Global Presence</span>
+                    </div>
+                  )}
+
+                  {parsedCapacity && (
+                    <div>
+                      <span className="font-fraunces text-lg md:text-[21px] font-semibold text-white block">
+                        {parsedCapacity}
+                      </span>
+                      <span className="text-[#9FADB8] text-xs">Annual Capacity</span>
+                    </div>
+                  )}
+
                   <div>
                     <span className="font-fraunces text-lg md:text-[21px] font-semibold text-white block">
-                      {brand.founded || "2010"}
+                      {actualReviewCount > 0 ? `${rating.toFixed(1)} / 5` : "New"}
                     </span>
-                    <span className="text-[#9FADB8] text-xs">Founded</span>
-                  </div>
-                  <div>
-                    <span className="font-fraunces text-lg md:text-[21px] font-semibold text-white block">
-                      {brand.countriesServed || "50+"}
+                    <span className="text-[#9FADB8] text-xs">
+                      {actualReviewCount > 0 ? `${actualReviewCount} reviews` : "Customer rating"}
                     </span>
-                    <span className="text-[#9FADB8] text-xs">Countries served</span>
-                  </div>
-                  <div>
-                    <span className="font-fraunces text-lg md:text-[21px] font-semibold text-white block">
-                      {capacityNumber}
-                    </span>
-                    <span className="text-[#9FADB8] text-xs">{capacityTitle}</span>
-                  </div>
-                  <div>
-                    <span className="font-fraunces text-lg md:text-[21px] font-semibold text-white block">
-                      {rating > 0 ? rating.toFixed(1) : "4.6"} / 5
-                    </span>
-                    <span className="text-[#9FADB8] text-xs">Customer rating</span>
                   </div>
                 </div>
               </div>
@@ -448,12 +306,14 @@ export function BrandProfileView({
                 </DialogContent>
               </Dialog>
 
-              <button
-                onClick={() => setActiveTab("products")}
-                className="w-full justify-center bg-transparent hover:border-white border border-white/40 text-white font-semibold text-xs md:text-sm rounded-[3px] py-2 px-4 cursor-pointer transition-colors"
-              >
-                View Products
-              </button>
+              {displayProducts.length > 0 && (
+                <button
+                  onClick={() => setActiveTab("products")}
+                  className="w-full justify-center bg-transparent hover:border-white border border-white/40 text-white font-semibold text-xs md:text-sm rounded-[3px] py-2 px-4 cursor-pointer transition-colors"
+                >
+                  View Products ({displayProducts.length})
+                </button>
+              )}
 
               <div className="flex items-center justify-between gap-2 mt-1">
                 <BrandReviewModal brandId={brand.id} brandName={brand.brandName} products={displayProducts} />
@@ -470,11 +330,11 @@ export function BrandProfileView({
           <div className="max-w-[1080px] mx-auto px-5 md:px-7 flex gap-1 overflow-x-auto scrollbar-none">
             {[
               { id: "profile", label: "Profile" },
-              { id: "products", label: "Products" },
-              { id: "distributors", label: `Distributors` },
-              { id: "retailers", label: `Retailers` },
-              { id: "centres", label: `Stores & CSS` },
-              { id: "installers", label: `Certified Installers` },
+              { id: "products", label: `Products (${displayProducts.length})` },
+              { id: "distributors", label: `Distributors (${distributors.length})` },
+              { id: "retailers", label: `Retailers (${retailers.length})` },
+              { id: "centres", label: `Stores & CSS (${serviceCentres.length})` },
+              { id: "installers", label: `Certified Installers (${certifiedInstallers.length})` },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -508,27 +368,32 @@ export function BrandProfileView({
                     About {brand.brandName}
                   </h2>
                   <p className="text-sm text-ink leading-relaxed">
-                    {brand.about ||
-                      `${brand.brandName} designs and manufactures string inverters, hybrid inverters, and residential and commercial energy storage systems, with a product range spanning off-grid, on-grid, and hybrid solar applications.`}
+                    {brand.about || `${brand.brandName} is a verified manufacturer and technology partner in the Pakistan renewable energy sector.`}
                   </p>
 
                   {/* Facts Grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-5 border-t border-line text-xs">
-                    <div>
-                      <span className="text-slate-custom block text-[11px]">Headquarters</span>
-                      <strong className="text-navy-deep font-semibold text-sm block mt-0.5">
-                        {brand.headquarters || "Shenzhen, China"}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-custom block text-[11px]">Country of origin</span>
-                      <strong className="text-navy-deep font-semibold text-sm block mt-0.5">
-                        {brand.countryOfOrigin || "China"}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-custom block text-[11px]">Official Website</span>
-                      {brand.website ? (
+                    {brand.headquarters && (
+                      <div>
+                        <span className="text-slate-custom block text-[11px]">Headquarters</span>
+                        <strong className="text-navy-deep font-semibold text-sm block mt-0.5">
+                          {brand.headquarters}
+                        </strong>
+                      </div>
+                    )}
+                    
+                    {brand.countryOfOrigin && (
+                      <div>
+                        <span className="text-slate-custom block text-[11px]">Country of origin</span>
+                        <strong className="text-navy-deep font-semibold text-sm block mt-0.5">
+                          {brand.countryOfOrigin}
+                        </strong>
+                      </div>
+                    )}
+
+                    {brand.website && (
+                      <div>
+                        <span className="text-slate-custom block text-[11px]">Official Website</span>
                         <a
                           href={brand.website.startsWith("http") ? brand.website : `https://${brand.website}`}
                           target="_blank"
@@ -540,47 +405,56 @@ export function BrandProfileView({
                               url: brand.website
                             });
                           }}
-                          className="text-navy-deep font-semibold text-sm block mt-0.5 hover:underline"
+                          className="text-navy-deep font-semibold text-sm block mt-0.5 hover:underline truncate"
                         >
                           {brand.website.replace(/^https?:\/\//, "")}
                         </a>
-                      ) : (
-                        <span className="text-slate-custom">growatt.com</span>
-                      )}
-                    </div>
-                    <div>
-                      <span className="text-slate-custom block text-[11px]">Global locations</span>
-                      <strong className="text-navy-deep font-semibold text-sm block mt-0.5">
-                        Germany, USA, Brazil, India, Pakistan +12 more
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-custom block text-[11px]">Manufacturing facilities</span>
-                      <strong className="text-navy-deep font-semibold text-sm block mt-0.5">
-                        3 facilities, China
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-custom block text-[11px]">Product categories</span>
-                      <strong className="text-navy-deep font-semibold text-sm block mt-0.5">
-                        Solar Panels, Inverters, Batteries
-                      </strong>
-                    </div>
+                      </div>
+                    )}
+
+                    {brand.globalLocations && (
+                      <div>
+                        <span className="text-slate-custom block text-[11px]">Global locations</span>
+                        <strong className="text-navy-deep font-semibold text-sm block mt-0.5">
+                          {brand.globalLocations}
+                        </strong>
+                      </div>
+                    )}
+
+                    {manufacturingFacilities.length > 0 && (
+                      <div>
+                        <span className="text-slate-custom block text-[11px]">Manufacturing facilities</span>
+                        <strong className="text-navy-deep font-semibold text-sm block mt-0.5">
+                          {manufacturingFacilities.length} {manufacturingFacilities.length === 1 ? "facility" : "facilities"}
+                        </strong>
+                      </div>
+                    )}
+
+                    {Array.isArray(brand.categories) && brand.categories.length > 0 && (
+                      <div>
+                        <span className="text-slate-custom block text-[11px]">Product categories</span>
+                        <strong className="text-navy-deep font-semibold text-sm block mt-0.5">
+                          {brand.categories.join(", ")}
+                        </strong>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Chips row */}
-                  <div className="flex gap-2 flex-wrap mt-4 pt-4 border-t border-line">
-                    {["On-grid Inverters", "Hybrid Inverters", "Low Voltage Batteries", "High Voltage Batteries", "Off-grid Systems"].map((chip, i) => (
-                      <span
-                        key={i}
-                        className="bg-cream border border-line text-ink text-xs px-2.5 py-1 rounded-full"
-                      >
-                        {chip}
-                      </span>
-                    ))}
-                  </div>
+                  {/* Product Chips row (only if categories exist) */}
+                  {Array.isArray(brand.categories) && brand.categories.length > 0 && (
+                    <div className="flex gap-2 flex-wrap mt-4 pt-4 border-t border-line">
+                      {brand.categories.map((chip: string, i: number) => (
+                        <span
+                          key={i}
+                          className="bg-cream border border-line text-ink text-xs px-2.5 py-1 rounded-full"
+                        >
+                          {chip}
+                        </span>
+                      ))}
+                    </div>
+                  )}
 
-                  {/* Social row */}
+                  {/* Social row (only dynamic links) */}
                   <div className="flex gap-2.5 mt-5">
                     {brand.website && (
                       <a
@@ -593,348 +467,389 @@ export function BrandProfileView({
                         <Globe className="w-4 h-4" />
                       </a>
                     )}
-                    <a
-                      href="https://linkedin.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="LinkedIn"
-                      className="w-8 h-8 rounded-full border border-line flex items-center justify-center text-navy-deep hover:bg-amber transition-colors"
-                    >
-                      <Linkedin className="w-4 h-4" />
-                    </a>
-                    <a
-                      href="https://facebook.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="Facebook"
-                      className="w-8 h-8 rounded-full border border-line flex items-center justify-center text-navy-deep hover:bg-amber transition-colors"
-                    >
-                      <Facebook className="w-4 h-4" />
-                    </a>
+                    {Array.isArray(brand.socialLinks) && brand.socialLinks.map((s: any, idx: number) => {
+                      if (!s.url) return null;
+                      return (
+                        <a
+                          key={idx}
+                          href={s.url.startsWith("http") ? s.url : `https://${s.url}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={s.platform || "Social Link"}
+                          className="w-8 h-8 rounded-full border border-line flex items-center justify-center text-navy-deep hover:bg-amber transition-colors"
+                        >
+                          {s.platform?.toLowerCase() === "facebook" ? <Facebook className="w-4 h-4" /> :
+                           s.platform?.toLowerCase() === "twitter" || s.platform?.toLowerCase() === "x" ? <Twitter className="w-4 h-4" /> :
+                           s.platform?.toLowerCase() === "youtube" ? <Youtube className="w-4 h-4" /> :
+                           <Linkedin className="w-4 h-4" />}
+                        </a>
+                      );
+                    })}
                   </div>
                 </div>
 
-                {/* Key Worldwide Projects Card */}
-                <div className="bg-white border border-line rounded-[3px] p-6 shadow-sm">
-                  <h2 className="font-fraunces text-lg font-semibold text-navy-deep mb-3.5">
-                    Key Worldwide Projects
-                  </h2>
-                  <div className="space-y-3.5">
-                    {worldwideProjects.map((p, idx) => (
-                      <div key={idx} className="flex gap-3.5 pb-3.5 border-b border-line last:border-b-0 last:pb-0">
-                        <div className="w-16 h-12 rounded-[2px] bg-gradient-to-br from-navy to-navy-deep shrink-0 flex items-center justify-center text-white/50 text-[10px] font-mono font-bold">
-                          Project
+                {/* Key Worldwide Projects Card (Only rendered if dynamic records exist) */}
+                {worldwideProjects.length > 0 && (
+                  <div className="bg-white border border-line rounded-[3px] p-6 shadow-sm">
+                    <h2 className="font-fraunces text-lg font-semibold text-navy-deep mb-3.5">
+                      Key Worldwide Projects
+                    </h2>
+                    <div className="space-y-3.5">
+                      {worldwideProjects.map((p, idx) => (
+                        <div key={idx} className="flex gap-3.5 pb-3.5 border-b border-line last:border-b-0 last:pb-0">
+                          {p.imageUrl ? (
+                            <Image
+                              src={p.imageUrl}
+                              alt={p.title}
+                              width={64}
+                              height={48}
+                              className="w-16 h-12 rounded-[2px] object-cover shrink-0"
+                            />
+                          ) : (
+                            <div className="w-16 h-12 rounded-[2px] bg-gradient-to-br from-navy to-navy-deep shrink-0 flex items-center justify-center text-white/50 text-[10px] font-mono font-bold">
+                              Project
+                            </div>
+                          )}
+                          <div>
+                            <h4 className="font-semibold text-sm text-navy-deep">{p.title}</h4>
+                            {p.location && (
+                              <span className="text-[11px] text-amber-deep font-medium block mt-0.5">
+                                {p.location}
+                              </span>
+                            )}
+                            <p className="text-xs text-slate-custom mt-1 leading-relaxed">{p.description}</p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-semibold text-sm text-navy-deep">{p.title}</h4>
-                          <p className="text-xs text-slate-custom mt-1 leading-relaxed">{p.description}</p>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
-              {/* Right Column */}
+              {/* Right Column: Dynamic Offices & Facilities */}
               <div className="space-y-6">
                 
                 {/* Offices Card */}
-                <div className="bg-white border border-line rounded-[3px] p-6 shadow-sm space-y-4">
-                  <h3 className="font-fraunces text-base font-semibold text-navy-deep">Offices</h3>
-                  
-                  {/* Pakistan Office */}
-                  <div className="pb-4 border-b border-dashed border-line">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-semibold text-xs text-navy-deep">Regional Office — Pakistan</span>
-                      <a
-                        href="https://maps.google.com/?q=31.5204,74.3587"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[11.5px] font-semibold text-amber-deep hover:underline"
-                      >
-                        View on map
-                      </a>
-                    </div>
-                    <div className="space-y-2 text-xs text-ink">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-3.5 h-3.5 text-amber-deep shrink-0" /> Lahore, PK
+                {(offices.length > 0 || brand.headOffice || primaryPhone || primaryEmail) && (
+                  <div className="bg-white border border-line rounded-[3px] p-6 shadow-sm space-y-4">
+                    <h3 className="font-fraunces text-base font-semibold text-navy-deep">Offices &amp; Contact</h3>
+                    
+                    {offices.map((office: any, idx: number) => (
+                      <div key={idx} className="pb-4 border-b border-dashed border-line last:border-b-0 last:pb-0">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-semibold text-xs text-navy-deep">
+                            {office.name || office.type || "Regional Office"}
+                          </span>
+                          {office.mapUrl && (
+                            <a
+                              href={office.mapUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[11.5px] font-semibold text-amber-deep hover:underline"
+                            >
+                              View on map
+                            </a>
+                          )}
+                        </div>
+                        <div className="space-y-1.5 text-xs text-ink">
+                          {office.city && (
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-3.5 h-3.5 text-amber-deep shrink-0" />
+                              <span>{office.address || office.city}</span>
+                            </div>
+                          )}
+                          {office.phone && (
+                            <div className="flex items-center gap-2">
+                              <Phone className="w-3.5 h-3.5 text-amber-deep shrink-0" />
+                              <a href={`tel:${office.phone}`} className="hover:underline">{office.phone}</a>
+                            </div>
+                          )}
+                          {office.email && (
+                            <div className="flex items-center gap-2">
+                              <Mail className="w-3.5 h-3.5 text-amber-deep shrink-0" />
+                              <a href={`mailto:${office.email}`} className="hover:underline">{office.email}</a>
+                            </div>
+                          )}
+                        </div>
+                        {office.whatsapp && (
+                          <a
+                            href={`https://wa.me/${office.whatsapp.replace(/[^0-9]/g, "")}?text=Hi%2C%20I%20need%20information%20about%20${encodeURIComponent(brand.brandName)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2E7D5C] mt-2.5 hover:underline"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" /> Chat on WhatsApp
+                          </a>
+                        )}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-3.5 h-3.5 text-amber-deep shrink-0" /> +92 42 111 000 111
+                    ))}
+
+                    {/* Global Head Office (if specified in brand) */}
+                    {brand.headOffice && (
+                      <div className="pt-2">
+                        <div className="flex justify-between items-center mb-1.5">
+                          <span className="font-semibold text-xs text-navy-deep">Head Office — Global</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-ink">
+                          <MapPin className="w-3.5 h-3.5 text-amber-deep shrink-0" /> {brand.headOffice}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-3.5 h-3.5 text-amber-deep shrink-0" /> service.pk@growatt.com
-                      </div>
-                    </div>
-                    <a
-                      href="https://wa.me/923001112222?text=Hi%2C%20I%20need%20after-sales%20support%20for%20my%20Growatt%20system"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2E7D5C] mt-2.5 hover:underline"
-                    >
-                      <MessageSquare className="w-3.5 h-3.5" /> Chat on WhatsApp
-                    </a>
+                    )}
                   </div>
+                )}
 
-                  {/* Global Head Office */}
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-semibold text-xs text-navy-deep">Head Office — Global</span>
-                      <a
-                        href="https://maps.google.com/?q=22.5431,114.0579"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[11.5px] font-semibold text-amber-deep hover:underline"
-                      >
-                        View on map
-                      </a>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-ink">
-                      <MapPin className="w-3.5 h-3.5 text-amber-deep shrink-0" /> Shenzhen, China
+                {/* Manufacturing Facility Card (Only rendered if actual facilities exist) */}
+                {manufacturingFacilities.length > 0 && (
+                  <div className="bg-white border border-line rounded-[3px] p-6 shadow-sm">
+                    <h3 className="font-fraunces text-base font-semibold text-navy-deep mb-3">Manufacturing Facilities</h3>
+                    <div className="space-y-3">
+                      {manufacturingFacilities.map((facility: any, fIdx: number) => (
+                        <div key={fIdx} className="border-b border-line last:border-b-0 pb-3 last:pb-0">
+                          {facility.imageUrl ? (
+                            <Image
+                              src={facility.imageUrl}
+                              alt={facility.name}
+                              width={320}
+                              height={112}
+                              className="w-full h-28 object-cover rounded-[2px] mb-2"
+                            />
+                          ) : null}
+                          <div className="font-semibold text-xs text-navy-deep">{facility.name}</div>
+                          {facility.location && (
+                            <div className="text-[11px] text-slate-custom mt-0.5">{facility.location}</div>
+                          )}
+                          {facility.description && (
+                            <p className="text-xs text-slate-custom mt-1 leading-relaxed">{facility.description}</p>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
+                )}
 
-                {/* Manufacturing Facility Card */}
-                <div className="bg-white border border-line rounded-[3px] p-6 shadow-sm">
-                  <h3 className="font-fraunces text-base font-semibold text-navy-deep mb-3">Manufacturing Facility</h3>
-                  <div className="w-full h-28 bg-gradient-to-br from-navy to-navy-deep rounded-[2px] mb-3 flex items-center justify-center text-white/40 text-xs font-mono">
-                    Production Plant
+                {/* Annual Manufacturing Capacity Card (Only rendered if dynamic capacity exists) */}
+                {brand.annualCapacity && typeof brand.annualCapacity === "object" && Object.values(brand.annualCapacity).some((v) => Boolean(v)) && (
+                  <div className="bg-white border border-line rounded-[3px] p-6 shadow-sm">
+                    <h3 className="font-fraunces text-base font-semibold text-navy-deep mb-3">Annual Manufacturing Capacity</h3>
+                    <div className="space-y-2.5 text-xs">
+                      {brand.annualCapacity.panels && (
+                        <div className="flex justify-between border-b border-dashed border-line pb-1.5">
+                          <span className="text-slate-custom">Solar Panels</span>
+                          <strong className="text-navy-deep font-semibold">{brand.annualCapacity.panels}</strong>
+                        </div>
+                      )}
+                      {brand.annualCapacity.inverters && (
+                        <div className="flex justify-between border-b border-dashed border-line pb-1.5">
+                          <span className="text-slate-custom">Inverters</span>
+                          <strong className="text-navy-deep font-semibold">{brand.annualCapacity.inverters}</strong>
+                        </div>
+                      )}
+                      {brand.annualCapacity.batteries && (
+                        <div className="flex justify-between border-b border-dashed border-line pb-1.5">
+                          <span className="text-slate-custom">Batteries</span>
+                          <strong className="text-navy-deep font-semibold">{brand.annualCapacity.batteries}</strong>
+                        </div>
+                      )}
+                      {brand.annualCapacity.bess && (
+                        <div className="flex justify-between border-b border-dashed border-line pb-1.5">
+                          <span className="text-slate-custom">BESS</span>
+                          <strong className="text-navy-deep font-semibold">{brand.annualCapacity.bess}</strong>
+                        </div>
+                      )}
+                      {brand.annualCapacity.breakers && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-custom">Breakers</span>
+                          <strong className="text-navy-deep font-semibold">{brand.annualCapacity.breakers}</strong>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-xs text-slate-custom leading-relaxed">
-                    Shenzhen production facility — primary manufacturing site for hybrid inverters and battery packs.
-                  </p>
-                </div>
-
-                {/* Annual Manufacturing Capacity Card */}
-                <div className="bg-white border border-line rounded-[3px] p-6 shadow-sm">
-                  <h3 className="font-fraunces text-base font-semibold text-navy-deep mb-3">Annual Manufacturing Capacity</h3>
-                  <div className="space-y-2.5 text-xs">
-                    <div className="flex justify-between border-b border-dashed border-line pb-1.5">
-                      <span className="text-slate-custom">Solar Panels</span>
-                      <strong className="text-navy-deep font-semibold">5 GW</strong>
-                    </div>
-                    <div className="flex justify-between border-b border-dashed border-line pb-1.5">
-                      <span className="text-slate-custom">Inverters</span>
-                      <strong className="text-navy-deep font-semibold">17 GW</strong>
-                    </div>
-                    <div className="flex justify-between border-b border-dashed border-line pb-1.5">
-                      <span className="text-slate-custom">Batteries</span>
-                      <strong className="text-navy-deep font-semibold">2 GWh</strong>
-                    </div>
-                    <div className="flex justify-between border-b border-dashed border-line pb-1.5">
-                      <span className="text-slate-custom">BESS</span>
-                      <strong className="text-navy-deep font-semibold">3 GWh</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-custom">Breakers</span>
-                      <strong className="text-navy-deep font-semibold">10M units</strong>
-                    </div>
-                  </div>
-                </div>
+                )}
 
               </div>
             </div>
 
-            {/* Local Team Card */}
-            <div className="bg-white border border-line rounded-[3px] p-6 shadow-sm">
-              <h2 className="font-fraunces text-lg font-semibold text-navy-deep mb-1">Local Team</h2>
-              <p className="text-xs text-slate-custom mb-5">Regional contacts supporting installers and distributors in Pakistan.</p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Sales Team */}
-                <div>
-                  <h4 className="text-[12.5px] font-semibold text-amber-deep uppercase tracking-wider pb-2 border-b-2 border-line mb-3">
-                    Sales Team
-                  </h4>
-                  <div className="space-y-3">
-                    {team.filter((t) => t.department === "sales" || !t.department).slice(0, 2).map((member, i) => (
-                      <div key={i} className="flex gap-2.5 items-start">
-                        <div className="w-9 h-9 rounded-full bg-cream border border-line flex items-center justify-center font-bold text-xs text-navy-deep shrink-0">
-                          {member.name.slice(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-semibold text-ink">{member.name}</span>
-                            {member.linkedIn && (
-                              <a href={member.linkedIn} target="_blank" rel="noopener noreferrer" className="text-navy-deep opacity-60 hover:opacity-100">
-                                <Linkedin className="w-3 h-3" />
-                              </a>
-                            )}
+            {/* Local Team Card (Only rendered if actual members exist) */}
+            {team.length > 0 && (
+              <div className="bg-white border border-line rounded-[3px] p-6 shadow-sm">
+                <h2 className="font-fraunces text-lg font-semibold text-navy-deep mb-1">Local Team</h2>
+                <p className="text-xs text-slate-custom mb-5">
+                  Regional contacts supporting installers and distributors in Pakistan.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Sales Team */}
+                  {team.filter((t: any) => t.department === "sales" || !t.department).length > 0 && (
+                    <div>
+                      <h4 className="text-[12.5px] font-semibold text-amber-deep uppercase tracking-wider pb-2 border-b-2 border-line mb-3">
+                        Sales Team
+                      </h4>
+                      <div className="space-y-3">
+                        {team.filter((t: any) => t.department === "sales" || !t.department).map((member: any, i: number) => (
+                          <div key={i} className="flex gap-2.5 items-start">
+                            <div className="w-9 h-9 rounded-full bg-cream border border-line flex items-center justify-center font-bold text-xs text-navy-deep shrink-0">
+                              {member.name.slice(0, 2).toUpperCase()}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-semibold text-ink">{member.name}</span>
+                                {member.linkedIn && (
+                                  <a href={member.linkedIn} target="_blank" rel="noopener noreferrer" className="text-navy-deep opacity-60 hover:opacity-100">
+                                    <Linkedin className="w-3 h-3" />
+                                  </a>
+                                )}
+                              </div>
+                              <span className="text-[11px] text-slate-custom block mt-0.5">{member.role || member.designation}</span>
+                            </div>
                           </div>
-                          <span className="text-[11px] text-slate-custom block mt-0.5">{member.role}</span>
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    </div>
+                  )}
 
-                {/* Technical Team */}
-                <div>
-                  <h4 className="text-[12.5px] font-semibold text-amber-deep uppercase tracking-wider pb-2 border-b-2 border-line mb-3">
-                    Technical Team
-                  </h4>
-                  <div className="space-y-3">
-                    {team.filter((t) => t.department === "technical").slice(0, 2).map((member, i) => (
-                      <div key={i} className="flex gap-2.5 items-start">
-                        <div className="w-9 h-9 rounded-full bg-cream border border-line flex items-center justify-center font-bold text-xs text-navy-deep shrink-0">
-                          {member.name.slice(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-semibold text-ink">{member.name}</span>
-                            {member.linkedIn && (
-                              <a href={member.linkedIn} target="_blank" rel="noopener noreferrer" className="text-navy-deep opacity-60 hover:opacity-100">
-                                <Linkedin className="w-3 h-3" />
-                              </a>
-                            )}
+                  {/* Technical Team */}
+                  {team.filter((t: any) => t.department === "technical").length > 0 && (
+                    <div>
+                      <h4 className="text-[12.5px] font-semibold text-amber-deep uppercase tracking-wider pb-2 border-b-2 border-line mb-3">
+                        Technical Team
+                      </h4>
+                      <div className="space-y-3">
+                        {team.filter((t: any) => t.department === "technical").map((member: any, i: number) => (
+                          <div key={i} className="flex gap-2.5 items-start">
+                            <div className="w-9 h-9 rounded-full bg-cream border border-line flex items-center justify-center font-bold text-xs text-navy-deep shrink-0">
+                              {member.name.slice(0, 2).toUpperCase()}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-semibold text-ink">{member.name}</span>
+                                {member.linkedIn && (
+                                  <a href={member.linkedIn} target="_blank" rel="noopener noreferrer" className="text-navy-deep opacity-60 hover:opacity-100">
+                                    <Linkedin className="w-3 h-3" />
+                                  </a>
+                                )}
+                              </div>
+                              <span className="text-[11px] text-slate-custom block mt-0.5">{member.role || member.designation}</span>
+                            </div>
                           </div>
-                          <span className="text-[11px] text-slate-custom block mt-0.5">{member.role}</span>
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    </div>
+                  )}
 
-                {/* After-Sales Team */}
-                <div>
-                  <h4 className="text-[12.5px] font-semibold text-amber-deep uppercase tracking-wider pb-2 border-b-2 border-line mb-3">
-                    After-Sales Team
-                  </h4>
-                  <div className="space-y-3">
-                    {team.filter((t) => t.department === "aftersales").slice(0, 2).map((member, i) => (
-                      <div key={i} className="flex gap-2.5 items-start">
-                        <div className="w-9 h-9 rounded-full bg-cream border border-line flex items-center justify-center font-bold text-xs text-navy-deep shrink-0">
-                          {member.name.slice(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-semibold text-ink">{member.name}</span>
+                  {/* After-Sales Team */}
+                  {team.filter((t: any) => t.department === "aftersales" || t.department === "afterSales").length > 0 && (
+                    <div>
+                      <h4 className="text-[12.5px] font-semibold text-amber-deep uppercase tracking-wider pb-2 border-b-2 border-line mb-3">
+                        After-Sales Team
+                      </h4>
+                      <div className="space-y-3">
+                        {team.filter((t: any) => t.department === "aftersales" || t.department === "afterSales").map((member: any, i: number) => (
+                          <div key={i} className="flex gap-2.5 items-start">
+                            <div className="w-9 h-9 rounded-full bg-cream border border-line flex items-center justify-center font-bold text-xs text-navy-deep shrink-0">
+                              {member.name.slice(0, 2).toUpperCase()}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-semibold text-ink">{member.name}</span>
+                              </div>
+                              <span className="text-[11px] text-slate-custom block mt-0.5">{member.role || member.designation}</span>
+                            </div>
                           </div>
-                          <span className="text-[11px] text-slate-custom block mt-0.5">{member.role}</span>
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Customer Reviews Card */}
+            {/* Customer Reviews Card (100% Dynamic from database) */}
             <div className="bg-white border border-line rounded-[3px] p-6 shadow-sm">
               <div className="flex justify-between items-start flex-wrap gap-4 mb-5">
                 <div>
                   <h2 className="font-fraunces text-lg font-semibold text-navy-deep mb-1">Customer Reviews</h2>
-                  <p className="text-xs text-slate-custom">From customers who have bought or had this brand's products installed.</p>
+                  <p className="text-xs text-slate-custom">
+                    {reviews.length > 0
+                      ? "From verified customers and installers in Pakistan."
+                      : "Be the first verified customer or installer to review this brand."}
+                  </p>
                 </div>
                 <BrandReviewModal brandId={brand.id} brandName={brand.brandName} products={displayProducts} />
               </div>
 
-              {/* Rating Summary Breakdown */}
-              <div className="flex gap-8 items-center flex-wrap pb-5 mb-5 border-b border-line">
-                <div className="text-center">
-                  <div className="font-fraunces text-4xl font-semibold text-navy-deep leading-none">
-                    {rating > 0 ? rating.toFixed(1) : "4.6"}
-                  </div>
-                  <div className="text-amber-deep text-sm mt-1">★★★★★</div>
-                  <div className="text-xs text-slate-custom mt-0.5">
-                    {reviewCount || 128} reviews
-                  </div>
-                </div>
+              {actualReviewCount > 0 ? (
+                <>
+                  {/* Rating Summary Breakdown */}
+                  <div className="flex gap-8 items-center flex-wrap pb-5 mb-5 border-b border-line">
+                    <div className="text-center">
+                      <div className="font-fraunces text-4xl font-semibold text-navy-deep leading-none">
+                        {rating > 0 ? rating.toFixed(1) : "—"}
+                      </div>
+                      <div className="text-amber-deep text-sm mt-1">
+                        {"★".repeat(Math.round(rating || 0)) + "☆".repeat(Math.max(0, 5 - Math.round(rating || 0)))}
+                      </div>
+                      <div className="text-xs text-slate-custom mt-0.5">
+                        {actualReviewCount} {actualReviewCount === 1 ? "review" : "reviews"}
+                      </div>
+                    </div>
 
-                <div className="flex-1 min-w-[200px] space-y-1.5 text-xs text-slate-custom">
-                  {[
-                    { star: 5, pct: 78 },
-                    { star: 4, pct: 14 },
-                    { star: 3, pct: 5 },
-                    { star: 2, pct: 2 },
-                    { star: 1, pct: 1 },
-                  ].map((row) => (
-                    <div key={row.star} className="flex items-center gap-2">
-                      <span className="w-3">{row.star}</span>
-                      <div className="flex-1 h-1.5 bg-cream rounded-full overflow-hidden">
-                        <div className="h-full bg-amber" style={{ width: `${row.pct}%` }} />
-                      </div>
-                      <span className="w-8 text-right">{row.pct}%</span>
+                    <div className="flex-1 min-w-[200px] space-y-1.5 text-xs text-slate-custom">
+                      {starCounts.map((row) => (
+                        <div key={row.star} className="flex items-center gap-2">
+                          <span className="w-3">{row.star}</span>
+                          <div className="flex-1 h-1.5 bg-cream rounded-full overflow-hidden">
+                            <div className="h-full bg-amber" style={{ width: `${row.pct}%` }} />
+                          </div>
+                          <span className="w-8 text-right">{row.pct}%</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
 
-              {/* Reviews List */}
-              <div className="space-y-4">
-                {reviews.length > 0 ? (
-                  reviews.map((rev) => (
-                    <div key={rev.id} className="pb-4 border-b border-line last:border-b-0 last:pb-0">
-                      <div className="flex justify-between items-start gap-3">
-                        <div>
-                          <span className="font-semibold text-xs text-navy-deep">
-                            {rev.authorName || rev.author?.name || "Verified Customer"}
+                  {/* Reviews List */}
+                  <div className="space-y-4">
+                    {reviews.map((rev) => (
+                      <div key={rev.id} className="pb-4 border-b border-line last:border-b-0 last:pb-0">
+                        <div className="flex justify-between items-start gap-3">
+                          <div>
+                            <span className="font-semibold text-xs text-navy-deep">
+                              {rev.authorName || rev.author?.name || "Verified Customer"}
+                            </span>
+                            <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-custom">
+                              <span className="text-amber-deep">{"★".repeat(rev.rating || 5)}</span>
+                              <span>· {rev.city || "Pakistan"} {rev.productUsed ? `· ${rev.productUsed}` : ""}</span>
+                            </div>
+                          </div>
+                          <span className="text-[11px] text-slate-custom">
+                            {new Date(rev.createdAt).toLocaleDateString()}
                           </span>
-                          <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-custom">
-                            <span className="text-amber-deep">{"★".repeat(rev.rating || 5)}</span>
-                            <span>· {rev.city || "Pakistan"} {rev.productUsed ? `· ${rev.productUsed}` : ""}</span>
-                          </div>
                         </div>
-                        <span className="text-[11px] text-slate-custom">
-                          {new Date(rev.createdAt).toLocaleDateString()}
-                        </span>
+                        <p className="text-xs text-ink mt-2 leading-relaxed">{rev.comment}</p>
                       </div>
-                      <p className="text-xs text-ink mt-2 leading-relaxed">{rev.comment}</p>
-                    </div>
-                  ))
-                ) : (
-                  <>
-                    <div className="pb-4 border-b border-line">
-                      <div className="flex justify-between items-start gap-3">
-                        <div>
-                          <span className="font-semibold text-xs text-navy-deep">Ahmed Raza</span>
-                          <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-custom">
-                            <span className="text-amber-deep">★★★★★</span>
-                            <span>· Lahore · WIT 100H Commercial Cabinet</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[10.5px] font-semibold text-[#3E7D5A] bg-[#E8F2EC] px-2 py-0.5 rounded-full">
-                            Verified Installation
-                          </span>
-                          <span className="text-[11px] text-slate-custom">2 weeks ago</span>
-                        </div>
-                      </div>
-                      <p className="text-xs text-ink mt-2 leading-relaxed">
-                        System has run without a hiccup since commissioning. Our installer said the monitoring app makes fault diagnosis much faster than previous brands.
-                      </p>
-                    </div>
-                    <div>
-                      <div className="flex justify-between items-start gap-3">
-                        <div>
-                          <span className="font-semibold text-xs text-navy-deep">Sana Malik</span>
-                          <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-custom">
-                            <span className="text-amber-deep">★★★★☆</span>
-                            <span>· Islamabad · MIN 6000TL-X</span>
-                          </div>
-                        </div>
-                        <span className="text-[11px] text-slate-custom">1 month ago</span>
-                      </div>
-                      <p className="text-xs text-ink mt-2 leading-relaxed">
-                        Good inverter, WiFi module dropped connection once during setup but technical support sorted it remotely right away.
-                      </p>
-                    </div>
-                  </>
-                )}
-              </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="py-8 text-center border-t border-line">
+                  <Star className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                  <p className="text-sm font-semibold text-navy-deep">No reviews yet for {brand.brandName}</p>
+                  <p className="text-xs text-slate-custom mt-1 max-w-sm mx-auto">
+                    Have you used {brand.brandName} solar products? Share your feedback to help the community.
+                  </p>
+                </div>
+              )}
             </div>
 
           </div>
         )}
 
-        {/* TAB 2: PRODUCTS (Matches exact reference image) */}
+        {/* TAB 2: PRODUCTS (100% Dynamic) */}
         {activeTab === "products" && (
           <div className="space-y-6">
             <div>
               <h2 className="font-fraunces text-xl font-semibold text-navy-deep">Products</h2>
               <p className="text-xs text-slate-custom mt-1">
-                {brand.brandName}'s panel, inverter, battery, and breaker range available through EnergyGurus-listed distributors and installers.
+                {brand.brandName}'s official product catalog verified on EnergyGurus.
               </p>
             </div>
 
@@ -944,7 +859,7 @@ export function BrandProfileView({
                 <Search className="w-4 h-4 text-slate-custom absolute left-3 top-3" />
                 <input
                   type="text"
-                  placeholder="Search by model or type"
+                  placeholder="Search by model or series"
                   value={productSearch}
                   onChange={(e) => setProductSearch(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 bg-white border border-line rounded-[3px] text-xs focus:outline-none focus:border-amber"
@@ -962,347 +877,363 @@ export function BrandProfileView({
                 <option value="bess">BESS</option>
                 <option value="breakers">Breakers</option>
               </select>
-              <select
-                value={productTypeFilter}
-                onChange={(e) => setProductTypeFilter(e.target.value)}
-                className="bg-white border border-line rounded-[3px] text-xs px-3 py-2 text-ink focus:outline-none focus:border-amber"
-              >
-                <option value="all">All types</option>
-                <option value="high voltage">High Voltage</option>
-                <option value="low voltage">Low Voltage</option>
-                <option value="single">Single Phase</option>
-                <option value="three">Three Phase</option>
-              </select>
             </div>
 
             {/* Product Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredProducts.map((p, idx) => {
-                const specs = p.specs || {
-                  Wattage: p.ratedPower ? `${p.ratedPower} W` : "585 W",
-                  Efficiency: p.efficiency ? `${p.efficiency}%` : "22.6%",
-                  Degradation: "0.4%/yr",
-                  Warranty: p.warrantyYears ? `${p.warrantyYears} yrs` : "10 yrs"
-                };
+            {filteredProducts.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filteredProducts.map((p, idx) => {
+                  const specs = p.specs || {};
 
-                return (
-                  <div key={idx} className="bg-white border border-line rounded-[3px] overflow-hidden flex flex-col shadow-sm">
-                    {/* Media */}
-                    <div className="h-36 bg-gradient-to-br from-navy to-navy-deep relative flex items-center justify-center p-3">
-                      <span className="absolute top-2.5 left-2.5 text-[10.5px] font-semibold bg-white/90 text-navy-deep px-2.5 py-0.5 rounded-full">
-                        {p.category || "Solar Equipment"}
-                      </span>
-                      {p.imageUrl ? (
-                        <Image
-                          src={p.imageUrl}
-                          alt={p.name}
-                          width={140}
-                          height={100}
-                          className="object-contain max-h-28"
-                        />
-                      ) : (
-                        <span className="text-white/40 font-mono text-xs">{p.name}</span>
-                      )}
-                    </div>
-
-                    {/* Body */}
-                    <div className="p-4 flex-1 flex flex-col justify-between">
-                      <div>
-                        <h3 className="font-fraunces font-bold text-base text-navy-deep">
-                          {p.name}
-                        </h3>
-                        <div className="text-xs text-slate-custom mt-0.5 mb-3">
-                          {p.series || "Official Certified Model"}
-                        </div>
-
-                        {/* Specs Grid */}
-                        <div className="grid grid-cols-2 gap-2 text-xs mb-4">
-                          {Object.entries(specs).slice(0, 4).map(([key, val]: [string, any], sIdx) => (
-                            <div key={sIdx} className="text-slate-custom">
-                              <span>{key}</span>
-                              <strong className="block text-ink font-semibold mt-0.5">{val}</strong>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="pt-3 border-t border-line">
-                        <div className="flex gap-2">
-                          <a
-                            href={`https://wa.me/923001112222?text=Hi%2C%20I%20am%20interested%20in%20pricing%20for%20${encodeURIComponent(p.name)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 bg-amber hover:bg-[#eab857] text-navy-deep font-semibold text-xs py-2 px-2.5 rounded-[3px] flex items-center justify-center gap-1.5 transition-colors"
-                          >
-                            <MessageSquare className="w-3.5 h-3.5" /> Click for Price
-                          </a>
-                          <a
-                            href={p.datasheetUrl || "#"}
-                            target={p.datasheetUrl ? "_blank" : undefined}
-                            rel="noopener noreferrer"
-                            className="flex-1 bg-cream hover:bg-[#EFEADC] border border-line text-ink font-semibold text-xs py-2 px-2.5 rounded-[3px] flex items-center justify-center gap-1.5 transition-colors"
-                          >
-                            Datasheet
-                          </a>
-                        </div>
-                        <span className="block text-center mt-2 text-[11px] font-semibold text-slate-custom underline cursor-pointer hover:text-ink">
-                          Warranty terms & conditions
+                  return (
+                    <div key={idx} className="bg-white border border-line rounded-[3px] overflow-hidden flex flex-col shadow-sm">
+                      {/* Media */}
+                      <div className="h-36 bg-gradient-to-br from-navy to-navy-deep relative flex items-center justify-center p-3">
+                        <span className="absolute top-2.5 left-2.5 text-[10.5px] font-semibold bg-white/90 text-navy-deep px-2.5 py-0.5 rounded-full">
+                          {p.category || "Solar Equipment"}
                         </span>
+                        {p.imageUrl ? (
+                          <Image
+                            src={p.imageUrl}
+                            alt={p.name}
+                            width={140}
+                            height={100}
+                            className="object-contain max-h-28"
+                          />
+                        ) : (
+                          <span className="text-white/40 font-mono text-xs">{p.name}</span>
+                        )}
+                      </div>
+
+                      {/* Body */}
+                      <div className="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                          <h3 className="font-fraunces font-bold text-base text-navy-deep">
+                            {p.name}
+                          </h3>
+                          {p.series && (
+                            <div className="text-xs text-slate-custom mt-0.5 mb-3">
+                              {p.series}
+                            </div>
+                          )}
+
+                          {p.description && (
+                            <p className="text-xs text-slate-custom mt-1 mb-3 line-clamp-2">
+                              {p.description}
+                            </p>
+                          )}
+
+                          {/* Specs Grid (only if specs exist) */}
+                          {Object.keys(specs).length > 0 && (
+                            <div className="grid grid-cols-2 gap-2 text-xs mb-4">
+                              {Object.entries(specs).slice(0, 4).map(([key, val]: [string, any], sIdx) => (
+                                <div key={sIdx} className="text-slate-custom">
+                                  <span>{key}</span>
+                                  <strong className="block text-ink font-semibold mt-0.5">{val}</strong>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Actions */}
+                        <div className="pt-3 border-t border-line">
+                          <div className="flex gap-2">
+                            {cleanWhatsappNumber ? (
+                              <a
+                                href={`https://wa.me/${cleanWhatsappNumber}?text=Hi%2C%20I%20am%20interested%20in%20pricing%20for%20${encodeURIComponent(p.name)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex-1 bg-amber hover:bg-[#eab857] text-navy-deep font-semibold text-xs py-2 px-2.5 rounded-[3px] flex items-center justify-center gap-1.5 transition-colors"
+                              >
+                                <MessageSquare className="w-3.5 h-3.5" /> Click for Price
+                              </a>
+                            ) : (
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <button
+                                    type="button"
+                                    className="flex-1 bg-amber hover:bg-[#eab857] text-navy-deep font-semibold text-xs py-2 px-2.5 rounded-[3px] flex items-center justify-center gap-1.5 transition-colors"
+                                  >
+                                    <MessageSquare className="w-3.5 h-3.5" /> Request Price
+                                  </button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-[500px] rounded-[4px] p-0 overflow-hidden border border-line text-ink bg-white">
+                                  <div className="bg-navy-deep p-6 text-white">
+                                    <h3 className="text-xl font-bold font-fraunces">Inquire about {p.name}</h3>
+                                    <p className="text-paper/70 text-xs mt-1">Send a direct procurement inquiry for this model.</p>
+                                  </div>
+                                  <div className="p-6 bg-white">
+                                    <ContactForm receiverId={brand.userId} receiverName={brand.brandName} />
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            )}
+
+                            {p.datasheetUrl && (
+                              <a
+                                href={p.datasheetUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex-1 bg-cream hover:bg-[#EFEADC] border border-line text-ink font-semibold text-xs py-2 px-2.5 rounded-[3px] flex items-center justify-center gap-1.5 transition-colors"
+                              >
+                                Datasheet
+                              </a>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="bg-white border border-line rounded-[3px] p-10 text-center">
+                <PackageX className="w-10 h-10 text-slate-300 mx-auto mb-2.5" />
+                <h3 className="font-semibold text-sm text-navy-deep">No products listed</h3>
+                <p className="text-xs text-slate-custom mt-1 max-w-sm mx-auto">
+                  {displayProducts.length === 0
+                    ? `No product models have been uploaded for ${brand.brandName} yet.`
+                    : "No products matched your search filter."}
+                </p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* TAB 4: AUTHORIZED DISTRIBUTORS */}
+        {/* TAB 3: AUTHORIZED DISTRIBUTORS */}
         {activeTab === "distributors" && (
           <div className="space-y-6">
             <div>
               <h2 className="font-fraunces text-xl font-semibold text-navy-deep">Authorized Distributors</h2>
-              <p className="text-xs text-slate-custom mt-1">Companies authorized by {brand.brandName} to import, stock, and distribute inverters and batteries in Pakistan.</p>
+              <p className="text-xs text-slate-custom mt-1">
+                Official distribution partners authorized by {brand.brandName} in Pakistan.
+              </p>
             </div>
 
             {/* Toolbar */}
-            <div className="flex gap-3 flex-wrap">
-              <div className="relative flex-1 min-w-[220px]">
-                <Search className="w-4 h-4 text-slate-custom absolute left-3 top-3" />
-                <input
-                  type="text"
-                  placeholder="Search by company or city"
-                  value={distributorSearch}
-                  onChange={(e) => setDistributorSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-white border border-line rounded-[3px] text-xs focus:outline-none focus:border-amber"
-                />
+            {distributors.length > 0 && (
+              <div className="flex gap-3 flex-wrap">
+                <div className="relative flex-1 min-w-[220px]">
+                  <Search className="w-4 h-4 text-slate-custom absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    placeholder="Search by company or city"
+                    value={distributorSearch}
+                    onChange={(e) => setDistributorSearch(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 bg-white border border-line rounded-[3px] text-xs focus:outline-none focus:border-amber"
+                  />
+                </div>
               </div>
-              <select
-                value={distributorRegionFilter}
-                onChange={(e) => setDistributorRegionFilter(e.target.value)}
-                className="bg-white border border-line rounded-[3px] text-xs px-3 py-2 text-ink focus:outline-none focus:border-amber"
-              >
-                <option value="all">All regions</option>
-                <option value="Punjab">Punjab</option>
-                <option value="Sindh">Sindh</option>
-                <option value="KPK">KPK</option>
-              </select>
-            </div>
+            )}
 
             {/* Entity List */}
-            <div className="bg-white border border-line rounded-[3px] divide-y divide-line overflow-hidden shadow-sm">
-              {filteredDistributors.map((d, i) => (
-                <div key={i} className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-cream/40 transition-colors">
-                  <div className="flex-1 min-w-[240px]">
-                    <h3 className="font-semibold text-sm text-navy-deep">{d.name}</h3>
-                    <p className="text-xs text-slate-custom mt-0.5">{d.address}</p>
-                  </div>
-                  <div className="text-xs">
-                    <span className="text-slate-custom block text-[11px]">Region</span>
-                    <strong className="text-ink font-semibold">{d.region || "Nationwide"}</strong>
-                  </div>
-                  <div className="text-xs">
-                    <span className="text-slate-custom block text-[11px]">Since</span>
-                    <strong className="text-ink font-semibold">{d.since || "2023"}</strong>
-                  </div>
-                  <div>
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold bg-[#FBF0DA] text-[#96701A] px-2.5 py-0.5 rounded-full">
-                      Authorized
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 text-xs font-semibold text-navy-deep">
-                    {d.mapUrl && (
-                      <a href={d.mapUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                        Map
-                      </a>
+            {filteredDistributors.length > 0 ? (
+              <div className="bg-white border border-line rounded-[3px] divide-y divide-line overflow-hidden shadow-sm">
+                {filteredDistributors.map((d, i) => (
+                  <div key={i} className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-cream/40 transition-colors">
+                    <div className="flex-1 min-w-[240px]">
+                      <h3 className="font-semibold text-sm text-navy-deep">{d.name}</h3>
+                      <p className="text-xs text-slate-custom mt-0.5">{d.address || d.city}</p>
+                    </div>
+                    {d.region && (
+                      <div className="text-xs">
+                        <span className="text-slate-custom block text-[11px]">Region</span>
+                        <strong className="text-ink font-semibold">{d.region}</strong>
+                      </div>
                     )}
-                    <span className="cursor-pointer hover:underline">View Profile</span>
+                    {d.since && (
+                      <div className="text-xs">
+                        <span className="text-slate-custom block text-[11px]">Since</span>
+                        <strong className="text-ink font-semibold">{d.since}</strong>
+                      </div>
+                    )}
+                    <div>
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold bg-[#FBF0DA] text-[#96701A] px-2.5 py-0.5 rounded-full">
+                        {d.status || "Authorized"}
+                      </span>
+                    </div>
+                    {d.mapUrl && (
+                      <div className="flex items-center gap-3 text-xs font-semibold text-navy-deep">
+                        <a href={d.mapUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                          View Map
+                        </a>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white border border-line rounded-[3px] p-10 text-center">
+                <Store className="w-10 h-10 text-slate-300 mx-auto mb-2.5" />
+                <h3 className="font-semibold text-sm text-navy-deep">No distributors listed</h3>
+                <p className="text-xs text-slate-custom mt-1 max-w-sm mx-auto">
+                  Official distributor network for {brand.brandName} will appear here once registered.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* TAB 5: CERTIFIED RETAILERS */}
+        {/* TAB 4: CERTIFIED RETAILERS */}
         {activeTab === "retailers" && (
           <div className="space-y-6">
             <div>
               <h2 className="font-fraunces text-xl font-semibold text-navy-deep">Authorized Retailers</h2>
-              <p className="text-xs text-slate-custom mt-1">Retail outlets authorized to sell genuine {brand.brandName} products directly to customers.</p>
+              <p className="text-xs text-slate-custom mt-1">
+                Retail outlets authorized to sell genuine {brand.brandName} products directly to consumers.
+              </p>
             </div>
 
-            {/* Toolbar */}
-            <div className="flex gap-3 flex-wrap">
-              <div className="relative flex-1 min-w-[220px]">
-                <Search className="w-4 h-4 text-slate-custom absolute left-3 top-3" />
-                <input
-                  type="text"
-                  placeholder="Search by shop or market"
-                  value={retailerSearch}
-                  onChange={(e) => setRetailerSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-white border border-line rounded-[3px] text-xs focus:outline-none focus:border-amber"
-                />
-              </div>
-              <select
-                value={retailerCityFilter}
-                onChange={(e) => setRetailerCityFilter(e.target.value)}
-                className="bg-white border border-line rounded-[3px] text-xs px-3 py-2 text-ink focus:outline-none focus:border-amber"
-              >
-                <option value="all">All cities</option>
-                <option value="Lahore">Lahore</option>
-                <option value="Karachi">Karachi</option>
-                <option value="Faisalabad">Faisalabad</option>
-              </select>
-            </div>
-
-            {/* Entity List */}
-            <div className="bg-white border border-line rounded-[3px] divide-y divide-line overflow-hidden shadow-sm">
-              {filteredRetailers.map((r, i) => (
-                <div key={i} className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-cream/40 transition-colors">
-                  <div className="flex-1 min-w-[240px]">
-                    <h3 className="font-semibold text-sm text-navy-deep">{r.name}</h3>
-                    <p className="text-xs text-slate-custom mt-0.5">{r.address}</p>
-                  </div>
-                  <div className="text-xs">
-                    <span className="text-slate-custom block text-[11px]">Type</span>
-                    <strong className="text-ink font-semibold">{r.type || "Retail Shop"}</strong>
-                  </div>
-                  <div className="text-xs">
-                    <span className="text-slate-custom block text-[11px]">Since</span>
-                    <strong className="text-ink font-semibold">{r.since || "2021"}</strong>
-                  </div>
-                  <div>
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold bg-[#EEF0F2] text-[#54606A] px-2.5 py-0.5 rounded-full">
-                      Authorized
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 text-xs font-semibold text-navy-deep">
+            {filteredRetailers.length > 0 ? (
+              <div className="bg-white border border-line rounded-[3px] divide-y divide-line overflow-hidden shadow-sm">
+                {filteredRetailers.map((r, i) => (
+                  <div key={i} className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-cream/40 transition-colors">
+                    <div className="flex-1 min-w-[240px]">
+                      <h3 className="font-semibold text-sm text-navy-deep">{r.name}</h3>
+                      <p className="text-xs text-slate-custom mt-0.5">{r.address || r.city}</p>
+                    </div>
+                    {r.type && (
+                      <div className="text-xs">
+                        <span className="text-slate-custom block text-[11px]">Type</span>
+                        <strong className="text-ink font-semibold">{r.type}</strong>
+                      </div>
+                    )}
+                    {r.since && (
+                      <div className="text-xs">
+                        <span className="text-slate-custom block text-[11px]">Since</span>
+                        <strong className="text-ink font-semibold">{r.since}</strong>
+                      </div>
+                    )}
+                    <div>
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold bg-[#EEF0F2] text-[#54606A] px-2.5 py-0.5 rounded-full">
+                        {r.status || "Authorized"}
+                      </span>
+                    </div>
                     {r.mapUrl && (
-                      <a href={r.mapUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                        Map
+                      <a href={r.mapUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-navy-deep hover:underline">
+                        View Map
                       </a>
                     )}
-                    <span className="cursor-pointer hover:underline">View Details</span>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white border border-line rounded-[3px] p-10 text-center">
+                <Building2 className="w-10 h-10 text-slate-300 mx-auto mb-2.5" />
+                <h3 className="font-semibold text-sm text-navy-deep">No retailers listed</h3>
+                <p className="text-xs text-slate-custom mt-1 max-w-sm mx-auto">
+                  Authorized retail outlets for {brand.brandName} will appear here once verified.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* TAB 6: FLAGSHIP STORES & CSS */}
+        {/* TAB 5: FLAGSHIP STORES & CSS */}
         {activeTab === "centres" && (
           <div className="space-y-6">
             <div>
-              <h2 className="font-fraunces text-xl font-semibold text-navy-deep">Flagship Stores & Customer Service Centres</h2>
-              <p className="text-xs text-slate-custom mt-1">Brand-operated locations for product demonstrations, warranty claims, and technical support.</p>
+              <h2 className="font-fraunces text-xl font-semibold text-navy-deep">Flagship Stores &amp; Customer Service Centres</h2>
+              <p className="text-xs text-slate-custom mt-1">
+                Official locations for product demonstrations, warranty claims, and technical service.
+              </p>
             </div>
 
-            {/* Centre Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {serviceCentres.map((c, i) => (
-                <div key={i} className="bg-white border border-line rounded-[3px] p-5 shadow-sm flex flex-col justify-between">
-                  <div>
-                    <h3 className="font-semibold text-sm text-navy-deep">{c.name}</h3>
-                    <div className="text-xs font-semibold text-amber-deep mt-0.5 mb-2">{c.area || c.city}</div>
-                    <p className="text-xs text-slate-custom mb-3 leading-relaxed">{c.address}</p>
-                    
-                    <div className="flex gap-1.5 flex-wrap mb-4">
-                      {(c.tags || ["Warranty Claims", "Technical Support"]).map((tag: string, tIdx: number) => (
-                        <span key={tIdx} className="text-[11px] bg-cream border border-line text-ink px-2.5 py-0.5 rounded-full">
-                          {tag}
-                        </span>
-                      ))}
+            {serviceCentres.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {serviceCentres.map((c, i) => (
+                  <div key={i} className="bg-white border border-line rounded-[3px] p-5 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <h3 className="font-semibold text-sm text-navy-deep">{c.name}</h3>
+                      <div className="text-xs font-semibold text-amber-deep mt-0.5 mb-2">{c.area || c.city}</div>
+                      <p className="text-xs text-slate-custom mb-3 leading-relaxed">{c.address}</p>
+                      
+                      {Array.isArray(c.tags || c.services) && (
+                        <div className="flex gap-1.5 flex-wrap mb-4">
+                          {(c.tags || c.services).map((tag: string, tIdx: number) => (
+                            <span key={tIdx} className="text-[11px] bg-cream border border-line text-ink px-2.5 py-0.5 rounded-full">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-3 border-t border-dashed border-line flex justify-between items-center text-xs">
+                      <span className="text-slate-custom">{c.hours || "Official Operating Hours"}</span>
+                      {c.mapUrl && (
+                        <a href={c.mapUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-navy-deep hover:underline">
+                          Get Directions
+                        </a>
+                      )}
                     </div>
                   </div>
-
-                  <div className="pt-3 border-t border-dashed border-line flex justify-between items-center text-xs">
-                    <span className="text-slate-custom">{c.hours || "Mon–Sat, 10am–6pm"}</span>
-                    {c.mapUrl && (
-                      <a href={c.mapUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-navy-deep hover:underline">
-                        Get Directions
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white border border-line rounded-[3px] p-10 text-center">
+                <Wrench className="w-10 h-10 text-slate-300 mx-auto mb-2.5" />
+                <h3 className="font-semibold text-sm text-navy-deep">No service centres registered</h3>
+                <p className="text-xs text-slate-custom mt-1 max-w-sm mx-auto">
+                  Customer service centres and flagship stores will be listed here once submitted by {brand.brandName}.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* TAB 7: CERTIFIED INSTALLERS */}
+        {/* TAB 6: CERTIFIED INSTALLERS */}
         {activeTab === "installers" && (
           <div className="space-y-6">
             <div>
               <h2 className="font-fraunces text-xl font-semibold text-navy-deep">Certified Installers</h2>
-              <p className="text-xs text-slate-custom mt-1">Installers verified by EnergyGurus and certified by {brand.brandName} to sell and install their product range.</p>
+              <p className="text-xs text-slate-custom mt-1">
+                Installers certified by {brand.brandName} to deploy their product ecosystem.
+              </p>
             </div>
 
-            {/* Toolbar */}
-            <div className="flex gap-3 flex-wrap">
-              <div className="relative flex-1 min-w-[220px]">
-                <Search className="w-4 h-4 text-slate-custom absolute left-3 top-3" />
-                <input
-                  type="text"
-                  placeholder="Search by installer or city"
-                  value={installerSearch}
-                  onChange={(e) => setInstallerSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-white border border-line rounded-[3px] text-xs focus:outline-none focus:border-amber"
-                />
+            {filteredInstallers.length > 0 ? (
+              <div className="bg-white border border-line rounded-[3px] divide-y divide-line overflow-hidden shadow-sm">
+                {filteredInstallers.map((inst, i) => (
+                  <div key={i} className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-cream/40 transition-colors">
+                    <div className="flex-1 min-w-[240px]">
+                      <h3 className="font-semibold text-sm text-navy-deep">{inst.installerName || inst.name}</h3>
+                      <p className="text-xs text-slate-custom mt-0.5">{inst.city || "Pakistan"}</p>
+                    </div>
+                    {inst.rating && (
+                      <div className="text-xs">
+                        <span className="text-slate-custom block text-[11px]">Rating</span>
+                        <strong className="text-ink font-semibold flex items-center gap-1">
+                          <span className="text-amber-deep">★</span> {inst.rating}
+                        </strong>
+                      </div>
+                    )}
+                    <div>
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#FBF0DA] text-[#96701A]">
+                        {inst.tier || "Certified"} Installer
+                      </span>
+                    </div>
+                    {inst.installerId || inst.slug ? (
+                      <Link
+                        href={`/epcs/${inst.installerId || inst.slug}`}
+                        className="text-xs font-semibold text-navy-deep hover:underline"
+                      >
+                        View Profile
+                      </Link>
+                    ) : null}
+                  </div>
+                ))}
               </div>
-              <select
-                value={installerCityFilter}
-                onChange={(e) => setInstallerCityFilter(e.target.value)}
-                className="bg-white border border-line rounded-[3px] text-xs px-3 py-2 text-ink focus:outline-none focus:border-amber"
-              >
-                <option value="all">All cities</option>
-                <option value="Lahore">Lahore</option>
-                <option value="Karachi">Karachi</option>
-                <option value="Islamabad">Islamabad</option>
-              </select>
-              <select
-                value={installerTierFilter}
-                onChange={(e) => setInstallerTierFilter(e.target.value)}
-                className="bg-white border border-line rounded-[3px] text-xs px-3 py-2 text-ink focus:outline-none focus:border-amber"
-              >
-                <option value="all">All tiers</option>
-                <option value="Gold">Gold</option>
-                <option value="Silver">Silver</option>
-              </select>
-            </div>
-
-            {/* Entity List */}
-            <div className="bg-white border border-line rounded-[3px] divide-y divide-line overflow-hidden shadow-sm">
-              {filteredInstallers.map((inst, i) => (
-                <div key={i} className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-cream/40 transition-colors">
-                  <div className="flex-1 min-w-[240px]">
-                    <h3 className="font-semibold text-sm text-navy-deep">{inst.name}</h3>
-                    <p className="text-xs text-slate-custom mt-0.5">{inst.city}, {inst.region || "Pakistan"}</p>
-                  </div>
-                  <div className="text-xs">
-                    <span className="text-slate-custom block text-[11px]">Rating</span>
-                    <strong className="text-ink font-semibold flex items-center gap-1">
-                      <span className="text-amber-deep">★★★★★</span> {inst.rating || 4.8}
-                    </strong>
-                  </div>
-                  <div>
-                    <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full ${
-                      inst.tier === "Gold" ? "bg-[#FBF0DA] text-[#96701A]" : "bg-[#EEF0F2] text-[#54606A]"
-                    }`}>
-                      {inst.tier} — Verified
-                    </span>
-                  </div>
-                  <Link
-                    href={`/installers/${inst.slug || ""}`}
-                    className="text-xs font-semibold text-navy-deep hover:underline"
-                  >
-                    View Profile
-                  </Link>
-                </div>
-              ))}
-            </div>
+            ) : (
+              <div className="bg-white border border-line rounded-[3px] p-10 text-center">
+                <Briefcase className="w-10 h-10 text-slate-300 mx-auto mb-2.5" />
+                <h3 className="font-semibold text-sm text-navy-deep">No certified installers listed</h3>
+                <p className="text-xs text-slate-custom mt-1 max-w-sm mx-auto">
+                  Certified EPC installers authorized for {brand.brandName} will appear here once vetted.
+                </p>
+              </div>
+            )}
           </div>
         )}
 

@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, BarChart3, Battery, Sun, AlertTriangle, Users, MessageSquare, Package, ShieldCheck, FileText } from "lucide-react";
+import { Activity, BarChart3, Battery, Sun, AlertTriangle, Users, MessageSquare, Package, ShieldCheck, FileText, Award, ArrowRight, Zap } from "lucide-react";
 import { getUserRole } from "@/lib/roles";
 import { db } from "@/db";
 import { users, inquiries, epcInstallers, brands, products, writerProfiles, news } from "@/db/schema";
@@ -7,6 +7,11 @@ import { eq, sql, and } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { fetchGoogleAnalyticsDashboardData } from "@/lib/google-analytics";
+import { GoogleAnalyticsSection } from "@/components/dashboard/GoogleAnalyticsSection";
+import { LiveAnalyticsHeaderBadge } from "@/components/dashboard/LiveAnalyticsHeaderBadge";
+
+export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
     const role = await getUserRole();
@@ -19,6 +24,9 @@ export default async function Dashboard() {
     let stats = [];
     let title = "Monitoring Dashboard";
     let subtitle = "Real-time telemetry and system performance overview.";
+
+    const isAdmin = role === 'admin' || role === 'super-admin';
+    let gaData: any = null;
 
     if (role === 'epc') {
         title = "EPC Overview";
@@ -61,18 +69,35 @@ export default async function Dashboard() {
                 { title: "Catalog Status", value: brand ? "Active" : "Pending Setup", unit: "Account Health", icon: <AlertTriangle className="w-4 h-4 text-amber" /> },
             ];
         }
-    } else if (role === 'admin' || role === 'super-admin') {
+    } else if (isAdmin) {
         title = "Admin Console";
         subtitle = "Global platform management and oversight.";
-        const userCount = await db.select({ count: sql<number>`count(*)` }).from(users);
-        const epcCount = await db.select({ count: sql<number>`count(*)` }).from(epcInstallers);
-        const globalInquiries = await db.select({ count: sql<number>`count(*)` }).from(inquiries);
+        
+        const [
+            userCount,
+            epcCount,
+            brandCount,
+            writerCount,
+            globalInquiries,
+            fetchedGaData
+        ] = await Promise.all([
+            db.select({ count: sql<number>`count(*)` }).from(users),
+            db.select({ count: sql<number>`count(*)` }).from(epcInstallers),
+            db.select({ count: sql<number>`count(*)` }).from(brands),
+            db.select({ count: sql<number>`count(*)` }).from(writerProfiles),
+            db.select({ count: sql<number>`count(*)` }).from(inquiries),
+            fetchGoogleAnalyticsDashboardData()
+        ]);
+
+        gaData = fetchedGaData;
 
         stats = [
-            { title: "Total Users", value: userCount[0].count.toString(), unit: "Registered", icon: <Users className="w-4 h-4 text-amber" /> },
-            { title: "Verified EPCs", value: epcCount[0].count.toString(), unit: "Partners", icon: <ShieldCheck className="w-4 h-4 text-green-500" /> },
-            { title: "Global Inquiries", value: globalInquiries[0].count.toString(), unit: "Total platform", icon: <MessageSquare className="w-4 h-4 text-blue-500" /> },
-            { title: "System Health", value: "99.9%", unit: "Operational", icon: <Activity className="w-4 h-4 text-green-500" /> },
+            { title: "Total Users", value: userCount[0].count.toString(), unit: "Registered", icon: <Users className="w-3.5 h-3.5 text-amber" />, accentColor: "bg-amber" },
+            { title: "Verified EPCs", value: epcCount[0].count.toString(), unit: "Installers", icon: <ShieldCheck className="w-3.5 h-3.5 text-navy-deep" />, accentColor: "bg-navy-deep" },
+            { title: "Brands", value: brandCount[0].count.toString(), unit: "Partners", icon: <Award className="w-3.5 h-3.5 text-amber-deep" />, accentColor: "bg-amber-deep" },
+            { title: "Writers", value: writerCount[0].count.toString(), unit: "Authors", icon: <FileText className="w-3.5 h-3.5 text-navy" />, accentColor: "bg-navy" },
+            { title: "Inquiries", value: globalInquiries[0].count.toString(), unit: "Platform leads", icon: <MessageSquare className="w-3.5 h-3.5 text-amber" />, accentColor: "bg-amber" },
+            { title: "System Health", value: "99.9%", unit: "Operational", icon: <Activity className="w-3.5 h-3.5 text-teal" />, accentColor: "bg-teal" },
         ];
     } else if (role === 'writer') {
         title = "Writer Desk";
@@ -150,88 +175,140 @@ export default async function Dashboard() {
                     <h1 className="font-space-grotesk text-3xl md:text-4xl font-semibold tracking-tight mb-2 text-ink">{title}</h1>
                     <p className="text-slate-custom text-base md:text-lg">{subtitle}</p>
                 </div>
-                <div className="w-fit bg-[rgba(47,110,98,0.1)] text-teal px-4 py-2 rounded-[20px] text-[0.7rem] font-ibm-plex-mono font-semibold flex items-center gap-2 border border-teal/20 uppercase tracking-widest">
-                    <div className="w-2 h-2 bg-teal rounded-full animate-pulse" />
-                    LIVE ANALYTICS
-                </div>
+                {isAdmin ? (
+                    <LiveAnalyticsHeaderBadge />
+                ) : (
+                    <div className="w-fit bg-[rgba(47,110,98,0.1)] text-teal px-4 py-2 rounded-[20px] text-[0.7rem] font-ibm-plex-mono font-semibold flex items-center gap-2 border border-teal/20 uppercase tracking-widest">
+                        <div className="w-2 h-2 bg-teal rounded-full animate-pulse" />
+                        LIVE ANALYTICS
+                    </div>
+                )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className={isAdmin ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"}>
                 {stats.map((s, i) => (
-                    <StatCard key={i} title={s.title} value={s.value} unit={s.unit} icon={s.icon} />
+                    <StatCard
+                        key={i}
+                        title={s.title}
+                        value={s.value}
+                        unit={s.unit}
+                        icon={s.icon}
+                        compact={isAdmin}
+                        accentColor={(s as any).accentColor}
+                    />
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <Card className="lg:col-span-2 border border-line shadow-sm rounded-[6px] overflow-hidden bg-white">
-                    <CardHeader className="p-6 md:p-8 pb-4">
-                        <CardTitle className="font-space-grotesk text-xl font-semibold flex items-center gap-2 text-ink">
-                            <Activity className="w-5 h-5 text-teal" />
-                            {'Engagement Trends (7d)'}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-6 md:p-8 pt-4">
-                        <div className="h-[250px] md:h-[350px] w-full bg-paper rounded-[4px] flex items-end p-6 md:p-8 gap-3 md:gap-6 border border-line relative overflow-hidden group">
-                            {/* Background Grid Lines */}
-                            <div className="absolute inset-0 flex flex-col justify-between p-6 md:p-8 pointer-events-none opacity-20">
-                                {[1, 2, 3, 4].map(line => <div key={line} className="w-full h-px bg-slate-custom/30 border-t border-dashed" />)}
-                            </div>
-
-                            {days.map((d, i) => (
-                                <div
-                                    key={i}
-                                    className="flex-1 flex flex-col items-center gap-3 h-full justify-end group/bar z-10"
-                                >
-                                    <div
-                                        className="w-full max-w-[40px] bg-gradient-to-t from-teal/80 to-teal rounded-t-[4px] transition-all duration-500 ease-out hover:brightness-110 relative"
-                                        style={{ height: `${(d.value / maxValue) * 100}%`, minHeight: d.value > 0 ? '4px' : '0px' }}
-                                    >
-                                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-ink backdrop-blur-md text-white text-[11px] font-semibold px-3 py-1.5 rounded-[4px] opacity-0 group-hover/bar:opacity-100 transition-all transform scale-90 group-hover/bar:scale-100 z-20 shadow-xl border border-white/10 whitespace-nowrap">
-                                            {d.value} {d.value === 1 ? 'Inquiry' : 'Inquiries'}
-                                        </div>
-                                        {/* Glow Effect */}
-                                        <div className="absolute inset-0 bg-teal/20 blur-md -z-10 opacity-0 group-hover/bar:opacity-100 transition-opacity" />
+            {/* MAIN BENTO SECTION */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
+                    {isAdmin ? (
+                        <GoogleAnalyticsSection data={gaData} />
+                    ) : (
+                        <Card className="border border-line/80 shadow-xs rounded-2xl overflow-hidden bg-white hover:border-teal/40 hover:shadow-sm transition-all duration-200">
+                            <CardHeader className="p-6 md:p-8 pb-4 border-b border-line/60 flex flex-row items-center justify-between">
+                                <CardTitle className="font-space-grotesk text-xl font-bold flex items-center gap-2 text-navy-deep">
+                                    <Activity className="w-5 h-5 text-teal" />
+                                    {'Engagement Trends (7d)'}
+                                </CardTitle>
+                                <span className="text-[11px] font-ibm-plex-mono text-slate-custom uppercase tracking-wider">Inquiries Telemetry</span>
+                            </CardHeader>
+                            <CardContent className="p-6 md:p-8 pt-6">
+                                <div className="h-[250px] md:h-[350px] w-full bg-paper rounded-xl flex items-end p-6 md:p-8 gap-3 md:gap-6 border border-line relative overflow-hidden group">
+                                    {/* Background Grid Lines */}
+                                    <div className="absolute inset-0 flex flex-col justify-between p-6 md:p-8 pointer-events-none opacity-20">
+                                        {[1, 2, 3, 4].map(line => <div key={line} className="w-full h-px bg-slate-custom/30 border-t border-dashed" />)}
                                     </div>
-                                    <span className="font-ibm-plex-mono text-[10px] md:text-[0.7rem] font-semibold text-slate-custom uppercase tracking-widest opacity-70 group-hover/bar:opacity-100 group-hover/bar:text-teal transition-all">
-                                        {d.label}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
 
-                <Card className="border-none shadow-sm rounded-[6px] bg-ink text-white overflow-hidden">
-                    <CardHeader className="p-8">
-                        <CardTitle className="font-space-grotesk text-xl font-semibold">Quick Actions</CardTitle>
+                                    {days.map((d, i) => (
+                                        <div
+                                            key={i}
+                                            className="flex-1 flex flex-col items-center gap-3 h-full justify-end group/bar z-10"
+                                        >
+                                            <div
+                                                className="w-full max-w-[40px] bg-gradient-to-t from-teal/80 to-teal rounded-t-md transition-all duration-500 ease-out hover:brightness-110 relative"
+                                                style={{ height: `${(d.value / maxValue) * 100}%`, minHeight: d.value > 0 ? '4px' : '0px' }}
+                                            >
+                                                <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-navy-deep backdrop-blur-md text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg opacity-0 group-hover/bar:opacity-100 transition-all transform scale-90 group-hover/bar:scale-100 z-20 shadow-xl border border-white/10 whitespace-nowrap font-ibm-plex-mono">
+                                                    {d.value} {d.value === 1 ? 'Inquiry' : 'Inquiries'}
+                                                </div>
+                                                {/* Glow Effect */}
+                                                <div className="absolute inset-0 bg-teal/20 blur-md -z-10 opacity-0 group-hover/bar:opacity-100 transition-opacity" />
+                                            </div>
+                                            <span className="font-ibm-plex-mono text-[10px] md:text-[0.7rem] font-semibold text-slate-custom uppercase tracking-widest opacity-70 group-hover/bar:opacity-100 group-hover/bar:text-teal transition-all">
+                                                {d.label}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
+
+                {/* BENTO QUICK ACTIONS DOCK */}
+                <Card className="border border-navy-deep/20 shadow-md rounded-2xl bg-navy-deep text-white overflow-hidden h-fit relative">
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-amber" />
+                    <CardHeader className="p-6 pb-4 border-b border-white/10 flex flex-row items-center justify-between">
+                        <CardTitle className="font-space-grotesk text-lg font-bold flex items-center gap-2 text-white">
+                            <Zap className="w-4 h-4 text-amber" />
+                            Quick Actions
+                        </CardTitle>
+                        <span className="text-[10px] font-ibm-plex-mono text-slate-400 uppercase tracking-widest">Dock</span>
                     </CardHeader>
-                    <CardContent className="p-8 pt-0 space-y-4">
+                    <CardContent className="p-6 space-y-3">
                         {role === 'epc' && (
                             <>
-                                <Link href="/dashboard/epc" className="w-full h-[52px] bg-white/5 border border-white/10 hover:border-amber rounded-[3px] text-left px-4 flex items-center text-[0.9rem] font-semibold transition-colors">Update Profile & Portfolio</Link>
-                                <Link href="/dashboard/support" className="w-full h-[52px] bg-white/5 border border-white/10 hover:border-amber rounded-[3px] text-left px-4 flex items-center text-[0.9rem] font-semibold transition-colors">Contact Expert Support</Link>
+                                <Link href="/dashboard/epc" className="w-full px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber/50 rounded-xl text-left flex items-center justify-between text-xs font-semibold text-slate-200 hover:text-white transition-all group">
+                                    <span>Update Profile &amp; Portfolio</span>
+                                    <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber group-hover:translate-x-0.5 transition-all shrink-0" />
+                                </Link>
+                                <Link href="/dashboard/support" className="w-full px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber/50 rounded-xl text-left flex items-center justify-between text-xs font-semibold text-slate-200 hover:text-white transition-all group">
+                                    <span>Contact Expert Support</span>
+                                    <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber group-hover:translate-x-0.5 transition-all shrink-0" />
+                                </Link>
                             </>
                         )}
                         {role === 'brand' && (
                             <>
-                                <Link href="/dashboard/brand" className="w-full h-[52px] bg-white/5 border border-white/10 hover:border-amber rounded-[3px] text-left px-4 flex items-center text-[0.9rem] font-semibold transition-colors">Manage Product Catalog</Link>
-                                <Link href="/dashboard/support" className="w-full h-[52px] bg-white/5 border border-white/10 hover:border-amber rounded-[3px] text-left px-4 flex items-center text-[0.9rem] font-semibold transition-colors">Head Office Support</Link>
+                                <Link href="/dashboard/brand" className="w-full px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber/50 rounded-xl text-left flex items-center justify-between text-xs font-semibold text-slate-200 hover:text-white transition-all group">
+                                    <span>Manage Product Catalog</span>
+                                    <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber group-hover:translate-x-0.5 transition-all shrink-0" />
+                                </Link>
+                                <Link href="/dashboard/support" className="w-full px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber/50 rounded-xl text-left flex items-center justify-between text-xs font-semibold text-slate-200 hover:text-white transition-all group">
+                                    <span>Head Office Support</span>
+                                    <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber group-hover:translate-x-0.5 transition-all shrink-0" />
+                                </Link>
                             </>
                         )}
                         {(role === 'admin' || role === 'super-admin') && (
                             <>
-                                <Link href="/dashboard/users" className="w-full h-[52px] bg-white/5 border border-white/10 hover:border-amber rounded-[3px] text-left px-4 flex items-center text-[0.9rem] font-semibold transition-colors">Manage System Users</Link>
-                                <Link href="/dashboard/inbox" className="w-full h-[52px] bg-white/5 border border-white/10 hover:border-amber rounded-[3px] text-left px-4 flex items-center text-[0.9rem] font-semibold transition-colors">Platform Lead Inbox</Link>
+                                <Link href="/dashboard/users" className="w-full px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber/50 rounded-xl text-left flex items-center justify-between text-xs font-semibold text-slate-200 hover:text-white transition-all group">
+                                    <span>Manage System Users</span>
+                                    <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber group-hover:translate-x-0.5 transition-all shrink-0" />
+                                </Link>
+                                <Link href="/dashboard/inbox" className="w-full px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber/50 rounded-xl text-left flex items-center justify-between text-xs font-semibold text-slate-200 hover:text-white transition-all group">
+                                    <span>Platform Lead Inbox</span>
+                                    <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber group-hover:translate-x-0.5 transition-all shrink-0" />
+                                </Link>
                             </>
                         )}
                         {role === 'writer' && (
                             <>
-                                <Link href="/dashboard/writer" className="w-full h-[52px] bg-white/5 border border-white/10 hover:border-amber rounded-[3px] text-left px-4 flex items-center text-[0.9rem] font-semibold transition-colors">My Author Profile</Link>
-                                <Link href="/dashboard/writer/articles" className="w-full h-[52px] bg-white/5 border border-white/10 hover:border-amber rounded-[3px] text-left px-4 flex items-center text-[0.9rem] font-semibold transition-colors">Write & Manage Articles</Link>
+                                <Link href="/dashboard/writer" className="w-full px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber/50 rounded-xl text-left flex items-center justify-between text-xs font-semibold text-slate-200 hover:text-white transition-all group">
+                                    <span>My Author Profile</span>
+                                    <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber group-hover:translate-x-0.5 transition-all shrink-0" />
+                                </Link>
+                                <Link href="/dashboard/writer/articles" className="w-full px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber/50 rounded-xl text-left flex items-center justify-between text-xs font-semibold text-slate-200 hover:text-white transition-all group">
+                                    <span>Write &amp; Manage Articles</span>
+                                    <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber group-hover:translate-x-0.5 transition-all shrink-0" />
+                                </Link>
                             </>
                         )}
 
-                        <Link href="/dashboard/settings" className="w-full h-[52px] bg-amber text-ink border border-amber hover:bg-[#f2b458] rounded-[3px] flex items-center justify-center text-[0.9rem] font-semibold shadow-lg mt-4 transition-colors">Account Settings</Link>
+                        <Link href="/dashboard/settings" className="w-full py-3 bg-amber text-navy-deep hover:bg-amber-deep rounded-xl flex items-center justify-center text-xs font-bold font-space-grotesk shadow-md mt-4 transition-all hover:shadow-lg active:scale-98">
+                            Account Settings
+                        </Link>
                     </CardContent>
                 </Card>
             </div>
@@ -239,20 +316,54 @@ export default async function Dashboard() {
     );
 }
 
-function StatCard({ title, value, unit, icon }: { title: string, value: string, unit: string, icon: React.ReactNode }) {
+function StatCard({
+    title,
+    value,
+    unit,
+    icon,
+    compact = false,
+    accentColor = "bg-amber"
+}: {
+    title: string;
+    value: string;
+    unit: string;
+    icon: React.ReactNode;
+    compact?: boolean;
+    accentColor?: string;
+}) {
+    if (compact) {
+        return (
+            <div className="bg-white rounded-2xl p-4 border border-line shadow-xs relative overflow-hidden group hover:border-amber/50 hover:shadow-sm transition-all duration-200">
+                <div className={`absolute top-0 left-0 right-0 h-1 ${accentColor}`} />
+                <div className="flex items-center justify-between mb-2 pt-0.5">
+                    <span className="font-ibm-plex-mono text-[10px] uppercase font-bold tracking-wider text-slate-500 truncate max-w-[75%]">
+                        {title}
+                    </span>
+                    <div className="p-1.5 rounded-lg bg-paper text-navy-deep border border-line/60 group-hover:scale-105 transition-transform">
+                        {icon}
+                    </div>
+                </div>
+                <div className="font-space-grotesk text-2xl font-bold tracking-tight text-navy-deep">
+                    {value}
+                </div>
+                <p className="font-ibm-plex-mono text-[10.5px] font-medium text-slate-400 mt-1 truncate">
+                    {unit}
+                </p>
+            </div>
+        );
+    }
     return (
-        <Card className="border border-line shadow-sm rounded-[6px] overflow-hidden bg-white hover:border-teal transition-colors">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-6">
-                <CardTitle className="font-ibm-plex-mono text-[0.7rem] uppercase tracking-widest text-slate-custom">{title}</CardTitle>
-                <div className="p-2 bg-paper rounded-[4px] text-teal border border-line">
+        <div className="bg-white rounded-2xl p-6 border border-line shadow-xs relative overflow-hidden group hover:border-amber/50 hover:shadow-sm transition-all duration-200">
+            <div className={`absolute top-0 left-0 right-0 h-1 ${accentColor}`} />
+            <div className="flex items-center justify-between mb-3">
+                <span className="font-ibm-plex-mono text-[11px] uppercase font-bold tracking-widest text-slate-500">{title}</span>
+                <div className="p-2 bg-paper rounded-xl text-teal border border-line group-hover:scale-105 transition-transform">
                     {icon}
                 </div>
-            </CardHeader>
-            <CardContent className="p-6 pt-0">
-                <div className="font-space-grotesk text-3xl font-semibold tracking-tight mb-1 text-ink">{value}</div>
-                <p className="font-ibm-plex-mono text-[0.7rem] font-medium text-slate-custom tracking-widest">{unit}</p>
-            </CardContent>
-        </Card>
+            </div>
+            <div className="font-space-grotesk text-3xl font-bold tracking-tight mb-1 text-navy-deep">{value}</div>
+            <p className="font-ibm-plex-mono text-[11px] font-medium text-slate-400 tracking-wider">{unit}</p>
+        </div>
     );
 }
 

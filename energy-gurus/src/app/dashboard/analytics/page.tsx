@@ -54,87 +54,92 @@ export default async function AnalyticsPage({
   const stats = [
     {
       title: "Brand Interest",
-      value: brandViews?.result?.[0]?.count || 0,
+      value: (brandViews?.result?.[0]?.count || 0).toLocaleString(),
       icon: <Building2 className="w-4 h-4 text-amber" />,
-      description: "Total portfolio views"
+      description: "Total portfolio views",
+      accent: "bg-amber"
     },
     {
       title: "EPC Engagement",
-      value: epcProfileViews?.result?.[0]?.count || 0,
-      icon: <Briefcase className="w-4 h-4 text-amber" />,
-      description: "Total profile views"
+      value: (epcProfileViews?.result?.[0]?.count || 0).toLocaleString(),
+      icon: <Briefcase className="w-4 h-4 text-navy-deep" />,
+      description: "Total profile views",
+      accent: "bg-navy-deep"
     },
     {
       title: "Direct Contacts & Leads",
-      value: directContactsCount,
-      icon: <MousePointerClick className="w-4 h-4 text-amber" />,
-      description: "Contact clicks & inquiries"
+      value: directContactsCount.toLocaleString(),
+      icon: <MousePointerClick className="w-4 h-4 text-amber-deep" />,
+      description: "Contact clicks & inquiries",
+      accent: "bg-amber-deep"
     },
     {
       title: "Website Referrals",
-      value: brandWebsiteClicks?.result?.[0]?.count || 0,
-      icon: <Globe className="w-4 h-4 text-amber" />,
-      description: "External website clicks"
+      value: (brandWebsiteClicks?.result?.[0]?.count || 0).toLocaleString(),
+      icon: <Globe className="w-4 h-4 text-teal" />,
+      description: "External website clicks",
+      accent: "bg-teal"
     }
   ];
 
   return (
-    <div className="p-4 md:p-8 space-y-10 max-w-[1600px] mx-auto">
-      <div className="flex justify-between items-end">
+    <div className="p-4 md:p-8 space-y-8 max-w-[1600px] mx-auto font-sans">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div className="space-y-1">
-          <h1 className="text-4xl font-black tracking-tighter">Engagement Hub</h1>
-          <p className="text-slate-custom font-medium">Real-time interaction analytics for Brands & EPC Installers</p>
+          <h1 className="font-space-grotesk text-3xl md:text-4xl font-bold tracking-tight text-navy-deep">Engagement Hub</h1>
+          <p className="text-slate-custom text-sm md:text-base">Real-time interaction telemetry for Brands &amp; EPC Installers</p>
         </div>
-        <div className="bg-amber/5 text-ink px-4 py-2 rounded-full border border-amber/10 text-[10px] font-bold uppercase tracking-widest text-amber flex items-center gap-2">
-          <div className="w-2 h-2 bg-amber text-ink rounded-full animate-pulse" />
-          Live PostHog Stream
+        <div className="bg-amber/10 text-amber px-3.5 py-1.5 rounded-full border border-amber/20 text-[11px] font-bold uppercase tracking-wider font-ibm-plex-mono flex items-center gap-2">
+          <span className="w-2 h-2 bg-amber rounded-full animate-pulse" />
+          <span>Live PostHog Stream</span>
         </div>
       </div>
 
-      <Tabs defaultValue="overview" className="w-full space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line/40 pb-4">
-          <TabsList className="grid grid-cols-3 w-full sm:w-[480px] h-12 p-1 bg-paper/20 rounded-xl">
-            <TabsTrigger value="overview" className="rounded-lg font-bold gap-2">
-              <LayoutDashboard className="w-4 h-4" /> Overview
+      <Tabs defaultValue="overview" className="w-full space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line/60 pb-3">
+          <TabsList className="grid grid-cols-3 w-full sm:w-[480px] h-11 p-1 bg-paper border border-line rounded-xl">
+            <TabsTrigger value="overview" className="rounded-lg font-bold gap-2 text-xs data-[state=active]:bg-white data-[state=active]:text-navy-deep data-[state=active]:shadow-xs">
+              <LayoutDashboard className="w-3.5 h-3.5" /> Overview
             </TabsTrigger>
-            <TabsTrigger value="epc" className="rounded-lg font-bold gap-2">
-              <Briefcase className="w-4 h-4" /> EPC Rankings
+            <TabsTrigger value="epc" className="rounded-lg font-bold gap-2 text-xs data-[state=active]:bg-white data-[state=active]:text-navy-deep data-[state=active]:shadow-xs">
+              <Briefcase className="w-3.5 h-3.5" /> EPC Rankings
             </TabsTrigger>
-            <TabsTrigger value="brand" className="rounded-lg font-bold gap-2">
-              <Building2 className="w-4 h-4" /> Brand Rankings
+            <TabsTrigger value="brand" className="rounded-lg font-bold gap-2 text-xs data-[state=active]:bg-white data-[state=active]:text-navy-deep data-[state=active]:shadow-xs">
+              <Building2 className="w-3.5 h-3.5" /> Brand Rankings
             </TabsTrigger>
           </TabsList>
         </div>
 
         <TabsContent value="overview" className="space-y-8 focus-visible:outline-none">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {stats.map((stat, i) => (
-              <Card key={i} className="border-line/50 shadow-sm rounded-3xl overflow-hidden bg-white/50 backdrop-blur-xl">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-xs font-black uppercase tracking-widest opacity-40">{stat.title}</CardTitle>
-                  {stat.icon}
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-black tracking-tight">{stat.value}</div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-custom mt-2">{stat.description}</p>
-                </CardContent>
-              </Card>
+              <div key={i} className="p-5 rounded-2xl bg-white border border-line shadow-xs relative overflow-hidden group hover:border-amber/50 hover:shadow-sm transition-all duration-200">
+                <div className={`absolute top-0 left-0 right-0 h-1 ${stat.accent}`} />
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono">{stat.title}</span>
+                  <div className="p-1.5 rounded-lg bg-paper border border-line/60">
+                    {stat.icon}
+                  </div>
+                </div>
+                <div className="text-3xl font-black text-navy-deep font-space-grotesk tracking-tight">{stat.value}</div>
+                <p className="text-[11px] font-medium text-slate-400 font-ibm-plex-mono mt-1">{stat.description}</p>
+              </div>
             ))}
           </div>
         </TabsContent>
 
         <TabsContent value="brand" className="space-y-8 focus-visible:outline-none">
           {/* Brand Engagement Table */}
-          <Card className="border-line/50 shadow-xl rounded-[2.5rem] overflow-hidden bg-white">
-            <CardHeader className="p-8 border-b border-line/50">
-              <div className="flex items-center justify-between">
+          <Card className="border border-line shadow-xs rounded-2xl overflow-hidden bg-white">
+            <CardHeader className="p-6 border-b border-line/60">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-amber/10 text-ink rounded-2xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-amber/10 rounded-xl flex items-center justify-center">
                     <Building2 className="w-5 h-5 text-amber" />
                   </div>
                   <div>
-                    <CardTitle className="text-2xl font-black tracking-tight">Brand Performance Matrix</CardTitle>
-                    <p className="text-sm text-slate-custom font-medium">Top brands ranked by total user engagement</p>
+                    <CardTitle className="text-xl font-bold font-space-grotesk text-navy-deep tracking-tight">Brand Performance Matrix</CardTitle>
+                    <p className="text-xs text-slate-custom font-medium mt-0.5">Top brands ranked by total user engagement</p>
                   </div>
                 </div>
                 <ListSort
@@ -150,41 +155,41 @@ export default async function AnalyticsPage({
             </CardHeader>
             <CardContent className="p-0">
               <Table>
-                <TableHeader className="bg-paper/5">
-                  <TableRow className="hover:bg-transparent border-line/50">
-                    <TableHead className="w-[250px] font-black uppercase tracking-widest text-[10px] pl-8">Brand Entity</TableHead>
-                    <TableHead className="text-center font-black uppercase tracking-widest text-[10px]">Views</TableHead>
-                    <TableHead className="text-center font-black uppercase tracking-widest text-[10px]">Web</TableHead>
-                    <TableHead className="text-center font-black uppercase tracking-widest text-[10px]">InMail</TableHead>
-                    <TableHead className="text-center font-black uppercase tracking-widest text-[10px]"><Facebook className="w-4 h-4 mx-auto opacity-40" /></TableHead>
-                    <TableHead className="text-center font-black uppercase tracking-widest text-[10px]"><Twitter className="w-4 h-4 mx-auto opacity-40" /></TableHead>
-                    <TableHead className="text-center font-black uppercase tracking-widest text-[10px]"><Linkedin className="w-4 h-4 mx-auto opacity-40" /></TableHead>
-                    <TableHead className="text-center font-black uppercase tracking-widest text-[10px]"><Instagram className="w-4 h-4 mx-auto opacity-40" /></TableHead>
-                    <TableHead className="text-center font-black uppercase tracking-widest text-[10px]"><MessageSquare className="w-4 h-4 mx-auto opacity-40" /></TableHead>
-                    <TableHead className="text-right font-black uppercase tracking-widest text-[10px] pr-8">Total Eng.</TableHead>
+                <TableHeader className="bg-paper/40">
+                  <TableRow className="hover:bg-transparent border-line/60">
+                    <TableHead className="w-[250px] font-bold uppercase tracking-wider text-[10px] pl-6 font-ibm-plex-mono text-slate-500">Brand Entity</TableHead>
+                    <TableHead className="text-center font-bold uppercase tracking-wider text-[10px] font-ibm-plex-mono text-slate-500">Views</TableHead>
+                    <TableHead className="text-center font-bold uppercase tracking-wider text-[10px] font-ibm-plex-mono text-slate-500">Web</TableHead>
+                    <TableHead className="text-center font-bold uppercase tracking-wider text-[10px] font-ibm-plex-mono text-slate-500">InMail</TableHead>
+                    <TableHead className="text-center font-bold uppercase tracking-wider text-[10px] font-ibm-plex-mono text-slate-500"><Facebook className="w-3.5 h-3.5 mx-auto opacity-40" /></TableHead>
+                    <TableHead className="text-center font-bold uppercase tracking-wider text-[10px] font-ibm-plex-mono text-slate-500"><Twitter className="w-3.5 h-3.5 mx-auto opacity-40" /></TableHead>
+                    <TableHead className="text-center font-bold uppercase tracking-wider text-[10px] font-ibm-plex-mono text-slate-500"><Linkedin className="w-3.5 h-3.5 mx-auto opacity-40" /></TableHead>
+                    <TableHead className="text-center font-bold uppercase tracking-wider text-[10px] font-ibm-plex-mono text-slate-500"><Instagram className="w-3.5 h-3.5 mx-auto opacity-40" /></TableHead>
+                    <TableHead className="text-center font-bold uppercase tracking-wider text-[10px] font-ibm-plex-mono text-slate-500"><MessageSquare className="w-3.5 h-3.5 mx-auto opacity-40" /></TableHead>
+                    <TableHead className="text-right font-bold uppercase tracking-wider text-[10px] pr-6 font-ibm-plex-mono text-slate-500">Total Eng.</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {brandTable && brandTable.length > 0 ? brandTable.map((row: any, i: number) => (
-                    <TableRow key={i} className="group hover:bg-amber text-ink/[0.02] border-line/50 transition-colors">
-                      <TableCell className="font-black text-base pl-8 py-6">{row[0]}</TableCell>
-                      <TableCell className="text-center font-bold text-slate-custom">{row[1]}</TableCell>
-                      <TableCell className="text-center font-bold text-slate-custom">{row[2]}</TableCell>
-                      <TableCell className="text-center font-bold text-slate-custom">{row[3]}</TableCell>
-                      <TableCell className="text-center font-medium opacity-40 group-hover:opacity-100 transition-opacity">{row[4] || 0}</TableCell>
-                      <TableCell className="text-center font-medium opacity-40 group-hover:opacity-100 transition-opacity">{row[5] || 0}</TableCell>
-                      <TableCell className="text-center font-medium opacity-40 group-hover:opacity-100 transition-opacity">{row[6] || 0}</TableCell>
-                      <TableCell className="text-center font-medium opacity-40 group-hover:opacity-100 transition-opacity">{row[7] || 0}</TableCell>
-                      <TableCell className="text-center font-medium opacity-40 group-hover:opacity-100 transition-opacity">{row[8] || 0}</TableCell>
-                      <TableCell className="text-right font-black pr-8">
-                        <span className="px-4 py-2 bg-amber/5 text-ink text-amber rounded-xl border border-amber/10">
+                    <TableRow key={i} className="group hover:bg-paper/40 border-line/60 transition-colors">
+                      <TableCell className="font-bold text-sm text-navy-deep pl-6 py-4">{row[0]}</TableCell>
+                      <TableCell className="text-center font-mono text-xs text-slate-custom">{row[1]}</TableCell>
+                      <TableCell className="text-center font-mono text-xs text-slate-custom">{row[2]}</TableCell>
+                      <TableCell className="text-center font-mono text-xs text-slate-custom">{row[3]}</TableCell>
+                      <TableCell className="text-center font-mono text-xs opacity-40 group-hover:opacity-100 transition-opacity">{row[4] || 0}</TableCell>
+                      <TableCell className="text-center font-mono text-xs opacity-40 group-hover:opacity-100 transition-opacity">{row[5] || 0}</TableCell>
+                      <TableCell className="text-center font-mono text-xs opacity-40 group-hover:opacity-100 transition-opacity">{row[6] || 0}</TableCell>
+                      <TableCell className="text-center font-mono text-xs opacity-40 group-hover:opacity-100 transition-opacity">{row[7] || 0}</TableCell>
+                      <TableCell className="text-center font-mono text-xs opacity-40 group-hover:opacity-100 transition-opacity">{row[8] || 0}</TableCell>
+                      <TableCell className="text-right font-black pr-6">
+                        <span className="px-3 py-1 bg-amber/10 text-amber font-mono text-xs rounded-lg border border-amber/20">
                           {row[9]}
                         </span>
                       </TableCell>
                     </TableRow>
                   )) : (
                     <TableRow>
-                      <TableCell colSpan={10} className="h-32 text-center text-slate-custom font-bold italic">
+                      <TableCell colSpan={10} className="h-32 text-center text-slate-custom text-xs font-medium italic">
                         Waiting for Brand engagement data...
                       </TableCell>
                     </TableRow>
@@ -197,16 +202,16 @@ export default async function AnalyticsPage({
 
         <TabsContent value="epc" className="space-y-8 focus-visible:outline-none">
           {/* EPC Engagement Table */}
-          <Card className="border-line/50 shadow-xl rounded-[2.5rem] overflow-hidden bg-white">
-            <CardHeader className="p-8 border-b border-line/50">
-              <div className="flex items-center justify-between">
+          <Card className="border border-line shadow-xs rounded-2xl overflow-hidden bg-white">
+            <CardHeader className="p-6 border-b border-line/60">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-paper/10 rounded-2xl flex items-center justify-center">
-                    <Briefcase className="w-5 h-5 text-ink" />
+                  <div className="w-10 h-10 bg-paper rounded-xl flex items-center justify-center border border-line">
+                    <Briefcase className="w-5 h-5 text-navy-deep" />
                   </div>
                   <div>
-                    <CardTitle className="text-2xl font-black tracking-tight">EPC Installer Ranking</CardTitle>
-                    <p className="text-sm text-slate-custom font-medium">Top performing installers based on profile interactions</p>
+                    <CardTitle className="text-xl font-bold font-space-grotesk text-navy-deep tracking-tight">EPC Installer Ranking</CardTitle>
+                    <p className="text-xs text-slate-custom font-medium mt-0.5">Top performing installers based on profile interactions</p>
                   </div>
                 </div>
                 <ListSort
@@ -222,41 +227,41 @@ export default async function AnalyticsPage({
             </CardHeader>
             <CardContent className="p-0">
               <Table>
-                <TableHeader className="bg-paper/5">
-                  <TableRow className="hover:bg-transparent border-line/50">
-                    <TableHead className="w-[250px] font-black uppercase tracking-widest text-[10px] pl-8">Company Name</TableHead>
-                    <TableHead className="text-center font-black uppercase tracking-widest text-[10px]">Views</TableHead>
-                    <TableHead className="text-center font-black uppercase tracking-widest text-[10px]">Portf.</TableHead>
-                    <TableHead className="text-center font-black uppercase tracking-widest text-[10px]">InMail</TableHead>
-                    <TableHead className="text-center font-black uppercase tracking-widest text-[10px]"><Facebook className="w-4 h-4 mx-auto opacity-40" /></TableHead>
-                    <TableHead className="text-center font-black uppercase tracking-widest text-[10px]"><Twitter className="w-4 h-4 mx-auto opacity-40" /></TableHead>
-                    <TableHead className="text-center font-black uppercase tracking-widest text-[10px]"><Linkedin className="w-4 h-4 mx-auto opacity-40" /></TableHead>
-                    <TableHead className="text-center font-black uppercase tracking-widest text-[10px]"><Instagram className="w-4 h-4 mx-auto opacity-40" /></TableHead>
-                    <TableHead className="text-center font-black uppercase tracking-widest text-[10px]"><MessageSquare className="w-4 h-4 mx-auto opacity-40" /></TableHead>
-                    <TableHead className="text-right font-black uppercase tracking-widest text-[10px] pr-8">Total Eng.</TableHead>
+                <TableHeader className="bg-paper/40">
+                  <TableRow className="hover:bg-transparent border-line/60">
+                    <TableHead className="w-[250px] font-bold uppercase tracking-wider text-[10px] pl-6 font-ibm-plex-mono text-slate-500">Company Name</TableHead>
+                    <TableHead className="text-center font-bold uppercase tracking-wider text-[10px] font-ibm-plex-mono text-slate-500">Views</TableHead>
+                    <TableHead className="text-center font-bold uppercase tracking-wider text-[10px] font-ibm-plex-mono text-slate-500">Portf.</TableHead>
+                    <TableHead className="text-center font-bold uppercase tracking-wider text-[10px] font-ibm-plex-mono text-slate-500">InMail</TableHead>
+                    <TableHead className="text-center font-bold uppercase tracking-wider text-[10px] font-ibm-plex-mono text-slate-500"><Facebook className="w-3.5 h-3.5 mx-auto opacity-40" /></TableHead>
+                    <TableHead className="text-center font-bold uppercase tracking-wider text-[10px] font-ibm-plex-mono text-slate-500"><Twitter className="w-3.5 h-3.5 mx-auto opacity-40" /></TableHead>
+                    <TableHead className="text-center font-bold uppercase tracking-wider text-[10px] font-ibm-plex-mono text-slate-500"><Linkedin className="w-3.5 h-3.5 mx-auto opacity-40" /></TableHead>
+                    <TableHead className="text-center font-bold uppercase tracking-wider text-[10px] font-ibm-plex-mono text-slate-500"><Instagram className="w-3.5 h-3.5 mx-auto opacity-40" /></TableHead>
+                    <TableHead className="text-center font-bold uppercase tracking-wider text-[10px] font-ibm-plex-mono text-slate-500"><MessageSquare className="w-3.5 h-3.5 mx-auto opacity-40" /></TableHead>
+                    <TableHead className="text-right font-bold uppercase tracking-wider text-[10px] pr-6 font-ibm-plex-mono text-slate-500">Total Eng.</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {epcTable && epcTable.length > 0 ? epcTable.map((row: any, i: number) => (
-                    <TableRow key={i} className="group hover:bg-paper/[0.02] border-line/50 transition-colors">
-                      <TableCell className="font-black text-base pl-8 py-6">{row[0]}</TableCell>
-                      <TableCell className="text-center font-bold text-slate-custom">{row[1]}</TableCell>
-                      <TableCell className="text-center font-bold text-slate-custom">{row[2]}</TableCell>
-                      <TableCell className="text-center font-bold text-slate-custom">{row[3]}</TableCell>
-                      <TableCell className="text-center font-medium opacity-40 group-hover:opacity-100 transition-opacity">{row[4] || 0}</TableCell>
-                      <TableCell className="text-center font-medium opacity-40 group-hover:opacity-100 transition-opacity">{row[5] || 0}</TableCell>
-                      <TableCell className="text-center font-medium opacity-40 group-hover:opacity-100 transition-opacity">{row[6] || 0}</TableCell>
-                      <TableCell className="text-center font-medium opacity-40 group-hover:opacity-100 transition-opacity">{row[7] || 0}</TableCell>
-                      <TableCell className="text-center font-medium opacity-40 group-hover:opacity-100 transition-opacity">{row[8] || 0}</TableCell>
-                      <TableCell className="text-right font-black pr-8">
-                        <span className="px-4 py-2 bg-paper/5 text-ink rounded-xl border border-accent/10">
+                    <TableRow key={i} className="group hover:bg-paper/40 border-line/60 transition-colors">
+                      <TableCell className="font-bold text-sm text-navy-deep pl-6 py-4">{row[0]}</TableCell>
+                      <TableCell className="text-center font-mono text-xs text-slate-custom">{row[1]}</TableCell>
+                      <TableCell className="text-center font-mono text-xs text-slate-custom">{row[2]}</TableCell>
+                      <TableCell className="text-center font-mono text-xs text-slate-custom">{row[3]}</TableCell>
+                      <TableCell className="text-center font-mono text-xs opacity-40 group-hover:opacity-100 transition-opacity">{row[4] || 0}</TableCell>
+                      <TableCell className="text-center font-mono text-xs opacity-40 group-hover:opacity-100 transition-opacity">{row[5] || 0}</TableCell>
+                      <TableCell className="text-center font-mono text-xs opacity-40 group-hover:opacity-100 transition-opacity">{row[6] || 0}</TableCell>
+                      <TableCell className="text-center font-mono text-xs opacity-40 group-hover:opacity-100 transition-opacity">{row[7] || 0}</TableCell>
+                      <TableCell className="text-center font-mono text-xs opacity-40 group-hover:opacity-100 transition-opacity">{row[8] || 0}</TableCell>
+                      <TableCell className="text-right font-black pr-6">
+                        <span className="px-3 py-1 bg-navy-deep/10 text-navy-deep font-mono text-xs rounded-lg border border-navy-deep/20">
                           {row[9]}
                         </span>
                       </TableCell>
                     </TableRow>
                   )) : (
                     <TableRow>
-                      <TableCell colSpan={10} className="h-32 text-center text-slate-custom font-bold italic">
+                      <TableCell colSpan={10} className="h-32 text-center text-slate-custom text-xs font-medium italic">
                         Waiting for EPC engagement data...
                       </TableCell>
                     </TableRow>
@@ -266,7 +271,7 @@ export default async function AnalyticsPage({
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs >
-    </div >
+      </Tabs>
+    </div>
   );
 }

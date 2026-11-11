@@ -60,31 +60,32 @@ export default async function EpcDashboard() {
         </div>
       )}
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 bg-amber text-ink rounded-2xl flex items-center justify-center">
+        <div className="w-12 h-12 bg-amber text-navy-deep rounded-2xl flex items-center justify-center shrink-0 shadow-md">
           <Briefcase className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">EPC Dashboard</h1>
-          <p className="text-slate-custom">Manage your company profile, portfolio, and customer inquiries.</p>
+          <h1 className="font-space-grotesk text-2xl md:text-3xl font-bold tracking-tight text-navy-deep">EPC Dashboard</h1>
+          <p className="text-slate-custom text-sm md:text-base">Manage your company profile, portfolio, and customer inquiries.</p>
         </div>
       </div>
 
-      {/* Profile Completeness Score Card */}
-      <div className="bg-white/50 backdrop-blur-xl border border-line/50 p-6 rounded-[2rem] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-2 flex-1">
+      {/* Profile Completeness Score Bento Card */}
+      <div className="bg-white border border-line p-6 rounded-2xl shadow-xs relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-amber" />
+        <div className="space-y-2.5 flex-1">
           <div className="flex justify-between items-center text-sm">
-            <span className="font-black uppercase tracking-widest text-[11px] opacity-60">Profile Completeness</span>
-            <span className={`font-black px-3 py-1 rounded-xl text-xs border ${score === 100 ? "bg-green-100 text-green-600 border-green-200" :
-              score >= 70 ? "bg-blue-100 text-blue-600 border-blue-200" :
-                "bg-orange-100 text-orange-600 border-orange-200"
+            <span className="font-ibm-plex-mono text-[10.5px] uppercase font-bold tracking-wider text-slate-500">Profile Completeness</span>
+            <span className={`font-ibm-plex-mono font-bold px-3 py-1 rounded-xl text-xs border ${score === 100 ? "bg-teal/10 text-teal border-teal/20" :
+              score >= 70 ? "bg-amber/10 text-amber-deep border-amber/20" :
+                "bg-orange-50 text-orange-600 border-orange-200"
               }`}>
               {score}% Complete
             </span>
           </div>
-          <div className="w-full h-3 bg-paper/30 rounded-full overflow-hidden">
+          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all duration-500 ${score === 100 ? "bg-green-500" :
-                score >= 70 ? "bg-blue-500" :
+              className={`h-full rounded-full transition-all duration-500 ${score === 100 ? "bg-teal" :
+                score >= 70 ? "bg-amber" :
                   "bg-orange-500"
                 }`}
               style={{ width: `${score}%` }}
@@ -94,34 +95,34 @@ export default async function EpcDashboard() {
 
         {missing.length > 0 ? (
           <div className="text-xs md:text-right max-w-sm">
-            <span className="font-bold text-slate-custom block mb-1">Missing Checkpoints to hit 100%:</span>
+            <span className="font-bold text-slate-500 font-ibm-plex-mono block mb-1">Missing Checkpoints to hit 100%:</span>
             <span className="text-slate-custom font-medium">
               {missing.join(", ")}
             </span>
           </div>
         ) : (
           <div className="text-xs md:text-right">
-            <span className="font-black text-green-600 block mb-1">🎉 Perfectly Complete Profile!</span>
+            <span className="font-bold text-teal font-ibm-plex-mono block mb-1">🎉 Complete &amp; Verified Profile!</span>
             <span className="text-slate-custom font-medium">Your profile is fully optimized for public directories and search engines.</span>
           </div>
         )}
       </div>
 
-      <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="flex flex-wrap w-full h-auto p-1 bg-paper/20 rounded-xl mb-8 gap-1">
-          <TabsTrigger value="profile" className="rounded-lg font-bold gap-2 flex-1 min-w-[120px] h-12">
+      <Tabs defaultValue="profile" className="w-full space-y-6">
+        <TabsList className="flex flex-wrap w-full h-auto p-1 bg-paper border border-line rounded-xl gap-1">
+          <TabsTrigger value="profile" className="rounded-lg font-bold gap-2 flex-1 min-w-[120px] h-11 text-xs data-[state=active]:bg-white data-[state=active]:text-navy-deep data-[state=active]:shadow-xs">
             <Settings className="w-4 h-4" /> Profile
           </TabsTrigger>
-          <TabsTrigger value="offices" className="rounded-lg font-bold gap-2 flex-1 min-w-[120px] h-12">
+          <TabsTrigger value="offices" className="rounded-lg font-bold gap-2 flex-1 min-w-[120px] h-11 text-xs data-[state=active]:bg-white data-[state=active]:text-navy-deep data-[state=active]:shadow-xs">
             <MapPin className="w-4 h-4" /> Offices
           </TabsTrigger>
-          <TabsTrigger value="projects" className="rounded-lg font-bold gap-2 flex-1 min-w-[120px] h-12">
+          <TabsTrigger value="projects" className="rounded-lg font-bold gap-2 flex-1 min-w-[120px] h-11 text-xs data-[state=active]:bg-white data-[state=active]:text-navy-deep data-[state=active]:shadow-xs">
             <LayoutGrid className="w-4 h-4" /> Showcase
           </TabsTrigger>
-          <TabsTrigger value="inquiries" className="rounded-lg font-bold gap-2 flex-1 min-w-[120px] h-12">
+          <TabsTrigger value="inquiries" className="rounded-lg font-bold gap-2 flex-1 min-w-[120px] h-11 text-xs data-[state=active]:bg-white data-[state=active]:text-navy-deep data-[state=active]:shadow-xs">
             <MessageSquare className="w-4 h-4" /> Inquiries
           </TabsTrigger>
-          <TabsTrigger value="reviews" className="rounded-lg font-bold gap-2 flex-1 min-w-[120px] h-12">
+          <TabsTrigger value="reviews" className="rounded-lg font-bold gap-2 flex-1 min-w-[120px] h-11 text-xs data-[state=active]:bg-white data-[state=active]:text-navy-deep data-[state=active]:shadow-xs">
             <Star className="w-4 h-4" /> Reviews
           </TabsTrigger>
         </TabsList>

@@ -55,13 +55,24 @@ const getInstallers = unstable_cache(
       eq(epcInstallers.status, "live"),
     ] as any[];
 
-    if (q) {
-      const searchCondition = or(
-        ilike(epcInstallers.companyName, `%${q}%`),
-        ilike(epcOffices.city, `%${q}%`),
-        ilike(epcProjects.city, `%${q}%`)
-      );
-      if (searchCondition) conditions.push(searchCondition);
+    if (q && q.trim()) {
+      const searchPattern = `%${q.trim()}%`;
+      const searchCondition = sql`(
+        ${epcInstallers.companyName} ILIKE ${searchPattern}
+        OR ${epcInstallers.serviceAreas}::text ILIKE ${searchPattern}
+        OR ${epcInstallers.serviceAreas}::text ILIKE '%All Over Pakistan%'
+        OR EXISTS (
+          SELECT 1 FROM ${epcOffices}
+          WHERE ${epcOffices.epcId} = ${epcInstallers.id}
+          AND ${epcOffices.city} ILIKE ${searchPattern}
+        )
+        OR EXISTS (
+          SELECT 1 FROM ${epcProjects}
+          WHERE ${epcProjects.epcId} = ${epcInstallers.id}
+          AND ${epcProjects.city} ILIKE ${searchPattern}
+        )
+      )`;
+      conditions.push(searchCondition);
     }
 
     if (certs) {
@@ -97,7 +108,6 @@ const getInstallers = unstable_cache(
       .from(epcInstallers)
       .innerJoin(users, eq(users.id, epcInstallers.userId))
       .leftJoin(reviews, eq(reviews.targetId, epcInstallers.id))
-      .leftJoin(epcOffices, eq(epcOffices.epcId, epcInstallers.id))
       .where(and(...conditions))
       .groupBy(epcInstallers.id)
       .orderBy((t) => {

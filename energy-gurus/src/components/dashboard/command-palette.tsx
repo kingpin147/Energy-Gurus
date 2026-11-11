@@ -45,8 +45,13 @@ export function CommandPalette({ role }: CommandPaletteProps) {
             }
         };
 
+        const handleCustomOpen = () => setOpen(true);
+        window.addEventListener("open-command-palette", handleCustomOpen);
         document.addEventListener("keydown", down);
-        return () => document.removeEventListener("keydown", down);
+        return () => {
+            document.removeEventListener("keydown", down);
+            window.removeEventListener("open-command-palette", handleCustomOpen);
+        };
     }, []);
 
     const runCommand = (command: () => void) => {

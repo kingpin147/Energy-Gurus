@@ -28,14 +28,14 @@ export default async function WriterArticlesPage() {
   const isProfileApproved = profile?.status === "approved";
 
   return (
-    <div className="p-4 md:p-8 space-y-8">
+    <div className="p-4 md:p-8 space-y-8 font-sans">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-amber text-ink rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-amber/20">
+          <div className="w-12 h-12 bg-amber text-navy-deep rounded-2xl flex items-center justify-center shrink-0 shadow-md">
             <FileText className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">My Articles</h1>
+            <h1 className="font-space-grotesk text-2xl md:text-3xl font-bold tracking-tight text-navy-deep">My Articles</h1>
             <p className="text-slate-custom text-sm md:text-base">
               Manage your submitted articles and monitor their editorial review status.
             </p>
@@ -43,7 +43,7 @@ export default async function WriterArticlesPage() {
         </div>
 
         {isProfileApproved ? (
-          <Button asChild className="rounded-xl h-11 px-6 font-bold bg-amber text-ink hover:bg-amber/90 shadow-lg shadow-amber/20">
+          <Button asChild className="rounded-xl h-11 px-6 font-bold bg-amber text-navy-deep hover:bg-amber-deep shadow-md font-space-grotesk">
             <Link href="/dashboard/writer/articles/new">
               <Plus className="w-4 h-4 mr-2" /> Write New Article
             </Link>
@@ -58,18 +58,18 @@ export default async function WriterArticlesPage() {
       </div>
 
       {!isProfileApproved && (
-        <div className="p-5 rounded-2xl bg-amber/15 border border-amber/30 flex items-start gap-4">
+        <div className="p-5 rounded-2xl bg-amber/10 border border-amber/20 flex items-start gap-4">
           <div className="w-10 h-10 rounded-xl bg-amber/20 text-amber-deep flex items-center justify-center shrink-0">
-            <AlertTriangle className="w-6 h-6" />
+            <AlertTriangle className="w-5 h-5 text-amber-deep" />
           </div>
           <div>
-            <h4 className="font-bold text-amber-deep">Profile Approval Required</h4>
-            <p className="text-sm text-slate-custom mt-0.5 leading-relaxed">
+            <h4 className="font-bold text-navy-deep font-space-grotesk">Profile Approval Required</h4>
+            <p className="text-xs text-slate-custom mt-0.5 leading-relaxed">
               Your writer profile must be approved before you can create articles. Please complete your profile with
               at least 2 social handles and a 50–100 word bio.
             </p>
             <div className="mt-3">
-              <Button asChild size="sm" className="bg-amber text-ink hover:bg-amber/90 rounded-xl font-bold">
+              <Button asChild size="sm" className="bg-amber text-navy-deep hover:bg-amber-deep rounded-xl font-bold text-xs">
                 <Link href="/dashboard/writer">Go to Profile Setup</Link>
               </Button>
             </div>
@@ -77,8 +77,8 @@ export default async function WriterArticlesPage() {
         </div>
       )}
 
-      {/* Articles Table */}
-      <div className="bg-white border border-line rounded-3xl overflow-hidden shadow-sm">
+      {/* Articles Table Bento Box */}
+      <div className="bg-white border border-line rounded-2xl overflow-hidden shadow-xs">
         {articles.length === 0 ? (
           <div className="p-12 text-center space-y-4">
             <div className="w-16 h-16 rounded-3xl bg-paper flex items-center justify-center mx-auto text-slate-custom">
