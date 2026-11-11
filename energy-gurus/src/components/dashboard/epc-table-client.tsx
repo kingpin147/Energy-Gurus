@@ -503,46 +503,47 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
         </div>
       </div>
 
-      {/* Table Card */}
-      <div className="bg-white border border-line rounded-2xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+      {/* Table & Mobile Stacked View Container */}
+      <div className="bg-white border border-line rounded-2xl shadow-xs overflow-hidden">
+        {/* Desktop Data Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
-              <tr className="bg-slate-50/80 border-b border-line">
-                <th className="p-4 text-[11px] font-bold uppercase tracking-wider text-slate-custom">Company</th>
-                <th className="p-4 text-[11px] font-bold uppercase tracking-wider text-slate-custom">CEO / Contact</th>
-                <th className="p-4 text-[11px] font-bold uppercase tracking-wider text-slate-custom">Location</th>
-                <th className="p-4 text-[11px] font-bold uppercase tracking-wider text-slate-custom">Tier</th>
-                <th className="p-4 text-[11px] font-bold uppercase tracking-wider text-slate-custom">Status</th>
-                <th className="p-4 text-[11px] font-bold uppercase tracking-wider text-slate-custom text-right">Actions</th>
+              <tr className="bg-paper/70 border-b border-line text-[11px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono">
+                <th className="p-4">Company</th>
+                <th className="p-4">CEO / Contact</th>
+                <th className="p-4">Location</th>
+                <th className="p-4">Tier</th>
+                <th className="p-4">Status</th>
+                <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-line">
+            <tbody className="divide-y divide-line/60">
               {filteredEpcs.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-12 text-center text-slate-custom">
-                    <Building2 className="w-12 h-12 mx-auto text-slate-custom/40 mb-3" />
-                    <p className="font-medium text-ink">No EPC Installers found</p>
+                    <Building2 className="w-12 h-12 mx-auto text-slate-300 mb-3" />
+                    <p className="font-bold text-navy-deep font-space-grotesk text-base">No EPC Installers found</p>
                     <p className="text-xs text-slate-custom mt-1">Try adjusting search parameters or onboarding a new installer.</p>
                   </td>
                 </tr>
               ) : (
                 filteredEpcs.map((epc) => (
-                  <tr key={epc.id} className="hover:bg-slate-50/50 transition-colors group">
+                  <tr key={epc.id} className="hover:bg-paper/40 transition-colors group">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10 border border-line shadow-sm rounded-xl">
+                        <Avatar className="h-10 w-10 border border-line shadow-xs rounded-xl shrink-0">
                           <AvatarImage src={epc.logoUrl || undefined} />
                           <AvatarFallback className="bg-amber/10 text-amber font-bold text-xs">
                             {epc.companyName.substring(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <div className="font-bold text-ink text-sm group-hover:text-amber transition-colors">
+                        <div className="min-w-0">
+                          <div className="font-bold text-navy-deep text-sm group-hover:text-amber transition-colors truncate">
                             {epc.companyName}
                           </div>
-                          <div className="text-xs text-slate-custom flex items-center gap-1 mt-0.5">
-                            <Mail className="w-3 h-3" />
+                          <div className="text-xs text-slate-custom flex items-center gap-1 mt-0.5 font-ibm-plex-mono truncate">
+                            <Mail className="w-3 h-3 text-slate-400 shrink-0" />
                             {epc.email || epc.userEmail || "No email"}
                           </div>
                         </div>
@@ -550,25 +551,25 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                     </td>
 
                     <td className="p-4 text-sm">
-                      <div className="font-semibold text-slate-700">{epc.ceoName || "N/A"}</div>
+                      <div className="font-semibold text-navy-deep">{epc.ceoName || "N/A"}</div>
                       {epc.contactNo && (
-                        <div className="text-xs text-slate-custom flex items-center gap-1 mt-0.5">
-                          <Phone className="w-3 h-3" /> {epc.contactNo}
+                        <div className="text-xs text-slate-custom flex items-center gap-1 mt-0.5 font-ibm-plex-mono">
+                          <Phone className="w-3 h-3 text-slate-400 shrink-0" /> {epc.contactNo}
                         </div>
                       )}
                     </td>
 
                     <td className="p-4 text-sm text-slate-custom">
-                      <div className="flex items-center gap-1 font-medium text-slate-700">
-                        <MapPin className="w-3.5 h-3.5 text-slate-custom shrink-0" />
+                      <div className="flex items-center gap-1 font-medium text-navy-deep">
+                        <MapPin className="w-3.5 h-3.5 text-amber shrink-0" />
                         {epc.city || "Pakistan"}
                       </div>
-                      {epc.area && <div className="text-xs text-slate-custom truncate max-w-[150px]">{epc.area}</div>}
+                      {epc.area && <div className="text-xs text-slate-400 truncate max-w-[150px] font-ibm-plex-mono">{epc.area}</div>}
                     </td>
 
                     <td className="p-4">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold capitalize border ${
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold capitalize font-ibm-plex-mono border ${
                           epc.tier === "gold"
                             ? "bg-amber-50 text-amber-700 border-amber-200"
                             : epc.tier === "silver"
@@ -576,66 +577,66 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
                             : "bg-orange-50 text-orange-700 border-orange-200"
                         }`}
                       >
-                        <Award className="w-3 h-3" />
+                        <Award className="w-3 h-3 text-amber" />
                         {epc.tier || "bronze"}
                       </span>
                     </td>
 
                     <td className="p-4">
                       {epc.isVerified ? (
-                        <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 gap-1 text-xs py-0.5">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Verified
+                        <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 gap-1 text-xs py-0.5 font-ibm-plex-mono">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Verified
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 gap-1 text-xs py-0.5">
-                          <AlertCircle className="w-3.5 h-3.5" /> Pending
+                        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 gap-1 text-xs py-0.5 font-ibm-plex-mono">
+                          <AlertCircle className="w-3.5 h-3.5 text-amber-600" /> Pending
                         </Badge>
                       )}
                     </td>
 
                     <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
+                      <div className="flex items-center justify-end gap-1">
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon"
                           onClick={() => window.open(`/epcs/${epc.id}`, "_blank")}
-                          className="h-8 px-2.5 rounded-lg text-slate-custom hover:text-blue-700 hover:bg-blue-50"
+                          className="h-8 w-8 rounded-lg text-slate-400 hover:text-navy-deep hover:bg-slate-100 transition-colors"
                           title="Preview Live Site Profile"
                         >
-                          <Eye className="w-4 h-4 text-blue-600" />
+                          <Eye className="w-3.5 h-3.5" />
                           <span className="sr-only">Preview Live Site</span>
                         </Button>
 
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon"
                           onClick={() => window.location.href = `/dashboard/admin/onboard-epc/${epc.id}`}
-                          className="h-8 px-2.5 rounded-lg text-slate-custom hover:text-ink hover:bg-slate-100"
+                          className="h-8 w-8 rounded-lg text-slate-400 hover:text-navy-deep hover:bg-slate-100 transition-colors"
                           title="Review Application in Dashboard"
                         >
-                          <FileText className="w-4 h-4 text-slate-600" />
+                          <FileText className="w-3.5 h-3.5" />
                           <span className="sr-only">Review Application</span>
                         </Button>
 
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon"
                           onClick={() => handleOpenEdit(epc)}
-                          className="h-8 px-2.5 rounded-lg text-slate-custom hover:text-ink hover:bg-slate-100"
+                          className="h-8 w-8 rounded-lg text-slate-400 hover:text-amber-deep hover:bg-amber/10 transition-colors"
                           title="Edit Installer"
                         >
-                          <Pencil className="w-4 h-4 text-amber-600" />
+                          <Pencil className="w-3.5 h-3.5" />
                           <span className="sr-only">Edit</span>
                         </Button>
 
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon"
                           onClick={() => setDeleteTarget(epc)}
-                          className="h-8 px-2.5 rounded-lg text-slate-custom hover:text-rose-600 hover:bg-rose-50"
+                          className="h-8 w-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
                           title="Delete Installer"
                         >
-                          <Trash2 className="w-4 h-4 text-rose-600" />
+                          <Trash2 className="w-3.5 h-3.5" />
                           <span className="sr-only">Delete</span>
                         </Button>
                       </div>
@@ -645,6 +646,108 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Stacked Bento Card View (Adaptive Table-to-Card Stack) */}
+        <div className="md:hidden divide-y divide-line/60">
+          {filteredEpcs.length === 0 ? (
+            <div className="p-8 text-center text-slate-custom">
+              <Building2 className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+              <p className="font-bold text-navy-deep text-sm font-space-grotesk">No EPC Installers found</p>
+              <p className="text-xs text-slate-custom mt-1">Try adjusting search parameters.</p>
+            </div>
+          ) : (
+            filteredEpcs.map((epc) => (
+              <div key={epc.id} className="p-4 space-y-3 bg-white hover:bg-paper/30 transition-colors">
+                {/* Top Row: Avatar + Name + Status */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Avatar className="h-10 w-10 border border-line shadow-xs rounded-xl shrink-0">
+                      <AvatarImage src={epc.logoUrl || undefined} />
+                      <AvatarFallback className="bg-amber/10 text-amber font-bold text-xs">
+                        {epc.companyName.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-sm text-navy-deep font-space-grotesk truncate">{epc.companyName}</h4>
+                      <p className="text-[11px] text-slate-custom font-mono truncate">{epc.email || epc.userEmail || "No email"}</p>
+                    </div>
+                  </div>
+                  <div>
+                    {epc.isVerified ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Verified
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+                        <AlertCircle className="w-3 h-3 text-amber-600" /> Pending
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2-Column Metadata Grid */}
+                <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-paper/60 p-2.5 rounded-xl border border-line/60">
+                  <div>
+                    <span className="text-[9.5px] uppercase font-bold text-slate-400 block">Contact / CEO</span>
+                    <span className="font-semibold text-navy-deep truncate block">{epc.ceoName || "N/A"}</span>
+                    {epc.contactNo && <span className="text-[10.5px] text-slate-500 block truncate">{epc.contactNo}</span>}
+                  </div>
+                  <div>
+                    <span className="text-[9.5px] uppercase font-bold text-slate-400 block">Location &amp; Tier</span>
+                    <span className="font-semibold text-navy-deep truncate block">{epc.city || "Pakistan"}</span>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 capitalize">
+                      <Award className="w-2.5 h-2.5" /> {epc.tier || "bronze"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Bottom Row: Action Buttons */}
+                <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-line/40">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => window.open(`/epcs/${epc.id}`, "_blank")}
+                    className="h-8 px-2.5 text-xs font-bold text-slate-500 hover:text-navy-deep hover:bg-slate-100 rounded-lg gap-1"
+                    title="Preview Live Site"
+                  >
+                    <Eye className="w-3.5 h-3.5 text-blue-600" />
+                    <span>View</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => window.location.href = `/dashboard/admin/onboard-epc/${epc.id}`}
+                    className="h-8 px-2.5 text-xs font-bold text-slate-500 hover:text-navy-deep hover:bg-slate-100 rounded-lg gap-1"
+                    title="Review Application"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-slate-600" />
+                    <span>Review</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleOpenEdit(epc)}
+                    className="h-8 px-2.5 text-xs font-bold text-slate-500 hover:text-amber-deep hover:bg-amber/10 rounded-lg gap-1"
+                    title="Edit"
+                  >
+                    <Pencil className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Edit</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setDeleteTarget(epc)}
+                    className="h-8 px-2.5 text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg gap-1"
+                    title="Delete"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                    <span>Delete</span>
+                  </Button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

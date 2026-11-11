@@ -387,137 +387,233 @@ export function BrandTableClient({ initialBrands }: { initialBrands: BrandListIt
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[850px]">
-              <thead>
-                <tr className="bg-slate-50/80 border-b border-line text-[11px] font-black uppercase tracking-wider text-slate-custom">
-                  <th className="p-5">Brand</th>
-                  <th className="p-5">Origin / HQ</th>
-                  <th className="p-5">Equipment</th>
-                  <th className="p-5">Products</th>
-                  <th className="p-5">Status</th>
-                  <th className="p-5 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {filteredBrands.map((b) => {
-                  const isLive = b.status === "live";
-                  const isPending = b.status === "pending_review";
-                  const isChangesReq = b.status === "changes_requested";
+          <div>
+            {/* Desktop Data Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[850px]">
+                <thead>
+                  <tr className="bg-paper/70 border-b border-line text-[11px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono">
+                    <th className="p-5">Brand</th>
+                    <th className="p-5">Origin / HQ</th>
+                    <th className="p-5">Equipment</th>
+                    <th className="p-5">Products</th>
+                    <th className="p-5">Status</th>
+                    <th className="p-5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line/60">
+                  {filteredBrands.map((b) => {
+                    const isLive = b.status === "live";
+                    const isPending = b.status === "pending_review";
+                    const isChangesReq = b.status === "changes_requested";
 
-                  return (
-                    <tr key={b.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="p-5">
-                        <div className="flex items-center gap-3.5">
-                          <Avatar className="h-11 w-11 rounded-xl border border-line bg-white shadow-sm shrink-0">
-                            <AvatarImage src={b.logoUrl || undefined} className="object-contain p-1" />
-                            <AvatarFallback className="bg-amber/15 text-amber-deep font-bold rounded-xl text-xs">
-                              {b.brandName.slice(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-sm text-ink">{b.brandName}</span>
-                              {b.isVerified && (
-                                <span title="Verified Brand">
-                                  <CheckCircle2 className="w-4 h-4 text-emerald-600 inline" />
-                                </span>
-                              )}
+                    return (
+                      <tr key={b.id} className="hover:bg-paper/40 transition-colors group">
+                        <td className="p-5">
+                          <div className="flex items-center gap-3.5">
+                            <Avatar className="h-11 w-11 rounded-xl border border-line bg-white shadow-xs shrink-0">
+                              <AvatarImage src={b.logoUrl || undefined} className="object-contain p-1" />
+                              <AvatarFallback className="bg-amber/15 text-amber-deep font-bold rounded-xl text-xs">
+                                {b.brandName.slice(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-sm text-navy-deep group-hover:text-amber transition-colors">{b.brandName}</span>
+                                {b.isVerified && (
+                                  <span title="Verified Brand">
+                                    <CheckCircle2 className="w-4 h-4 text-emerald-600 inline" />
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-slate-custom line-clamp-1 font-ibm-plex-mono">
+                                {b.tagline || b.userEmail || "Solar Manufacturer"}
+                              </p>
                             </div>
-                            <p className="text-xs text-slate-custom line-clamp-1">
-                              {b.tagline || b.userEmail || "Solar Manufacturer"}
-                            </p>
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      <td className="p-5 text-xs text-slate-custom">
-                        <span className="font-semibold text-ink">{b.countryOfOrigin || "China"}</span>
-                        {b.headquarters && <p className="text-[11px] text-slate-custom line-clamp-1">{b.headquarters}</p>}
-                      </td>
+                        <td className="p-5 text-xs text-slate-custom font-ibm-plex-mono">
+                          <span className="font-semibold text-navy-deep">{b.countryOfOrigin || "China"}</span>
+                          {b.headquarters && <p className="text-[11px] text-slate-400 line-clamp-1">{b.headquarters}</p>}
+                        </td>
 
-                      <td className="p-5">
-                        <div className="flex flex-wrap gap-1 max-w-[200px]">
-                          {(b.categories || ["Inverters"]).slice(0, 2).map((cat) => (
-                            <span
-                              key={cat}
-                              className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-700 border border-line"
-                            >
-                              {cat}
+                        <td className="p-5">
+                          <div className="flex flex-wrap gap-1 max-w-[200px]">
+                            {(b.categories || ["Inverters"]).slice(0, 2).map((cat) => (
+                              <span
+                                key={cat}
+                                className="px-2 py-0.5 rounded-lg text-[10px] font-bold font-ibm-plex-mono bg-paper text-slate-700 border border-line/80"
+                              >
+                                {cat}
+                              </span>
+                            ))}
+                            {(b.categories?.length || 0) > 2 && (
+                              <span className="text-[10px] text-slate-400 font-semibold font-ibm-plex-mono">
+                                +{(b.categories?.length || 0) - 2}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+
+                        <td className="p-5">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold font-ibm-plex-mono bg-amber/10 text-amber-deep border border-amber/20">
+                            <Package className="w-3.5 h-3.5 text-amber" /> {b.productsCount || 0} Models
+                          </span>
+                        </td>
+
+                        <td className="p-5">
+                          {isLive ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-ibm-plex-mono uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              <Check className="w-3 h-3" /> Live
                             </span>
-                          ))}
-                          {(b.categories?.length || 0) > 2 && (
-                            <span className="text-[10px] text-slate-custom font-semibold">
-                              +{(b.categories?.length || 0) - 2}
+                          ) : isPending ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-ibm-plex-mono uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
+                              Pending Review
+                            </span>
+                          ) : isChangesReq ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-ibm-plex-mono uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
+                              Changes Needed
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-ibm-plex-mono uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+                              Draft
                             </span>
                           )}
+                        </td>
+
+                        <td className="p-5 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleOpenView(b)}
+                              title="View Brand Profile"
+                              className="h-8 w-8 rounded-lg text-slate-400 hover:text-navy-deep hover:bg-slate-100 transition-colors"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </Button>
+
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleOpenEdit(b)}
+                              title="Edit Profile"
+                              className="h-8 w-8 rounded-lg text-slate-400 hover:text-amber-deep hover:bg-amber/10 transition-colors"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </Button>
+
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setDeletingBrand(b)}
+                              title="Delete Brand"
+                              className="h-8 w-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Stacked Bento Card View (Adaptive Table-to-Card Stack) */}
+            <div className="md:hidden divide-y divide-line/60">
+              {filteredBrands.map((b) => {
+                const isLive = b.status === "live";
+                const isPending = b.status === "pending_review";
+                const isChangesReq = b.status === "changes_requested";
+
+                return (
+                  <div key={b.id} className="p-4 space-y-3 bg-white hover:bg-paper/30 transition-colors">
+                    {/* Top Row: Avatar + Name + Status */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Avatar className="h-10 w-10 border border-line shadow-xs rounded-xl shrink-0">
+                          <AvatarImage src={b.logoUrl || undefined} className="object-contain p-1" />
+                          <AvatarFallback className="bg-amber/15 text-amber-deep font-bold rounded-xl text-xs">
+                            {b.brandName.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <h4 className="font-bold text-sm text-navy-deep font-space-grotesk truncate">{b.brandName}</h4>
+                          <p className="text-[11px] text-slate-custom font-mono truncate">{b.tagline || b.userEmail || "Solar Manufacturer"}</p>
                         </div>
-                      </td>
-
-                      <td className="p-5">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold bg-amber/10 text-amber-900 border border-amber/20">
-                          <Package className="w-3.5 h-3.5 text-amber" /> {b.productsCount || 0} Models
-                        </span>
-                      </td>
-
-                      <td className="p-5">
+                      </div>
+                      <div>
                         {isLive ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
                             <Check className="w-3 h-3" /> Live
                           </span>
                         ) : isPending ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber/15 text-amber-deep border border-amber/30">
-                            Pending Review
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+                            Pending
                           </span>
                         ) : isChangesReq ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-50 text-red-600 border border-red-200">
-                            Changes Needed
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 shrink-0">
+                            Changes
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 shrink-0">
                             Draft
                           </span>
                         )}
-                      </td>
+                      </div>
+                    </div>
 
-                      <td className="p-5 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleOpenView(b)}
-                            title="View Brand Profile"
-                            className="h-8 w-8 p-0 rounded-lg text-slate-custom hover:text-ink hover:bg-slate-100"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
+                    {/* 2-Column Metadata Grid */}
+                    <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-paper/60 p-2.5 rounded-xl border border-line/60">
+                      <div>
+                        <span className="text-[9.5px] uppercase font-bold text-slate-400 block">Origin / HQ</span>
+                        <span className="font-semibold text-navy-deep truncate block">{b.countryOfOrigin || "Global"}</span>
+                        {b.headquarters && <span className="text-[10px] text-slate-500 block truncate">{b.headquarters}</span>}
+                      </div>
+                      <div>
+                        <span className="text-[9.5px] uppercase font-bold text-slate-400 block">Catalog</span>
+                        <span className="font-semibold text-navy-deep truncate block">{b.productsCount || 0} Models</span>
+                        <span className="text-[10px] text-slate-500 block truncate">{(b.categories || []).join(", ") || "Inverters"}</span>
+                      </div>
+                    </div>
 
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleOpenEdit(b)}
-                            title="Edit Profile"
-                            className="h-8 w-8 p-0 rounded-lg text-slate-custom hover:text-amber-deep hover:bg-amber/10"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </Button>
-
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDeletingBrand(b)}
-                            title="Delete Brand"
-                            className="h-8 w-8 p-0 rounded-lg text-slate-custom hover:text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                    {/* Bottom Row: Actions */}
+                    <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-line/40">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleOpenView(b)}
+                        className="h-8 px-2.5 text-xs font-bold text-slate-500 hover:text-navy-deep hover:bg-slate-100 rounded-lg gap-1"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>View</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleOpenEdit(b)}
+                        className="h-8 px-2.5 text-xs font-bold text-slate-500 hover:text-amber-deep hover:bg-amber/10 rounded-lg gap-1"
+                      >
+                        <Pencil className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Edit</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDeletingBrand(b)}
+                        className="h-8 px-2.5 text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg gap-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                        <span>Delete</span>
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>

@@ -102,43 +102,46 @@ export function BrandModerationQueue({ brands }: { brands: BrandItem[] }) {
   return (
     <div className="space-y-6">
       
-      {/* Queue Tabs */}
-      <div className="bg-white border border-line rounded-[4px] p-1.5 inline-flex flex-wrap gap-1 shadow-sm">
+      {/* Secondary Status Filter Bar */}
+      <div className="bg-white border border-line rounded-2xl p-1.5 flex flex-wrap items-center gap-1 shadow-xs">
         <button
+          type="button"
           onClick={() => setActiveTab("pending")}
-          className={`px-5 py-2 rounded text-xs font-bold transition-colors cursor-pointer flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
             activeTab === "pending"
-              ? "bg-navy-deep text-white shadow-sm"
-              : "text-slate-custom hover:text-navy-deep"
+              ? "bg-navy-deep text-white shadow-xs font-ibm-plex-mono"
+              : "text-slate-500 hover:text-navy-deep hover:bg-paper font-ibm-plex-mono"
           }`}
         >
           <Clock className="w-3.5 h-3.5" />
           Pending Submissions
           {pendingBrands.length > 0 && (
-            <span className="bg-danger text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+            <span className="bg-amber text-navy-deep text-[10px] font-black px-1.5 py-0.2 rounded-full font-mono">
               {pendingBrands.length}
             </span>
           )}
         </button>
 
         <button
+          type="button"
           onClick={() => setActiveTab("live")}
-          className={`px-5 py-2 rounded text-xs font-bold transition-colors cursor-pointer flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
             activeTab === "live"
-              ? "bg-navy-deep text-white shadow-sm"
-              : "text-slate-custom hover:text-navy-deep"
+              ? "bg-navy-deep text-white shadow-xs font-ibm-plex-mono"
+              : "text-slate-500 hover:text-navy-deep hover:bg-paper font-ibm-plex-mono"
           }`}
         >
           <Check className="w-3.5 h-3.5" />
-          Live & Published ({liveBrands.length})
+          Live &amp; Published ({liveBrands.length})
         </button>
 
         <button
+          type="button"
           onClick={() => setActiveTab("changes_requested")}
-          className={`px-5 py-2 rounded text-xs font-bold transition-colors cursor-pointer flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
             activeTab === "changes_requested"
-              ? "bg-navy-deep text-white shadow-sm"
-              : "text-slate-custom hover:text-navy-deep"
+              ? "bg-navy-deep text-white shadow-xs font-ibm-plex-mono"
+              : "text-slate-500 hover:text-navy-deep hover:bg-paper font-ibm-plex-mono"
           }`}
         >
           <AlertTriangle className="w-3.5 h-3.5" />
@@ -146,26 +149,27 @@ export function BrandModerationQueue({ brands }: { brands: BrandItem[] }) {
         </button>
 
         <button
+          type="button"
           onClick={() => setActiveTab("drafts")}
-          className={`px-5 py-2 rounded text-xs font-bold transition-colors cursor-pointer flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
             activeTab === "drafts"
-              ? "bg-navy-deep text-white shadow-sm"
-              : "text-slate-custom hover:text-navy-deep"
+              ? "bg-navy-deep text-white shadow-xs font-ibm-plex-mono"
+              : "text-slate-500 hover:text-navy-deep hover:bg-paper font-ibm-plex-mono"
           }`}
         >
           <Building2 className="w-3.5 h-3.5" />
-          Drafts / In Progress ({draftBrands.length})
+          Drafts ({draftBrands.length})
         </button>
       </div>
 
       {/* Brand Submissions List */}
       {displayedBrands.length === 0 ? (
-        <div className="text-center py-20 bg-white border border-line rounded-[4px] shadow-sm">
-          <Building2 className="w-12 h-12 text-slate-custom/30 mx-auto mb-3" />
-          <h4 className="font-fraunces font-semibold text-lg text-navy-deep">
+        <div className="text-center py-16 bg-white border border-line rounded-2xl shadow-xs">
+          <Building2 className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+          <h4 className="font-space-grotesk font-bold text-base text-navy-deep">
             No {activeTab === "pending" ? "pending" : activeTab === "live" ? "live" : activeTab === "changes_requested" ? "changes requested" : "draft"} brands
           </h4>
-          <p className="text-xs text-slate-custom mt-1">
+          <p className="text-xs text-slate-custom mt-1 max-w-sm mx-auto">
             {activeTab === "pending"
               ? "All submitted brand profiles have been moderated."
               : activeTab === "drafts"
@@ -178,30 +182,30 @@ export function BrandModerationQueue({ brands }: { brands: BrandItem[] }) {
           {displayedBrands.map((b) => (
             <div
               key={b.id}
-              className="bg-white border border-line rounded-[4px] p-6 shadow-sm hover:border-amber transition-all space-y-4"
+              className="bg-white border border-line rounded-2xl p-5 sm:p-6 shadow-xs hover:border-amber/50 hover:shadow-sm transition-all duration-200 space-y-4"
             >
               {/* Top Row: Brand Info */}
               <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded bg-navy text-white font-fraunces font-bold text-xl flex items-center justify-center shrink-0 border border-navy-deep overflow-hidden">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="w-14 h-14 rounded-2xl bg-paper text-navy-deep font-space-grotesk font-black text-xl flex items-center justify-center shrink-0 border border-line/80 overflow-hidden shadow-2xs">
                     {b.logoUrl ? (
                       <Image src={b.logoUrl} alt={b.brandName} width={56} height={56} className="object-contain p-1 bg-white" />
                     ) : (
                       b.brandName.slice(0, 2).toUpperCase()
                     )}
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-fraunces font-bold text-base md:text-lg text-navy-deep">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-space-grotesk font-bold text-base md:text-lg text-navy-deep truncate">
                         {b.brandName}
                       </h3>
                       {b.isVerified && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-amber/15 text-amber-deep border border-amber/30 px-2 py-0.5 rounded-full">
-                          <CheckCircle2 className="w-3 h-3" /> Verified
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-amber/15 text-amber-deep border border-amber/30 px-2 py-0.5 rounded-full font-ibm-plex-mono">
+                          <CheckCircle2 className="w-3 h-3 text-amber" /> Verified
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-slate-custom mt-1">
+                    <div className="flex items-center gap-3 text-xs text-slate-custom mt-1 font-ibm-plex-mono truncate">
                       {b.countryOfOrigin && (
                         <span className="flex items-center gap-1">
                           <Globe className="w-3 h-3 text-slate-custom/70" /> {b.countryOfOrigin}
@@ -218,30 +222,30 @@ export function BrandModerationQueue({ brands }: { brands: BrandItem[] }) {
                 {/* Status Badge */}
                 <div>
                   {b.status === "live" && (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold bg-good-bg text-good border border-good/30 px-3 py-1 rounded-full">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Live & Published
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold font-ibm-plex-mono bg-teal/10 text-teal border border-teal/20 px-2.5 py-1 rounded-full">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-teal" /> Live &amp; Published
                     </span>
                   )}
                   {b.status === "pending_review" && (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold bg-amber/15 text-amber-deep border border-amber/40 px-3 py-1 rounded-full">
-                      <Clock className="w-3.5 h-3.5" /> Pending Admin Review
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold font-ibm-plex-mono bg-amber/15 text-amber-deep border border-amber/30 px-2.5 py-1 rounded-full">
+                      <Clock className="w-3.5 h-3.5 text-amber" /> Awaiting Review
                     </span>
                   )}
                   {b.status === "changes_requested" && (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold bg-danger-bg text-danger border border-danger/30 px-3 py-1 rounded-full">
-                      <AlertTriangle className="w-3.5 h-3.5" /> Changes Requested
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold font-ibm-plex-mono bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-full">
+                      <AlertTriangle className="w-3.5 h-3.5 text-rose-600" /> Changes Requested
                     </span>
                   )}
                   {b.status === "draft" && (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold bg-gray-100 text-slate-custom border border-gray-300 px-3 py-1 rounded-full">
-                      <Clock className="w-3.5 h-3.5 text-slate-custom" /> Draft (In Progress)
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold font-ibm-plex-mono bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-1 rounded-full">
+                      <Clock className="w-3.5 h-3.5 text-slate-400" /> Draft (In Progress)
                     </span>
                   )}
                 </div>
               </div>
 
               {/* Profile Overview */}
-              <p className="text-xs md:text-sm text-ink leading-relaxed bg-paper p-3.5 rounded border border-line/60">
+              <p className="text-xs md:text-sm text-navy-deep leading-relaxed bg-paper/60 p-3.5 rounded-xl border border-line/60">
                 {b.about || "No brand description provided yet."}
               </p>
 
@@ -313,27 +317,29 @@ export function BrandModerationQueue({ brands }: { brands: BrandItem[] }) {
                 </div>
               )}
 
-              {/* Admin Actions Footer */}
-              <div className="pt-3 border-t border-line flex items-center justify-between flex-wrap gap-3">
-                <div className="flex items-center gap-2">
+              {/* Admin Actions Footer with Streamlined Color-Coded Hierarchy */}
+              <div className="pt-3 border-t border-line/60 flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-2 flex-wrap">
                   {b.status !== "live" && (
                     <button
+                      type="button"
                       onClick={() => handleApprove(b.id)}
                       disabled={processingId === b.id}
-                      className="px-4 py-1.5 bg-good hover:bg-green-700 text-white font-bold text-xs rounded-[3px] transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm"
+                      className="px-4 py-2 bg-teal hover:bg-teal/90 text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-xs font-space-grotesk"
                     >
                       {processingId === b.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-                      Approve & Publish Live
+                      Approve &amp; Publish Live
                     </button>
                   )}
 
                   {b.status !== "changes_requested" && rejectingId !== b.id && (
                     <button
+                      type="button"
                       onClick={() => setRejectingId(b.id)}
-                      className="px-4 py-1.5 bg-transparent border border-line text-danger hover:bg-danger-bg font-semibold text-xs rounded-[3px] transition-colors cursor-pointer flex items-center gap-1.5"
+                      className="px-4 py-2 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5 font-space-grotesk"
                     >
-                      <X className="w-3.5 h-3.5" />
-                      Request Changes / Reject
+                      <X className="w-3.5 h-3.5 text-rose-600" />
+                      Request Changes
                     </button>
                   )}
                 </div>
@@ -341,9 +347,9 @@ export function BrandModerationQueue({ brands }: { brands: BrandItem[] }) {
                 <Link
                   href={`/brands/${b.id}`}
                   target="_blank"
-                  className="text-xs text-navy-deep font-bold hover:text-amber-deep flex items-center gap-1.5"
+                  className="text-xs text-navy-deep font-bold hover:text-amber flex items-center gap-1.5 font-space-grotesk transition-colors"
                 >
-                  <Eye className="w-3.5 h-3.5" /> Preview Public Page
+                  <Eye className="w-3.5 h-3.5 text-amber" /> Preview Public Page
                 </Link>
               </div>
             </div>

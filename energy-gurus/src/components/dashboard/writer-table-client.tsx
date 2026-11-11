@@ -289,154 +289,248 @@ export function WriterTableClient({ initialWriters }: { initialWriters: WriterLi
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[850px]">
-              <thead>
-                <tr className="bg-slate-50/80 border-b border-line text-[11px] font-black uppercase tracking-wider text-slate-custom">
-                  <th className="p-5">Author</th>
-                  <th className="p-5">Designation</th>
-                  <th className="p-5">Articles</th>
-                  <th className="p-5">Social Handles</th>
-                  <th className="p-5">Status</th>
-                  <th className="p-5 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {filteredWriters.map((w) => {
-                  const isApproved = w.status === "approved";
-                  const isPending = w.status === "pending_review";
-                  const isChangesReq = w.status === "changes_requested";
+          <div>
+            {/* Desktop Data Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[850px]">
+                <thead>
+                  <tr className="bg-paper/70 border-b border-line text-[11px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono">
+                    <th className="p-5">Author</th>
+                    <th className="p-5">Designation</th>
+                    <th className="p-5">Articles</th>
+                    <th className="p-5">Social Handles</th>
+                    <th className="p-5">Status</th>
+                    <th className="p-5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line/60">
+                  {filteredWriters.map((w) => {
+                    const isApproved = w.status === "approved";
+                    const isPending = w.status === "pending_review";
+                    const isChangesReq = w.status === "changes_requested";
 
-                  const socials = w.socialLinks || {};
-                  const hasAnySocial = Object.keys(socials).length > 0;
+                    const socials = w.socialLinks || {};
+                    const hasAnySocial = Object.keys(socials).length > 0;
 
-                  return (
-                    <tr key={w.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="p-5">
-                        <div className="flex items-center gap-3.5">
-                          <Avatar className="h-11 w-11 rounded-xl border border-line bg-white shadow-sm shrink-0">
-                            <AvatarImage src={w.pictureUrl || undefined} className="object-cover" />
-                            <AvatarFallback className="bg-amber/15 text-amber-deep font-bold rounded-xl text-xs">
-                              {w.name.slice(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-sm text-ink">{w.name}</span>
-                              {isApproved && (
-                                <span title="Approved Contributing Writer">
-                                  <CheckCircle2 className="w-4 h-4 text-emerald-600 inline" />
-                                </span>
+                    return (
+                      <tr key={w.id} className="hover:bg-paper/40 transition-colors group">
+                        <td className="p-5">
+                          <div className="flex items-center gap-3.5">
+                            <Avatar className="h-11 w-11 rounded-xl border border-line bg-white shadow-xs shrink-0">
+                              <AvatarImage src={w.pictureUrl || undefined} className="object-cover" />
+                              <AvatarFallback className="bg-amber/15 text-amber-deep font-bold rounded-xl text-xs">
+                                {w.name.slice(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-sm text-navy-deep group-hover:text-amber transition-colors">{w.name}</span>
+                                {isApproved && (
+                                  <span title="Approved Contributing Writer">
+                                    <CheckCircle2 className="w-4 h-4 text-emerald-600 inline" />
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-slate-custom line-clamp-1 font-ibm-plex-mono">{w.userEmail}</p>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="p-5 text-xs text-slate-custom max-w-[240px]">
+                          <p className="font-semibold text-navy-deep line-clamp-1">{w.designation || "Contributing Columnist"}</p>
+                          {w.bio && <p className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">{w.bio}</p>}
+                        </td>
+
+                        <td className="p-5">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold font-ibm-plex-mono bg-amber/10 text-amber-deep border border-amber/20">
+                            <FileText className="w-3.5 h-3.5 text-amber" /> {w.articlesCount || 0} Articles
+                          </span>
+                        </td>
+
+                        <td className="p-5">
+                          {hasAnySocial ? (
+                            <div className="flex items-center gap-2 text-slate-400">
+                              {socials.linkedin && (
+                                <a href={socials.linkedin} target="_blank" rel="noreferrer" title="LinkedIn" className="hover:text-blue-600 transition-colors">
+                                  <Linkedin className="w-4 h-4" />
+                                </a>
+                              )}
+                              {socials.twitter && (
+                                <a href={socials.twitter} target="_blank" rel="noreferrer" title="Twitter" className="hover:text-sky-500 transition-colors">
+                                  <Twitter className="w-4 h-4" />
+                                </a>
+                              )}
+                              {socials.facebook && (
+                                <a href={socials.facebook} target="_blank" rel="noreferrer" title="Facebook" className="hover:text-blue-700 transition-colors">
+                                  <Facebook className="w-4 h-4" />
+                                </a>
+                              )}
+                              {socials.instagram && (
+                                <a href={socials.instagram} target="_blank" rel="noreferrer" title="Instagram" className="hover:text-pink-600 transition-colors">
+                                  <Instagram className="w-4 h-4" />
+                                </a>
+                              )}
+                              {socials.tiktok && (
+                                <a href={socials.tiktok} target="_blank" rel="noreferrer" title="TikTok" className="hover:text-navy-deep transition-colors">
+                                  <Music className="w-4 h-4" />
+                                </a>
                               )}
                             </div>
-                            <p className="text-xs text-slate-custom line-clamp-1">{w.userEmail}</p>
+                          ) : (
+                            <span className="text-xs text-slate-400 italic font-mono">None</span>
+                          )}
+                        </td>
+
+                        <td className="p-5">
+                          {isApproved ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-ibm-plex-mono uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              <Check className="w-3 h-3" /> Approved
+                            </span>
+                          ) : isPending ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-ibm-plex-mono uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
+                              <Clock className="w-3 h-3 text-amber" /> In Review
+                            </span>
+                          ) : isChangesReq ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-ibm-plex-mono uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
+                              Changes Needed
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-ibm-plex-mono uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+                              Draft
+                            </span>
+                          )}
+                        </td>
+
+                        <td className="p-5 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleOpenView(w)}
+                              title="View Author Profile"
+                              className="h-8 w-8 rounded-lg text-slate-400 hover:text-navy-deep hover:bg-slate-100 transition-colors"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </Button>
+
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleOpenEdit(w)}
+                              title="Edit Profile"
+                              className="h-8 w-8 rounded-lg text-slate-400 hover:text-amber-deep hover:bg-amber/10 transition-colors"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </Button>
+
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setDeletingWriter(w)}
+                              title="Delete Writer"
+                              className="h-8 w-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
                           </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Stacked Bento Card View (Adaptive Table-to-Card Stack) */}
+            <div className="md:hidden divide-y divide-line/60">
+              {filteredWriters.map((w) => {
+                const isApproved = w.status === "approved";
+                const isPending = w.status === "pending_review";
+                const isChangesReq = w.status === "changes_requested";
+
+                return (
+                  <div key={w.id} className="p-4 space-y-3 bg-white hover:bg-paper/30 transition-colors">
+                    {/* Top Row: Avatar + Name + Status */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Avatar className="h-10 w-10 border border-line shadow-xs rounded-xl shrink-0">
+                          <AvatarImage src={w.pictureUrl || undefined} className="object-cover" />
+                          <AvatarFallback className="bg-amber/15 text-amber-deep font-bold rounded-xl text-xs">
+                            {w.name.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <h4 className="font-bold text-sm text-navy-deep font-space-grotesk truncate">{w.name}</h4>
+                          <p className="text-[11px] text-slate-custom font-mono truncate">{w.userEmail}</p>
                         </div>
-                      </td>
-
-                      <td className="p-5 text-xs text-slate-custom max-w-[240px]">
-                        <p className="font-medium text-ink line-clamp-1">{w.designation || "Contributing Columnist"}</p>
-                        {w.bio && <p className="text-[11px] text-slate-custom line-clamp-1 mt-0.5">{w.bio}</p>}
-                      </td>
-
-                      <td className="p-5">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold bg-amber/10 text-amber-900 border border-amber/20">
-                          <FileText className="w-3.5 h-3.5 text-amber" /> {w.articlesCount || 0} Articles
-                        </span>
-                      </td>
-
-                      <td className="p-5">
-                        {hasAnySocial ? (
-                          <div className="flex items-center gap-2 text-slate-custom">
-                            {socials.linkedin && (
-                              <a href={socials.linkedin} target="_blank" rel="noreferrer" title="LinkedIn" className="hover:text-blue-600">
-                                <Linkedin className="w-4 h-4" />
-                              </a>
-                            )}
-                            {socials.twitter && (
-                              <a href={socials.twitter} target="_blank" rel="noreferrer" title="Twitter" className="hover:text-sky-500">
-                                <Twitter className="w-4 h-4" />
-                              </a>
-                            )}
-                            {socials.facebook && (
-                              <a href={socials.facebook} target="_blank" rel="noreferrer" title="Facebook" className="hover:text-blue-700">
-                                <Facebook className="w-4 h-4" />
-                              </a>
-                            )}
-                            {socials.instagram && (
-                              <a href={socials.instagram} target="_blank" rel="noreferrer" title="Instagram" className="hover:text-pink-600">
-                                <Instagram className="w-4 h-4" />
-                              </a>
-                            )}
-                            {socials.tiktok && (
-                              <a href={socials.tiktok} target="_blank" rel="noreferrer" title="TikTok" className="hover:text-ink">
-                                <Music className="w-4 h-4" />
-                              </a>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-xs text-slate-custom/60 italic">None</span>
-                        )}
-                      </td>
-
-                      <td className="p-5">
+                      </div>
+                      <div>
                         {isApproved ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
                             <Check className="w-3 h-3" /> Approved
                           </span>
                         ) : isPending ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber/15 text-amber-deep border border-amber/30">
-                            <Clock className="w-3 h-3" /> In Review
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+                            In Review
                           </span>
                         ) : isChangesReq ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-50 text-red-600 border border-red-200">
-                            Changes Needed
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 shrink-0">
+                            Changes
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 shrink-0">
                             Draft
                           </span>
                         )}
-                      </td>
+                      </div>
+                    </div>
 
-                      <td className="p-5 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleOpenView(w)}
-                            title="View Author Profile"
-                            className="h-8 w-8 p-0 rounded-lg text-slate-custom hover:text-ink hover:bg-slate-100"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
+                    {/* 2-Column Metadata Grid */}
+                    <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-paper/60 p-2.5 rounded-xl border border-line/60">
+                      <div>
+                        <span className="text-[9.5px] uppercase font-bold text-slate-400 block">Designation</span>
+                        <span className="font-semibold text-navy-deep truncate block">{w.designation || "Columnist"}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9.5px] uppercase font-bold text-slate-400 block">Articles Published</span>
+                        <span className="font-semibold text-navy-deep truncate block">{w.articlesCount || 0} Articles</span>
+                      </div>
+                    </div>
 
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleOpenEdit(w)}
-                            title="Edit Profile"
-                            className="h-8 w-8 p-0 rounded-lg text-slate-custom hover:text-amber-deep hover:bg-amber/10"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </Button>
-
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDeletingWriter(w)}
-                            title="Delete Writer"
-                            className="h-8 w-8 p-0 rounded-lg text-slate-custom hover:text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                    {/* Bottom Row: Actions */}
+                    <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-line/40">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleOpenView(w)}
+                        className="h-8 px-2.5 text-xs font-bold text-slate-500 hover:text-navy-deep hover:bg-slate-100 rounded-lg gap-1"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>View</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleOpenEdit(w)}
+                        className="h-8 px-2.5 text-xs font-bold text-slate-500 hover:text-amber-deep hover:bg-amber/10 rounded-lg gap-1"
+                      >
+                        <Pencil className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Edit</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDeletingWriter(w)}
+                        className="h-8 px-2.5 text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg gap-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                        <span>Delete</span>
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>

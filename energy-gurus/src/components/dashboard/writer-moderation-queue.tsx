@@ -337,22 +337,22 @@ export function WriterModerationQueue({ writers }: { writers: WriterModerationIt
                               setActiveFeedbackId(writer.id);
                               setFeedbackText(writer.adminFeedback || "");
                             }}
-                            className="rounded-xl font-bold border-red-200 text-red-600 hover:bg-red-50"
+                            className="rounded-xl font-bold border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 font-space-grotesk"
                           >
-                            <AlertTriangle className="w-3.5 h-3.5 mr-1.5" /> Request Changes
+                            <AlertTriangle className="w-3.5 h-3.5 mr-1.5 text-rose-600" /> Request Changes
                           </Button>
                           <Button
                             size="sm"
                             disabled={isPending}
                             onClick={() => handleApprove(writer.id, writer.name)}
-                            className="rounded-xl font-bold bg-green-700 text-white hover:bg-green-800"
+                            className="rounded-xl font-bold bg-teal text-white hover:bg-teal/90 font-space-grotesk shadow-xs"
                           >
                             {isPending ? (
                               <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
                             ) : (
                               <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
                             )}
-                            Approve Profile
+                            Approve &amp; Verify Profile
                           </Button>
                         </>
                       )}

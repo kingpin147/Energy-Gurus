@@ -711,3 +711,4 @@ export function AdsManagementClient({ initialAds }: AdsManagementClientProps) {
     </div>
   );
 }
+
