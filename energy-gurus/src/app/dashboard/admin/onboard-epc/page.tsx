@@ -21,15 +21,15 @@ export default async function OnboardEpcPage() {
     const silverCount = epcInstallers.filter(e => e.tier === 'silver').length;
 
     return (
-        <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+        <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto font-sans">
             {/* Header */}
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-amber text-ink rounded-2xl flex items-center justify-center shadow-lg shadow-amber/20">
+                    <div className="w-12 h-12 bg-amber text-navy-deep rounded-2xl flex items-center justify-center shadow-md">
                         <Briefcase className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-ink">EPC Installers Hub</h1>
+                        <h1 className="font-space-grotesk text-2xl md:text-3xl font-bold tracking-tight text-navy-deep">EPC Installers Hub</h1>
                         <p className="text-slate-custom text-sm mt-0.5">
                             Manage existing onboarded EPC installers (View, Edit, Delete) or register new companies.
                         </p>
@@ -37,61 +37,73 @@ export default async function OnboardEpcPage() {
                 </div>
             </div>
 
-            {/* Metrics Grid */}
+            {/* Bento Metrics Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white border border-line p-5 rounded-2xl shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                        <Building2 className="w-6 h-6" />
+                {/* Total Installers */}
+                <div className="bg-white border border-line p-5 rounded-2xl shadow-xs relative overflow-hidden group hover:border-navy-deep/50 hover:shadow-sm transition-all duration-200">
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-navy-deep" />
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono">Total Installers</span>
+                        <div className="p-1.5 rounded-lg bg-paper border border-line/60">
+                            <Building2 className="w-4 h-4 text-navy-deep" />
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-xs font-bold uppercase tracking-wider text-slate-custom">Total Installers</p>
-                        <p className="text-2xl font-bold text-ink">{totalInstallers}</p>
-                    </div>
+                    <div className="text-3xl font-black text-navy-deep font-space-grotesk tracking-tight">{totalInstallers}</div>
+                    <p className="text-[11px] font-medium text-slate-400 font-ibm-plex-mono mt-1">Registered EPC network</p>
                 </div>
 
-                <div className="bg-white border border-line p-5 rounded-2xl shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                        <CheckCircle2 className="w-6 h-6" />
+                {/* Verified Profiles */}
+                <div className="bg-white border border-line p-5 rounded-2xl shadow-xs relative overflow-hidden group hover:border-amber/50 hover:shadow-sm transition-all duration-200">
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-amber" />
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono">Verified Profiles</span>
+                        <div className="p-1.5 rounded-lg bg-amber/10 text-amber">
+                            <CheckCircle2 className="w-4 h-4" />
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-xs font-bold uppercase tracking-wider text-slate-custom">Verified Profiles</p>
-                        <p className="text-2xl font-bold text-ink">{verifiedCount}</p>
-                    </div>
+                    <div className="text-3xl font-black text-navy-deep font-space-grotesk tracking-tight">{verifiedCount}</div>
+                    <p className="text-[11px] font-medium text-slate-400 font-ibm-plex-mono mt-1">Identity &amp; license confirmed</p>
                 </div>
 
-                <div className="bg-white border border-line p-5 rounded-2xl shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                        <Award className="w-6 h-6" />
+                {/* Gold Tier */}
+                <div className="bg-white border border-line p-5 rounded-2xl shadow-xs relative overflow-hidden group hover:border-amber-deep/50 hover:shadow-sm transition-all duration-200">
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-amber-deep" />
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono">Gold Tier</span>
+                        <div className="p-1.5 rounded-lg bg-amber/10 text-amber-deep">
+                            <Award className="w-4 h-4" />
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-xs font-bold uppercase tracking-wider text-slate-custom">Gold Tier</p>
-                        <p className="text-2xl font-bold text-ink">{goldCount}</p>
-                    </div>
+                    <div className="text-3xl font-black text-navy-deep font-space-grotesk tracking-tight">{goldCount}</div>
+                    <p className="text-[11px] font-medium text-slate-400 font-ibm-plex-mono mt-1">Top-tier certified contractors</p>
                 </div>
 
-                <div className="bg-white border border-line p-5 rounded-2xl shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center">
-                        <Award className="w-6 h-6" />
+                {/* Silver Tier */}
+                <div className="bg-white border border-line p-5 rounded-2xl shadow-xs relative overflow-hidden group hover:border-teal/50 hover:shadow-sm transition-all duration-200">
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-teal" />
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono">Silver Tier</span>
+                        <div className="p-1.5 rounded-lg bg-teal/10 text-teal">
+                            <ShieldCheck className="w-4 h-4" />
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-xs font-bold uppercase tracking-wider text-slate-custom">Silver Tier</p>
-                        <p className="text-2xl font-bold text-ink">{silverCount}</p>
-                    </div>
+                    <div className="text-3xl font-black text-navy-deep font-space-grotesk tracking-tight">{silverCount}</div>
+                    <p className="text-[11px] font-medium text-slate-400 font-ibm-plex-mono mt-1">Verified regional installers</p>
                 </div>
             </div>
 
             {/* Main Tabs */}
             <Tabs defaultValue="table" className="w-full space-y-6">
-                <div className="border-b border-line pb-4">
-                    <TabsList className="bg-slate-100 p-1 rounded-xl">
-                        <TabsTrigger value="table" className="rounded-lg text-sm font-bold px-5 py-2.5 gap-2">
-                            <Building2 className="w-4 h-4" /> Onboarded Installers ({totalInstallers})
+                <div className="border-b border-line/60 pb-3">
+                    <TabsList className="bg-paper border border-line p-1 rounded-xl">
+                        <TabsTrigger value="table" className="rounded-lg text-xs font-bold px-4 py-2 gap-2 data-[state=active]:bg-white data-[state=active]:text-navy-deep data-[state=active]:shadow-xs">
+                            <Building2 className="w-3.5 h-3.5" /> Onboarded Installers ({totalInstallers})
                         </TabsTrigger>
-                        <TabsTrigger value="moderation" className="rounded-lg text-sm font-bold px-5 py-2.5 gap-2">
-                            <ShieldCheck className="w-4 h-4" /> Moderation Queue
+                        <TabsTrigger value="moderation" className="rounded-lg text-xs font-bold px-4 py-2 gap-2 data-[state=active]:bg-white data-[state=active]:text-navy-deep data-[state=active]:shadow-xs">
+                            <ShieldCheck className="w-3.5 h-3.5" /> Moderation Queue
                         </TabsTrigger>
-                        <TabsTrigger value="onboard" className="rounded-lg text-sm font-bold px-5 py-2.5 gap-2">
-                            <UserPlus className="w-4 h-4" /> Onboard New EPC
+                        <TabsTrigger value="onboard" className="rounded-lg text-xs font-bold px-4 py-2 gap-2 data-[state=active]:bg-white data-[state=active]:text-navy-deep data-[state=active]:shadow-xs">
+                            <UserPlus className="w-3.5 h-3.5" /> Onboard New EPC
                         </TabsTrigger>
                     </TabsList>
                 </div>

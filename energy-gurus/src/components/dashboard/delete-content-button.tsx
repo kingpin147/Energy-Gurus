@@ -9,9 +9,19 @@ interface DeleteButtonProps {
     id: string;
     action: (id: string) => Promise<{ success: boolean; message: string }>;
     confirmMessage?: string;
+    variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+    className?: string;
+    title?: string;
 }
 
-export function DeleteContentButton({ id, action, confirmMessage }: DeleteButtonProps) {
+export function DeleteContentButton({
+    id,
+    action,
+    confirmMessage,
+    variant = "destructive",
+    className = "h-8 w-8 p-0 rounded-lg shadow-lg",
+    title = "Delete item"
+}: DeleteButtonProps) {
     const [isDeleting, setIsDeleting] = useState(false);
 
     const handleDelete = async () => {
@@ -35,16 +45,17 @@ export function DeleteContentButton({ id, action, confirmMessage }: DeleteButton
 
     return (
         <Button
-            variant="destructive"
+            variant={variant}
             size="sm"
-            className="h-8 w-8 p-0 rounded-lg shadow-lg"
+            className={className}
             onClick={handleDelete}
             disabled={isDeleting}
+            title={title}
         >
             {isDeleting ? (
-                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
             ) : (
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-3.5 h-3.5" />
             )}
         </Button>
     );

@@ -66,6 +66,9 @@ function DialogContent({
         )}
         {...props}
       >
+        <DialogPrimitive.Title className="sr-only">
+          Dialog
+        </DialogPrimitive.Title>
         <DialogPrimitive.Description className="sr-only">
           Please fill out the form below to send an inquiry.
         </DialogPrimitive.Description>

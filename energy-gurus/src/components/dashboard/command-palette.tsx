@@ -62,6 +62,7 @@ export function CommandPalette({ role }: CommandPaletteProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent className="max-w-2xl p-0 overflow-hidden border-none shadow-2xl bg-white/95 backdrop-blur-xl rounded-2xl">
+                <DialogTitle className="sr-only">Command Palette Navigation</DialogTitle>
                 <Command className="flex flex-col h-full bg-transparent">
                     <div className="flex items-center border-b px-4 py-4 gap-3">
                         <Search className="w-5 h-5 text-slate-custom opacity-50" />

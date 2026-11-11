@@ -56,20 +56,20 @@ export default async function CertificationApprovalsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-cream text-ink">
+    <div className="min-h-screen text-ink font-sans pb-16">
       {/* Page Header */}
-      <div className="bg-white border-b border-line py-8 px-6 md:px-10">
+      <div className="bg-white border-b border-line/80 py-8 px-6 md:px-10 shadow-xs">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center gap-2 text-xs text-slate-custom mb-2">
+          <div className="flex items-center gap-2 text-xs text-slate-custom mb-2 font-ibm-plex-mono">
             <span>Installers</span>
             <span>/</span>
-            <span className="text-navy-deep font-semibold">Certification Approvals</span>
+            <span className="text-amber font-semibold">Certification Approvals</span>
           </div>
-          <h1 className="font-fraunces text-2xl md:text-3xl font-bold text-navy-deep">
+          <h1 className="font-space-grotesk text-2xl md:text-3xl font-bold text-navy-deep tracking-tight">
             Certification Approvals
           </h1>
           <p className="text-xs md:text-sm text-slate-custom mt-2 max-w-3xl leading-relaxed">
-            The final step in the certification pipeline. Everything here has already been approved by the brand — confirm proof to publish it to the installer's live profile. Confirming automatically recalculates the installer's overall tier (Silver / Gold / Diamond / Platinum).
+            The final step in the certification pipeline. Everything here has already been approved by the brand — confirm proof to publish it to the installer's live profile. Confirming automatically recalculates the installer's overall tier.
           </p>
         </div>
       </div>

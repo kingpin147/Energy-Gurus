@@ -24,21 +24,36 @@ export function GoogleAnalyticsSection({ data }: Props) {
   const [rangeTab, setRangeTab] = useState<"7d" | "14d" | "30d">("30d"); // Default is 30 days
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
-  const overview = data?.overview || {
-    activeUsers: 0,
-    totalUsers: 0,
-    screenPageViews: 0,
-    sessions: 0,
-    averageSessionDuration: 0,
-  };
+  // Dynamically select data bundle based on active range tab (7d, 14d, 30d)
+  const activeBundle = useMemo(() => {
+    if (data?.ranges && data.ranges[rangeTab]) {
+      return data.ranges[rangeTab];
+    }
+    return {
+      overview: data?.overview || {
+        activeUsers: 0,
+        totalUsers: 0,
+        screenPageViews: 0,
+        sessions: 0,
+        averageSessionDuration: 0,
+      },
+      topPages: data?.topPages || [],
+      topCountries: data?.topCountries || [],
+      topCities: data?.topCities || [],
+      trafficSources: data?.trafficSources || [],
+    };
+  }, [data, rangeTab]);
 
-  const topPages = data?.topPages || [];
-  const topCountries = data?.topCountries || [];
-  const topCities = data?.topCities || [];
-  const trafficSources = data?.trafficSources || [];
+  const overview = activeBundle.overview;
+  const topPages = activeBundle.topPages;
+  const topCountries = activeBundle.topCountries;
+  const topCities = activeBundle.topCities;
+  const trafficSources = activeBundle.trafficSources;
   const dailyTrends = data?.dailyTrends || [];
 
-  const maxPageViews = Math.max(...topPages.map((p) => p.views), 1);
+  const maxPageViews = useMemo(() => {
+    return Math.max(...topPages.map((p) => p.views), 1);
+  }, [topPages]);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -61,6 +76,9 @@ export function GoogleAnalyticsSection({ data }: Props) {
     const users = currentTrends.reduce((acc, curr) => acc + curr.users, 0);
     return { views, users };
   }, [currentTrends]);
+
+  const rangeLabel = rangeTab === "7d" ? "Last 7 Days" : rangeTab === "14d" ? "Last 14 Days" : "Last 30 Days";
+  const rangeShort = rangeTab === "7d" ? "7d" : rangeTab === "14d" ? "14d" : "30d";
 
   // SVG Chart Geometry Constants
   const SVG_WIDTH = 900;
@@ -402,8 +420,8 @@ export function GoogleAnalyticsSection({ data }: Props) {
         </CardContent>
       </Card>
 
-      {/* BENTO TELEMETRY ROW: 4 Core Stat Pods */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      {/* BENTO TELEMETRY ROW: 4 Core Stat Pods (Synchronized with 7d / 14d / 30d) */}
+      <div key={`pods-${rangeTab}`} className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 animate-in fade-in-50 duration-200">
         {/* Active Users */}
         <div className="p-4 rounded-2xl bg-white border border-line shadow-xs relative overflow-hidden group hover:border-amber/50 hover:shadow-sm transition-all duration-200">
           <div className="absolute top-0 left-0 right-0 h-1 bg-amber" />
@@ -417,7 +435,7 @@ export function GoogleAnalyticsSection({ data }: Props) {
             {overview.activeUsers.toLocaleString()}
           </div>
           <p className="text-[11px] text-slate-400 mt-0.5 font-ibm-plex-mono truncate">
-            {overview.totalUsers.toLocaleString()} Total visitors (30d)
+            {overview.totalUsers.toLocaleString()} Total visitors ({rangeShort})
           </p>
         </div>
 
@@ -434,7 +452,7 @@ export function GoogleAnalyticsSection({ data }: Props) {
             {overview.screenPageViews.toLocaleString()}
           </div>
           <p className="text-[11px] text-slate-400 mt-0.5 font-ibm-plex-mono truncate">
-            Across directory &amp; profiles
+            Directory &amp; profiles ({rangeShort})
           </p>
         </div>
 
@@ -451,7 +469,7 @@ export function GoogleAnalyticsSection({ data }: Props) {
             {overview.sessions.toLocaleString()}
           </div>
           <p className="text-[11px] text-slate-400 mt-0.5 font-ibm-plex-mono truncate">
-            User visits &amp; return visits
+            User visits ({rangeShort})
           </p>
         </div>
 
@@ -468,21 +486,24 @@ export function GoogleAnalyticsSection({ data }: Props) {
             {formatDuration(overview.averageSessionDuration)}
           </div>
           <p className="text-[11px] text-slate-400 mt-0.5 font-ibm-plex-mono truncate">
-            Time spent per session
+            Time per session ({rangeShort})
           </p>
         </div>
       </div>
 
       {/* BENTO FOUNDATION: 2-Column Split (Top Pages + Audience Hub) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div key={`split-${rangeTab}`} className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in-50 duration-200">
         {/* Top Pages */}
         <Card className="border border-line shadow-xs rounded-2xl overflow-hidden bg-white hover:border-amber/40 hover:shadow-sm transition-all duration-200">
-          <CardHeader className="p-5 pb-3 border-b border-line/60 flex flex-row items-center justify-between">
+          <CardHeader className="p-5 pb-3 border-b border-line/60 flex flex-row items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <Layers className="w-4 h-4 text-amber" />
               <CardTitle className="font-space-grotesk text-base font-bold text-navy-deep">
                 Top Viewed Pages &amp; Profiles
               </CardTitle>
+              <span className="text-[10px] font-bold font-ibm-plex-mono bg-amber/10 text-amber px-2 py-0.5 rounded-full border border-amber/20">
+                {rangeLabel}
+              </span>
             </div>
             <span className="text-xs font-semibold text-slate-custom font-ibm-plex-mono">
               {topPages.length} Pages
@@ -520,7 +541,7 @@ export function GoogleAnalyticsSection({ data }: Props) {
               })}
               {topPages.length === 0 && (
                 <div className="p-6 text-center text-xs text-slate-custom">
-                  No page views recorded yet in the last 30 days.
+                  No page views recorded yet in the {rangeLabel.toLowerCase()}.
                 </div>
               )}
             </div>
@@ -531,12 +552,15 @@ export function GoogleAnalyticsSection({ data }: Props) {
         <div className="space-y-6">
           {/* Geographic Breakdown */}
           <Card className="border border-line shadow-xs rounded-2xl overflow-hidden bg-white hover:border-teal/40 hover:shadow-sm transition-all duration-200">
-            <CardHeader className="p-5 pb-3 border-b border-line/60 flex flex-row items-center justify-between">
+            <CardHeader className="p-5 pb-3 border-b border-line/60 flex flex-row items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2">
                 <Globe2 className="w-4 h-4 text-teal" />
                 <CardTitle className="font-space-grotesk text-base font-bold text-navy-deep">
                   Audience Locations
                 </CardTitle>
+                <span className="text-[10px] font-bold font-ibm-plex-mono bg-teal/10 text-teal px-2 py-0.5 rounded-full border border-teal/20">
+                  {rangeLabel}
+                </span>
               </div>
               <div className="flex items-center bg-slate-100 p-0.5 rounded-lg text-xs font-semibold">
                 <button
@@ -575,7 +599,7 @@ export function GoogleAnalyticsSection({ data }: Props) {
                 ))}
                 {(activeGeoTab === "cities" ? topCities : topCountries).length === 0 && (
                   <div className="py-4 text-center text-xs text-slate-custom">
-                    Location data will populate as visitors browse.
+                    Location data pending for {rangeLabel.toLowerCase()}.
                   </div>
                 )}
               </div>
@@ -584,12 +608,15 @@ export function GoogleAnalyticsSection({ data }: Props) {
 
           {/* Traffic Sources */}
           <Card className="border border-line shadow-xs rounded-2xl overflow-hidden bg-white hover:border-amber/40 hover:shadow-sm transition-all duration-200">
-            <CardHeader className="p-5 pb-3 border-b border-line/60 flex flex-row items-center justify-between">
+            <CardHeader className="p-5 pb-3 border-b border-line/60 flex flex-row items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2">
                 <Share2 className="w-4 h-4 text-amber" />
                 <CardTitle className="font-space-grotesk text-base font-bold text-navy-deep">
                   Traffic Sources &amp; Channels
                 </CardTitle>
+                <span className="text-[10px] font-bold font-ibm-plex-mono bg-amber/10 text-amber px-2 py-0.5 rounded-full border border-amber/20">
+                  {rangeLabel}
+                </span>
               </div>
             </CardHeader>
             <CardContent className="p-4">
@@ -607,7 +634,7 @@ export function GoogleAnalyticsSection({ data }: Props) {
                 ))}
                 {trafficSources.length === 0 && (
                   <div className="py-4 text-center text-xs text-slate-custom">
-                    Referral &amp; traffic channels pending.
+                    Referral &amp; traffic channels pending for {rangeLabel.toLowerCase()}.
                   </div>
                 )}
               </div>

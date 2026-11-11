@@ -1,7 +1,7 @@
 export async function getPostHogTrends(eventName: string, properties?: Record<string, any>) {
-  const project_id = process.env.NEXT_POSTHOG_PROJECT_ID; 
-  const personal_api_key = process.env.POSTHOG_API_KEY;
-  const host = process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com';
+  const project_id = process.env.NEXT_POSTHOG_PROJECT_ID?.trim(); 
+  const personal_api_key = process.env.POSTHOG_API_KEY?.trim();
+  const host = (process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com').trim();
 
   if (!personal_api_key) {
     console.error('POSTHOG_API_KEY is missing');
@@ -28,7 +28,7 @@ export async function getPostHogTrends(eventName: string, properties?: Record<st
       ],
       "interval": "day",
       "dateRange": {
-        "date_from": "-30d"
+        "date_from": "-90d"
       }
     }
   };
@@ -41,7 +41,7 @@ export async function getPostHogTrends(eventName: string, properties?: Record<st
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(queryPayload),
-      next: { revalidate: 3600 },
+      next: { revalidate: 1800 },
       signal: AbortSignal.timeout(8000)
     });
 
@@ -53,8 +53,7 @@ export async function getPostHogTrends(eventName: string, properties?: Record<st
 
     const data = await response.json();
     
-    // The response structure for TrendsQuery is different
-    // We normalize it to return a simple count
+    // Normalize count across series
     const totalCount = data.results?.[0]?.data?.reduce((acc: number, val: number) => acc + val, 0) || 0;
     
     return { result: [{ count: totalCount }] };
@@ -65,14 +64,13 @@ export async function getPostHogTrends(eventName: string, properties?: Record<st
 }
 
 export async function getPostHogTable(type: 'brand' | 'epc', sort: string = 'engagement') {
-  const project_id = process.env.NEXT_POSTHOG_PROJECT_ID;
-  const personal_api_key = process.env.POSTHOG_API_KEY;
-  const host = process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com';
+  const project_id = process.env.NEXT_POSTHOG_PROJECT_ID?.trim();
+  const personal_api_key = process.env.POSTHOG_API_KEY?.trim();
+  const host = (process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com').trim();
 
   if (!personal_api_key || !project_id) return null;
 
   // 1. Get the list of ACTIVE names from our database to filter PostHog results
-  // This ensures disabled/deleted profiles don't show up in analytics
   const activeEntities = await (async () => {
     try {
       const { db } = await import("@/db");
@@ -122,7 +120,7 @@ export async function getPostHogTable(type: 'brand' | 'epc', sort: string = 'eng
     FROM events
     WHERE event LIKE '${eventPrefix}%'
       AND properties.${nameProperty} IS NOT NULL
-      AND timestamp > now() - INTERVAL 30 DAY
+      AND timestamp > now() - INTERVAL 90 DAY
     GROUP BY name
     ORDER BY ${orderBy}
     LIMIT 100
@@ -143,7 +141,7 @@ export async function getPostHogTable(type: 'brand' | 'epc', sort: string = 'eng
           "query": hogQL
         }
       }),
-      next: { revalidate: 3600 },
+      next: { revalidate: 1800 },
       signal: AbortSignal.timeout(12000)
     });
 
@@ -156,17 +154,26 @@ export async function getPostHogTable(type: 'brand' | 'epc', sort: string = 'eng
     }
 
     const data = await response.json();
-    const results = data.results;
+    const results = data.results || [];
+
+    // Case-insensitive active entity lookup
+    const activeEntitiesLower = activeEntities
+      ? new Set(Array.from(activeEntities).map(n => n.toLowerCase().trim()))
+      : null;
 
     // 2. Filter results based on active status in our DB
-    const filteredResults = results?.filter((row: any) => !activeEntities || activeEntities.has(row[0])) || [];
+    const filteredResults = results.filter((row: any) => {
+      if (!activeEntitiesLower) return true;
+      const rowName = String(row[0] || '').toLowerCase().trim();
+      return activeEntitiesLower.has(rowName);
+    });
 
-    // 3. If PostHog has no click events yet, fallback to active registered entities so the table is never blank
+    // 3. Fallback to active registered entities if no telemetry rows exist yet
     if (filteredResults.length === 0 && activeEntities && activeEntities.size > 0) {
       return Array.from(activeEntities).slice(0, 20).map(name => [name, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
     }
 
-    return filteredResults.slice(0, 20);
+    return (filteredResults.length > 0 ? filteredResults : results).slice(0, 20);
   } catch (error) {
     console.error('Failed to fetch PostHog table:', error);
     if (activeEntities && activeEntities.size > 0) {

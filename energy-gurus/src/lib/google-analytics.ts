@@ -34,6 +34,14 @@ export interface GADailyTrend {
   views: number;
 }
 
+export interface GARangeBundle {
+  overview: GAOverview;
+  topPages: GAPageStat[];
+  topCountries: GALocationStat[];
+  topCities: GALocationStat[];
+  trafficSources: GASourceStat[];
+}
+
 export interface GAResponse {
   isConfigured: boolean;
   propertyId?: string;
@@ -44,6 +52,11 @@ export interface GAResponse {
   topCities?: GALocationStat[];
   trafficSources?: GASourceStat[];
   dailyTrends?: GADailyTrend[];
+  ranges?: {
+    "7d": GARangeBundle;
+    "14d": GARangeBundle;
+    "30d": GARangeBundle;
+  };
 }
 
 function getClient() {
@@ -82,13 +95,19 @@ export async function fetchGoogleAnalyticsDashboardData(): Promise<GAResponse> {
       ? propertyId
       : `properties/${propertyId}`;
 
-    // Parallel GA4 queries
+    const dateRanges = [
+      { startDate: "7daysAgo", endDate: "today", name: "7d" },
+      { startDate: "14daysAgo", endDate: "today", name: "14d" },
+      { startDate: "30daysAgo", endDate: "today", name: "30d" },
+    ];
+
+    // Parallel GA4 queries across all 3 ranges
     const [overviewReport, pagesReport, countriesReport, citiesReport, sourcesReport, trendsReport] =
       await Promise.all([
-        // 1. Overview (Last 30 days)
+        // 1. Overview for 7d, 14d, 30d
         client.runReport({
           property: formattedProperty,
-          dateRanges: [{ startDate: "30daysAgo", endDate: "today" }],
+          dateRanges,
           metrics: [
             { name: "activeUsers" },
             { name: "totalUsers" },
@@ -98,47 +117,47 @@ export async function fetchGoogleAnalyticsDashboardData(): Promise<GAResponse> {
           ],
         }),
 
-        // 2. Top Pages (Last 30 days)
+        // 2. Top Pages for 7d, 14d, 30d
         client.runReport({
           property: formattedProperty,
-          dateRanges: [{ startDate: "30daysAgo", endDate: "today" }],
+          dateRanges,
           dimensions: [{ name: "pagePath" }, { name: "pageTitle" }],
           metrics: [{ name: "screenPageViews" }, { name: "activeUsers" }],
           orderBys: [{ metric: { metricName: "screenPageViews" }, desc: true }],
-          limit: 10,
+          limit: 60,
         }),
 
-        // 3. Top Countries
+        // 3. Top Countries for 7d, 14d, 30d
         client.runReport({
           property: formattedProperty,
-          dateRanges: [{ startDate: "30daysAgo", endDate: "today" }],
+          dateRanges,
           dimensions: [{ name: "country" }],
           metrics: [{ name: "activeUsers" }, { name: "screenPageViews" }],
           orderBys: [{ metric: { metricName: "activeUsers" }, desc: true }],
-          limit: 8,
+          limit: 30,
         }),
 
-        // 4. Top Cities
+        // 4. Top Cities for 7d, 14d, 30d
         client.runReport({
           property: formattedProperty,
-          dateRanges: [{ startDate: "30daysAgo", endDate: "today" }],
+          dateRanges,
           dimensions: [{ name: "city" }],
           metrics: [{ name: "activeUsers" }, { name: "screenPageViews" }],
           orderBys: [{ metric: { metricName: "activeUsers" }, desc: true }],
-          limit: 8,
+          limit: 30,
         }),
 
-        // 5. Traffic Sources
+        // 5. Traffic Sources for 7d, 14d, 30d
         client.runReport({
           property: formattedProperty,
-          dateRanges: [{ startDate: "30daysAgo", endDate: "today" }],
+          dateRanges,
           dimensions: [{ name: "sessionSource" }],
           metrics: [{ name: "activeUsers" }, { name: "sessions" }],
           orderBys: [{ metric: { metricName: "activeUsers" }, desc: true }],
-          limit: 6,
+          limit: 30,
         }),
 
-        // 6. Daily Trends (Last 30 days)
+        // 6. Daily Trends (Last 30 days daily series for line chart)
         client.runReport({
           property: formattedProperty,
           dateRanges: [{ startDate: "30daysAgo", endDate: "today" }],
@@ -148,50 +167,105 @@ export async function fetchGoogleAnalyticsDashboardData(): Promise<GAResponse> {
         }),
       ]);
 
-    // Parse Overview
-    const overviewRow = overviewReport[0]?.rows?.[0];
-    const overview: GAOverview = {
-      activeUsers: Number(overviewRow?.metricValues?.[0]?.value || 0),
-      totalUsers: Number(overviewRow?.metricValues?.[1]?.value || 0),
-      screenPageViews: Number(overviewRow?.metricValues?.[2]?.value || 0),
-      sessions: Number(overviewRow?.metricValues?.[3]?.value || 0),
-      averageSessionDuration: Math.round(Number(overviewRow?.metricValues?.[4]?.value || 0)),
+    // Initialize per-range bundles
+    const ranges: {
+      "7d": GARangeBundle;
+      "14d": GARangeBundle;
+      "30d": GARangeBundle;
+    } = {
+      "7d": {
+        overview: { activeUsers: 0, totalUsers: 0, screenPageViews: 0, sessions: 0, averageSessionDuration: 0 },
+        topPages: [],
+        topCountries: [],
+        topCities: [],
+        trafficSources: [],
+      },
+      "14d": {
+        overview: { activeUsers: 0, totalUsers: 0, screenPageViews: 0, sessions: 0, averageSessionDuration: 0 },
+        topPages: [],
+        topCountries: [],
+        topCities: [],
+        trafficSources: [],
+      },
+      "30d": {
+        overview: { activeUsers: 0, totalUsers: 0, screenPageViews: 0, sessions: 0, averageSessionDuration: 0 },
+        topPages: [],
+        topCountries: [],
+        topCities: [],
+        trafficSources: [],
+      },
     };
 
-    // Parse Top Pages
-    const topPages: GAPageStat[] = (pagesReport[0]?.rows || []).map((row) => ({
-      pagePath: row.dimensionValues?.[0]?.value || "/",
-      pageTitle: row.dimensionValues?.[1]?.value || "Untitled",
-      views: Number(row.metricValues?.[0]?.value || 0),
-      activeUsers: Number(row.metricValues?.[1]?.value || 0),
-    }));
+    // Parse Overview by dateRange
+    overviewReport[0]?.rows?.forEach((row) => {
+      const range = (row.dimensionValues?.[0]?.value as "7d" | "14d" | "30d") || "30d";
+      if (ranges[range]) {
+        ranges[range].overview = {
+          activeUsers: Number(row.metricValues?.[0]?.value || 0),
+          totalUsers: Number(row.metricValues?.[1]?.value || 0),
+          screenPageViews: Number(row.metricValues?.[2]?.value || 0),
+          sessions: Number(row.metricValues?.[3]?.value || 0),
+          averageSessionDuration: Math.round(Number(row.metricValues?.[4]?.value || 0)),
+        };
+      }
+    });
 
-    // Parse Countries
-    const topCountries: GALocationStat[] = (countriesReport[0]?.rows || [])
-      .map((row) => ({
-        name: row.dimensionValues?.[0]?.value || "Unknown",
-        users: Number(row.metricValues?.[0]?.value || 0),
-        views: Number(row.metricValues?.[1]?.value || 0),
-      }))
-      .filter((c) => c.name !== "(not set)");
+    // Parse Top Pages by dateRange
+    pagesReport[0]?.rows?.forEach((row) => {
+      const dimCount = row.dimensionValues?.length || 0;
+      const range = (row.dimensionValues?.[dimCount - 1]?.value as "7d" | "14d" | "30d") || "30d";
+      if (ranges[range] && ranges[range].topPages.length < 10) {
+        ranges[range].topPages.push({
+          pagePath: row.dimensionValues?.[0]?.value || "/",
+          pageTitle: row.dimensionValues?.[1]?.value || "Untitled",
+          views: Number(row.metricValues?.[0]?.value || 0),
+          activeUsers: Number(row.metricValues?.[1]?.value || 0),
+        });
+      }
+    });
 
-    // Parse Cities
-    const topCities: GALocationStat[] = (citiesReport[0]?.rows || [])
-      .map((row) => ({
-        name: row.dimensionValues?.[0]?.value || "Unknown",
-        users: Number(row.metricValues?.[0]?.value || 0),
-        views: Number(row.metricValues?.[1]?.value || 0),
-      }))
-      .filter((c) => c.name !== "(not set)");
+    // Parse Countries by dateRange
+    countriesReport[0]?.rows?.forEach((row) => {
+      const dimCount = row.dimensionValues?.length || 0;
+      const range = (row.dimensionValues?.[dimCount - 1]?.value as "7d" | "14d" | "30d") || "30d";
+      const name = row.dimensionValues?.[0]?.value || "Unknown";
+      if (ranges[range] && name !== "(not set)" && ranges[range].topCountries.length < 8) {
+        ranges[range].topCountries.push({
+          name,
+          users: Number(row.metricValues?.[0]?.value || 0),
+          views: Number(row.metricValues?.[1]?.value || 0),
+        });
+      }
+    });
 
-    // Parse Sources
-    const trafficSources: GASourceStat[] = (sourcesReport[0]?.rows || []).map((row) => ({
-      source: row.dimensionValues?.[0]?.value || "direct",
-      users: Number(row.metricValues?.[0]?.value || 0),
-      sessions: Number(row.metricValues?.[1]?.value || 0),
-    }));
+    // Parse Cities by dateRange
+    citiesReport[0]?.rows?.forEach((row) => {
+      const dimCount = row.dimensionValues?.length || 0;
+      const range = (row.dimensionValues?.[dimCount - 1]?.value as "7d" | "14d" | "30d") || "30d";
+      const name = row.dimensionValues?.[0]?.value || "Unknown";
+      if (ranges[range] && name !== "(not set)" && ranges[range].topCities.length < 8) {
+        ranges[range].topCities.push({
+          name,
+          users: Number(row.metricValues?.[0]?.value || 0),
+          views: Number(row.metricValues?.[1]?.value || 0),
+        });
+      }
+    });
 
-    // Parse Daily Trends
+    // Parse Sources by dateRange
+    sourcesReport[0]?.rows?.forEach((row) => {
+      const dimCount = row.dimensionValues?.length || 0;
+      const range = (row.dimensionValues?.[dimCount - 1]?.value as "7d" | "14d" | "30d") || "30d";
+      if (ranges[range] && ranges[range].trafficSources.length < 6) {
+        ranges[range].trafficSources.push({
+          source: row.dimensionValues?.[0]?.value || "direct",
+          users: Number(row.metricValues?.[0]?.value || 0),
+          sessions: Number(row.metricValues?.[1]?.value || 0),
+        });
+      }
+    });
+
+    // Parse Daily Trends (All 30 days)
     const dailyTrends: GADailyTrend[] = (trendsReport[0]?.rows || []).map((row) => {
       const rawDate = row.dimensionValues?.[0]?.value || ""; // YYYYMMDD
       let label = rawDate;
@@ -210,15 +284,19 @@ export async function fetchGoogleAnalyticsDashboardData(): Promise<GAResponse> {
       };
     });
 
+    // Default top-level fields to 30d for backwards compatibility
+    const defaultBundle = ranges["30d"];
+
     return {
       isConfigured: true,
       propertyId,
-      overview,
-      topPages,
-      topCountries,
-      topCities,
-      trafficSources,
+      overview: defaultBundle.overview,
+      topPages: defaultBundle.topPages,
+      topCountries: defaultBundle.topCountries,
+      topCities: defaultBundle.topCities,
+      trafficSources: defaultBundle.trafficSources,
       dailyTrends,
+      ranges,
     };
   } catch (err: any) {
     console.error("Google Analytics Data API fetch error:", err);
@@ -229,4 +307,3 @@ export async function fetchGoogleAnalyticsDashboardData(): Promise<GAResponse> {
     };
   }
 }
-
