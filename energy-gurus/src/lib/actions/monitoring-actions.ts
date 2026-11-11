@@ -6,7 +6,7 @@ import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
-export async function updateMonitoringStatus(id: string, status: "pending" | "contacted" | "active") {
+export async function updateMonitoringStatus(id: string, status: "pending" | "contacted" | "active" | "rejected") {
   try {
     const { userId: clerkId } = await auth();
     if (!clerkId) {

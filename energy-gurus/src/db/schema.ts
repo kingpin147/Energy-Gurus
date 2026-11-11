@@ -422,7 +422,7 @@ export const monitoringRequests = pgTable('monitoring_requests', {
   monitoringHours: text('monitoring_hours').notNull(),
   paymentPlan: text('payment_plan').notNull(),
   amountPayable: text('amount_payable'),
-  status: text('status').$type<'pending' | 'contacted' | 'active'>().default('pending').notNull(),
+  status: text('status').$type<'pending' | 'contacted' | 'active' | 'rejected'>().default('pending').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
     });
