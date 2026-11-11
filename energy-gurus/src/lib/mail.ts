@@ -159,7 +159,11 @@ export async function sendInvitationEmail(toEmail: string, role: string): Promis
   }
 }
 
-export async function sendAdminNotificationEmail(subject: string, messageHtml: string): Promise<boolean> {
+export async function sendAdminNotificationEmail(
+  subject: string, 
+  messageHtml: string,
+  replyTo?: { email: string; name?: string }
+): Promise<boolean> {
   const apiKey = process.env.BREVO_API_KEY;
   if (!apiKey) {
     console.warn("BREVO_API_KEY is not configured. Cannot send admin notification emails.");
@@ -184,6 +188,7 @@ export async function sendAdminNotificationEmail(subject: string, messageHtml: s
             email: "energygurusonline@gmail.com"
           }
         ],
+        ...(replyTo ? { replyTo } : {}),
         subject: `[Admin Alert] ${subject}`,
         htmlContent: `
           <!DOCTYPE html>
