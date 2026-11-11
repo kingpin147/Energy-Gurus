@@ -21,7 +21,10 @@ import {
   ShieldCheck,
   Building2,
   Award,
-  PenTool
+  PenTool,
+  Radio,
+  Zap,
+  Filter
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +58,8 @@ export interface DashboardUser {
   clerkId: string;
   isActive: boolean;
   createdAt: Date | string;
+  lastSignInAt?: string | null;
+  lastActiveAt?: string | null;
   brandLogo?: string | null;
   epcLogo?: string | null;
 }
@@ -67,17 +72,59 @@ interface UserManagementClientProps {
 
 const ITEMS_PER_PAGE = 12;
 
+type ActivityFilter = "all" | "online" | "today" | "24h" | "7d" | "14d" | "30d";
+
+function formatRelativeTime(dateStr: string | Date | null | undefined): { label: string; isOnline: boolean; isRecent: boolean } {
+  if (!dateStr) return { label: "No login yet", isOnline: false, isRecent: false };
+  const d = new Date(dateStr);
+  const now = Date.now();
+  const diffMs = now - d.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 15) return { label: "Online Now", isOnline: true, isRecent: true };
+  if (diffMins < 60) return { label: `${diffMins}m ago`, isOnline: false, isRecent: true };
+  if (diffHours < 24) return { label: `${diffHours}h ago`, isOnline: false, isRecent: true };
+  if (diffDays === 1) return { label: "Yesterday", isOnline: false, isRecent: false };
+  if (diffDays < 30) return { label: `${diffDays}d ago`, isOnline: false, isRecent: false };
+  return { label: format(d, "MMM dd, yyyy"), isOnline: false, isRecent: false };
+}
+
+function checkUserActivityMatch(user: DashboardUser, filter: ActivityFilter): boolean {
+  if (filter === "all") return true;
+  const timestamp = user.lastActiveAt || user.lastSignInAt;
+  if (!timestamp) return false;
+  const time = new Date(timestamp).getTime();
+  const now = Date.now();
+  const diffHours = (now - time) / (1000 * 60 * 60);
+  const diffDays = diffHours / 24;
+
+  if (filter === "online") return diffHours <= 0.25; // 15 minutes
+  if (filter === "today") {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    return time >= todayStart.getTime();
+  }
+  if (filter === "24h") return diffHours <= 24;
+  if (filter === "7d") return diffDays <= 7;
+  if (filter === "14d") return diffDays <= 14;
+  if (filter === "30d") return diffDays <= 30;
+  return true;
+}
+
 export function UserManagementClient({
   initialUsers,
   initialPendingInvites,
   userRole,
 }: UserManagementClientProps) {
-  const [activeTab, setActiveTab] = useState<"users" | "invites">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "invites" | "activity">("users");
+  const [activityFilter, setActivityFilter] = useState<ActivityFilter>("all");
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [inviteModalMode, setInviteModalMode] = useState<"single" | "bulk">("single");
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
-  const [sortOrder, setSortOrder] = useState<"latest" | "oldest" | "alpha">("latest");
+  const [sortOrder, setSortOrder] = useState<"latest" | "oldest" | "alpha" | "recent_login">("latest");
   const [currentPage, setCurrentPage] = useState(1);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -100,192 +147,249 @@ export function UserManagementClient({
   const brandCount = initialUsers.filter((u) => u.role === "brand").length;
   const writerCount = initialUsers.filter((u) => u.role === "writer").length;
 
-  // Filter & sort registered users
+  // Real-time online and activity counts
+  const onlineNowCount = useMemo(() => {
+    return initialUsers.filter((u) => {
+      const ts = u.lastActiveAt || u.lastSignInAt;
+      if (!ts) return false;
+      return Date.now() - new Date(ts).getTime() <= 15 * 60 * 1000;
+    }).length;
+  }, [initialUsers]);
+
+  const activeTodayCount = useMemo(() => {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    return initialUsers.filter((u) => {
+      const ts = u.lastActiveAt || u.lastSignInAt;
+      if (!ts) return false;
+      return new Date(ts).getTime() >= todayStart.getTime();
+    }).length;
+  }, [initialUsers]);
+
+  const active24hCount = useMemo(() => {
+    return initialUsers.filter((u) => {
+      const ts = u.lastActiveAt || u.lastSignInAt;
+      if (!ts) return false;
+      return Date.now() - new Date(ts).getTime() <= 24 * 60 * 60 * 1000;
+    }).length;
+  }, [initialUsers]);
+
+  const active7dCount = useMemo(() => {
+    return initialUsers.filter((u) => {
+      const ts = u.lastActiveAt || u.lastSignInAt;
+      if (!ts) return false;
+      return Date.now() - new Date(ts).getTime() <= 7 * 24 * 60 * 60 * 1000;
+    }).length;
+  }, [initialUsers]);
+
+  const active14dCount = useMemo(() => {
+    return initialUsers.filter((u) => {
+      const ts = u.lastActiveAt || u.lastSignInAt;
+      if (!ts) return false;
+      return Date.now() - new Date(ts).getTime() <= 14 * 24 * 60 * 60 * 1000;
+    }).length;
+  }, [initialUsers]);
+
+  const active30dCount = useMemo(() => {
+    return initialUsers.filter((u) => {
+      const ts = u.lastActiveAt || u.lastSignInAt;
+      if (!ts) return false;
+      return Date.now() - new Date(ts).getTime() <= 30 * 24 * 60 * 60 * 1000;
+    }).length;
+  }, [initialUsers]);
+
+  // Filtered and Sorted Users
   const filteredUsers = useMemo(() => {
-    let result = [...initialUsers];
+    return initialUsers.filter((user) => {
+      const matchesSearch =
+        search === "" ||
+        (user.name && user.name.toLowerCase().includes(search.toLowerCase())) ||
+        user.email.toLowerCase().includes(search.toLowerCase());
 
-    // Search query
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (u) =>
-          (u.name && u.name.toLowerCase().includes(q)) ||
-          u.email.toLowerCase().includes(q)
-      );
-    }
+      const matchesRole = roleFilter === "all" || user.role === roleFilter;
 
-    // Role filter
-    if (roleFilter !== "all") {
-      result = result.filter((u) => u.role === roleFilter);
-    }
+      // Activity tab specific filter
+      const matchesActivity =
+        activeTab !== "activity" || checkUserActivityMatch(user, activityFilter);
 
-    // Sort order
-    if (sortOrder === "latest") {
-      result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    } else if (sortOrder === "oldest") {
-      result.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    } else if (sortOrder === "alpha") {
-      result.sort((a, b) => (a.name || a.email).localeCompare(b.name || b.email));
-    }
+      return matchesSearch && matchesRole && matchesActivity;
+    }).sort((a, b) => {
+      if (sortOrder === "alpha") {
+        return (a.name || a.email).localeCompare(b.name || b.email);
+      }
+      if (sortOrder === "oldest") {
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      }
+      if (sortOrder === "recent_login") {
+        const aTime = a.lastActiveAt || a.lastSignInAt ? new Date(a.lastActiveAt || a.lastSignInAt!).getTime() : 0;
+        const bTime = b.lastActiveAt || b.lastSignInAt ? new Date(b.lastActiveAt || b.lastSignInAt!).getTime() : 0;
+        return bTime - aTime;
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }, [initialUsers, search, roleFilter, sortOrder, activeTab, activityFilter]);
 
-    return result;
-  }, [initialUsers, search, roleFilter, sortOrder]);
-
-  // Pagination math
-  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / ITEMS_PER_PAGE));
-  const paginatedUsers = filteredUsers.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  // Pagination slice
+  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredUsers.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredUsers, currentPage]);
 
   const getRoleBadgeStyle = (role: string) => {
     switch (role) {
       case "super-admin":
-        return "bg-red-50 text-red-700 border-red-200";
+        return "bg-navy-deep text-white border-navy-deep";
       case "admin":
-        return "bg-navy-deep/10 text-navy-deep border-navy-deep/20";
+        return "bg-slate-800 text-white border-slate-800";
       case "epc":
-        return "bg-teal/10 text-teal border-teal/20";
+        return "bg-amber/15 text-amber-deep border-amber/30";
       case "brand":
-        return "bg-amber/10 text-amber-deep border-amber/25";
+        return "bg-amber-50 text-amber-700 border-amber-200";
       case "writer":
-        return "bg-navy/10 text-navy border-navy/20";
+        return "bg-teal/15 text-teal border-teal/30";
       default:
-        return "bg-slate-100 text-slate-600 border-slate-200";
+        return "bg-slate-100 text-slate-700 border-slate-200";
     }
   };
 
   return (
     <div className="space-y-6">
-      {/* 1. TOP HEADER & GLOBAL ACTIONS */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 bg-amber text-navy-deep rounded-2xl flex items-center justify-center shrink-0 shadow-md">
-            <UsersIcon className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="font-space-grotesk text-2xl md:text-3xl font-bold tracking-tight text-navy-deep">
+      {/* 1. HEADER ROW WITH DIRECT ACTION BUTTONS */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="font-space-grotesk text-2xl sm:text-3xl font-bold tracking-tight text-navy-deep">
               User Management
             </h1>
-            <p className="text-slate-custom text-xs md:text-sm mt-0.5 font-ibm-plex-mono">
-              Manage platform access, roles, and administrative permissions.
-            </p>
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber/10 text-amber border border-amber/20 font-ibm-plex-mono">
+              Directory
+            </span>
           </div>
+          <p className="text-xs sm:text-sm text-slate-custom font-ibm-plex-mono">
+            Provision, manage roles, audit live online presence, and track user authentication.
+          </p>
         </div>
 
+        {/* Primary Action Buttons */}
         <div className="flex items-center gap-2.5 flex-wrap">
-          <a href="/api/reports?type=users" download>
-            <Button
-              variant="outline"
-              className="h-10 rounded-xl gap-2 font-bold text-xs border-line hover:bg-paper whitespace-nowrap cursor-pointer shadow-2xs font-ibm-plex-mono"
-            >
-              <Download className="w-3.5 h-3.5 text-navy-deep" /> Export CSV
-            </Button>
-          </a>
-
           <Button
-            type="button"
-            onClick={() => setIsInviteModalOpen(true)}
-            className="h-10 px-4 rounded-xl gap-2 font-bold text-xs bg-amber text-navy-deep hover:bg-amber-deep shadow-md font-space-grotesk cursor-pointer transition-all hover:shadow-lg active:scale-98"
+            onClick={() => {
+              setInviteModalMode("bulk");
+              setIsInviteModalOpen(true);
+            }}
+            variant="outline"
+            size="sm"
+            className="h-9 px-3.5 rounded-xl border-line text-xs font-bold text-navy-deep hover:bg-paper gap-1.5 shadow-xs"
           >
-            <Plus className="w-4 h-4" /> Invite &amp; Import
+            <Download className="w-3.5 h-3.5 text-amber" />
+            Bulk CSV Upload
+          </Button>
+          <Button
+            onClick={() => {
+              setInviteModalMode("single");
+              setIsInviteModalOpen(true);
+            }}
+            size="sm"
+            className="h-9 px-4 rounded-xl bg-amber hover:bg-amber-deep text-navy-deep text-xs font-bold gap-1.5 shadow-sm transition-all active:scale-98"
+          >
+            <Plus className="w-4 h-4" />
+            Invite User
           </Button>
         </div>
       </div>
 
-      {/* 2. CONSOLIDATED BENTO METRICS BAR */}
-      <div className="bg-white rounded-2xl border border-line shadow-xs overflow-hidden">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-line/60">
-          {/* Total Registered */}
-          <div className="p-4 sm:p-5 relative overflow-hidden group hover:bg-paper/40 transition-colors">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-amber" />
-            <div className="flex items-center justify-between mb-2 pt-0.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono truncate">
-                Registered Users
-              </span>
-              <div className="p-1.5 rounded-lg bg-paper text-navy-deep border border-line/60 group-hover:scale-105 transition-transform">
-                <UsersIcon className="w-3.5 h-3.5 text-amber" />
-              </div>
+      {/* 2. UNIFIED BENTO METRIC ROW */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+        {/* Total Users */}
+        <div className="p-4 rounded-2xl bg-white border border-line shadow-xs relative overflow-hidden group hover:border-amber/40 hover:shadow-sm transition-all duration-200">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-amber" />
+          <div className="flex items-center justify-between mb-2 pt-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono truncate">
+              Registered Users
+            </span>
+            <div className="p-1.5 rounded-lg bg-amber/10 text-amber group-hover:scale-105 transition-transform">
+              <UsersIcon className="w-3.5 h-3.5" />
             </div>
-            <div className="font-space-grotesk text-2xl sm:text-3xl font-black text-navy-deep tracking-tight">
-              {totalUsersCount}
-            </div>
-            <p className="text-[10.5px] text-slate-400 mt-0.5 font-ibm-plex-mono truncate">Active platform accounts</p>
           </div>
+          <div className="font-space-grotesk text-2xl sm:text-3xl font-black text-navy-deep tracking-tight">
+            {totalUsersCount}
+          </div>
+          <p className="text-[10.5px] text-slate-400 mt-0.5 font-ibm-plex-mono truncate">Active database profiles</p>
+        </div>
 
-          {/* Pending Invites */}
-          <div className="p-4 sm:p-5 relative overflow-hidden group hover:bg-paper/40 transition-colors">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-amber-deep" />
-            <div className="flex items-center justify-between mb-2 pt-0.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono truncate">
-                Pending Invites
-              </span>
-              <div className="p-1.5 rounded-lg bg-amber/10 text-amber-deep border border-amber/25 group-hover:scale-105 transition-transform">
-                <Clock className="w-3.5 h-3.5" />
-              </div>
+        {/* Online Now */}
+        <div className="p-4 rounded-2xl bg-white border border-line shadow-xs relative overflow-hidden group hover:border-teal/40 hover:shadow-sm transition-all duration-200">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-teal" />
+          <div className="flex items-center justify-between mb-2 pt-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono truncate">
+              Online Now
+            </span>
+            <div className="p-1.5 rounded-lg bg-teal/10 text-teal group-hover:scale-105 transition-transform flex items-center justify-center">
+              <span className="w-2 h-2 rounded-full bg-teal animate-pulse" />
             </div>
-            <div className="font-space-grotesk text-2xl sm:text-3xl font-black text-amber-deep tracking-tight">
-              {pendingCount}
-            </div>
-            <p className="text-[10.5px] text-slate-400 mt-0.5 font-ibm-plex-mono truncate">Awaiting activation</p>
           </div>
+          <div className="font-space-grotesk text-2xl sm:text-3xl font-black text-teal tracking-tight">
+            {onlineNowCount}
+          </div>
+          <p className="text-[10.5px] text-slate-400 mt-0.5 font-ibm-plex-mono truncate">Active in last 15 mins</p>
+        </div>
 
-          {/* EPC Installers */}
-          <div className="p-4 sm:p-5 relative overflow-hidden group hover:bg-paper/40 transition-colors">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-teal" />
-            <div className="flex items-center justify-between mb-2 pt-0.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono truncate">
-                EPC Installers
-              </span>
-              <div className="p-1.5 rounded-lg bg-teal/10 text-teal border border-teal/20 group-hover:scale-105 transition-transform">
-                <Building2 className="w-3.5 h-3.5" />
-              </div>
+        {/* EPC Installers */}
+        <div className="p-4 rounded-2xl bg-white border border-line shadow-xs relative overflow-hidden group hover:border-amber-deep/40 hover:shadow-sm transition-all duration-200">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-amber-deep" />
+          <div className="flex items-center justify-between mb-2 pt-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono truncate">
+              EPC Installers
+            </span>
+            <div className="p-1.5 rounded-lg bg-amber-deep/10 text-amber-deep group-hover:scale-105 transition-transform">
+              <Building2 className="w-3.5 h-3.5" />
             </div>
-            <div className="font-space-grotesk text-2xl sm:text-3xl font-black text-teal tracking-tight">
-              {epcCount}
-            </div>
-            <p className="text-[10.5px] text-slate-400 mt-0.5 font-ibm-plex-mono truncate">Contractor network</p>
           </div>
+          <div className="font-space-grotesk text-2xl sm:text-3xl font-black text-amber-deep tracking-tight">
+            {epcCount}
+          </div>
+          <p className="text-[10.5px] text-slate-400 mt-0.5 font-ibm-plex-mono truncate">Solar contractors</p>
+        </div>
 
-          {/* Solar Brands */}
-          <div className="p-4 sm:p-5 relative overflow-hidden group hover:bg-paper/40 transition-colors">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-navy-deep" />
-            <div className="flex items-center justify-between mb-2 pt-0.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono truncate">
-                Solar Brands
-              </span>
-              <div className="p-1.5 rounded-lg bg-paper text-navy-deep border border-line/60 group-hover:scale-105 transition-transform">
-                <Award className="w-3.5 h-3.5 text-navy-deep" />
-              </div>
+        {/* Solar Brands */}
+        <div className="p-4 rounded-2xl bg-white border border-line shadow-xs relative overflow-hidden group hover:border-amber/40 hover:shadow-sm transition-all duration-200">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-amber" />
+          <div className="flex items-center justify-between mb-2 pt-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono truncate">
+              Solar Brands
+            </span>
+            <div className="p-1.5 rounded-lg bg-amber/10 text-amber group-hover:scale-105 transition-transform">
+              <Award className="w-3.5 h-3.5" />
             </div>
-            <div className="font-space-grotesk text-2xl sm:text-3xl font-black text-navy-deep tracking-tight">
-              {brandCount}
-            </div>
-            <p className="text-[10.5px] text-slate-400 mt-0.5 font-ibm-plex-mono truncate">Hardware partners</p>
           </div>
+          <div className="font-space-grotesk text-2xl sm:text-3xl font-black text-navy-deep tracking-tight">
+            {brandCount}
+          </div>
+          <p className="text-[10.5px] text-slate-400 mt-0.5 font-ibm-plex-mono truncate">OEM partners</p>
+        </div>
 
-          {/* Writers */}
-          <div className="p-4 sm:p-5 relative overflow-hidden group hover:bg-paper/40 transition-colors col-span-2 sm:col-span-1">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-slate-400" />
-            <div className="flex items-center justify-between mb-2 pt-0.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono truncate">
-                Article Writers
-              </span>
-              <div className="p-1.5 rounded-lg bg-slate-100 text-slate-500 border border-slate-200 group-hover:scale-105 transition-transform">
-                <PenTool className="w-3.5 h-3.5" />
-              </div>
+        {/* Article Writers */}
+        <div className="p-4 rounded-2xl bg-white border border-line shadow-xs relative overflow-hidden group hover:border-navy-deep/40 hover:shadow-sm transition-all duration-200">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-navy-deep" />
+          <div className="flex items-center justify-between mb-2 pt-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono truncate">
+              Writers &amp; Invites
+            </span>
+            <div className="p-1.5 rounded-lg bg-navy-deep/10 text-navy-deep group-hover:scale-105 transition-transform">
+              <PenTool className="w-3.5 h-3.5" />
             </div>
-            <div className="font-space-grotesk text-2xl sm:text-3xl font-black text-slate-700 tracking-tight">
-              {writerCount}
-            </div>
-            <p className="text-[10.5px] text-slate-400 mt-0.5 font-ibm-plex-mono truncate">Editorial team</p>
           </div>
+          <div className="font-space-grotesk text-2xl sm:text-3xl font-black text-navy-deep tracking-tight">
+            {writerCount} <span className="text-xs font-normal text-slate-400">({pendingCount} pend)</span>
+          </div>
+          <p className="text-[10.5px] text-slate-400 mt-0.5 font-ibm-plex-mono truncate">Editorial columnists</p>
         </div>
       </div>
 
-      {/* 3. ADAPTIVE SEGMENTED TABS */}
+      {/* 3. ADAPTIVE SEGMENTED TABS (Including New Online & Activity Tab) */}
       <div className="flex items-center justify-between flex-wrap gap-4 border-b border-line pb-4">
-        <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-line/50 text-xs font-ibm-plex-mono">
+        <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-line/50 text-xs font-ibm-plex-mono flex-wrap gap-1">
           <button
             type="button"
             onClick={() => setActiveTab("users")}
@@ -310,17 +414,27 @@ export function UserManagementClient({
             <Clock className="w-3.5 h-3.5 text-amber-deep" />
             Pending Invitations ({pendingCount})
           </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("activity")}
+            className={`px-4 py-2 rounded-lg font-bold transition-all flex items-center gap-2 cursor-pointer ${
+              activeTab === "activity"
+                ? "bg-white text-navy-deep shadow-xs border border-line/60"
+                : "text-slate-500 hover:text-navy-deep"
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-teal animate-pulse" />
+            Online &amp; Activity ({onlineNowCount} online)
+          </button>
         </div>
 
-        {activeTab === "users" && (
-          <span className="text-xs text-slate-custom font-ibm-plex-mono">
-            Showing <strong className="text-navy-deep">{filteredUsers.length}</strong> matching records
-          </span>
-        )}
+        <span className="text-xs text-slate-custom font-ibm-plex-mono">
+          Showing <strong className="text-navy-deep">{filteredUsers.length}</strong> matching records
+        </span>
       </div>
 
       {/* 4. ACTIVE TAB CONTENT */}
-      {activeTab === "users" ? (
+      {activeTab === "users" && (
         <div className="space-y-4">
           {/* SEARCH & FILTERS BAR */}
           <div className="bg-white p-3.5 rounded-2xl border border-line shadow-xs flex flex-col md:flex-row gap-3 items-center justify-between">
@@ -339,13 +453,13 @@ export function UserManagementClient({
                     placeholder="Search name or email..."
                     className="w-full bg-transparent border-none text-xs text-navy-deep placeholder:text-slate-400 focus:outline-none"
                   />
-                  <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono font-bold text-slate-400 bg-slate-100 border border-line/70 rounded-md select-none shrink-0 ml-1">
+                  <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[9.5px] font-mono font-bold text-slate-400 bg-slate-100 rounded border border-slate-200">
                     ⌘K
                   </kbd>
                 </div>
               </div>
 
-              {/* Role Filter */}
+              {/* Role Dropdown */}
               <Select
                 value={roleFilter}
                 onValueChange={(val) => {
@@ -369,13 +483,14 @@ export function UserManagementClient({
               {/* Sort Order */}
               <Select
                 value={sortOrder}
-                onValueChange={(val: "latest" | "oldest" | "alpha") => setSortOrder(val)}
+                onValueChange={(val: "latest" | "oldest" | "alpha" | "recent_login") => setSortOrder(val)}
               >
-                <SelectTrigger className="h-10 rounded-xl bg-white border border-slate-200/80 shadow-xs text-xs font-semibold text-navy-deep w-full sm:w-36 focus:ring-amber/20 focus:border-amber">
+                <SelectTrigger className="h-10 rounded-xl bg-white border border-slate-200/80 shadow-xs text-xs font-semibold text-navy-deep w-full sm:w-40 focus:ring-amber/20 focus:border-amber">
                   <SelectValue placeholder="Sort Order" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="latest">Latest</SelectItem>
+                  <SelectItem value="latest">Latest Registered</SelectItem>
+                  <SelectItem value="recent_login">Recent Login</SelectItem>
                   <SelectItem value="oldest">Oldest</SelectItem>
                   <SelectItem value="alpha">Name (A-Z)</SelectItem>
                 </SelectContent>
@@ -401,6 +516,10 @@ export function UserManagementClient({
                     <th className="py-3.5 px-5 font-bold text-navy-deep text-[11px] uppercase tracking-wider font-ibm-plex-mono">
                       Account Status
                     </th>
+                    {/* NEW COLUMN: Last Active / Registered */}
+                    <th className="py-3.5 px-5 font-bold text-navy-deep text-[11px] uppercase tracking-wider font-ibm-plex-mono">
+                      Last Active / Registered
+                    </th>
                     <th className="py-3.5 px-5 font-bold text-navy-deep text-[11px] uppercase tracking-wider font-ibm-plex-mono text-right">
                       Actions
                     </th>
@@ -412,6 +531,8 @@ export function UserManagementClient({
                     const isSuperAdmin = whitelist.includes(user.email.toLowerCase()) || user.role === "super-admin";
                     const displayRole = isSuperAdmin ? "super-admin" : user.role;
                     const userLogo = user.brandLogo || user.epcLogo;
+                    const activeTs = user.lastActiveAt || user.lastSignInAt;
+                    const { label: activeLabel, isOnline } = formatRelativeTime(activeTs);
 
                     return (
                       <tr key={user.id} className="hover:bg-paper/50 transition-colors duration-150 group">
@@ -461,6 +582,30 @@ export function UserManagementClient({
                           )}
                         </td>
 
+                        {/* NEW COLUMN: Last Active / Registered */}
+                        <td className="py-3.5 px-5">
+                          <div className="space-y-0.5">
+                            {isOnline ? (
+                              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-teal/10 text-teal border border-teal/20 text-[10.5px] font-bold font-ibm-plex-mono">
+                                <span className="w-1.5 h-1.5 rounded-full bg-teal animate-pulse" />
+                                Online Now
+                              </div>
+                            ) : activeTs ? (
+                              <div className="text-xs font-semibold text-navy-deep font-ibm-plex-mono flex items-center gap-1.5">
+                                <Clock className="w-3 h-3 text-slate-400" />
+                                <span>{activeLabel}</span>
+                              </div>
+                            ) : (
+                              <div className="text-xs text-slate-400 font-ibm-plex-mono italic">
+                                No login recorded
+                              </div>
+                            )}
+                            <div className="text-[10.5px] text-slate-400 font-ibm-plex-mono">
+                              Joined {format(new Date(user.createdAt), "MMM dd, yyyy")}
+                            </div>
+                          </div>
+                        </td>
+
                         {/* Actions */}
                         <td className="py-3.5 px-5 text-right">
                           <div className="flex items-center justify-end gap-1.5">
@@ -508,7 +653,7 @@ export function UserManagementClient({
                                   user.role !== "super-admin")) && (
                                 <DeleteUserButton
                                   userId={user.id}
-                                  userName={user.name || ""}
+                                  userName={user.name || user.email}
                                   userEmail={user.email}
                                 />
                               )}
@@ -517,120 +662,111 @@ export function UserManagementClient({
                       </tr>
                     );
                   })}
-
-                  {paginatedUsers.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="py-12 text-center text-slate-custom font-ibm-plex-mono">
-                        <UsersIcon className="w-10 h-10 mx-auto mb-2 opacity-20" />
-                        <p className="text-sm font-semibold text-navy-deep">No users found</p>
-                        <p className="text-xs text-slate-custom mt-0.5">Try adjusting your search query or filters.</p>
-                      </td>
-                    </tr>
-                  )}
                 </tbody>
               </table>
+
+              {paginatedUsers.length === 0 && (
+                <div className="py-12 text-center text-slate-custom font-ibm-plex-mono">
+                  <UsersIcon className="w-10 h-10 mx-auto mb-2 opacity-20" />
+                  <p className="text-sm font-semibold text-navy-deep">No users matching filter criteria</p>
+                  <p className="text-xs text-slate-custom mt-0.5">Try searching with a different keyword or role.</p>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* MOBILE STACKED CARD FALLBACK (visible on < md, hidden on md+) */}
+          {/* MOBILE ADAPTIVE BENTO STACK CARDS (visible on mobile <md) */}
           <div className="md:hidden space-y-3">
             {paginatedUsers.map((user) => {
               const whitelist = ["nomiking0072012@gmail.com", "energygurusonline@gmail.com"];
               const isSuperAdmin = whitelist.includes(user.email.toLowerCase()) || user.role === "super-admin";
               const displayRole = isSuperAdmin ? "super-admin" : user.role;
               const userLogo = user.brandLogo || user.epcLogo;
+              const activeTs = user.lastActiveAt || user.lastSignInAt;
+              const { label: activeLabel, isOnline } = formatRelativeTime(activeTs);
 
               return (
                 <div
                   key={user.id}
-                  className="bg-white rounded-2xl p-4 border border-line shadow-xs space-y-3"
+                  className="bg-white rounded-2xl p-4 border border-line shadow-xs space-y-3 hover:border-amber/40 transition-colors"
                 >
-                  {/* Card Header: Avatar, Name, Role */}
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <Avatar className="h-10 w-10 border border-line shrink-0">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10 border border-line/80 shadow-2xs">
                         <AvatarImage src={userLogo || undefined} />
                         <AvatarFallback className="bg-amber/10 text-amber font-bold text-xs">
                           <UserIcon className="w-4 h-4" />
                         </AvatarFallback>
                       </Avatar>
-                      <div className="min-w-0">
-                        <h4 className="font-bold text-sm text-navy-deep truncate">
-                          {user.name || "N/A"}
-                        </h4>
-                        <span
-                          className={`inline-flex items-center px-2 py-0.2 rounded-full text-[9.5px] font-semibold font-ibm-plex-mono uppercase tracking-wider border mt-0.5 ${getRoleBadgeStyle(
-                            displayRole
-                          )}`}
-                        >
-                          {displayRole.replace("-", " ")}
-                        </span>
+                      <div>
+                        <h3 className="font-bold text-sm text-navy-deep line-clamp-1">{user.name || "N/A"}</h3>
+                        <p className="text-xs text-slate-custom font-mono truncate">{user.email}</p>
                       </div>
                     </div>
 
-                    {!isSuperAdmin &&
-                      (userRole === "super-admin" ||
-                        (userRole === "admin" &&
-                          user.role !== "admin" &&
-                          user.role !== "super-admin")) && (
-                        <DeleteUserButton
-                          userId={user.id}
-                          userName={user.name || ""}
-                          userEmail={user.email}
-                        />
-                      )}
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold font-ibm-plex-mono uppercase tracking-wider border ${getRoleBadgeStyle(
+                        displayRole
+                      )}`}
+                    >
+                      {displayRole.replace("-", " ")}
+                    </span>
                   </div>
 
-                  {/* Card Middle: Email */}
-                  <div className="flex items-center gap-2 text-xs text-slate-500 font-mono bg-paper/60 p-2.5 rounded-xl border border-line/60 break-all">
-                    <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span className="truncate">{user.email}</span>
-                  </div>
-
-                  {/* Card Footer: Status & Quick Link */}
-                  <div className="flex items-center justify-between pt-1 gap-2 border-t border-line/40">
-                    <div>
-                      {!isSuperAdmin && (user.role === "epc" || user.role === "brand" || user.role === "writer") ? (
-                        <UserStatusButton
-                          userId={user.id}
-                          initialActive={user.isActive}
-                          userName={user.name || user.email}
-                        />
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold font-ibm-plex-mono text-teal">
-                          <ShieldCheck className="w-3.5 h-3.5" /> Active
-                        </span>
-                      )}
+                  {/* 2-Column Details Grid */}
+                  <div className="grid grid-cols-2 gap-2 pt-1 border-t border-line/40 text-xs">
+                    <div className="p-2.5 rounded-xl bg-paper/60 border border-line/40">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 font-ibm-plex-mono block">Status</span>
+                      <div className="mt-1">
+                        {!isSuperAdmin && (user.role === "epc" || user.role === "brand" || user.role === "writer") ? (
+                          <UserStatusButton
+                            userId={user.id}
+                            initialActive={user.isActive}
+                            userName={user.name || user.email}
+                          />
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold font-ibm-plex-mono text-teal">
+                            <ShieldCheck className="w-3.5 h-3.5" /> Active
+                          </span>
+                        )}
+                      </div>
                     </div>
+
+                    <div className="p-2.5 rounded-xl bg-paper/60 border border-line/40">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 font-ibm-plex-mono block">Last Active</span>
+                      <div className="mt-1">
+                        {isOnline ? (
+                          <span className="inline-flex items-center gap-1 text-teal font-bold font-mono text-[11px]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-teal animate-pulse" />
+                            Online
+                          </span>
+                        ) : (
+                          <span className="text-xs font-semibold text-navy-deep font-ibm-plex-mono">
+                            {activeLabel}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1 border-t border-line/40">
+                    <span className="text-[10.5px] text-slate-400 font-ibm-plex-mono">
+                      Joined {format(new Date(user.createdAt), "MMM dd, yyyy")}
+                    </span>
 
                     <div className="flex items-center gap-1.5">
                       {user.role === "epc" && (
-                        <Button
-                          asChild
-                          variant="outline"
-                          size="sm"
-                          className="h-8 px-2.5 rounded-lg text-xs font-bold border-line"
-                        >
+                        <Button asChild variant="outline" size="sm" className="h-8 px-2.5 rounded-lg text-xs font-bold border-line">
                           <Link href="/dashboard/admin/onboard-epc">EPC Hub</Link>
                         </Button>
                       )}
                       {user.role === "brand" && (
-                        <Button
-                          asChild
-                          variant="outline"
-                          size="sm"
-                          className="h-8 px-2.5 rounded-lg text-xs font-bold border-line"
-                        >
+                        <Button asChild variant="outline" size="sm" className="h-8 px-2.5 rounded-lg text-xs font-bold border-line">
                           <Link href="/dashboard/admin/onboard-brand">Brand Hub</Link>
                         </Button>
                       )}
                       {user.role === "writer" && (
-                        <Button
-                          asChild
-                          variant="outline"
-                          size="sm"
-                          className="h-8 px-2.5 rounded-lg text-xs font-bold border-line"
-                        >
+                        <Button asChild variant="outline" size="sm" className="h-8 px-2.5 rounded-lg text-xs font-bold border-line">
                           <Link href="/dashboard/admin/onboard-writer">Writer Hub</Link>
                         </Button>
                       )}
@@ -684,8 +820,242 @@ export function UserManagementClient({
             </div>
           )}
         </div>
-      ) : (
-        /* PENDING INVITATIONS TAB (100% Full Width) */
+      )}
+
+      {/* NEW TAB: ONLINE & ACTIVITY TELEMETRY */}
+      {activeTab === "activity" && (
+        <div className="space-y-6">
+          {/* Activity Filter Navigation Bar */}
+          <div className="bg-white p-4 rounded-2xl border border-line shadow-xs space-y-3">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <Radio className="w-4 h-4 text-teal animate-pulse" />
+                <h3 className="font-space-grotesk text-base font-bold text-navy-deep">
+                  User Presence &amp; Login Activity
+                </h3>
+              </div>
+              <span className="text-xs text-slate-custom font-ibm-plex-mono">
+                Select timeframe to filter users by authentication and activity
+              </span>
+            </div>
+
+            {/* Time Filter Pills: currently online, today online, 24hr, 7 days, 14 days, 30 days */}
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl text-xs font-semibold flex-wrap gap-1">
+              <button
+                type="button"
+                onClick={() => setActivityFilter("all")}
+                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-ibm-plex-mono text-[11px] ${
+                  activityFilter === "all"
+                    ? "bg-white text-navy-deep shadow-xs font-bold border border-line/60"
+                    : "text-slate-500 hover:text-navy-deep"
+                }`}
+              >
+                All Users ({totalUsersCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActivityFilter("online")}
+                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-ibm-plex-mono text-[11px] flex items-center gap-1.5 ${
+                  activityFilter === "online"
+                    ? "bg-white text-teal shadow-xs font-bold border border-teal/30"
+                    : "text-slate-500 hover:text-navy-deep"
+                }`}
+              >
+                <span className="w-2 h-2 rounded-full bg-teal animate-pulse" />
+                Currently Online ({onlineNowCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActivityFilter("today")}
+                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-ibm-plex-mono text-[11px] ${
+                  activityFilter === "today"
+                    ? "bg-white text-navy-deep shadow-xs font-bold border border-line/60"
+                    : "text-slate-500 hover:text-navy-deep"
+                }`}
+              >
+                Today Online ({activeTodayCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActivityFilter("24h")}
+                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-ibm-plex-mono text-[11px] ${
+                  activityFilter === "24h"
+                    ? "bg-white text-navy-deep shadow-xs font-bold border border-line/60"
+                    : "text-slate-500 hover:text-navy-deep"
+                }`}
+              >
+                Last 24 Hours ({active24hCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActivityFilter("7d")}
+                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-ibm-plex-mono text-[11px] ${
+                  activityFilter === "7d"
+                    ? "bg-white text-navy-deep shadow-xs font-bold border border-line/60"
+                    : "text-slate-500 hover:text-navy-deep"
+                }`}
+              >
+                Last 7 Days ({active7dCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActivityFilter("14d")}
+                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-ibm-plex-mono text-[11px] ${
+                  activityFilter === "14d"
+                    ? "bg-white text-navy-deep shadow-xs font-bold border border-line/60"
+                    : "text-slate-500 hover:text-navy-deep"
+                }`}
+              >
+                Last 14 Days ({active14dCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActivityFilter("30d")}
+                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-ibm-plex-mono text-[11px] ${
+                  activityFilter === "30d"
+                    ? "bg-white text-navy-deep shadow-xs font-bold border border-line/60"
+                    : "text-slate-500 hover:text-navy-deep"
+                }`}
+              >
+                Last 30 Days ({active30dCount})
+              </button>
+            </div>
+          </div>
+
+          {/* Activity Table */}
+          <div className="bg-white rounded-2xl border border-line overflow-hidden shadow-xs">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-paper/80 border-b border-line/60">
+                  <tr>
+                    <th className="py-3.5 px-5 font-bold text-navy-deep text-[11px] uppercase tracking-wider font-ibm-plex-mono">
+                      User
+                    </th>
+                    <th className="py-3.5 px-5 font-bold text-navy-deep text-[11px] uppercase tracking-wider font-ibm-plex-mono">
+                      Role
+                    </th>
+                    <th className="py-3.5 px-5 font-bold text-navy-deep text-[11px] uppercase tracking-wider font-ibm-plex-mono">
+                      Live Presence
+                    </th>
+                    <th className="py-3.5 px-5 font-bold text-navy-deep text-[11px] uppercase tracking-wider font-ibm-plex-mono">
+                      Last Active / Signed In
+                    </th>
+                    <th className="py-3.5 px-5 font-bold text-navy-deep text-[11px] uppercase tracking-wider font-ibm-plex-mono">
+                      Account Registered
+                    </th>
+                    <th className="py-3.5 px-5 font-bold text-navy-deep text-[11px] uppercase tracking-wider font-ibm-plex-mono text-right">
+                      Directory Link
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line/40">
+                  {filteredUsers.map((user) => {
+                    const activeTs = user.lastActiveAt || user.lastSignInAt;
+                    const { label: activeLabel, isOnline } = formatRelativeTime(activeTs);
+                    const userLogo = user.brandLogo || user.epcLogo;
+
+                    return (
+                      <tr key={user.id} className="hover:bg-paper/50 transition-colors group">
+                        <td className="py-3.5 px-5">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-9 w-9 border border-line/80 shadow-2xs">
+                              <AvatarImage src={userLogo || undefined} />
+                              <AvatarFallback className="bg-amber/10 text-amber font-bold text-xs">
+                                <UserIcon className="w-4 h-4" />
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-bold text-sm text-navy-deep group-hover:text-amber transition-colors">
+                                {user.name || "N/A"}
+                              </div>
+                              <div className="text-xs text-slate-custom font-mono">
+                                {user.email}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="py-3.5 px-5">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10.5px] font-semibold font-ibm-plex-mono uppercase tracking-wider border ${getRoleBadgeStyle(
+                              user.role
+                            )}`}
+                          >
+                            {user.role.replace("-", " ")}
+                          </span>
+                        </td>
+
+                        <td className="py-3.5 px-5">
+                          {isOnline ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal/10 text-teal border border-teal/20 text-xs font-bold font-ibm-plex-mono">
+                              <span className="w-2 h-2 rounded-full bg-teal animate-pulse" />
+                              Online Now
+                            </span>
+                          ) : activeTs ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-paper text-slate-custom border border-line text-xs font-semibold font-ibm-plex-mono">
+                              <span className="w-2 h-2 rounded-full bg-slate-400" />
+                              Offline
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber/10 text-amber-deep border border-amber/25 text-xs font-semibold font-ibm-plex-mono">
+                              <span className="w-2 h-2 rounded-full bg-amber-deep" />
+                              Dormant
+                            </span>
+                          )}
+                        </td>
+
+                        <td className="py-3.5 px-5">
+                          <div className="text-xs font-semibold text-navy-deep font-ibm-plex-mono">
+                            {activeLabel}
+                          </div>
+                          {activeTs && (
+                            <div className="text-[10.5px] text-slate-400 font-mono">
+                              {format(new Date(activeTs), "MMM dd, yyyy • hh:mm a")}
+                            </div>
+                          )}
+                        </td>
+
+                        <td className="py-3.5 px-5 text-xs text-slate-custom font-ibm-plex-mono">
+                          {format(new Date(user.createdAt), "MMM dd, yyyy")}
+                        </td>
+
+                        <td className="py-3.5 px-5 text-right">
+                          {user.role === "epc" && (
+                            <Button asChild variant="outline" size="sm" className="h-8 px-2.5 rounded-lg text-xs font-bold border-line">
+                              <Link href="/dashboard/admin/onboard-epc">EPC Hub</Link>
+                            </Button>
+                          )}
+                          {user.role === "brand" && (
+                            <Button asChild variant="outline" size="sm" className="h-8 px-2.5 rounded-lg text-xs font-bold border-line">
+                              <Link href="/dashboard/admin/onboard-brand">Brand Hub</Link>
+                            </Button>
+                          )}
+                          {user.role === "writer" && (
+                            <Button asChild variant="outline" size="sm" className="h-8 px-2.5 rounded-lg text-xs font-bold border-line">
+                              <Link href="/dashboard/admin/onboard-writer">Writer Hub</Link>
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+
+              {filteredUsers.length === 0 && (
+                <div className="py-12 text-center text-slate-custom font-ibm-plex-mono">
+                  <Radio className="w-10 h-10 mx-auto mb-2 opacity-20 text-slate-400" />
+                  <p className="text-sm font-semibold text-navy-deep">No users found for this activity timeframe</p>
+                  <p className="text-xs text-slate-custom mt-0.5">Try selecting a broader timeframe like "Last 30 Days" or "All Users".</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PENDING INVITATIONS TAB */}
+      {activeTab === "invites" && (
         <div className="space-y-4">
           <PendingInvitations initialInvites={initialPendingInvites} />
         </div>
@@ -742,4 +1112,3 @@ export function UserManagementClient({
     </div>
   );
 }
-

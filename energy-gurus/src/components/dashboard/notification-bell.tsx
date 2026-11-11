@@ -80,20 +80,20 @@ export function NotificationBell() {
 
     const getTypeIcon = (type: string) => {
         switch (type) {
-            case "inquiry": return <Mail className="h-4 w-4 text-blue-500" />;
-            case "reply": return <MessageSquare className="h-4 w-4 text-green-500" />;
-            default: return <Info className="h-4 w-4 text-amber-500" />;
+            case "inquiry": return <Mail className="h-4 w-4 text-navy-deep" />;
+            case "reply": return <MessageSquare className="h-4 w-4 text-teal" />;
+            default: return <Info className="h-4 w-4 text-amber" />;
         }
     };
 
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full bg-paper/10 hover:bg-paper/20 transition-all">
-                    <Bell className="h-5 w-5 text-amber" />
+                <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-xl bg-paper hover:bg-paper/80 border border-line transition-all">
+                    <Bell className="h-4 w-4 text-slate-custom" />
                     {unreadCount > 0 && (
                         <Badge
-                            className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white border-2 border-white animate-in zoom-in"
+                            className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 bg-amber-deep text-white border-2 border-white animate-in zoom-in text-[9px]"
                         >
                             {unreadCount > 9 ? "9+" : unreadCount}
                         </Badge>

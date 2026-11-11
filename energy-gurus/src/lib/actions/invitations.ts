@@ -260,7 +260,7 @@ export async function resendInvitation(email: string, role: UserRole) {
  * 
  * Automatically activates the user in DB with their assigned role and removes them from the pending invitations list.
  */
-export async function syncPendingInvitations() {
+export async function syncPendingInvitations(shouldRevalidate: boolean = false) {
     try {
         const allInvites = await db.select().from(invitations);
         if (allInvites.length === 0) return { success: true, removedCount: 0 };
@@ -397,7 +397,9 @@ export async function syncPendingInvitations() {
             }
         }
 
-        revalidatePath("/dashboard/users", "layout");
+        if (shouldRevalidate) {
+            revalidatePath("/dashboard/users", "layout");
+        }
         return { success: true, removedCount };
     } catch (error) {
         console.error("Error in syncPendingInvitations:", error);

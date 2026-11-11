@@ -60,7 +60,7 @@ export function MobileDashboardNav({ role }: { role: UserRole | null | undefined
                             </Link>
                             <div className="flex flex-col gap-3">
                                 <span className="text-xs font-medium uppercase text-slate-custom px-1">Account</span>
-                                <UserNav />
+                                <UserNav showAvatar={false} />
                             </div>
                         </div>
                     </div>

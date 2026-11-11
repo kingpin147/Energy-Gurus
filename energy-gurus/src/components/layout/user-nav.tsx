@@ -15,15 +15,15 @@ import {
 import { LogOut, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export function UserNav() {
+export function UserNav({ showAvatar = true }: { showAvatar?: boolean }) {
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
   const router = useRouter();
 
   if (!isLoaded) {
     return (
-      <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-        <Loader2 className="h-5 w-5 animate-spin text-slate-custom" />
+      <Button variant="ghost" className="relative h-9 px-3 rounded-xl border border-line">
+        <Loader2 className="h-4 w-4 animate-spin text-slate-custom" />
       </Button>
     );
   }
@@ -37,16 +37,20 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="relative flex items-center justify-center gap-2 pl-1 pr-2 rounded-full border border-gray-200 hover:bg-gray-100 overflow-hidden"
-          style={{ height: "40px", minWidth: "40px" }}
+          className="relative flex items-center justify-start gap-2 px-3 py-2 rounded-xl border border-line bg-white hover:bg-paper hover:border-amber/40 transition-all cursor-pointer overflow-hidden"
+          style={{ height: "38px" }}
         >
-          <Avatar className="h-8 w-8 shrink-0">
-            <AvatarImage src={(user.publicMetadata?.brandLogo as string) || user.imageUrl} alt={user.fullName ?? ""} />
-            <AvatarFallback className="bg-teal text-white">
-              {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
-          <span className="user-name-text text-sm font-semibold text-ink truncate max-w-[140px]">{user.fullName}</span>
+          {showAvatar && (
+            <Avatar className="h-7 w-7 shrink-0">
+              <AvatarImage src={(user.publicMetadata?.brandLogo as string) || user.imageUrl} alt={user.fullName ?? ""} />
+              <AvatarFallback className="bg-teal text-white text-xs">
+                {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+          )}
+          <span className={`text-xs font-bold text-navy-deep truncate max-w-[150px] ${showAvatar ? "hidden md:inline-block" : "inline-block"}`}>
+            {user.fullName || user.firstName || "Account"}
+          </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount sideOffset={8}>
@@ -64,12 +68,6 @@ export function UserNav() {
           <span>Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
-      <style>{`
-        .user-name-text { display: inline-block; }
-        @media (max-width: 767px) {
-          .user-name-text { display: none; }
-        }
-      `}</style>
     </DropdownMenu>
   );
 }

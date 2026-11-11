@@ -19,7 +19,9 @@ import {
     MousePointerClick,
     Star,
     User,
-    UserCheck
+    UserCheck,
+    Megaphone,
+    Activity
 } from "lucide-react";
 import { UserRole } from "@/db/schema";
 
@@ -37,8 +39,8 @@ export default function Sidebar({ role }: { role: UserRole | null | undefined })
         { href: "/dashboard/admin/certifications", icon: <ShieldCheck className="w-4 h-4" />, label: "Certification Approvals" },
         { href: "/dashboard/content", icon: <Video className="w-4 h-4" />, label: "Content (Podcast/QA)" },
         { href: "/dashboard/news", icon: <FileText className="w-4 h-4" />, label: "News Management" },
-        { href: "/dashboard/ads", icon: <LayoutDashboard className="w-4 h-4" />, label: "Ads Management" },
-        { href: "/dashboard/analytics", icon: <MousePointerClick className="w-4 h-4" />, label: "Engagement Hub" },
+        { href: "/dashboard/ads", icon: <Megaphone className="w-4 h-4" />, label: "Ads Management" },
+        { href: "/dashboard/analytics", icon: <Activity className="w-4 h-4" />, label: "Engagement Hub" },
         { href: "/dashboard/reviews", icon: <Star className="w-4 h-4" />, label: "Give & Manage Reviews" },
         { href: "/dashboard/inbox", icon: <Inbox className="w-4 h-4" />, label: "Support Inbox" },
         { href: "/dashboard/users", icon: <Users className="w-4 h-4" />, label: "Manage Users" },
@@ -92,19 +94,21 @@ export default function Sidebar({ role }: { role: UserRole | null | undefined })
     );
 }
 
-function SidebarLink({ href, icon, label, active = false }: { href: string, icon: React.ReactNode, label: string, active?: boolean }) {
+function SidebarLink({ href, icon, label, active = false }: { href: string; icon: React.ReactNode; label: string; active?: boolean }) {
     return (
         <Link
             href={href as any}
-            className={`group relative flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150 ${active
-                ? "bg-navy-deep text-white shadow-xs font-semibold"
-                : "text-slate-custom hover:bg-paper hover:text-navy-deep"
-                }`}
+            className={`group relative flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 select-none ${
+                active
+                    ? "bg-navy-deep text-white shadow-md shadow-navy-deep/10 font-semibold"
+                    : "text-slate-600 hover:bg-amber-500/10 hover:text-navy-deep hover:translate-x-0.5"
+            }`}
         >
+            {/* Sliding vertical amber indicator pill */}
             {active && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-amber rounded-r-full" />
+                <span className="absolute left-0 top-2 bottom-2 w-1.5 bg-amber rounded-r-full shadow-xs" />
             )}
-            <span className={`transition-transform duration-150 group-hover:scale-110 ${active ? "text-amber" : "text-slate-400 group-hover:text-navy-deep"}`}>
+            <span className={`transition-all duration-200 group-hover:scale-110 shrink-0 ${active ? "text-amber" : "text-slate-400 group-hover:text-amber"}`}>
                 {icon}
             </span>
             <span className="truncate">{label}</span>
