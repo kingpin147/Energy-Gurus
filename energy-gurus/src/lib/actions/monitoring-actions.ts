@@ -33,3 +33,4 @@ export async function updateMonitoringStatus(id: string, status: "pending" | "co
     return { success: false, error: "Failed to update status" };
   }
 }
+
