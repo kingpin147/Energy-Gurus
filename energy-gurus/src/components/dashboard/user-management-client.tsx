@@ -83,7 +83,7 @@ function formatRelativeTime(dateStr: string | Date | null | undefined): { label:
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 15) return { label: "Online Now", isOnline: true, isRecent: true };
+  if (diffMins < 20) return { label: "Online Now", isOnline: true, isRecent: true };
   if (diffMins < 60) return { label: `${diffMins}m ago`, isOnline: false, isRecent: true };
   if (diffHours < 24) return { label: `${diffHours}h ago`, isOnline: false, isRecent: true };
   if (diffDays === 1) return { label: "Yesterday", isOnline: false, isRecent: false };
@@ -100,7 +100,7 @@ function checkUserActivityMatch(user: DashboardUser, filter: ActivityFilter): bo
   const diffHours = (now - time) / (1000 * 60 * 60);
   const diffDays = diffHours / 24;
 
-  if (filter === "online") return diffHours <= 0.25; // 15 minutes
+  if (filter === "online") return diffHours <= 0.35; // ~20 minutes
   if (filter === "today") {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
@@ -152,7 +152,7 @@ export function UserManagementClient({
     return initialUsers.filter((u) => {
       const ts = u.lastActiveAt || u.lastSignInAt;
       if (!ts) return false;
-      return Date.now() - new Date(ts).getTime() <= 15 * 60 * 1000;
+      return Date.now() - new Date(ts).getTime() <= 20 * 60 * 1000;
     }).length;
   }, [initialUsers]);
 
@@ -220,7 +220,7 @@ export function UserManagementClient({
       if (sortOrder === "oldest") {
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       }
-      if (sortOrder === "recent_login") {
+      if (sortOrder === "recent_login" || activeTab === "activity") {
         const aTime = a.lastActiveAt || a.lastSignInAt ? new Date(a.lastActiveAt || a.lastSignInAt!).getTime() : 0;
         const bTime = b.lastActiveAt || b.lastSignInAt ? new Date(b.lastActiveAt || b.lastSignInAt!).getTime() : 0;
         return bTime - aTime;
@@ -319,7 +319,14 @@ export function UserManagementClient({
         </div>
 
         {/* Online Now */}
-        <div className="p-4 rounded-2xl bg-white border border-line shadow-xs relative overflow-hidden group hover:border-teal/40 hover:shadow-sm transition-all duration-200">
+        <div
+          onClick={() => {
+            setActiveTab("activity");
+            setActivityFilter("online");
+          }}
+          className="p-4 rounded-2xl bg-white border border-line shadow-xs relative overflow-hidden group hover:border-teal/60 hover:shadow-sm transition-all duration-200 cursor-pointer select-none"
+          title="Click to view all currently active users"
+        >
           <div className="absolute top-0 left-0 right-0 h-1 bg-teal" />
           <div className="flex items-center justify-between mb-2 pt-0.5">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-ibm-plex-mono truncate">
@@ -332,7 +339,7 @@ export function UserManagementClient({
           <div className="font-space-grotesk text-2xl sm:text-3xl font-black text-teal tracking-tight">
             {onlineNowCount}
           </div>
-          <p className="text-[10.5px] text-slate-400 mt-0.5 font-ibm-plex-mono truncate">Active in last 15 mins</p>
+          <p className="text-[10.5px] text-slate-400 mt-0.5 font-ibm-plex-mono truncate">Active in last 20 mins</p>
         </div>
 
         {/* EPC Installers */}

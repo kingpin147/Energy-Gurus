@@ -159,3 +159,18 @@ export async function toggleUserStatus(userId: string) {
 
     return { success: true, isActive: newStatus };
 }
+
+export async function recordUserHeartbeat() {
+    try {
+        const { userId: clerkId } = await auth();
+        if (!clerkId) return { success: false };
+
+        await db.update(users)
+            .set({ updatedAt: new Date() })
+            .where(eq(users.clerkId, clerkId));
+
+        return { success: true };
+    } catch {
+        return { success: false };
+    }
+}

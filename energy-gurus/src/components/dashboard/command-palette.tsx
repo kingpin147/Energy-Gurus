@@ -21,7 +21,6 @@ import {
     LayoutDashboard,
     Mail,
     Users,
-    Settings,
     Zap,
     Shield,
     FileText,
@@ -112,15 +111,6 @@ export function CommandPalette({ role }: CommandPaletteProps) {
                                 </CommandItem>
                             </CommandGroup>
                         )}
-
-                        <CommandGroup heading="Settings" className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-custom/40 mb-2 mt-4">
-                            <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/settings"))} className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-amber/5 text-ink transition-colors group">
-                                <div className="w-8 h-8 rounded-lg bg-slate-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                    <Settings className="w-4 h-4 text-slate-500" />
-                                </div>
-                                <span className="font-bold text-sm text-graphite">Profile Settings</span>
-                            </CommandItem>
-                        </CommandGroup>
                     </CommandList>
                 </Command>
             </DialogContent>

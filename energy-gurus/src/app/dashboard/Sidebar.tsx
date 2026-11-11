@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import {
     LayoutDashboard,
     FileText,
-    Settings,
     ArrowLeft,
     Users,
     Video,
@@ -44,21 +43,18 @@ export default function Sidebar({ role }: { role: UserRole | null | undefined })
         { href: "/dashboard/reviews", icon: <Star className="w-4 h-4" />, label: "Give & Manage Reviews" },
         { href: "/dashboard/inbox", icon: <Inbox className="w-4 h-4" />, label: "Support Inbox" },
         { href: "/dashboard/users", icon: <Users className="w-4 h-4" />, label: "Manage Users" },
-        { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings" },
     ];
 
     const epcLinks = [
         { href: "/dashboard/epc", icon: <Briefcase className="w-4 h-4" />, label: "My EPC Profile" },
         { href: "/dashboard/inquiries", icon: <Inbox className="w-4 h-4" />, label: "My Inquiries" },
         { href: "/dashboard/support", icon: <HeadphonesIcon className="w-4 h-4" />, label: "Contact Support" },
-        { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings" },
     ];
 
     const brandLinks = [
         { href: "/dashboard/brand", icon: <Building2 className="w-4 h-4" />, label: "My Brand Profile" },
         { href: "/dashboard/inquiries", icon: <Inbox className="w-4 h-4" />, label: "My Inquiries" },
         { href: "/dashboard/support", icon: <HeadphonesIcon className="w-4 h-4" />, label: "Contact Support" },
-        { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings" },
     ];
 
     const writerLinks = [
@@ -66,7 +62,6 @@ export default function Sidebar({ role }: { role: UserRole | null | undefined })
         { href: "/dashboard/writer", icon: <User className="w-4 h-4" />, label: "My Author Profile" },
         { href: "/dashboard/writer/articles", icon: <FileText className="w-4 h-4" />, label: "My Articles" },
         { href: "/dashboard/support", icon: <HeadphonesIcon className="w-4 h-4" />, label: "Contact Support" },
-        { href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, label: "Settings" },
     ];
 
     const links = role === 'super-admin' || role === 'admin'

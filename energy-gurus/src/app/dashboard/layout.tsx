@@ -12,6 +12,7 @@ import { MobileDashboardNav } from "@/components/dashboard/mobile-nav";
 
 import { CommandPalette } from "@/components/dashboard/command-palette";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
+import { UserPresenceHeartbeat } from "@/components/dashboard/UserPresenceHeartbeat";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,7 @@ export default async function DashboardLayout({
     return (
         <div className="dashboard-layout">
             <CommandPalette role={role} />
+            <UserPresenceHeartbeat />
             {/* Mobile Nav — only visible below 1024px */}
             <div className="mobile-nav-wrapper">
                 <MobileDashboardNav role={role} />
