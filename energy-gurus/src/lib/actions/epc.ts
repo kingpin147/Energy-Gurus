@@ -58,6 +58,7 @@ export async function updateEpcProfile(data: FormData | Partial<typeof epcInstal
     ...(data.has("socialLinks") ? { socialLinks: parseJsonArray(data.get("socialLinks"), []) } : {}),
     ...(data.has("reviewVideos") ? { reviewVideos: parseJsonArray(data.get("reviewVideos"), []) } : {}),
     ...(data.has("photos") ? { photos: parseJsonArray(data.get("photos"), []) } : {}),
+    ...(data.has("status") ? { status: (data.get("status") as any) } : {}),
     ...(data.has("sectors") ? { sectors: parseJsonArray(data.get("sectors"), []) } : {}),
     ...(data.has("certifications") ? { certifications: parseJsonArray(data.get("certifications"), []) } : {}),
     ...(data.has("brandsCertified") ? { brandsCertified: parseJsonArray(data.get("brandsCertified"), []) } : {}),
@@ -102,6 +103,29 @@ export async function updateEpcProfile(data: FormData | Partial<typeof epcInstal
 
   revalidatePath("/", "layout");
   return { success: true, id: existingEpc.id };
+}
+
+export async function submitEpcForReview(epcId: string) {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) throw new Error("Unauthorized");
+
+  const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId));
+  if (!user) throw new Error("User not found");
+
+  const [epc] = await db.select().from(epcInstallers).where(and(eq(epcInstallers.id, epcId), eq(epcInstallers.userId, user.id)));
+  if (!epc) throw new Error("EPC not found or not owned by user");
+
+  if (epc.status === "live") {
+    throw new Error("Profile is already live. Edit rights are exclusively managed by EnergyGurus administrators.");
+  }
+
+  await db.update(epcInstallers)
+    .set({ status: "pending_review", updatedAt: new Date() })
+    .where(eq(epcInstallers.id, epc.id));
+
+  revalidatePath("/dashboard/epc");
+  revalidatePath("/dashboard/admin/onboard-epc");
+  return { success: true, message: "Profile successfully submitted for EnergyGurus admin review!" };
 }
 
 // Office Actions
