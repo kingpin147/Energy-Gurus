@@ -9,6 +9,7 @@ import {
   MapPin,
   CreditCard,
   Zap,
+  Activity,
   Clock,
   CheckCircle2,
   AlertCircle,
@@ -98,33 +99,33 @@ const STATUS_CONFIG: Record<
   pending: {
     label: "PENDING",
     sublabel: "Needs initial contact & review",
-    pillClass: "bg-amber-50/90 text-amber-700 border-amber-200/80 hover:bg-amber-100/70",
-    dotClass: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)] animate-pulse",
-    borderClass: "border-l-amber-500",
+    pillClass: "bg-amber/10 text-amber-deep border-amber/30 hover:bg-amber/20",
+    dotClass: "bg-amber shadow-[0_0_8px_rgba(232,163,61,0.6)] animate-pulse",
+    borderClass: "border-l-amber",
     icon: "●",
   },
   contacted: {
     label: "CONTACTED",
     sublabel: "Outreach sent / in discussion",
-    pillClass: "bg-blue-50/90 text-blue-700 border-blue-200/80 hover:bg-blue-100/70",
-    dotClass: "bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]",
-    borderClass: "border-l-blue-500",
+    pillClass: "bg-navy-deep/10 text-navy-deep border-navy-deep/20 hover:bg-navy-deep/15",
+    dotClass: "bg-navy-deep shadow-[0_0_8px_rgba(18,33,58,0.3)]",
+    borderClass: "border-l-navy-deep",
     icon: "●",
   },
   active: {
     label: "ACTIVE",
     sublabel: "Contract confirmed & monitoring live",
-    pillClass: "bg-emerald-50/90 text-emerald-700 border-emerald-200/80 hover:bg-emerald-100/70",
-    dotClass: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse",
-    borderClass: "border-l-emerald-500",
+    pillClass: "bg-teal/10 text-teal border-teal/20 hover:bg-teal/20",
+    dotClass: "bg-teal shadow-[0_0_8px_rgba(47,110,98,0.6)] animate-pulse",
+    borderClass: "border-l-teal",
     icon: "●",
   },
   rejected: {
     label: "REJECTED",
     sublabel: "Archived / invalid inquiry",
-    pillClass: "bg-rose-50/90 text-rose-700 border-rose-200/80 hover:bg-rose-100/70",
-    dotClass: "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]",
-    borderClass: "border-l-rose-500",
+    pillClass: "bg-slate-100 text-slate-custom border-line hover:bg-slate-200/60",
+    dotClass: "bg-slate-400",
+    borderClass: "border-l-slate-400",
     icon: "✕",
   },
 };
@@ -246,10 +247,10 @@ export function MonitoringRequestsClient({
   const getCustomerTypeBadgeStyle = (type: string) => {
     const lower = (type || "").toLowerCase();
     if (lower.includes("comm"))
-      return "bg-blue-50/90 text-blue-700 border-blue-200/70";
+      return "bg-navy-deep/10 text-navy-deep border-navy-deep/20";
     if (lower.includes("indus"))
-      return "bg-purple-50/90 text-purple-700 border-purple-200/70";
-    return "bg-emerald-50/90 text-emerald-700 border-emerald-200/70";
+      return "bg-amber/10 text-amber-deep border-amber/20";
+    return "bg-teal/10 text-teal border-teal/20";
   };
 
   return (
@@ -269,7 +270,7 @@ export function MonitoringRequestsClient({
         <div>
           <div className="flex items-center gap-2">
             <span className="p-2 rounded-xl bg-amber/10 text-amber border border-amber/20 shadow-xs">
-              <Zap className="w-5 h-5" />
+              <Activity className="w-5 h-5" />
             </span>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-navy-deep font-space-grotesk">
               Solar Monitoring Setup Inquiries
@@ -284,7 +285,7 @@ export function MonitoringRequestsClient({
       {/* 2. Bento Telemetry Cards (Metrics Top Bar) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Total Inquiries Card */}
-        <div className="bg-white border border-line rounded-2xl p-4.5 shadow-xs border-t-2 border-t-slate-800 transition-all hover:shadow-sm">
+        <div className="bg-white border border-line rounded-2xl p-4.5 shadow-xs border-t-2 border-t-navy-deep transition-all hover:shadow-sm">
           <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 font-ibm-plex-mono">
             <span>Total Inquiries</span>
             <Layers className="w-3.5 h-3.5 text-slate-400" />
@@ -296,48 +297,48 @@ export function MonitoringRequestsClient({
         </div>
 
         {/* Pending Card */}
-        <div className="bg-white border border-amber-200/60 rounded-2xl p-4.5 shadow-xs border-t-2 border-t-amber transition-all hover:shadow-sm bg-gradient-to-b from-amber-50/30 to-transparent">
-          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-amber font-ibm-plex-mono">
+        <div className="bg-white border border-amber/30 rounded-2xl p-4.5 shadow-xs border-t-2 border-t-amber transition-all hover:shadow-sm bg-gradient-to-b from-amber/5 to-transparent">
+          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-amber-deep font-ibm-plex-mono">
             <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber shadow-[0_0_8px_rgba(245,158,11,0.6)] animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-amber shadow-[0_0_8px_rgba(232,163,61,0.6)] animate-pulse" />
               Pending
             </span>
             <Clock className="w-3.5 h-3.5 text-amber" />
           </div>
-          <div className="text-2xl font-bold text-amber font-space-grotesk mt-2">
+          <div className="text-2xl font-bold text-amber-deep font-space-grotesk mt-2">
             {stats.pending}
           </div>
-          <div className="text-[11px] text-amber-700/80 mt-1 font-mono">Needs initial contact</div>
+          <div className="text-[11px] text-slate-custom mt-1 font-mono">Needs initial contact</div>
         </div>
 
         {/* Contacted Card */}
-        <div className="bg-white border border-blue-200/60 rounded-2xl p-4.5 shadow-xs border-t-2 border-t-blue-500 transition-all hover:shadow-sm bg-gradient-to-b from-blue-50/20 to-transparent">
-          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-blue-600 font-ibm-plex-mono">
+        <div className="bg-white border border-line rounded-2xl p-4.5 shadow-xs border-t-2 border-t-navy-deep transition-all hover:shadow-sm bg-gradient-to-b from-navy-deep/[0.03] to-transparent">
+          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-navy-deep font-ibm-plex-mono">
             <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-blue-500" />
+              <span className="w-2 h-2 rounded-full bg-navy-deep" />
               Contacted
             </span>
-            <Phone className="w-3.5 h-3.5 text-blue-500" />
+            <Phone className="w-3.5 h-3.5 text-navy-deep" />
           </div>
-          <div className="text-2xl font-bold text-blue-700 font-space-grotesk mt-2">
+          <div className="text-2xl font-bold text-navy-deep font-space-grotesk mt-2">
             {stats.contacted}
           </div>
-          <div className="text-[11px] text-blue-700/80 mt-1 font-mono">Under discussion</div>
+          <div className="text-[11px] text-slate-custom mt-1 font-mono">Under discussion</div>
         </div>
 
         {/* Active Live Card */}
-        <div className="bg-white border border-emerald-200/60 rounded-2xl p-4.5 shadow-xs border-t-2 border-t-emerald-500 transition-all hover:shadow-sm bg-gradient-to-b from-emerald-50/25 to-transparent">
-          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-emerald-700 font-ibm-plex-mono">
+        <div className="bg-white border border-teal/30 rounded-2xl p-4.5 shadow-xs border-t-2 border-t-teal transition-all hover:shadow-sm bg-gradient-to-b from-teal/5 to-transparent">
+          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-teal font-ibm-plex-mono">
             <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-teal shadow-[0_0_8px_rgba(47,110,98,0.6)] animate-pulse" />
               Active Live
             </span>
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-teal" />
           </div>
-          <div className="text-2xl font-bold text-emerald-700 font-space-grotesk mt-2">
+          <div className="text-2xl font-bold text-teal font-space-grotesk mt-2">
             {stats.active}
           </div>
-          <div className="text-[11px] text-emerald-700/80 mt-1 font-mono">Contract confirmed</div>
+          <div className="text-[11px] text-slate-custom mt-1 font-mono">Contract confirmed</div>
         </div>
       </div>
 
@@ -384,11 +385,11 @@ export function MonitoringRequestsClient({
             onClick={() => setStatusFilter("contacted")}
             className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
               statusFilter === "contacted"
-                ? "bg-white text-blue-600 shadow-xs font-bold"
-                : "text-slate-500 hover:text-blue-600"
+                ? "bg-white text-navy-deep shadow-xs font-bold"
+                : "text-slate-500 hover:text-navy-deep"
             }`}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+            <span className="w-1.5 h-1.5 rounded-full bg-navy-deep" />
             Contacted ({stats.contacted})
           </button>
           <button
@@ -396,11 +397,11 @@ export function MonitoringRequestsClient({
             onClick={() => setStatusFilter("active")}
             className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
               statusFilter === "active"
-                ? "bg-white text-emerald-700 shadow-xs font-bold"
-                : "text-slate-500 hover:text-emerald-700"
+                ? "bg-white text-teal shadow-xs font-bold"
+                : "text-slate-500 hover:text-teal"
             }`}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span className="w-1.5 h-1.5 rounded-full bg-teal" />
             Active ({stats.active})
           </button>
         </div>
@@ -914,7 +915,7 @@ export function MonitoringRequestsClient({
                 <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4.5 shadow-2xs space-y-3">
                   <div className="border-b border-line/60 pb-2">
                     <span className="text-xs font-bold font-ibm-plex-mono uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                      <Layers className="w-3.5 h-3.5 text-blue-500" />
+                      <Layers className="w-3.5 h-3.5 text-teal" />
                       Monitoring Package
                     </span>
                   </div>

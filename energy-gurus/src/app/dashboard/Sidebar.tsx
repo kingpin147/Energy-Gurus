@@ -20,7 +20,9 @@ import {
     User,
     UserCheck,
     Megaphone,
-    Activity
+    Activity,
+    BarChart3,
+    Award
 } from "lucide-react";
 import { UserRole } from "@/db/schema";
 
@@ -35,12 +37,12 @@ export default function Sidebar({ role }: { role: UserRole | null | undefined })
         { href: "/dashboard/admin/onboard-brand", icon: <Building2 className="w-4 h-4" />, label: "Brands Hub & Onboarding" },
         { href: "/dashboard/admin/onboard-writer", icon: <UserCheck className="w-4 h-4" />, label: "Writers Hub & Onboarding" },
         { href: "/dashboard/moderation", icon: <ShieldCheck className="w-4 h-4" />, label: "Submissions & Moderation" },
-        { href: "/dashboard/admin/certifications", icon: <ShieldCheck className="w-4 h-4" />, label: "Certification Approvals" },
+        { href: "/dashboard/admin/certifications", icon: <Award className="w-4 h-4" />, label: "Certification Approvals" },
         { href: "/dashboard/monitoring/requests", icon: <Activity className="w-4 h-4" />, label: "Monitoring Requests" },
         { href: "/dashboard/content", icon: <Video className="w-4 h-4" />, label: "Content (Podcast/QA)" },
         { href: "/dashboard/news", icon: <FileText className="w-4 h-4" />, label: "News Management" },
         { href: "/dashboard/ads", icon: <Megaphone className="w-4 h-4" />, label: "Ads Management" },
-        { href: "/dashboard/analytics", icon: <Activity className="w-4 h-4" />, label: "Engagement Hub" },
+        { href: "/dashboard/analytics", icon: <BarChart3 className="w-4 h-4" />, label: "Engagement Hub" },
         { href: "/dashboard/reviews", icon: <Star className="w-4 h-4" />, label: "Give & Manage Reviews" },
         { href: "/dashboard/inbox", icon: <Inbox className="w-4 h-4" />, label: "Support Inbox" },
         { href: "/dashboard/users", icon: <Users className="w-4 h-4" />, label: "Manage Users" },
