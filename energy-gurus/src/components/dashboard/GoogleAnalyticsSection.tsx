@@ -22,6 +22,14 @@ import {
   ExternalLink,
   Radio
 } from "lucide-react";
+import {
+  GoogleIcon,
+  FacebookIcon,
+  TikTokIcon,
+  LinkedInIcon,
+  YouTubeIcon,
+  DirectIcon,
+} from "@/components/icons/BrandIcons";
 import { GAResponse, GADailyTrend } from "@/lib/google-analytics";
 
 function MiniSparkline({ points, strokeColor }: { points: number[]; strokeColor: string }) {
@@ -656,14 +664,14 @@ export function GoogleAnalyticsSection({ data }: Props) {
                     <span className={`text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border ${item.badgeColor}`}>
                       {item.category}
                     </span>
-                    <span className="text-xs">
-                      {item.iconType === "google" && <Search className="w-3.5 h-3.5 text-amber" />}
-                      {item.iconType === "facebook" && <Share2 className="w-3.5 h-3.5 text-blue-600" />}
-                      {item.iconType === "tiktok" && <Radio className="w-3.5 h-3.5 text-slate-800" />}
-                      {item.iconType === "linkedin" && <Globe2 className="w-3.5 h-3.5 text-sky-600" />}
-                      {item.iconType === "youtube" && <ExternalLink className="w-3.5 h-3.5 text-rose-600" />}
-                      {item.iconType === "direct" && <Compass className="w-3.5 h-3.5 text-emerald-600" />}
-                    </span>
+                    <div className="w-6 h-6 rounded-md bg-white border border-line/70 shadow-2xs flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
+                      {item.iconType === "google" && <GoogleIcon className="w-3.5 h-3.5" />}
+                      {item.iconType === "facebook" && <FacebookIcon className="w-3.5 h-3.5" />}
+                      {item.iconType === "tiktok" && <TikTokIcon className="w-3.5 h-3.5" />}
+                      {item.iconType === "linkedin" && <LinkedInIcon className="w-3.5 h-3.5" />}
+                      {item.iconType === "youtube" && <YouTubeIcon className="w-3.5 h-3.5" />}
+                      {item.iconType === "direct" && <DirectIcon className="w-3.5 h-3.5" />}
+                    </div>
                   </div>
                   <h4 className="text-xs font-bold text-navy-deep group-hover:text-amber transition-colors truncate" title={item.name}>
                     {item.name}
