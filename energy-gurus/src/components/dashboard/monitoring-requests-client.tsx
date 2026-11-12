@@ -19,6 +19,8 @@ import {
   ShieldCheck,
   CreditCard,
   MapPin,
+  Building2,
+  FileText,
 } from "lucide-react";
 import { updateMonitoringStatus } from "@/lib/actions/monitoring-actions";
 
@@ -27,16 +29,20 @@ export type MonitoringStatus = "pending" | "contacted" | "active" | "rejected";
 export interface MonitoringRequestItem {
   id: string;
   customerName: string;
-  address: string;
+  designation?: string | null;
+  company?: string | null;
+  city?: string | null;
+  address?: string | null;
   contactNo: string;
   email: string;
-  cnic: string;
-  customerType: string;
-  systemSize: string;
-  package: string;
-  monitoringHours: string;
-  paymentPlan: string;
-  amountPayable: string | null;
+  cnic?: string | null;
+  customerType?: string | null;
+  systemSize?: string | null;
+  package?: string | null;
+  monitoringHours?: string | null;
+  paymentPlan?: string | null;
+  amountPayable?: string | null;
+  remarks?: string | null;
   status: MonitoringStatus;
   createdAt: Date | string;
   updatedAt: Date | string;
@@ -198,10 +204,14 @@ export function MonitoringRequestsClient({
       const q = search.toLowerCase();
       return (
         req.customerName.toLowerCase().includes(q) ||
+        (req.designation || "").toLowerCase().includes(q) ||
+        (req.company || "").toLowerCase().includes(q) ||
+        (req.city || "").toLowerCase().includes(q) ||
         req.email.toLowerCase().includes(q) ||
         req.contactNo.toLowerCase().includes(q) ||
-        req.cnic.toLowerCase().includes(q) ||
-        req.address.toLowerCase().includes(q) ||
+        (req.cnic || "").toLowerCase().includes(q) ||
+        (req.address || "").toLowerCase().includes(q) ||
+        (req.remarks || "").toLowerCase().includes(q) ||
         (req.amountPayable || "").toLowerCase().includes(q)
       );
     });
@@ -217,11 +227,9 @@ export function MonitoringRequestsClient({
     return `MON-${year}-${shortCode}`;
   };
 
-  const formatPriceDisplay = (amountStr: string | null) => {
+  const formatPriceDisplay = (amountStr: string | null | undefined) => {
     if (!amountStr) return "Custom Quote";
-    // Clean up strings like "PKR 14,520 per year (billed annually) - approx..."
     const primaryPart = amountStr.split(/\s*\(billed|\s*-\s*approx/i)[0].trim();
-    // Normalize "per year" -> "/ yr", "per month" -> "/ mo", "per quarter" -> "/ qtr"
     return primaryPart
       .replace(/per year/i, "/ yr")
       .replace(/per month/i, "/ mo")
@@ -257,9 +265,8 @@ export function MonitoringRequestsClient({
         </div>
       </div>
 
-      {/* 2. Top KPI Cards (Uniform 1px solid border, no colored full borders, 6px status dots) */}
+      {/* 2. Top KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        {/* Total Inquiries Card */}
         <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs transition-all hover:border-slate-300">
           <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-500 font-mono">
             <span className="flex items-center gap-1.5">
@@ -274,7 +281,6 @@ export function MonitoringRequestsClient({
           <div className="text-[11px] text-slate-500 mt-1 font-mono">Platform Telemetry</div>
         </div>
 
-        {/* Pending Card */}
         <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs transition-all hover:border-slate-300">
           <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-700 font-mono">
             <span className="flex items-center gap-1.5">
@@ -289,7 +295,6 @@ export function MonitoringRequestsClient({
           <div className="text-[11px] text-slate-500 mt-1 font-mono">Needs initial contact</div>
         </div>
 
-        {/* Contacted Card */}
         <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs transition-all hover:border-slate-300">
           <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-700 font-mono">
             <span className="flex items-center gap-1.5">
@@ -304,7 +309,6 @@ export function MonitoringRequestsClient({
           <div className="text-[11px] text-slate-500 mt-1 font-mono">Under discussion</div>
         </div>
 
-        {/* Active Live Card */}
         <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs transition-all hover:border-slate-300">
           <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-700 font-mono">
             <span className="flex items-center gap-1.5">
@@ -320,7 +324,7 @@ export function MonitoringRequestsClient({
         </div>
       </div>
 
-      {/* 3. Search and Segmented Filter Controls (Unified rounded-lg) */}
+      {/* 3. Search and Segmented Filter Controls */}
       <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -328,12 +332,11 @@ export function MonitoringRequestsClient({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search customer name, CNIC, phone, address..."
+            placeholder="Search name, company, city, contact, remarks..."
             className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-sans text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all shadow-2xs"
           />
         </div>
 
-        {/* Segmented Filter Control */}
         <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg self-start md:self-auto text-xs font-mono font-medium border border-slate-200">
           <button
             type="button"
@@ -392,9 +395,9 @@ export function MonitoringRequestsClient({
             <thead className="text-[11px] font-mono uppercase tracking-wider text-slate-500 bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="px-4 py-3 font-semibold">Customer & Inquiry Ref</th>
-                <th className="px-4 py-3 font-semibold">Contact & CNIC</th>
-                <th className="px-4 py-3 font-semibold">Site Address</th>
-                <th className="px-4 py-3 font-semibold">System Spec</th>
+                <th className="px-4 py-3 font-semibold">Contact Details</th>
+                <th className="px-4 py-3 font-semibold">City & Address</th>
+                <th className="px-4 py-3 font-semibold">Specification / Remarks</th>
                 <th className="px-4 py-3 font-semibold">Commercials</th>
                 <th className="px-4 py-3 font-semibold">Status</th>
                 <th className="px-4 py-3 font-semibold text-right">Action</th>
@@ -414,23 +417,24 @@ export function MonitoringRequestsClient({
                     month: "short",
                     day: "numeric",
                   });
-                  const sizeLabel = SYSTEM_SIZE_LABELS[req.systemSize] || `${req.systemSize} kW`;
-                  const pkgData = PACKAGE_LABELS[req.package] || {
+                  const sizeLabel = req.systemSize ? (SYSTEM_SIZE_LABELS[req.systemSize] || `${req.systemSize} kW`) : null;
+                  const pkgData = req.package ? (PACKAGE_LABELS[req.package] || {
                     name: req.package,
                     frequency: "Checkup",
                     audits: "Standard",
-                  };
-                  const typeData = SYSTEM_TYPE_LABELS[req.monitoringHours] || {
+                  }) : null;
+                  const typeData = req.monitoringHours ? (SYSTEM_TYPE_LABELS[req.monitoringHours] || {
                     label: req.monitoringHours,
                     desc: "System",
-                  };
-                  const planData = PAYMENT_PLAN_LABELS[req.paymentPlan] || {
+                  }) : null;
+                  const planData = req.paymentPlan ? (PAYMENT_PLAN_LABELS[req.paymentPlan] || {
                     title: req.paymentPlan,
                     discountBadge: null,
-                  };
+                  }) : null;
                   const statusConf = STATUS_CONFIG[req.status] || STATUS_CONFIG.pending;
                   const isDropdownOpen = openStatusDropdownId === req.id;
                   const formattedPrice = formatPriceDisplay(req.amountPayable);
+                  const displayLocation = req.city || req.address || "—";
 
                   return (
                     <tr
@@ -438,17 +442,22 @@ export function MonitoringRequestsClient({
                       className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
                       onClick={() => setSelectedReq(req)}
                     >
-                      {/* 1. Customer & Inquiry Ref (Typography + Bullet Separator, No Pill Boxes) */}
+                      {/* 1. Customer & Inquiry Ref */}
                       <td className="px-4 py-3.5 align-top">
                         <div className="font-space-grotesk font-semibold text-slate-900 text-[13.5px]">
                           {req.customerName}
                         </div>
                         <div className="font-mono text-xs text-slate-500 mt-0.5">
-                          #{inquiryRef} • {req.customerType || "Residential"} • {formattedDate}
+                          #{inquiryRef} • {req.city || req.customerType || "Residential"} • {formattedDate}
                         </div>
+                        {(req.designation || req.company) && (
+                          <div className="font-mono text-[11px] text-slate-500 mt-0.5 truncate max-w-[200px]">
+                            {req.designation}{req.designation && req.company ? " at " : ""}{req.company}
+                          </div>
+                        )}
                       </td>
 
-                      {/* 2. Contact & CNIC (Hover-only Copy Icons, Plain Typography) */}
+                      {/* 2. Contact Details (Hover-only Copy Icons) */}
                       <td className="px-4 py-3.5 align-top space-y-0.5" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center gap-1.5">
                           <a
@@ -500,76 +509,102 @@ export function MonitoringRequestsClient({
                           </button>
                         </div>
 
-                        <div className="flex items-center gap-1.5 text-xs font-mono text-slate-500 pt-0.5">
-                          <span>CNIC {req.cnic}</span>
-                          <button
-                            type="button"
-                            onClick={() => copyToClipboard(req.cnic, `cnic-${req.id}`, "CNIC Number")}
-                            className={`text-slate-400 hover:text-slate-700 p-0.5 rounded transition-all cursor-pointer ${
-                              copiedField === `cnic-${req.id}`
-                                ? "opacity-100 text-emerald-600"
-                                : "opacity-0 group-hover:opacity-100"
-                            }`}
-                            title="Copy CNIC"
-                          >
-                            {copiedField === `cnic-${req.id}` ? (
-                              <Check className="w-3 h-3 text-emerald-600" />
-                            ) : (
-                              <Copy className="w-3 h-3" />
-                            )}
-                          </button>
-                        </div>
+                        {req.cnic ? (
+                          <div className="flex items-center gap-1.5 text-xs font-mono text-slate-500 pt-0.5">
+                            <span>CNIC {req.cnic}</span>
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(req.cnic || "", `cnic-${req.id}`, "CNIC Number")}
+                              className={`text-slate-400 hover:text-slate-700 p-0.5 rounded transition-all cursor-pointer ${
+                                copiedField === `cnic-${req.id}` ? "opacity-100 text-emerald-600" : "opacity-0 group-hover:opacity-100"
+                              }`}
+                              title="Copy CNIC"
+                            >
+                              {copiedField === `cnic-${req.id}` ? (
+                                <Check className="w-3 h-3 text-emerald-600" />
+                              ) : (
+                                <Copy className="w-3 h-3" />
+                              )}
+                            </button>
+                          </div>
+                        ) : req.company ? (
+                          <div className="text-[11px] font-mono text-slate-500 pt-0.5 truncate max-w-[170px]">
+                            {req.company}
+                          </div>
+                        ) : null}
                       </td>
 
-                      {/* 3. Site Address (Hover-only Copy Icon) */}
+                      {/* 3. City & Address */}
                       <td className="px-4 py-3.5 align-top max-w-[210px]" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-start gap-1.5 text-xs text-slate-500 leading-relaxed">
-                          <span className="line-clamp-2">{req.address}</span>
-                          <button
-                            type="button"
-                            onClick={() => copyToClipboard(req.address, `addr-${req.id}`, "Address")}
-                            className={`text-slate-400 hover:text-slate-700 shrink-0 mt-0.5 p-0.5 rounded transition-all cursor-pointer ${
-                              copiedField === `addr-${req.id}`
-                                ? "opacity-100 text-emerald-600"
-                                : "opacity-0 group-hover:opacity-100"
-                            }`}
-                            title="Copy Address"
-                          >
-                            {copiedField === `addr-${req.id}` ? (
-                              <Check className="w-3 h-3 text-emerald-600" />
-                            ) : (
-                              <Copy className="w-3 h-3" />
-                            )}
-                          </button>
-                        </div>
-                      </td>
-
-                      {/* 4. System Spec (Clean Typography, No Sticker Pills) */}
-                      <td className="px-4 py-3.5 align-top">
-                        <div className="font-mono text-xs font-semibold text-slate-900">
-                          {sizeLabel} • {typeData.label}
-                        </div>
-                        <div className="text-xs text-slate-500 mt-0.5">
-                          {pkgData.name} ({pkgData.frequency})
-                        </div>
-                      </td>
-
-                      {/* 5. Commercials (Bold Slate Amount, Subtle Subtitle) */}
-                      <td className="px-4 py-3.5 align-top">
-                        <div className="font-mono text-xs font-bold text-slate-900">
-                          {formattedPrice}
-                        </div>
-                        <div className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1 flex-wrap">
-                          <span>{planData.title}</span>
-                          {planData.discountBadge && (
-                            <span className="text-emerald-700 font-medium font-mono">
-                              ({planData.discountBadge})
-                            </span>
+                          <span className="line-clamp-2">{displayLocation}</span>
+                          {displayLocation !== "—" && (
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(displayLocation, `addr-${req.id}`, "Location")}
+                              className={`text-slate-400 hover:text-slate-700 shrink-0 mt-0.5 p-0.5 rounded transition-all cursor-pointer ${
+                                copiedField === `addr-${req.id}` ? "opacity-100 text-emerald-600" : "opacity-0 group-hover:opacity-100"
+                              }`}
+                              title="Copy Address"
+                            >
+                              {copiedField === `addr-${req.id}` ? (
+                                <Check className="w-3 h-3 text-emerald-600" />
+                              ) : (
+                                <Copy className="w-3 h-3" />
+                              )}
+                            </button>
                           )}
                         </div>
                       </td>
 
-                      {/* 6. Status Dropdown (Compact rounded-md badge) */}
+                      {/* 4. Specification / Remarks */}
+                      <td className="px-4 py-3.5 align-top max-w-[220px]">
+                        {sizeLabel ? (
+                          <>
+                            <div className="font-mono text-xs font-semibold text-slate-900">
+                              {sizeLabel} {typeData?.label ? `• ${typeData.label}` : ""}
+                            </div>
+                            <div className="text-xs text-slate-500 mt-0.5">
+                              {pkgData?.name} {pkgData?.frequency ? `(${pkgData.frequency})` : ""}
+                            </div>
+                          </>
+                        ) : req.remarks ? (
+                          <div className="text-xs text-slate-700 line-clamp-2 italic">
+                            "{req.remarks}"
+                          </div>
+                        ) : (
+                          <div className="font-mono text-xs text-slate-700">
+                            Request to Contact
+                          </div>
+                        )}
+                      </td>
+
+                      {/* 5. Commercials */}
+                      <td className="px-4 py-3.5 align-top">
+                        {req.amountPayable ? (
+                          <>
+                            <div className="font-mono text-xs font-bold text-slate-900">
+                              {formattedPrice}
+                            </div>
+                            {planData && (
+                              <div className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1 flex-wrap">
+                                <span>{planData.title}</span>
+                                {planData.discountBadge && (
+                                  <span className="text-emerald-700 font-medium font-mono">
+                                    ({planData.discountBadge})
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="font-mono text-xs text-slate-700">
+                            Consultation
+                          </div>
+                        )}
+                      </td>
+
+                      {/* 6. Status Dropdown */}
                       <td className="px-4 py-3.5 align-top relative" onClick={(e) => e.stopPropagation()}>
                         <div className="relative inline-block">
                           <button
@@ -585,7 +620,6 @@ export function MonitoringRequestsClient({
                             <ChevronDown className="w-3 h-3 opacity-60 ml-0.5" />
                           </button>
 
-                          {/* Status Popover */}
                           {isDropdownOpen && (
                             <div
                               ref={dropdownRef}
@@ -626,7 +660,7 @@ export function MonitoringRequestsClient({
                         </div>
                       </td>
 
-                      {/* 7. Action Strip (Clean outline button) */}
+                      {/* 7. Action Strip */}
                       <td className="px-4 py-3.5 align-top text-right" onClick={(e) => e.stopPropagation()}>
                         <button
                           type="button"
@@ -668,7 +702,7 @@ export function MonitoringRequestsClient({
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 font-mono">
-                  #{getInquiryRef(selectedReq)} • {selectedReq.customerType || "Residential"} •{" "}
+                  #{getInquiryRef(selectedReq)} • {selectedReq.city || selectedReq.customerType || "Residential"} •{" "}
                   {new Date(selectedReq.createdAt).toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",
@@ -707,7 +741,7 @@ export function MonitoringRequestsClient({
                   <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
                 </a>
                 <a
-                  href={`mailto:${selectedReq.email}?subject=Regarding%20Your%20Solar%20Monitoring%20Request%20-%20EnergyGurus`}
+                  href={`mailto:${selectedReq.email}?subject=Regarding%20Your%20EnergyGurus%20Monitoring%20Request`}
                   className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md border border-slate-200 bg-white text-slate-700 text-xs font-medium hover:bg-slate-50 transition-colors shadow-2xs"
                 >
                   <Mail className="w-3.5 h-3.5" /> Email
@@ -715,10 +749,10 @@ export function MonitoringRequestsClient({
               </div>
             </div>
 
-            {/* Modal Body: 2x2 Clean Enterprise Grid */}
+            {/* Modal Body: Grid */}
             <div className="p-5 overflow-y-auto space-y-4 max-h-[calc(92vh-220px)] bg-slate-50/50">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                {/* 1. Contact & Site Details */}
+                {/* 1. Contact & Identity Details */}
                 <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs space-y-2.5">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                     <span className="text-xs font-semibold font-mono uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
@@ -729,7 +763,7 @@ export function MonitoringRequestsClient({
                       type="button"
                       onClick={() =>
                         copyToClipboard(
-                          `Customer: ${selectedReq.customerName}\nPhone: ${selectedReq.contactNo}\nEmail: ${selectedReq.email}\nCNIC: ${selectedReq.cnic}\nAddress: ${selectedReq.address}`,
+                          `Customer: ${selectedReq.customerName}\nDesignation: ${selectedReq.designation || 'N/A'}\nCompany: ${selectedReq.company || 'N/A'}\nCity: ${selectedReq.city || selectedReq.address || 'N/A'}\nPhone: ${selectedReq.contactNo}\nEmail: ${selectedReq.email}`,
                           "copy-all-contact",
                           "Contact Card"
                         )
@@ -753,109 +787,102 @@ export function MonitoringRequestsClient({
                         {selectedReq.email}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-500 font-mono">CNIC:</span>
-                      <span className="font-mono text-slate-900 font-medium">
-                        {selectedReq.cnic}
-                      </span>
-                    </div>
+                    {selectedReq.designation && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500 font-mono">Designation:</span>
+                        <span className="text-slate-900 font-medium">
+                          {selectedReq.designation}
+                        </span>
+                      </div>
+                    )}
+                    {selectedReq.company && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500 font-mono">Company:</span>
+                        <span className="text-slate-900 font-medium">
+                          {selectedReq.company}
+                        </span>
+                      </div>
+                    )}
+                    {selectedReq.cnic && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500 font-mono">CNIC:</span>
+                        <span className="font-mono text-slate-900 font-medium">
+                          {selectedReq.cnic}
+                        </span>
+                      </div>
+                    )}
                     <div className="pt-2 border-t border-slate-100">
                       <div className="text-slate-500 font-mono text-[11px] mb-1 flex items-center gap-1">
-                        <MapPin className="w-3 h-3 text-slate-400" /> Site Address:
+                        <MapPin className="w-3 h-3 text-slate-400" /> City / Address:
                       </div>
                       <div className="text-slate-700 leading-relaxed text-xs">
-                        {selectedReq.address}
+                        {selectedReq.city || selectedReq.address || "N/A"}
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* 2. System & Grid Spec */}
+                {/* 2. Remarks / Requirements */}
                 <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs space-y-2.5">
                   <div className="border-b border-slate-100 pb-2">
                     <span className="text-xs font-semibold font-mono uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                      <Zap className="w-3.5 h-3.5 text-slate-400" />
-                      System Spec
+                      <FileText className="w-3.5 h-3.5 text-slate-400" />
+                      Inquiry Remarks & Notes
                     </span>
                   </div>
 
                   <div className="space-y-3 text-xs">
-                    <div>
-                      <div className="text-slate-500 font-mono text-[11px]">System Capacity</div>
-                      <div className="font-space-grotesk font-bold text-slate-900 text-base mt-0.5">
-                        {SYSTEM_SIZE_LABELS[selectedReq.systemSize] || `${selectedReq.systemSize} kW`}
+                    {selectedReq.remarks ? (
+                      <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-slate-800 leading-relaxed text-xs whitespace-pre-wrap">
+                        {selectedReq.remarks}
                       </div>
-                    </div>
+                    ) : (
+                      <div className="text-slate-400 italic text-xs py-2">
+                        No specific remarks provided by customer.
+                      </div>
+                    )}
 
-                    <div className="pt-2 border-t border-slate-100">
-                      <div className="text-slate-500 font-mono text-[11px]">Grid Integration</div>
-                      <div className="font-semibold text-slate-900 text-xs mt-0.5">
-                        {SYSTEM_TYPE_LABELS[selectedReq.monitoringHours]?.label || selectedReq.monitoringHours}
+                    {selectedReq.systemSize && (
+                      <div className="pt-2 border-t border-slate-100">
+                        <div className="text-slate-500 font-mono text-[11px]">System Size:</div>
+                        <div className="font-space-grotesk font-bold text-slate-900 text-sm mt-0.5">
+                          {SYSTEM_SIZE_LABELS[selectedReq.systemSize] || `${selectedReq.systemSize} kW`}
+                        </div>
                       </div>
-                      <div className="text-[11px] text-slate-500 mt-0.5">
-                        {SYSTEM_TYPE_LABELS[selectedReq.monitoringHours]?.desc || "Standard Grid telemetry"}
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
 
-                {/* 3. Monitoring Package */}
-                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs space-y-2.5">
-                  <div className="border-b border-slate-100 pb-2">
-                    <span className="text-xs font-semibold font-mono uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                      <Layers className="w-3.5 h-3.5 text-slate-400" />
-                      Monitoring Package
-                    </span>
-                  </div>
-
-                  <div className="space-y-2 text-xs">
-                    <div>
-                      <div className="text-slate-500 font-mono text-[11px]">Package Tier</div>
-                      <div className="font-semibold text-slate-900 text-sm mt-0.5">
-                        {PACKAGE_LABELS[selectedReq.package]?.name || selectedReq.package}
-                      </div>
+                {/* 3. System & Commercial Spec (if present) */}
+                {(selectedReq.package || selectedReq.amountPayable) && (
+                  <div className="md:col-span-2 bg-white border border-slate-200 rounded-xl p-4 shadow-2xs space-y-2.5">
+                    <div className="border-b border-slate-100 pb-2">
+                      <span className="text-xs font-semibold font-mono uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                        <CreditCard className="w-3.5 h-3.5 text-slate-400" />
+                        Package & Financial Breakdown
+                      </span>
                     </div>
 
-                    <div className="pt-2 border-t border-slate-100">
-                      <div className="text-slate-500 font-mono text-[11px]">Audit / Checkup Frequency</div>
-                      <div className="text-slate-700 mt-0.5">
-                        {PACKAGE_LABELS[selectedReq.package]?.frequency || "Annual"} (
-                        {PACKAGE_LABELS[selectedReq.package]?.audits || "1x / yr"})
-                      </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      {selectedReq.package && (
+                        <div>
+                          <div className="text-slate-500 font-mono text-[11px]">Package Tier:</div>
+                          <div className="font-semibold text-slate-900 mt-0.5">
+                            {PACKAGE_LABELS[selectedReq.package]?.name || selectedReq.package}
+                          </div>
+                        </div>
+                      )}
+                      {selectedReq.amountPayable && (
+                        <div>
+                          <div className="text-slate-500 font-mono text-[11px]">Estimated Amount:</div>
+                          <div className="font-mono font-bold text-slate-900 mt-0.5">
+                            {selectedReq.amountPayable}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-
-                {/* 4. Commercial Breakdown */}
-                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs space-y-2.5">
-                  <div className="border-b border-slate-100 pb-2">
-                    <span className="text-xs font-semibold font-mono uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                      <CreditCard className="w-3.5 h-3.5 text-slate-400" />
-                      Commercial Terms
-                    </span>
-                  </div>
-
-                  <div className="space-y-2 text-xs">
-                    <div>
-                      <div className="text-slate-500 font-mono text-[11px]">Payment Schedule</div>
-                      <div className="font-semibold text-slate-900 text-sm mt-0.5 flex items-center gap-1.5">
-                        <span>{PAYMENT_PLAN_LABELS[selectedReq.paymentPlan]?.title || selectedReq.paymentPlan}</span>
-                        {PAYMENT_PLAN_LABELS[selectedReq.paymentPlan]?.discountBadge && (
-                          <span className="text-emerald-700 font-mono text-xs font-medium">
-                            ({PAYMENT_PLAN_LABELS[selectedReq.paymentPlan].discountBadge})
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-slate-100">
-                      <div className="text-slate-500 font-mono text-[11px]">Amount Payable</div>
-                      <div className="font-mono font-bold text-slate-900 text-sm mt-0.5">
-                        {selectedReq.amountPayable || "Custom Quote"}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
 

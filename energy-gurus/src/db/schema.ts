@@ -412,20 +412,24 @@ export const brandsRelations = relations(brands, ({ one }) => ({
 export const monitoringRequests = pgTable('monitoring_requests', {
   id: uuid('id').defaultRandom().primaryKey(),
   customerName: text('customer_name').notNull(),
-  address: text('address').notNull(),
+  designation: text('designation'),
+  company: text('company'),
+  city: text('city'),
+  address: text('address'),
   contactNo: text('contact_no').notNull(),
   email: text('email').notNull(),
-  cnic: text('cnic').notNull(),
-  customerType: text('customer_type').notNull(),
-  systemSize: text('system_size').notNull(),
-  package: text('package').notNull(),
-  monitoringHours: text('monitoring_hours').notNull(),
-  paymentPlan: text('payment_plan').notNull(),
+  cnic: text('cnic'),
+  customerType: text('customer_type'),
+  systemSize: text('system_size'),
+  package: text('package'),
+  monitoringHours: text('monitoring_hours'),
+  paymentPlan: text('payment_plan'),
   amountPayable: text('amount_payable'),
+  remarks: text('remarks'),
   status: text('status').$type<'pending' | 'contacted' | 'active' | 'rejected'>().default('pending').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
-    });
+});
 
 export const writerProfiles = pgTable('writer_profiles', {
   id: uuid('id').defaultRandom().primaryKey(),

@@ -1,86 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { submitMonitoringRequest } from '@/app/(public)/monitoring/actions';
 
 export default function RequestForm() {
-    const [size, setSize] = useState<string>('');
-    const [pkg, setPkg] = useState<string>('');
-    const [hours, setHours] = useState<string>('');
-    const [plan, setPlan] = useState<string>('');
-    
-    const [showModal, setShowModal] = useState<boolean>(false);
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const [cnic, setCnic] = useState<string>('');
-
-    useEffect(() => {
-        const handleSelectPackage = (e: Event) => {
-            const customEvent = e as CustomEvent;
-            const { pkg: newPkg, size: newSize, hours: newHours, plan: newPlan } = customEvent.detail;
-            setPkg(newPkg);
-            setSize(newSize);
-            setHours(newHours);
-            setPlan(newPlan);
-            
-            if (newSize === 'contact') {
-                setShowModal(true);
-            }
-        };
-
-        document.addEventListener('selectPackage', handleSelectPackage);
-        return () => document.removeEventListener('selectPackage', handleSelectPackage);
-    }, []);
-
-    const handleCnicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let val = e.target.value.replace(/\D/g, '');
-        if (val.length > 13) val = val.slice(0, 13);
-        let formatted = val;
-        if (val.length > 5 && val.length <= 12) {
-            formatted = val.slice(0, 5) + '-' + val.slice(5);
-        } else if (val.length > 12) {
-            formatted = val.slice(0, 5) + '-' + val.slice(5, 12) + '-' + val.slice(12);
-        }
-        setCnic(formatted);
-    };
-
-    const handleSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const val = e.target.value;
-        setSize(val);
-        if (val === 'contact') {
-            setShowModal(true);
-        }
-    };
-
-    const getAmountLabel = () => {
-        if (!pkg || !size || !hours || !plan) {
-            return { text: 'Select package, size, type & plan above', ready: false };
-        }
-        if (size === 'contact') {
-            return { text: 'Systems 30 kW & above are priced individually — our team will contact you with a custom quote.', ready: false };
-        }
-        
-        const base = parseFloat(size);
-        const sizeMult = parseFloat(pkg);
-        const hoursMult = parseFloat(hours);
-        const discount = parseFloat(plan);
-        const monthly = Math.round((base * sizeMult * hoursMult * (1 - discount)) / 10) * 10;
-        
-        let periodLabel = 'per month';
-        let payableNow = monthly;
-        if (discount === 0.07) { periodLabel = 'per quarter (billed every 3 months)'; payableNow = monthly * 3; }
-        else if (discount === 0.15) { periodLabel = 'per half-year (billed every 6 months)'; payableNow = monthly * 6; }
-        else if (discount === 0.3) { periodLabel = 'per year (billed annually)'; payableNow = monthly * 12; }
-        
-        return { 
-            text: `PKR ${payableNow.toLocaleString('en-US')} ${periodLabel} — approx. PKR ${monthly.toLocaleString('en-US')}/mo equivalent`, 
-            ready: true,
-            payableNow
-        };
-    };
-
-    const amountData = getAmountLabel();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -88,27 +14,14 @@ export default function RequestForm() {
         setError(null);
         
         const formData = new FormData(e.currentTarget);
-        if (amountData.ready) {
-             formData.append('amountPayable', amountData.text);
-        }
         
         const result = await submitMonitoringRequest(formData);
         
         if (result.success) {
             setIsSubmitted(true);
-            setShowModal(false);
         } else {
-            setError(result.error || 'Something went wrong');
+            setError(result.error || 'Something went wrong. Please try again.');
             setIsSubmitting(false);
-        }
-    };
-
-    const submitLargeSystem = () => {
-        const form = document.getElementById('monitoringForm') as HTMLFormElement;
-        if (form) {
-             if (form.reportValidity()) {
-                 form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-             }
         }
     };
 
@@ -118,101 +31,124 @@ export default function RequestForm() {
                 <div className="max-w-[600px] mx-auto mb-8 text-center">
                     <p className="font-ibm-plex-mono text-[0.76rem] tracking-[0.14em] uppercase text-amber flex items-center justify-center gap-2.5 mb-[18px]">
                         <span className="w-5 h-[1px] bg-amber"></span>
-                        Request Monitoring
+                        Request to Contact
                     </p>
                     <h2 className="font-space-grotesk font-semibold text-[clamp(1.6rem,3vw,2.3rem)] text-ink mb-2 tracking-[-0.01em]">
                         Keep your system performing at its best.
                     </h2>
                     <p className="text-slate-custom mt-2">
-                        Fill in your details and we'll follow up to confirm your package and schedule setup.
+                        Fill in your details and we'll follow up to confirm further details.
                     </p>
                 </div>
 
-                <form id="monitoringForm" className="bg-white border border-line rounded-[6px] p-[28px_22px] md:p-[44px] max-w-[720px] mx-auto text-left" onSubmit={handleSubmit}>
+                <form id="monitoringForm" className="bg-white border border-line rounded-[6px] p-[28px_22px] md:p-[44px] max-w-[720px] mx-auto text-left shadow-xs" onSubmit={handleSubmit}>
                     {!isSubmitted ? (
                         <>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-2">
+                                {/* Name */}
                                 <div className="md:col-span-2">
-                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">Customer Name</label>
-                                    <input type="text" name="customerName" required className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber" />
+                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">
+                                        Name <span className="text-amber">*</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        name="customerName" 
+                                        required 
+                                        placeholder="Full Name" 
+                                        className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber" 
+                                    />
                                 </div>
+
+                                {/* Designation */}
+                                <div>
+                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">
+                                        Designation
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        name="designation" 
+                                        placeholder="e.g. Director, Manager, Homeowner" 
+                                        className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber" 
+                                    />
+                                </div>
+
+                                {/* Company */}
+                                <div>
+                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">
+                                        Company
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        name="company" 
+                                        placeholder="Company / Organization Name" 
+                                        className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber" 
+                                    />
+                                </div>
+
+                                {/* City */}
+                                <div>
+                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">
+                                        City <span className="text-amber">*</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        name="city" 
+                                        required 
+                                        placeholder="e.g. Lahore, Karachi, Islamabad" 
+                                        className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber" 
+                                    />
+                                </div>
+
+                                {/* Contact No */}
+                                <div>
+                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">
+                                        Contact No. <span className="text-amber">*</span>
+                                    </label>
+                                    <input 
+                                        type="tel" 
+                                        name="contactNo" 
+                                        required 
+                                        placeholder="03XX XXXXXXX" 
+                                        className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber" 
+                                    />
+                                </div>
+
+                                {/* Email Address */}
                                 <div className="md:col-span-2">
-                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">Address</label>
-                                    <textarea name="address" required className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber resize-y min-h-[70px]"></textarea>
+                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">
+                                        Email Address <span className="text-amber">*</span>
+                                    </label>
+                                    <input 
+                                        type="email" 
+                                        name="email" 
+                                        required 
+                                        placeholder="name@example.com" 
+                                        pattern="[^@\s]+@[^@\s]+\.[^@\s]+" 
+                                        title="Please enter a valid email address" 
+                                        className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber" 
+                                    />
                                 </div>
-                                <div>
-                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">Contact No.</label>
-                                    <input type="tel" name="contactNo" required className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber" />
-                                </div>
-                                <div>
-                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">Email Address</label>
-                                    <input type="email" name="email" required pattern="[^@\s]+@[^@\s]+\.[^@\s]+" title="Please enter a valid email address" className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber" />
-                                </div>
-                                <div>
-                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">CNIC Number</label>
-                                    <input type="text" name="cnic" placeholder="XXXXX-XXXXXXX-X" value={cnic} onChange={handleCnicChange} pattern="^\d{5}-\d{7}-\d{1}$" title="Format: XXXXX-XXXXXXX-X" required className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber" />
-                                </div>
-                                <div>
-                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">Customer Type</label>
-                                    <select name="customerType" required className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber">
-                                        <option value="">Select...</option>
-                                        <option value="Residential">Residential</option>
-                                        <option value="Commercial">Commercial</option>
-                                        <option value="Industrial">Industrial</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">System Size</label>
-                                    <select name="systemSize" required value={size} onChange={handleSizeChange} className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber">
-                                        <option value="">Select...</option>
-                                        <option value="800">1 – 5 kW</option>
-                                        <option value="1200">6 – 10 kW</option>
-                                        <option value="1600">11 – 15 kW</option>
-                                        <option value="2000">16 – 20 kW</option>
-                                        <option value="2500">21 – 25 kW</option>
-                                        <option value="3000">26 – 30 kW</option>
-                                        <option value="contact">31 kW & Above (Contact Us)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">Package</label>
-                                    <select name="package" required value={pkg} onChange={(e) => setPkg(e.target.value)} className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber">
-                                        <option value="">Select...</option>
-                                        <option value="1">Basic (Annual Checkup)</option>
-                                        <option value="1.2">Moderate (Bi-Annual Checkup)</option>
-                                        <option value="1.4">Comprehensive (Quarterly Checkup)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">System Type</label>
-                                    <select name="monitoringHours" required value={hours} onChange={(e) => setHours(e.target.value)} className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber">
-                                        <option value="">Select...</option>
-                                        <option value="1">Grid Tied</option>
-                                        <option value="1.2">Hybrid</option>
-                                    </select>
-                                </div>
+
+                                {/* Remarks */}
                                 <div className="md:col-span-2">
-                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">Advance Payment Plan</label>
-                                    <select name="paymentPlan" required value={plan} onChange={(e) => setPlan(e.target.value)} className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber">
-                                        <option value="">Select...</option>
-                                        <option value="0">Monthly</option>
-                                        <option value="0.07">Quarterly Advance (7% off)</option>
-                                        <option value="0.15">Bi-Annual Advance (15% off)</option>
-                                        <option value="0.3">Annual Advance (30% off)</option>
-                                    </select>
+                                    <label className="block font-ibm-plex-mono text-[0.72rem] tracking-[0.06em] uppercase text-slate-custom mb-2">
+                                        Remarks
+                                    </label>
+                                    <textarea 
+                                        name="remarks" 
+                                        placeholder="Any specific system size, inverter model, or query..." 
+                                        className="w-full p-[12px_14px] border border-line rounded-[3px] font-sans text-[0.92rem] text-graphite bg-paper outline-none focus-visible:ring-2 focus-visible:ring-amber resize-y min-h-[90px]"
+                                    ></textarea>
                                 </div>
                             </div>
 
-                            <div className={`mt-7 p-[20px_22px] rounded-[4px] bg-paper border border-line flex flex-col gap-1.5 ${amountData.ready ? 'bg-[rgba(47,110,98,0.06)] border-teal' : ''}`}>
-                                <span className="font-ibm-plex-mono text-[0.7rem] tracking-[0.06em] uppercase text-slate-custom">Estimated Amount Payable</span>
-                                <span className={`font-space-grotesk font-bold text-[1.15rem] ${amountData.ready ? 'text-teal' : 'text-ink'}`}>
-                                    {amountData.text}
-                                </span>
-                            </div>
-                            
                             {error && <div className="mt-4 text-red-500 text-sm text-center">{error}</div>}
 
-                            <button type="submit" disabled={isSubmitting} className="mt-7 w-full p-[15px] rounded-[3px] font-semibold text-[0.95rem] bg-amber text-ink hover:bg-[#f2b458] transition-colors disabled:opacity-50">
+                            <button 
+                                type="submit" 
+                                disabled={isSubmitting} 
+                                className="mt-7 w-full p-[15px] rounded-[3px] font-semibold text-[0.95rem] bg-amber text-ink hover:bg-[#f2b458] transition-colors disabled:opacity-50 cursor-pointer"
+                            >
                                 {isSubmitting ? 'Submitting...' : 'Submit Request'}
                             </button>
                             <p className="text-[0.8rem] text-slate-custom mt-3.5 text-center">
@@ -221,27 +157,16 @@ export default function RequestForm() {
                         </>
                     ) : (
                         <div className="text-center p-5 py-8">
-                            <h3 className="text-teal font-space-grotesk font-semibold text-[1.2rem] mb-2 tracking-[-0.01em]">Request received</h3>
-                            <p className="text-slate-custom text-[0.92rem]">Thanks — our team will reach out shortly to confirm your monitoring package.</p>
+                            <h3 className="text-teal font-space-grotesk font-semibold text-[1.2rem] mb-2 tracking-[-0.01em]">
+                                Request received
+                            </h3>
+                            <p className="text-slate-custom text-[0.92rem]">
+                                Thanks — our team will reach out shortly to confirm further details.
+                            </p>
                         </div>
                     )}
                 </form>
             </div>
-
-            {/* Custom Quote Modal */}
-            {showModal && (
-                <div className="fixed inset-0 z-[100] bg-[rgba(18,33,58,0.55)] flex items-center justify-center p-5">
-                    <div className="bg-white rounded-[6px] p-8 max-w-[400px] w-full border-t-[3px] border-t-amber text-left">
-                        <h3 className="text-ink font-space-grotesk font-semibold text-[1.15rem] mb-3 tracking-[-0.01em]">Custom Quote Needed</h3>
-                        <p className="text-slate-custom text-[0.92rem] mb-6">
-                            Systems 30 kW and above are priced individually based on site requirements. Our team will contact you directly to prepare a custom quote — no need to select a package below.
-                        </p>
-                        <button type="button" onClick={submitLargeSystem} className="bg-ink text-white p-[11px_22px] rounded-[3px] font-semibold text-[0.88rem] hover:bg-ink/90 transition-colors">
-                            Submit Request
-                        </button>
-                    </div>
-                </div>
-            )}
         </section>
     );
 }
