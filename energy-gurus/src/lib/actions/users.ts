@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { users, brands, epcInstallers, inquiries, reviews, epcProjects, products } from "@/db/schema";
+import { users, brands, epcInstallers, writerProfiles, inquiries, reviews, epcProjects, products } from "@/db/schema";
 import { eq, or } from "drizzle-orm";
 import { clerkClient as createClerkClient, auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
@@ -197,5 +197,110 @@ export async function recordUserHeartbeat() {
         return { success: true };
     } catch {
         return { success: false };
+    }
+}
+
+/**
+ * Updates the authenticated user's profile avatar URL in PostgreSQL and Clerk metadata.
+ * Also logs user activity in developer_logs.
+ */
+export async function updateUserAvatar(avatarUrl: string | null) {
+    const { userId: clerkId } = await auth();
+    if (!clerkId) {
+        throw new Error("Unauthorized. Please log in to update your avatar.");
+    }
+
+    // 1. Update or create user record in PostgreSQL
+    const [existingUser] = await db.select().from(users).where(eq(users.clerkId, clerkId)).limit(1);
+
+    if (existingUser) {
+        await db.update(users)
+            .set({ avatarUrl: avatarUrl || null, updatedAt: new Date() })
+            .where(eq(users.id, existingUser.id));
+    } else {
+        // If user is whitelisted admin or newly signed up
+        try {
+            const client = await createClerkClient();
+            const cu = await client.users.getUser(clerkId);
+            const email = cu.emailAddresses[0]?.emailAddress;
+            if (email) {
+                await db.insert(users).values({
+                    clerkId,
+                    email,
+                    name: `${cu.firstName || ""} ${cu.lastName || ""}`.trim() || email,
+                    avatarUrl: avatarUrl || null,
+                    role: "super-admin",
+                }).onConflictDoUpdate({
+                    target: users.email,
+                    set: { avatarUrl: avatarUrl || null, clerkId, updatedAt: new Date() }
+                });
+            }
+        } catch (syncErr) {
+            console.warn("[Users] Could not create DB user for Clerk account:", syncErr);
+        }
+    }
+
+    // 2. Sync avatar URL into Clerk publicMetadata so client useUser() reads it instantly
+    try {
+        const client = await createClerkClient();
+        await client.users.updateUserMetadata(clerkId, {
+            publicMetadata: {
+                avatarUrl: avatarUrl || null,
+                r2AvatarUrl: avatarUrl || null,
+            }
+        });
+    } catch (clerkErr) {
+        console.warn("[Users] Failed to update Clerk publicMetadata:", clerkErr);
+    }
+
+    // 3. Log user activity in developer logs
+    logActivity({
+        action: "UPDATE",
+        logType: "user_activity",
+        tableName: "users",
+        recordId: existingUser?.id || clerkId,
+        summary: avatarUrl ? `User updated profile avatar image` : `User removed profile avatar image`,
+        metadata: {
+            avatarUrl,
+            clerkId,
+            email: existingUser?.email,
+        },
+        user: {
+            id: existingUser?.id || clerkId,
+            name: existingUser?.name || "User",
+            role: existingUser?.role || "user",
+            email: existingUser?.email,
+        }
+    });
+
+    revalidatePath("/", "layout");
+    revalidatePath("/dashboard", "layout");
+    revalidatePath("/dashboard/users");
+    revalidatePath("/dashboard/developer-logs");
+
+    return { success: true, avatarUrl };
+}
+
+/**
+ * Fetches the currently authenticated user's avatar from PostgreSQL or associated entities.
+ */
+export async function getCurrentUserAvatar(): Promise<string | null> {
+    try {
+        const { userId: clerkId } = await auth();
+        if (!clerkId) return null;
+
+        const [dbUser] = await db.select({ avatarUrl: users.avatarUrl }).from(users).where(eq(users.clerkId, clerkId)).limit(1);
+        if (dbUser?.avatarUrl) return dbUser.avatarUrl;
+
+        // Check if user is linked to an EPC, Brand, or Writer profile
+        const [brand, epc, writer] = await Promise.all([
+            db.select({ logo: brands.logoUrl }).from(brands).innerJoin(users, eq(brands.userId, users.id)).where(eq(users.clerkId, clerkId)).limit(1),
+            db.select({ logo: epcInstallers.logoUrl }).from(epcInstallers).innerJoin(users, eq(epcInstallers.userId, users.id)).where(eq(users.clerkId, clerkId)).limit(1),
+            db.select({ logo: writerProfiles.pictureUrl }).from(writerProfiles).innerJoin(users, eq(writerProfiles.userId, users.id)).where(eq(users.clerkId, clerkId)).limit(1),
+        ]);
+
+        return brand[0]?.logo || epc[0]?.logo || writer[0]?.logo || null;
+    } catch {
+        return null;
     }
 }

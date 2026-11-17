@@ -15,7 +15,7 @@ const ALLOWED_FOLDERS = [
     "podcast-thumbnails", "uploads",
     "project-images", "project-videos",
     "live-qa-thumbnails", "expert-photos", "epc-reviews", "review-proofs",
-    "news-cover", "news-covers", "news-authors", "news-images", "ad-banners", "ad-banners-mobile", "team", "writer-avatars"
+    "news-cover", "news-covers", "news-authors", "news-images", "ad-banners", "ad-banners-mobile", "team", "writer-avatars", "user-avatars", "avatars"
 ];
 
 function sanitizeExtension(filename: string): string {

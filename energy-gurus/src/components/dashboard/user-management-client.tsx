@@ -60,6 +60,7 @@ export interface DashboardUser {
   createdAt: Date | string;
   lastSignInAt?: string | null;
   lastActiveAt?: string | null;
+  avatarUrl?: string | null;
   brandLogo?: string | null;
   epcLogo?: string | null;
 }
@@ -537,7 +538,7 @@ export function UserManagementClient({
                     const whitelist = ["nomiking0072012@gmail.com", "energygurusonline@gmail.com"];
                     const isSuperAdmin = whitelist.includes(user.email.toLowerCase()) || user.role === "super-admin";
                     const displayRole = isSuperAdmin ? "super-admin" : user.role;
-                    const userLogo = user.brandLogo || user.epcLogo;
+                    const userLogo = user.avatarUrl || user.brandLogo || user.epcLogo;
                     const activeTs = user.lastActiveAt || user.lastSignInAt;
                     const { label: activeLabel, isOnline } = formatRelativeTime(activeTs);
 
@@ -688,7 +689,7 @@ export function UserManagementClient({
               const whitelist = ["nomiking0072012@gmail.com", "energygurusonline@gmail.com"];
               const isSuperAdmin = whitelist.includes(user.email.toLowerCase()) || user.role === "super-admin";
               const displayRole = isSuperAdmin ? "super-admin" : user.role;
-              const userLogo = user.brandLogo || user.epcLogo;
+              const userLogo = user.avatarUrl || user.brandLogo || user.epcLogo;
               const activeTs = user.lastActiveAt || user.lastSignInAt;
               const { label: activeLabel, isOnline } = formatRelativeTime(activeTs);
 
@@ -959,7 +960,7 @@ export function UserManagementClient({
                   {filteredUsers.map((user) => {
                     const activeTs = user.lastActiveAt || user.lastSignInAt;
                     const { label: activeLabel, isOnline } = formatRelativeTime(activeTs);
-                    const userLogo = user.brandLogo || user.epcLogo;
+                    const userLogo = user.avatarUrl || user.brandLogo || user.epcLogo;
 
                     return (
                       <tr key={user.id} className="hover:bg-paper/50 transition-colors group">

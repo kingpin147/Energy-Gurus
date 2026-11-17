@@ -60,6 +60,7 @@ export default async function UserManagementPage() {
         isActive: users.isActive,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
+        avatarUrl: users.avatarUrl,
         brandLogo: brands.logoUrl,
         epcLogo: epcInstallers.logoUrl
     })

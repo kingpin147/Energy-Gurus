@@ -115,8 +115,16 @@ export async function getDeveloperLogs(options: GetLogsOptions = {}) {
       db.select({ userId: brands.userId, name: brands.brandName, logo: brands.logoUrl }).from(brands),
       db.select({ userId: epcInstallers.userId, name: epcInstallers.companyName, logo: epcInstallers.logoUrl }).from(epcInstallers),
       db.select({ userId: writerProfiles.userId, name: writerProfiles.name, logo: writerProfiles.pictureUrl }).from(writerProfiles),
-      db.select({ id: users.id, name: users.name, email: users.email }).from(users),
+      db.select({ id: users.id, name: users.name, email: users.email, avatarUrl: users.avatarUrl }).from(users),
     ]);
+
+    userList.forEach((u) => {
+      if (u.avatarUrl) {
+        if (u.id) avatarMap[u.id] = u.avatarUrl;
+        if (u.name) avatarMap[u.name.toLowerCase().trim()] = u.avatarUrl;
+        if (u.email) avatarMap[u.email.toLowerCase().trim()] = u.avatarUrl;
+      }
+    });
 
     brandList.forEach((b) => {
       if (b.logo) {

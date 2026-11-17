@@ -12,6 +12,7 @@ export const users = pgTable('users', {
   clerkId: text('clerk_id').notNull().unique(),
   email: text('email').notNull().unique(),
   name: text('name'),
+  avatarUrl: text('avatar_url'),
   role: text('role').$type<UserRole>().default('epc').notNull(),
   isActive: boolean('is_active').default(true).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),

@@ -59,7 +59,7 @@ export default async function DashboardLayout({
                         <span className="font-ibm-plex-mono text-[0.7rem] uppercase text-slate-custom px-1 tracking-widest">Account</span>
                         <div className="flex items-center gap-3 px-1">
                             <NotificationBell />
-                            <UserNav showAvatar={false} />
+                            <UserNav showAvatar={true} />
                         </div>
                     </div>
                 </div>
