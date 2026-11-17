@@ -26,6 +26,7 @@ import {
   TimeframeOption,
   LogTypeFilter,
 } from "@/lib/actions/developer-logs-actions";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface DeveloperLogItem {
   id: string;
@@ -37,6 +38,7 @@ interface DeveloperLogItem {
   userId: string | null;
   userName: string | null;
   userRole: string | null;
+  userAvatar?: string | null;
   metadata: Record<string, any> | null;
   createdAt: Date | string;
 }
@@ -550,14 +552,17 @@ export function DeveloperLogsClient({ initialData }: DeveloperLogsClientProps) {
                       onClick={() => setSelectedLog(log)}
                       className="hover:bg-slate-50/70 transition-colors group cursor-pointer"
                     >
-                      {/* 1. User / Actor with Initial Avatar */}
+                      {/* 1. User / Actor with Uploaded Avatar or Fallback Initials */}
                       <td className="px-5 py-4 align-top">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-amber/10 text-amber flex items-center justify-center shrink-0 border border-amber/20 font-bold text-xs font-ibm-plex-mono">
-                            {getUserInitials(log.userName)}
-                          </div>
+                          <Avatar className="h-8 w-8 rounded-full border border-line/80 shadow-2xs group-hover:border-amber/40 transition-colors shrink-0 bg-white">
+                            <AvatarImage src={log.userAvatar || undefined} alt={log.userName || "User"} className="object-contain p-0.5" />
+                            <AvatarFallback className="bg-amber/10 text-amber font-bold text-xs font-ibm-plex-mono">
+                              {getUserInitials(log.userName)}
+                            </AvatarFallback>
+                          </Avatar>
                           <div>
-                            <div className="font-bold text-navy-deep group-hover:text-amber transition-colors">
+                            <div className="font-bold text-navy-deep group-hover:text-amber transition-colors line-clamp-1">
                               {log.userName || "System / Guest"}
                             </div>
                             <div className="text-[11px] text-slate-400 font-ibm-plex-mono truncate max-w-[170px]">
@@ -729,26 +734,32 @@ export function DeveloperLogsClient({ initialData }: DeveloperLogsClientProps) {
 
             {/* Modal Body */}
             <div className="p-5 overflow-y-auto space-y-4 max-h-[calc(90vh-160px)] bg-slate-50/40">
-              {/* Actor Card */}
-              <div className="bg-white border border-line rounded-xl p-4 shadow-2xs space-y-2 text-xs font-ibm-plex-mono">
+              {/* Actor Card with Avatar */}
+              <div className="bg-white border border-line rounded-xl p-4 shadow-2xs space-y-3 text-xs font-ibm-plex-mono">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   Actor &amp; Context
                 </div>
-                <div className="grid grid-cols-2 gap-2 pt-1 text-slate-700">
+                <div className="flex items-center gap-3 pb-2 border-b border-line/60">
+                  <Avatar className="h-10 w-10 rounded-full border border-line shadow-xs shrink-0 bg-white">
+                    <AvatarImage src={selectedLog.userAvatar || undefined} alt={selectedLog.userName || "User"} className="object-contain p-0.5" />
+                    <AvatarFallback className="bg-amber/10 text-amber font-bold text-xs font-ibm-plex-mono">
+                      {getUserInitials(selectedLog.userName)}
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
-                    <span className="text-slate-400">Name:</span>{" "}
-                    <strong className="text-navy-deep">{selectedLog.userName || "System"}</strong>
-                  </div>
-                  <div>
-                    <span className="text-slate-400">Role:</span>{" "}
+                    <div className="font-bold text-sm text-navy-deep font-sans">
+                      {selectedLog.userName || "System"}
+                    </div>
                     <span
-                      className={`inline-block px-2 py-0.2 rounded-full text-[10px] font-bold uppercase border ${getRoleBadgeStyle(
+                      className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border font-ibm-plex-mono mt-0.5 ${getRoleBadgeStyle(
                         selectedLog.userRole || "guest"
                       )}`}
                     >
                       {selectedLog.userRole || "guest"}
                     </span>
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2 pt-1 text-slate-700">
                   {selectedLog.userId && (
                     <div className="col-span-2 truncate">
                       <span className="text-slate-400">User ID:</span> {selectedLog.userId}

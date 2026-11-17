@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { developerLogs } from "@/db/schema";
+import { developerLogs, brands, epcInstallers, writerProfiles, users } from "@/db/schema";
 import { getUserRole } from "@/lib/roles";
 import { pruneOldDeveloperLogs } from "@/lib/developer-logger";
 import { sql, eq, desc, and } from "drizzle-orm";
@@ -108,8 +108,64 @@ export async function getDeveloperLogs(options: GetLogsOptions = {}) {
     today: 0,
   };
 
+  // Enrich logs with brand/epc/writer avatar logos from Cloudflare R2
+  const avatarMap: Record<string, string> = {};
+  try {
+    const [brandList, epcList, writerList, userList] = await Promise.all([
+      db.select({ userId: brands.userId, name: brands.brandName, logo: brands.logoUrl }).from(brands),
+      db.select({ userId: epcInstallers.userId, name: epcInstallers.companyName, logo: epcInstallers.logoUrl }).from(epcInstallers),
+      db.select({ userId: writerProfiles.userId, name: writerProfiles.name, logo: writerProfiles.pictureUrl }).from(writerProfiles),
+      db.select({ id: users.id, name: users.name, email: users.email }).from(users),
+    ]);
+
+    brandList.forEach((b) => {
+      if (b.logo) {
+        if (b.userId) avatarMap[b.userId] = b.logo;
+        if (b.name) avatarMap[b.name.toLowerCase().trim()] = b.logo;
+        const u = userList.find((usr) => usr.id === b.userId);
+        if (u?.name) avatarMap[u.name.toLowerCase().trim()] = b.logo;
+        if (u?.email) avatarMap[u.email.toLowerCase().trim()] = b.logo;
+      }
+    });
+
+    epcList.forEach((e) => {
+      if (e.logo) {
+        if (e.userId) avatarMap[e.userId] = e.logo;
+        if (e.name) avatarMap[e.name.toLowerCase().trim()] = e.logo;
+        const u = userList.find((usr) => usr.id === e.userId);
+        if (u?.name) avatarMap[u.name.toLowerCase().trim()] = e.logo;
+        if (u?.email) avatarMap[u.email.toLowerCase().trim()] = e.logo;
+      }
+    });
+
+    writerList.forEach((w) => {
+      if (w.logo) {
+        if (w.userId) avatarMap[w.userId] = w.logo;
+        if (w.name) avatarMap[w.name.toLowerCase().trim()] = w.logo;
+        const u = userList.find((usr) => usr.id === w.userId);
+        if (u?.name) avatarMap[u.name.toLowerCase().trim()] = w.logo;
+        if (u?.email) avatarMap[u.email.toLowerCase().trim()] = w.logo;
+      }
+    });
+  } catch (err) {
+    console.warn("[DeveloperLogs] Avatar enrichment error:", err);
+  }
+
+  const enrichedLogs = logs.map((log) => {
+    const resolvedAvatar =
+      log.userAvatar ||
+      (log.userId ? avatarMap[log.userId] : null) ||
+      (log.userName ? avatarMap[log.userName.toLowerCase().trim()] : null) ||
+      null;
+
+    return {
+      ...log,
+      userAvatar: resolvedAvatar,
+    };
+  });
+
   return {
-    logs,
+    logs: enrichedLogs,
     total,
     page,
     limit,

@@ -526,6 +526,7 @@ export const developerLogs = pgTable('developer_logs', {
   userId: text('user_id'),
   userName: text('user_name'),
   userRole: text('user_role'),
+  userAvatar: text('user_avatar'),
   metadata: jsonb('metadata').$type<Record<string, any>>().default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
