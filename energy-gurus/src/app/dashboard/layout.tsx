@@ -55,11 +55,13 @@ export default async function DashboardLayout({
                         <ArrowLeft className="w-4 h-4" />
                         <span>Back to Site</span>
                     </Link>
-                    <div className="flex flex-col gap-3">
-                        <span className="font-ibm-plex-mono text-[0.7rem] uppercase text-slate-custom px-1 tracking-widest">Account</span>
-                        <div className="flex items-center gap-3 px-1">
+                    <div className="flex flex-col gap-2.5">
+                        <span className="font-ibm-plex-mono text-[0.7rem] uppercase text-slate-custom px-0.5 tracking-widest">Account</span>
+                        <div className="flex items-center gap-2 w-full min-w-0">
                             <NotificationBell />
-                            <UserNav showAvatar={true} />
+                            <div className="flex-1 min-w-0">
+                                <UserNav showAvatar={true} className="w-full" />
+                            </div>
                         </div>
                     </div>
                 </div>

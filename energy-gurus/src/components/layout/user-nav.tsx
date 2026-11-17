@@ -16,8 +16,15 @@ import { LogOut, Loader2, Camera, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getCurrentUserAvatar } from "@/lib/actions/users";
 import { AvatarUploadModal } from "@/components/layout/avatar-upload-modal";
+import { cn } from "@/lib/utils";
 
-export function UserNav({ showAvatar = true }: { showAvatar?: boolean }) {
+export function UserNav({
+  showAvatar = true,
+  className = "",
+}: {
+  showAvatar?: boolean;
+  className?: string;
+}) {
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
   const router = useRouter();
@@ -75,7 +82,10 @@ export function UserNav({ showAvatar = true }: { showAvatar?: boolean }) {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="relative flex items-center justify-start gap-2.5 px-3 py-2 rounded-xl border border-line bg-white hover:bg-paper hover:border-amber/40 transition-all cursor-pointer overflow-hidden shadow-2xs group"
+            className={cn(
+              "relative flex items-center justify-start gap-2 px-2.5 py-1.5 rounded-xl border border-line bg-white hover:bg-paper hover:border-amber/40 transition-all cursor-pointer overflow-hidden shadow-2xs group min-w-0 max-w-full",
+              className
+            )}
             style={{ height: "40px" }}
           >
             {showAvatar && (
@@ -90,11 +100,7 @@ export function UserNav({ showAvatar = true }: { showAvatar?: boolean }) {
                 </AvatarFallback>
               </Avatar>
             )}
-            <span
-              className={`text-xs font-bold text-navy-deep group-hover:text-amber transition-colors truncate max-w-[150px] ${
-                showAvatar ? "inline-block" : "inline-block"
-              }`}
-            >
+            <span className="text-xs font-bold text-navy-deep group-hover:text-amber transition-colors truncate min-w-0 flex-1 text-left">
               {displayName}
             </span>
           </Button>
