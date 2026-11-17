@@ -22,7 +22,8 @@ import {
     Megaphone,
     Activity,
     BarChart3,
-    Award
+    Award,
+    Terminal
 } from "lucide-react";
 import { UserRole } from "@/db/schema";
 
@@ -46,6 +47,7 @@ export default function Sidebar({ role }: { role: UserRole | null | undefined })
         { href: "/dashboard/reviews", icon: <Star className="w-4 h-4" />, label: "Give & Manage Reviews" },
         { href: "/dashboard/inbox", icon: <Inbox className="w-4 h-4" />, label: "Support Inbox" },
         { href: "/dashboard/users", icon: <Users className="w-4 h-4" />, label: "Manage Users" },
+        { href: "/dashboard/developer-logs", icon: <Terminal className="w-4 h-4" />, label: "Developer Logs" },
     ];
 
     const epcLinks = [

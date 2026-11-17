@@ -5,6 +5,7 @@ import { monitoringRequests, inquiries, users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { sendAdminNotificationEmail } from '@/lib/mail';
+import { logActivity, logError } from '@/lib/developer-logger';
 
 export async function submitMonitoringRequest(formData: FormData) {
   try {
@@ -51,6 +52,13 @@ export async function submitMonitoringRequest(formData: FormData) {
 
     // Insert into database
     await db.insert(monitoringRequests).values(rawData);
+
+    logActivity({
+      action: "CREATE",
+      tableName: "monitoring_requests",
+      summary: `New contact & monitoring inquiry from ${customerName}${company ? ` (${company})` : ""}`,
+      metadata: { customerName, email, contactNo, city, company, designation },
+    });
 
     // Sync into inquiries table so it appears in Admin Support Inbox and Dashboard Overview
     try {

@@ -515,3 +515,23 @@ export const ads = pgTable('ads', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
 });
+
+export const developerLogs = pgTable('developer_logs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  logType: text('log_type').$type<'activity' | 'error'>().default('activity').notNull(),
+  action: text('action').notNull(), // CREATE, UPDATE, DELETE, WRITE, API_ERROR, DB_ERROR, AUTH_ERROR
+  tableName: text('table_name'),
+  recordId: text('record_id'),
+  summary: text('summary').notNull(),
+  userId: text('user_id'),
+  userName: text('user_name'),
+  userRole: text('user_role'),
+  metadata: jsonb('metadata').$type<Record<string, any>>().default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (table) => ({
+  logTypeCreatedAtIdx: index('developer_logs_log_type_created_at_idx').on(table.logType, table.createdAt),
+  userIdIdx: index('developer_logs_user_id_idx').on(table.userId),
+  actionIdx: index('developer_logs_action_idx').on(table.action),
+  createdAtIdx: index('developer_logs_created_at_idx').on(table.createdAt),
+}));
+

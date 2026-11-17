@@ -7,6 +7,7 @@ import { clerkClient as createClerkClient, auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { getUserRole } from "@/lib/roles";
 import { deleteFile, extractKeyFromUrl } from "@/lib/r2";
+import { logActivity, logError } from "@/lib/developer-logger";
 
 const adminWhitelist = ["nomiking0072012@gmail.com", "energygurusonline@gmail.com"];
 
@@ -98,6 +99,14 @@ export async function deleteUser(userId: string) {
     // Delete from DB
     await db.delete(users).where(eq(users.id, userId));
 
+    logActivity({
+        action: "DELETE",
+        tableName: "users",
+        recordId: userId,
+        summary: `Deleted user profile ${userToDelete.name || userToDelete.email} (${userToDelete.role})`,
+        metadata: { email: userToDelete.email, role: userToDelete.role, clerkId: userToDelete.clerkId },
+    });
+
     revalidatePath("/", "layout");
 }
 
@@ -129,6 +138,14 @@ export async function updateUserRole(userId: string, newRole: any) {
     // Update DB
     await db.update(users).set({ role: newRole }).where(eq(users.id, userId));
 
+    logActivity({
+        action: "UPDATE",
+        tableName: "users",
+        recordId: userId,
+        summary: `Updated user role for ${userToUpdate.name || userToUpdate.email} to ${newRole}`,
+        metadata: { previousRole: userToUpdate.role, newRole, email: userToUpdate.email },
+    });
+
     revalidatePath("/", "layout");
 }
 
@@ -153,6 +170,14 @@ export async function toggleUserStatus(userId: string) {
 
     const newStatus = !user.isActive;
     await db.update(users).set({ isActive: newStatus }).where(eq(users.id, userId));
+
+    logActivity({
+        action: "UPDATE",
+        tableName: "users",
+        recordId: userId,
+        summary: `${newStatus ? "Activated" : "Suspended"} user account ${user.name || user.email}`,
+        metadata: { previousStatus: user.isActive, newStatus, email: user.email },
+    });
 
     revalidatePath("/dashboard/users");
     revalidatePath("/", "layout");
