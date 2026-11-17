@@ -3,12 +3,18 @@ import { developerLogs, users } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
 import { sql, eq, desc, and, gte } from "drizzle-orm";
 
-export type LogType = "activity" | "error";
+export type LogType = "activity" | "user_activity" | "error";
 export type LogAction =
   | "CREATE"
   | "UPDATE"
   | "DELETE"
   | "WRITE"
+  | "LOGIN"
+  | "LOGOUT"
+  | "SUBMISSION"
+  | "INQUIRY"
+  | "REVIEW"
+  | "STATUS_CHANGE"
   | "API_ERROR"
   | "DB_ERROR"
   | "AUTH_ERROR"
@@ -16,6 +22,7 @@ export type LogAction =
 
 export interface LogParams {
   action: LogAction;
+  logType?: LogType;
   tableName?: string;
   recordId?: string;
   summary: string;
@@ -24,6 +31,7 @@ export interface LogParams {
     id?: string;
     name?: string;
     role?: string;
+    email?: string;
   };
 }
 
@@ -38,6 +46,7 @@ export interface ErrorLogParams {
     id?: string;
     name?: string;
     role?: string;
+    email?: string;
   };
 }
 
@@ -57,7 +66,7 @@ export async function pruneOldDeveloperLogs(): Promise<void> {
 }
 
 /**
- * Non-blocking fire-and-forget activity logger.
+ * Non-blocking fire-and-forget activity logger for both developer/system and user actions.
  * Never throws, never blocks the caller request.
  */
 export function logActivity(params: LogParams): void {
@@ -86,19 +95,30 @@ export function logActivity(params: LogParams): void {
             }
           }
         } catch {
-          // Running in context where auth() is unavailable
+          // Running outside request context
+        }
+      }
+
+      // Automatically determine user_activity vs system activity if not explicitly specified
+      let resolvedType: LogType = params.logType || "activity";
+      const act = params.action.toUpperCase();
+      if (!params.logType) {
+        if (["LOGIN", "LOGOUT", "SUBMISSION", "INQUIRY", "REVIEW", "AUTH"].includes(act)) {
+          resolvedType = "user_activity";
+        } else if (userRole && !["super-admin", "admin"].includes(userRole.toLowerCase())) {
+          resolvedType = "user_activity";
         }
       }
 
       await db.insert(developerLogs).values({
-        logType: "activity",
-        action: (params.action || "WRITE").toUpperCase(),
+        logType: resolvedType,
+        action: params.action.toUpperCase(),
         tableName: params.tableName || null,
         recordId: params.recordId ? String(params.recordId) : null,
         summary: params.summary,
         userId: userId || null,
-        userName: userName || "System",
-        userRole: userRole || "system",
+        userName: userName || "System / Guest",
+        userRole: userRole || "guest",
         metadata: params.metadata || {},
       });
     } catch (e) {
@@ -108,8 +128,17 @@ export function logActivity(params: LogParams): void {
 }
 
 /**
+ * Convenience helper specifically for user actions (logins, submissions, profile updates)
+ */
+export function logUserActivity(params: LogParams): void {
+  logActivity({
+    ...params,
+    logType: "user_activity",
+  });
+}
+
+/**
  * Non-blocking fire-and-forget error logger.
- * Captures error message, stack trace, and context safely.
  */
 export function logError(params: ErrorLogParams): void {
   if (params.tableName === "developer_logs") return;

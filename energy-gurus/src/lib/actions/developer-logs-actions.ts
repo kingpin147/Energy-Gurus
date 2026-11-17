@@ -4,14 +4,15 @@ import { db } from "@/db";
 import { developerLogs } from "@/db/schema";
 import { getUserRole } from "@/lib/roles";
 import { pruneOldDeveloperLogs } from "@/lib/developer-logger";
-import { sql, eq, desc, and, gte } from "drizzle-orm";
+import { sql, eq, desc, and } from "drizzle-orm";
 
 export type TimeframeOption = "1d" | "3d" | "7d";
-export type LogTypeFilter = "all" | "activity" | "error";
+export type LogTypeFilter = "all" | "user_activity" | "activity" | "error";
 
 export interface GetLogsOptions {
   timeframe?: TimeframeOption;
   logType?: LogTypeFilter;
+  roleFilter?: string;
   action?: string;
   search?: string;
   page?: number;
@@ -29,6 +30,7 @@ export async function getDeveloperLogs(options: GetLogsOptions = {}) {
 
   const timeframe = options.timeframe || "7d";
   const logType = options.logType || "all";
+  const roleFilter = options.roleFilter || "all";
   const action = options.action || "ALL";
   const search = (options.search || "").trim().toLowerCase();
   const page = Math.max(1, options.page || 1);
@@ -45,6 +47,10 @@ export async function getDeveloperLogs(options: GetLogsOptions = {}) {
 
   if (logType !== "all") {
     conditions.push(eq(developerLogs.logType, logType));
+  }
+
+  if (roleFilter !== "all") {
+    conditions.push(eq(developerLogs.userRole, roleFilter));
   }
 
   if (action !== "ALL") {
@@ -84,7 +90,8 @@ export async function getDeveloperLogs(options: GetLogsOptions = {}) {
     db
       .select({
         total: sql<number>`count(*)::int`,
-        activities: sql<number>`count(*) filter (where log_type = 'activity')::int`,
+        userActivities: sql<number>`count(*) filter (where log_type = 'user_activity')::int`,
+        devActivities: sql<number>`count(*) filter (where log_type = 'activity')::int`,
         errors: sql<number>`count(*) filter (where log_type = 'error')::int`,
         today: sql<number>`count(*) filter (where created_at >= NOW() - INTERVAL '1 day')::int`,
       })
@@ -93,7 +100,13 @@ export async function getDeveloperLogs(options: GetLogsOptions = {}) {
   ]);
 
   const total = countResult[0]?.count || 0;
-  const stats = statsResult[0] || { total: 0, activities: 0, errors: 0, today: 0 };
+  const stats = statsResult[0] || {
+    total: 0,
+    userActivities: 0,
+    devActivities: 0,
+    errors: 0,
+    today: 0,
+  };
 
   return {
     logs,

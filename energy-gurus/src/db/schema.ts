@@ -518,8 +518,8 @@ export const ads = pgTable('ads', {
 
 export const developerLogs = pgTable('developer_logs', {
   id: uuid('id').defaultRandom().primaryKey(),
-  logType: text('log_type').$type<'activity' | 'error'>().default('activity').notNull(),
-  action: text('action').notNull(), // CREATE, UPDATE, DELETE, WRITE, API_ERROR, DB_ERROR, AUTH_ERROR
+  logType: text('log_type').$type<'activity' | 'user_activity' | 'error'>().default('activity').notNull(),
+  action: text('action').notNull(), // CREATE, UPDATE, DELETE, WRITE, LOGIN, INQUIRY, SUBMISSION, API_ERROR, DB_ERROR, AUTH_ERROR
   tableName: text('table_name'),
   recordId: text('record_id'),
   summary: text('summary').notNull(),
