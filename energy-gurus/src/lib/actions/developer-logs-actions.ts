@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { developerLogs, brands, epcInstallers, writerProfiles, users } from "@/db/schema";
 import { getUserRole } from "@/lib/roles";
 import { pruneOldDeveloperLogs } from "@/lib/developer-logger";
-import { sql, eq, desc, and } from "drizzle-orm";
+import { sql, eq, desc, and, or } from "drizzle-orm";
 import { createClerkClient } from "@clerk/nextjs/server";
 
 export type TimeframeOption = "1d" | "3d" | "7d";
@@ -72,6 +72,14 @@ export async function syncUserAuthTelemetryToLogs(): Promise<void> {
       }
     });
 
+    // Purge redundant LOGIN / auth_sessions activity logs so developer logs focus purely on DB CRUD and system events
+    await db.delete(developerLogs).where(
+      or(
+        eq(developerLogs.action, "LOGIN"),
+        eq(developerLogs.tableName, "auth_sessions")
+      )
+    );
+
     // Match key by recordId_action_hour
     const existingKeySet = new Set(
       existingLogs.map((l) => `${l.recordId}_${l.action}_${new Date(l.createdAt).toISOString().slice(0, 13)}`)
@@ -101,33 +109,7 @@ export async function syncUserAuthTelemetryToLogs(): Promise<void> {
         (cu.hasImage ? cu.imageUrl : null) ||
         null;
 
-      // 1. Process recent sign-in / login (within last 7 days)
-      if (cu.lastSignInAt && cu.lastSignInAt >= sevenDaysAgo) {
-        const signinDate = new Date(cu.lastSignInAt);
-        const loginKey = `${cu.id}_LOGIN_${signinDate.toISOString().slice(0, 13)}`;
-        if (!existingKeySet.has(loginKey)) {
-          existingKeySet.add(loginKey);
-          toInsert.push({
-            logType: "user_activity" as const,
-            action: "LOGIN",
-            tableName: "auth_sessions",
-            recordId: cu.id,
-            summary: `${userName} signed into ${userRole === "super-admin" || userRole === "admin" ? "dashboard" : userRole.toUpperCase() + " portal"}`,
-            userId: dbUser?.id || cu.id,
-            userName,
-            userRole,
-            userAvatar: resolvedAvatar,
-            metadata: {
-              email: primaryEmail,
-              lastSignInAt: signinDate.toISOString(),
-              source: "clerk_auth",
-            },
-            createdAt: signinDate,
-          });
-        }
-      }
-
-      // 2. Process user registration (if registered within last 7 days)
+      // 1. Process user registration (if registered within last 7 days)
       if (cu.createdAt && cu.createdAt >= sevenDaysAgo) {
         const regDate = new Date(cu.createdAt);
         const regKey = `${cu.id}_REGISTER_${regDate.toISOString().slice(0, 13)}`;

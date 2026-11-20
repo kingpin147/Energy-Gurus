@@ -285,7 +285,7 @@ export function DeveloperLogsClient({ initialData }: DeveloperLogsClientProps) {
             {data.stats.userActivities}
           </div>
           <p className="text-[10.5px] text-slate-400 mt-0.5 font-ibm-plex-mono truncate">
-            Logins, inquiries, submissions
+            Inquiries, reviews, registrations
           </p>
         </div>
 
@@ -497,10 +497,10 @@ export function DeveloperLogsClient({ initialData }: DeveloperLogsClientProps) {
             className="w-full sm:w-auto h-9 px-3 text-xs font-semibold bg-slate-50/80 border border-line rounded-xl text-navy-deep outline-none focus:border-amber focus:bg-white transition-all cursor-pointer"
           >
             <option value="ALL">All Actions</option>
-            <option value="LOGIN">LOGIN</option>
             <option value="CREATE">CREATE</option>
             <option value="UPDATE">UPDATE</option>
             <option value="DELETE">DELETE</option>
+            <option value="REGISTER">REGISTER</option>
             <option value="INQUIRY">INQUIRY</option>
             <option value="SUBMISSION">SUBMISSION</option>
             <option value="REVIEW">REVIEW</option>
