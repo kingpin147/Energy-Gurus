@@ -41,7 +41,7 @@ export async function getPostHogTrends(eventName: string, properties?: Record<st
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(queryPayload),
-      next: { revalidate: 1800 },
+      next: { revalidate: 30 },
       signal: AbortSignal.timeout(8000)
     });
 
@@ -111,11 +111,11 @@ export async function getPostHogTable(type: 'brand' | 'epc', sort: string = 'eng
       countIf(event = '${eventPrefix}portfolio_view' OR event = '${eventPrefix}profile_view') as views,
       countIf(event = '${eventPrefix}website_click') as website,
       countIf(event = '${eventPrefix}contact_click') as contacts,
-      countIf(event = '${eventPrefix}social_click' AND properties.platform = 'Facebook') as facebook,
-      countIf(event = '${eventPrefix}social_click' AND properties.platform = 'Twitter') as twitter,
-      countIf(event = '${eventPrefix}social_click' AND properties.platform = 'LinkedIn') as linkedin,
-      countIf(event = '${eventPrefix}social_click' AND properties.platform = 'Instagram') as instagram,
-      countIf(event = '${eventPrefix}social_click' AND properties.platform = 'WhatsApp') as whatsapp,
+      countIf(event = '${eventPrefix}social_click' AND lower(properties.platform) = 'facebook') as facebook,
+      countIf(event = '${eventPrefix}social_click' AND (lower(properties.platform) = 'twitter' OR lower(properties.platform) = 'x')) as twitter,
+      countIf(event = '${eventPrefix}social_click' AND lower(properties.platform) = 'linkedin') as linkedin,
+      countIf(event = '${eventPrefix}social_click' AND lower(properties.platform) = 'instagram') as instagram,
+      countIf((event = '${eventPrefix}social_click' AND lower(properties.platform) = 'whatsapp') OR event = '${eventPrefix}whatsapp_click') as whatsapp,
       count() as total
     FROM events
     WHERE event LIKE '${eventPrefix}%'
@@ -141,7 +141,7 @@ export async function getPostHogTable(type: 'brand' | 'epc', sort: string = 'eng
           "query": hogQL
         }
       }),
-      next: { revalidate: 1800 },
+      next: { revalidate: 30 },
       signal: AbortSignal.timeout(12000)
     });
 

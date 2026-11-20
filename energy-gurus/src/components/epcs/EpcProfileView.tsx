@@ -143,6 +143,15 @@ export function EpcProfileView({
 
   // Keyboard navigation for photo gallery
   useEffect(() => {
+    if (installer?.companyName) {
+      trackEngagement("epc_profile_view", {
+        epcId: installer.id,
+        companyName: installer.companyName
+      });
+    }
+  }, [installer?.id, installer?.companyName]);
+
+  useEffect(() => {
     if (!lightbox) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft" && lightbox.index > 0) {
@@ -392,6 +401,18 @@ export function EpcProfileView({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-outline text-center"
+                  onClick={() => {
+                    trackEngagement("epc_contact_click", {
+                      epcId: installer.id,
+                      companyName: installer.companyName,
+                      method: "whatsapp"
+                    });
+                    trackEngagement("epc_social_click", {
+                      epcId: installer.id,
+                      companyName: installer.companyName,
+                      platform: "WhatsApp"
+                    });
+                  }}
                 >
                   Message on WhatsApp
                 </a>
@@ -458,13 +479,37 @@ export function EpcProfileView({
                   {installer.contactNo && (
                     <div className="contact-line">
                       <svg viewBox="0 0 24 24" fill="none"><path d="M4 5h3l2 5-2 1a11 11 0 005 5l1-2 5 2v3a2 2 0 01-2 2C10 21 3 14 3 7a2 2 0 012-2z" stroke="currentColor" strokeWidth="1.5" /></svg>
-                      <a href={`tel:${installer.contactNo.replace(/\s+/g, '')}`} className="hover:underline text-inherit">{installer.contactNo}</a>
+                      <a
+                        href={`tel:${installer.contactNo.replace(/\s+/g, '')}`}
+                        className="hover:underline text-inherit"
+                        onClick={() => {
+                          trackEngagement("epc_contact_click", {
+                            epcId: installer.id,
+                            companyName: installer.companyName,
+                            method: "phone"
+                          });
+                        }}
+                      >
+                        {installer.contactNo}
+                      </a>
                     </div>
                   )}
                   {installer.email && (
                     <div className="contact-line">
                       <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.5"/></svg>
-                      <a href={`mailto:${installer.email}`} className="hover:underline text-inherit truncate">{installer.email}</a>
+                      <a
+                        href={`mailto:${installer.email}`}
+                        className="hover:underline text-inherit truncate"
+                        onClick={() => {
+                          trackEngagement("epc_contact_click", {
+                            epcId: installer.id,
+                            companyName: installer.companyName,
+                            method: "email"
+                          });
+                        }}
+                      >
+                        {installer.email}
+                      </a>
                     </div>
                   )}
                   {whatsappNumber && (
@@ -474,6 +519,18 @@ export function EpcProfileView({
                       rel="noopener noreferrer"
                       style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginTop: "8px", fontSize: "12.5px", fontWeight: "600", color: "#2E7D5C", textDecoration: "none" }}
                       className="hover:underline"
+                      onClick={() => {
+                        trackEngagement("epc_contact_click", {
+                          epcId: installer.id,
+                          companyName: installer.companyName,
+                          method: "whatsapp"
+                        });
+                        trackEngagement("epc_social_click", {
+                          epcId: installer.id,
+                          companyName: installer.companyName,
+                          platform: "WhatsApp"
+                        });
+                      }}
                     >
                       <svg viewBox="0 0 24 24" fill="none" style={{ width: "15px", height: "15px" }}>
                         <path d="M20.5 11.5a8.5 8.5 0 10-3.8 7.1L21 20l-1.4-3.8a8.4 8.4 0 001-4.7z" stroke="currentColor" strokeWidth="1.6" />
@@ -487,7 +544,19 @@ export function EpcProfileView({
                         <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
                         <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" stroke="currentColor" strokeWidth="1.5" />
                       </svg>
-                      <a href={installer.website.startsWith("http") ? installer.website : `https://${installer.website}`} target="_blank" rel="noopener noreferrer" className="hover:underline text-inherit truncate">
+                      <a
+                        href={installer.website.startsWith("http") ? installer.website : `https://${installer.website}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline text-inherit truncate"
+                        onClick={() => {
+                          trackEngagement("epc_website_click", {
+                            epcId: installer.id,
+                            companyName: installer.companyName,
+                            url: installer.website
+                          });
+                        }}
+                      >
                         Visit Website ↗
                       </a>
                     </div>
@@ -501,6 +570,13 @@ export function EpcProfileView({
                       title="Facebook"
                       style={{ width: "32px", height: "32px", borderRadius: "50%", border: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--navy-deep)" }}
                       className="hover:bg-[#F3EEDF] transition-colors"
+                      onClick={() => {
+                        trackEngagement("epc_social_click", {
+                          epcId: installer.id,
+                          companyName: installer.companyName,
+                          platform: "Facebook"
+                        });
+                      }}
                     >
                       <svg viewBox="0 0 24 24" fill="none" style={{ width: "14px", height: "14px" }}>
                         <path d="M14 9h2V6h-2c-1.7 0-3 1.3-3 3v2H9v3h2v6h3v-6h2l1-3h-3v-1.5c0-.3.2-.5.5-.5z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
@@ -514,6 +590,13 @@ export function EpcProfileView({
                       title="Instagram"
                       style={{ width: "32px", height: "32px", borderRadius: "50%", border: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--navy-deep)" }}
                       className="hover:bg-[#F3EEDF] transition-colors"
+                      onClick={() => {
+                        trackEngagement("epc_social_click", {
+                          epcId: installer.id,
+                          companyName: installer.companyName,
+                          platform: "Instagram"
+                        });
+                      }}
                     >
                       <svg viewBox="0 0 24 24" fill="none" style={{ width: "14px", height: "14px" }}>
                         <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="1.5" />
@@ -529,6 +612,13 @@ export function EpcProfileView({
                       title="LinkedIn"
                       style={{ width: "32px", height: "32px", borderRadius: "50%", border: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--navy-deep)" }}
                       className="hover:bg-[#F3EEDF] transition-colors"
+                      onClick={() => {
+                        trackEngagement("epc_social_click", {
+                          epcId: installer.id,
+                          companyName: installer.companyName,
+                          platform: "LinkedIn"
+                        });
+                      }}
                     >
                       <svg viewBox="0 0 24 24" fill="none" style={{ width: "14px", height: "14px" }}>
                         <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.6" />
@@ -544,6 +634,13 @@ export function EpcProfileView({
                         title="YouTube"
                         style={{ width: "32px", height: "32px", borderRadius: "50%", border: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--navy-deep)" }}
                         className="hover:bg-[#F3EEDF] transition-colors"
+                        onClick={() => {
+                          trackEngagement("epc_social_click", {
+                            epcId: installer.id,
+                            companyName: installer.companyName,
+                            platform: "YouTube"
+                          });
+                        }}
                       >
                         <svg viewBox="0 0 24 24" fill="none" style={{ width: "14px", height: "14px" }}>
                           <rect x="2" y="5" width="20" height="14" rx="4" stroke="currentColor" strokeWidth="1.5" />

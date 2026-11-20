@@ -477,6 +477,13 @@ export function BrandProfileView({
                           rel="noopener noreferrer"
                           aria-label={s.platform || "Social Link"}
                           className="w-8 h-8 rounded-full border border-line flex items-center justify-center text-navy-deep hover:bg-amber transition-colors"
+                          onClick={() => {
+                            trackEngagement("brand_social_click", {
+                              brandId: brand.id,
+                              brandName: brand.brandName,
+                              platform: s.platform || "Social Link"
+                            });
+                          }}
                         >
                           {s.platform?.toLowerCase() === "facebook" ? <Facebook className="w-4 h-4" /> :
                            s.platform?.toLowerCase() === "twitter" || s.platform?.toLowerCase() === "x" ? <Twitter className="w-4 h-4" /> :

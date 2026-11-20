@@ -4,6 +4,7 @@ import { Building2, Briefcase, MousePointerClick, Globe, Facebook, Twitter, Link
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ListSort } from "@/components/shared/list-sort";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AnalyticsRefreshButton } from "@/components/dashboard/analytics-refresh-button";
 import { db } from "@/db";
 import { inquiries, reviews } from "@/db/schema";
 import { count } from "drizzle-orm";
@@ -79,8 +80,10 @@ export default async function AnalyticsPage({
   const [
     brandViewsResult,
     brandWebsiteClicksResult,
+    epcWebsiteClicksResult,
     epcProfileViewsResult,
-    contactClicksResult,
+    brandContactClicksResult,
+    epcContactClicksResult,
     brandTableResult,
     epcTableResult,
     totalInquiriesResult,
@@ -88,8 +91,10 @@ export default async function AnalyticsPage({
   ] = await Promise.allSettled([
     getPostHogTrends('brand_portfolio_view'),
     getPostHogTrends('brand_website_click'),
+    getPostHogTrends('epc_website_click'),
     getPostHogTrends('epc_profile_view'),
     getPostHogTrends('brand_contact_click'),
+    getPostHogTrends('epc_contact_click'),
     getPostHogTable('brand', brandSort || 'engagement'),
     getPostHogTable('epc', epcSort || 'engagement'),
     db.select({ count: count() }).from(inquiries),
@@ -98,8 +103,10 @@ export default async function AnalyticsPage({
 
   const brandViews = brandViewsResult.status === "fulfilled" ? brandViewsResult.value : null;
   const brandWebsiteClicks = brandWebsiteClicksResult.status === "fulfilled" ? brandWebsiteClicksResult.value : null;
+  const epcWebsiteClicks = epcWebsiteClicksResult.status === "fulfilled" ? epcWebsiteClicksResult.value : null;
   const epcProfileViews = epcProfileViewsResult.status === "fulfilled" ? epcProfileViewsResult.value : null;
-  const contactClicks = contactClicksResult.status === "fulfilled" ? contactClicksResult.value : null;
+  const brandContactClicks = brandContactClicksResult.status === "fulfilled" ? brandContactClicksResult.value : null;
+  const epcContactClicks = epcContactClicksResult.status === "fulfilled" ? epcContactClicksResult.value : null;
   const brandTable = brandTableResult.status === "fulfilled" ? brandTableResult.value : null;
   const epcTable = epcTableResult.status === "fulfilled" ? epcTableResult.value : null;
 
@@ -107,12 +114,26 @@ export default async function AnalyticsPage({
   const dbReviewsCount = totalReviewsResult.status === "fulfilled" ? totalReviewsResult.value[0]?.count || 0 : 0;
 
   // Use PostHog stream count, or fallback to real DB activity if events are pending
-  const directContactsCount = Math.max(contactClicks?.result?.[0]?.count || 0, dbInquiriesCount);
+  const totalContactClicks = (brandContactClicks?.result?.[0]?.count || 0) + (epcContactClicks?.result?.[0]?.count || 0);
+  const directContactsCount = Math.max(totalContactClicks, dbInquiriesCount);
 
   // High-level aggregated statistics
   const totalBrandViews = brandViews?.result?.[0]?.count || 0;
   const totalEpcViews = epcProfileViews?.result?.[0]?.count || 0;
   const totalViews = totalBrandViews + totalEpcViews;
+
+  const brandWebsiteCount = brandWebsiteClicks?.result?.[0]?.count || 0;
+  const epcWebsiteCount = epcWebsiteClicks?.result?.[0]?.count || 0;
+  const totalWebsiteReferrals = brandWebsiteCount + epcWebsiteCount;
+
+  // Dynamic calculation for the top engaged entity across both Brands and EPCs
+  const topBrandScore = Number(brandTable?.[0]?.[9] || 0);
+  const topEpcScore = Number(epcTable?.[0]?.[9] || 0);
+  const isEpcHigher = topEpcScore > topBrandScore;
+  const topEntityName = isEpcHigher 
+    ? (epcTable?.[0]?.[0] || brandTable?.[0]?.[0] || "Huawei") 
+    : (brandTable?.[0]?.[0] || epcTable?.[0]?.[0] || "Huawei");
+  const topEntityEngagements = isEpcHigher ? topEpcScore : topBrandScore;
 
   const stats = [
     {
@@ -131,14 +152,14 @@ export default async function AnalyticsPage({
     },
     {
       title: "Top Engaged Entity",
-      value: brandTable?.[0]?.[0] || epcTable?.[0]?.[0] || "Huawei",
+      value: topEntityName,
       icon: <Trophy className="w-4 h-4 text-amber-deep" />,
-      description: `${(brandTable?.[0]?.[9] || epcTable?.[0]?.[9] || 0)} total engagements`,
+      description: `${topEntityEngagements} total engagements`,
       accent: "bg-amber-deep"
     },
     {
       title: "Website Referrals",
-      value: (brandWebsiteClicks?.result?.[0]?.count || 0).toLocaleString(),
+      value: totalWebsiteReferrals.toLocaleString(),
       icon: <Globe className="w-4 h-4 text-teal" />,
       description: "External website clicks",
       accent: "bg-teal"
@@ -152,9 +173,12 @@ export default async function AnalyticsPage({
           <h1 className="font-space-grotesk text-3xl md:text-4xl font-bold tracking-tight text-navy-deep">Engagement Hub</h1>
           <p className="text-slate-custom text-sm md:text-base">Real-time interaction telemetry for Brands &amp; EPC Installers</p>
         </div>
-        <div className="bg-amber/10 text-amber px-3.5 py-1.5 rounded-full border border-amber/20 text-[11px] font-bold uppercase tracking-wider font-ibm-plex-mono flex items-center gap-2">
-          <span className="w-2 h-2 bg-amber rounded-full animate-pulse" />
-          <span>Live PostHog Stream</span>
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="bg-amber/10 text-amber px-3.5 py-1.5 rounded-full border border-amber/20 text-[11px] font-bold uppercase tracking-wider font-ibm-plex-mono flex items-center gap-2">
+            <span className="w-2 h-2 bg-amber rounded-full animate-pulse" />
+            <span>Live PostHog Stream</span>
+          </div>
+          <AnalyticsRefreshButton />
         </div>
       </div>
 
