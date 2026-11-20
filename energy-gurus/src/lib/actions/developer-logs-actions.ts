@@ -5,6 +5,7 @@ import { developerLogs, brands, epcInstallers, writerProfiles, users } from "@/d
 import { getUserRole } from "@/lib/roles";
 import { pruneOldDeveloperLogs } from "@/lib/developer-logger";
 import { sql, eq, desc, and } from "drizzle-orm";
+import { createClerkClient } from "@clerk/nextjs/server";
 
 export type TimeframeOption = "1d" | "3d" | "7d";
 export type LogTypeFilter = "all" | "user_activity" | "activity" | "error";
@@ -19,11 +20,156 @@ export interface GetLogsOptions {
   limit?: number;
 }
 
+/**
+ * Automatically syncs recent user sign-ins and registrations from Clerk & DB
+ * into developer_logs so that real user activity and velocity are always up to date.
+ */
+export async function syncUserAuthTelemetryToLogs(): Promise<void> {
+  try {
+    const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+    const clerkRes = await clerk.users.getUserList({ limit: 200 });
+
+    const [dbUsers, brandList, epcList, writerList, existingLogs] = await Promise.all([
+      db.select({ id: users.id, clerkId: users.clerkId, email: users.email, name: users.name, role: users.role, avatarUrl: users.avatarUrl }).from(users),
+      db.select({ userId: brands.userId, name: brands.brandName, logo: brands.logoUrl }).from(brands),
+      db.select({ userId: epcInstallers.userId, name: epcInstallers.companyName, logo: epcInstallers.logoUrl }).from(epcInstallers),
+      db.select({ userId: writerProfiles.userId, name: writerProfiles.name, logo: writerProfiles.pictureUrl }).from(writerProfiles),
+      db.select({
+        recordId: developerLogs.recordId,
+        action: developerLogs.action,
+        createdAt: developerLogs.createdAt,
+      })
+      .from(developerLogs)
+      .where(sql`created_at >= NOW() - INTERVAL '7 days'`),
+    ]);
+
+    // Build logo / avatar map
+    const avatarMap: Record<string, string> = {};
+    brandList.forEach((b) => {
+      if (b.logo) {
+        if (b.userId) avatarMap[b.userId] = b.logo;
+        if (b.name) avatarMap[b.name.toLowerCase().trim()] = b.logo;
+      }
+    });
+    epcList.forEach((e) => {
+      if (e.logo) {
+        if (e.userId) avatarMap[e.userId] = e.logo;
+        if (e.name) avatarMap[e.name.toLowerCase().trim()] = e.logo;
+      }
+    });
+    writerList.forEach((w) => {
+      if (w.logo) {
+        if (w.userId) avatarMap[w.userId] = w.logo;
+        if (w.name) avatarMap[w.name.toLowerCase().trim()] = w.logo;
+      }
+    });
+    dbUsers.forEach((u) => {
+      if (u.avatarUrl) {
+        if (u.id) avatarMap[u.id] = u.avatarUrl;
+        if (u.clerkId) avatarMap[u.clerkId] = u.avatarUrl;
+        if (u.name) avatarMap[u.name.toLowerCase().trim()] = u.avatarUrl;
+        if (u.email) avatarMap[u.email.toLowerCase().trim()] = u.avatarUrl;
+      }
+    });
+
+    // Match key by recordId_action_hour
+    const existingKeySet = new Set(
+      existingLogs.map((l) => `${l.recordId}_${l.action}_${new Date(l.createdAt).toISOString().slice(0, 13)}`)
+    );
+
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const toInsert: any[] = [];
+
+    for (const cu of clerkRes.data) {
+      const primaryEmail = cu.emailAddresses[0]?.emailAddress?.toLowerCase().trim();
+      const dbUser = dbUsers.find(
+        (u) => u.clerkId === cu.id || (primaryEmail && u.email?.toLowerCase() === primaryEmail)
+      );
+
+      const userName =
+        dbUser?.name ||
+        [cu.firstName, cu.lastName].filter(Boolean).join(" ") ||
+        primaryEmail ||
+        "User";
+
+      const userRole = dbUser?.role || "user";
+      const resolvedAvatar =
+        dbUser?.avatarUrl ||
+        (dbUser ? avatarMap[dbUser.id] : null) ||
+        avatarMap[cu.id] ||
+        avatarMap[userName.toLowerCase().trim()] ||
+        (cu.hasImage ? cu.imageUrl : null) ||
+        null;
+
+      // 1. Process recent sign-in / login (within last 7 days)
+      if (cu.lastSignInAt && cu.lastSignInAt >= sevenDaysAgo) {
+        const signinDate = new Date(cu.lastSignInAt);
+        const loginKey = `${cu.id}_LOGIN_${signinDate.toISOString().slice(0, 13)}`;
+        if (!existingKeySet.has(loginKey)) {
+          existingKeySet.add(loginKey);
+          toInsert.push({
+            logType: "user_activity" as const,
+            action: "LOGIN",
+            tableName: "auth_sessions",
+            recordId: cu.id,
+            summary: `${userName} signed into ${userRole === "super-admin" || userRole === "admin" ? "dashboard" : userRole.toUpperCase() + " portal"}`,
+            userId: dbUser?.id || cu.id,
+            userName,
+            userRole,
+            userAvatar: resolvedAvatar,
+            metadata: {
+              email: primaryEmail,
+              lastSignInAt: signinDate.toISOString(),
+              source: "clerk_auth",
+            },
+            createdAt: signinDate,
+          });
+        }
+      }
+
+      // 2. Process user registration (if registered within last 7 days)
+      if (cu.createdAt && cu.createdAt >= sevenDaysAgo) {
+        const regDate = new Date(cu.createdAt);
+        const regKey = `${cu.id}_REGISTER_${regDate.toISOString().slice(0, 13)}`;
+        if (!existingKeySet.has(regKey)) {
+          existingKeySet.add(regKey);
+          toInsert.push({
+            logType: "user_activity" as const,
+            action: "REGISTER",
+            tableName: "users",
+            recordId: cu.id,
+            summary: `New user account registered: ${userName} (${userRole.toUpperCase()})`,
+            userId: dbUser?.id || cu.id,
+            userName,
+            userRole,
+            userAvatar: resolvedAvatar,
+            metadata: {
+              email: primaryEmail,
+              registeredAt: regDate.toISOString(),
+              source: "clerk_signup",
+            },
+            createdAt: regDate,
+          });
+        }
+      }
+    }
+
+    if (toInsert.length > 0) {
+      await db.insert(developerLogs).values(toInsert);
+    }
+  } catch (err) {
+    console.warn("[DeveloperLogs] Telemetry sync warning:", err);
+  }
+}
+
 export async function getDeveloperLogs(options: GetLogsOptions = {}) {
   const role = await getUserRole();
   if (role !== "super-admin" && role !== "admin") {
     throw new Error("Unauthorized: Developer logs require administrative privileges.");
   }
+
+  // Sync real-time authentication events (logins, new registrations) before querying
+  await syncUserAuthTelemetryToLogs();
 
   // Asynchronously prune logs older than 7 days to keep database lightweight
   pruneOldDeveloperLogs().catch(() => {});

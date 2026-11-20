@@ -10,6 +10,7 @@ import { redirect } from "next/navigation";
 import { deleteFile, extractKeyFromUrl } from "@/lib/r2";
 import { clerkClient as createClerkClient } from "@clerk/nextjs/server";
 import { sanitizeDbError } from "@/lib/utils/errors";
+import { logActivity, logUserActivity } from "@/lib/developer-logger";
 
 export async function updateBrandProfile(data: FormData | Partial<typeof brands.$inferInsert>) {
   const { userId: clerkId } = await auth();
@@ -106,6 +107,15 @@ export async function updateBrandProfile(data: FormData | Partial<typeof brands.
     })
     .where(eq(brands.userId, targetUserId))
     .returning();
+
+  const brandName = (result?.[0]?.brandName) || user.name || "Brand";
+  logActivity({
+    action: "UPDATE",
+    tableName: "brands",
+    recordId: result?.[0]?.id,
+    summary: `${brandName} updated OEM brand profile`,
+    user: { id: user.id, name: brandName, role: user.role, email: user.email },
+  });
 
   // Handle Clerk Avatar Sync if logoUrl is updated
   const newLogoUrl = (updateData as any).logoUrl;

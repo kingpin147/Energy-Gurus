@@ -9,6 +9,7 @@ import { generateUniqueNewsSlug } from "@/lib/utils/slug";
 import { getUserRole } from "@/lib/roles";
 import { newsArticleSchema } from "@/lib/validations/schemas";
 import { sanitizeDbError } from "@/lib/utils/errors";
+import { logActivity } from "@/lib/developer-logger";
 
 export async function getMyWriterArticles() {
   try {
@@ -227,6 +228,15 @@ export async function createNews(formData: FormData) {
       isPublished,
       status: articleStatus,
       publishedAt: finalPublishedAt || (isPublished ? new Date() : null),
+    });
+
+    logActivity({
+      action: isWriter ? "SUBMISSION" : "CREATE",
+      logType: isWriter ? "user_activity" : "activity",
+      tableName: "news",
+      recordId: slug,
+      summary: `${authorName || user.name} ${isWriter ? "submitted draft article" : "published article"}: "${title.slice(0, 50)}..."`,
+      user: { id: user.id, name: authorName || user.name, role: user.role, email: user.email || undefined },
     });
 
     revalidatePath("/dashboard/news");

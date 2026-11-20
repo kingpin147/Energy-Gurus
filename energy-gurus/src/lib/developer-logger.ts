@@ -28,10 +28,10 @@ export interface LogParams {
   summary: string;
   metadata?: Record<string, any>;
   user?: {
-    id?: string;
-    name?: string;
-    role?: string;
-    email?: string;
+    id?: string | null;
+    name?: string | null;
+    role?: string | null;
+    email?: string | null;
   };
 }
 
@@ -43,10 +43,10 @@ export interface ErrorLogParams {
   recordId?: string;
   metadata?: Record<string, any>;
   user?: {
-    id?: string;
-    name?: string;
-    role?: string;
-    email?: string;
+    id?: string | null;
+    name?: string | null;
+    role?: string | null;
+    email?: string | null;
   };
 }
 

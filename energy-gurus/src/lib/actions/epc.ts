@@ -8,6 +8,7 @@ import { eq, and } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { deleteFile, extractKeyFromUrl } from "@/lib/r2";
+import { logActivity, logUserActivity } from "@/lib/developer-logger";
 
 export async function updateEpcProfile(data: FormData | Partial<typeof epcInstallers.$inferInsert>) {
   const { userId: clerkId } = await auth();
@@ -102,6 +103,14 @@ export async function updateEpcProfile(data: FormData | Partial<typeof epcInstal
     .set({ ...updateData, updatedAt: new Date() })
     .where(eq(epcInstallers.id, existingEpc.id));
 
+  logActivity({
+    action: "UPDATE",
+    tableName: "epc_installers",
+    recordId: existingEpc.id,
+    summary: `${existingEpc.companyName || user.name || "EPC"} updated installer profile`,
+    user: { id: user.id, name: existingEpc.companyName || user.name || "EPC", role: user.role, email: user.email || undefined },
+  });
+
   revalidatePath("/", "layout");
   return { success: true, id: existingEpc.id };
 }
@@ -123,6 +132,14 @@ export async function submitEpcForReview(epcId: string) {
   await db.update(epcInstallers)
     .set({ status: "pending_review", updatedAt: new Date() })
     .where(eq(epcInstallers.id, epc.id));
+
+  logUserActivity({
+    action: "SUBMISSION",
+    tableName: "epc_installers",
+    recordId: epc.id,
+    summary: `${epc.companyName || user.name} submitted EPC profile for review`,
+    user: { id: user.id, name: epc.companyName || user.name, role: user.role, email: user.email || undefined },
+  });
 
   revalidatePath("/dashboard/epc");
   revalidatePath("/dashboard/admin/onboard-epc");

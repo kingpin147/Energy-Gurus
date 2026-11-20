@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db";
-import { users, brands, epcInstallers, writerProfiles, inquiries, reviews, epcProjects, products } from "@/db/schema";
-import { eq, or } from "drizzle-orm";
+import { users, brands, epcInstallers, writerProfiles, inquiries, reviews, epcProjects, products, developerLogs } from "@/db/schema";
+import { eq, or, and, sql } from "drizzle-orm";
 import { clerkClient as createClerkClient, auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { getUserRole } from "@/lib/roles";
@@ -193,6 +193,36 @@ export async function recordUserHeartbeat() {
         await db.update(users)
             .set({ updatedAt: new Date() })
             .where(eq(users.clerkId, clerkId));
+
+        // Check if an active session log exists for this user in the last 4 hours
+        const [recentLog] = await db
+            .select({ id: developerLogs.id })
+            .from(developerLogs)
+            .where(and(
+                eq(developerLogs.userId, clerkId),
+                eq(developerLogs.action, "LOGIN"),
+                sql`created_at >= NOW() - INTERVAL '4 hours'`
+            ))
+            .limit(1);
+
+        if (!recentLog) {
+            const [u] = await db.select().from(users).where(eq(users.clerkId, clerkId)).limit(1);
+            if (u) {
+                logActivity({
+                    action: "LOGIN",
+                    logType: "user_activity",
+                    tableName: "auth_sessions",
+                    recordId: clerkId,
+                    summary: `${u.name || u.email} active in dashboard session`,
+                    user: {
+                        id: u.id,
+                        name: u.name || u.email,
+                        role: u.role,
+                        email: u.email
+                    }
+                });
+            }
+        }
 
         return { success: true };
     } catch {
