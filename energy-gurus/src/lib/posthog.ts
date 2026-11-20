@@ -182,3 +182,78 @@ export async function getPostHogTable(type: 'brand' | 'epc', sort: string = 'eng
     return null;
   }
 }
+
+export interface AdTelemetryMap {
+  [adId: string]: {
+    impressions: number;
+    clicks: number;
+    ctr: string;
+  };
+}
+
+export async function getPostHogAdTelemetry(): Promise<AdTelemetryMap> {
+  const project_id = process.env.NEXT_POSTHOG_PROJECT_ID?.trim();
+  const personal_api_key = process.env.POSTHOG_API_KEY?.trim();
+  const host = (process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com').trim();
+
+  if (!personal_api_key || !project_id) {
+    return {};
+  }
+
+  const hogQL = `
+    SELECT 
+      properties.adId as ad_id,
+      countIf(event = 'ad_impression') as impressions,
+      countIf(event = 'ad_click') as clicks
+    FROM events
+    WHERE event IN ('ad_impression', 'ad_click')
+      AND properties.adId IS NOT NULL
+      AND timestamp > now() - INTERVAL 90 DAY
+    GROUP BY ad_id
+  `;
+
+  const apiUrl = `${host.replace('.i.', '.')}/api/projects/${project_id}/query/`;
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${personal_api_key}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        "query": {
+          "kind": "HogQLQuery",
+          "query": hogQL
+        }
+      }),
+      next: { revalidate: 30 },
+      signal: AbortSignal.timeout(10000)
+    });
+
+    if (!response.ok) {
+      console.error('PostHog Ad Telemetry Error:', await response.text());
+      return {};
+    }
+
+    const data = await response.json();
+    const results = data.results || [];
+    const map: AdTelemetryMap = {};
+
+    results.forEach((row: any) => {
+      const adId = String(row[0] || '').trim();
+      const impressions = Number(row[1] || 0);
+      const clicks = Number(row[2] || 0);
+      const ctr = impressions > 0 ? ((clicks / impressions) * 100).toFixed(1) : "0.0";
+      if (adId) {
+        map[adId] = { impressions, clicks, ctr };
+      }
+    });
+
+    return map;
+  } catch (error) {
+    console.error('Failed to fetch PostHog ad telemetry:', error);
+    return {};
+  }
+}
+

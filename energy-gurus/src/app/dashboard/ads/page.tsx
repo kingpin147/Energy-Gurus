@@ -7,6 +7,7 @@ import { desc } from "drizzle-orm";
 import { getUserRole } from "@/lib/roles";
 import Link from "next/link";
 import { AdsManagementClient } from "@/components/dashboard/ads-management-client";
+import { getPostHogAdTelemetry } from "@/lib/posthog";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,10 @@ export default async function AdsManagementPage() {
         redirect("/dashboard");
     }
 
-    const allAds = await db.select().from(ads).orderBy(desc(ads.createdAt));
+    const [allAds, adTelemetry] = await Promise.all([
+        db.select().from(ads).orderBy(desc(ads.createdAt)),
+        getPostHogAdTelemetry(),
+    ]);
 
     return (
         <div className="p-4 md:p-8 space-y-8 max-w-[1600px] mx-auto font-sans">
@@ -49,8 +53,8 @@ export default async function AdsManagementPage() {
                 </div>
             </div>
 
-            {/* Modern Ads Campaign HUD Client Component */}
-            <AdsManagementClient initialAds={allAds} />
+            {/* Modern Ads Campaign HUD Client Component with Real PostHog Telemetry */}
+            <AdsManagementClient initialAds={allAds} initialTelemetry={adTelemetry} />
         </div>
     );
 }

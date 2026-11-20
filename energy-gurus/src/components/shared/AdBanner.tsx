@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { ads } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
+import { AdBannerClient } from "./AdBannerClient";
 
 export type AdPlacement = 
     | "leaderboard_top" 
@@ -69,23 +70,11 @@ export async function AdBanner({ placement, targetPage = "global", className = "
 
     if (ad) {
         return (
-            <div className={wrapperClass}>
-                <div className={innerClass + " overflow-hidden p-0 border-none bg-transparent"}>
-                    {ad.linkUrl ? (
-                        <a href={ad.linkUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
-                            <picture>
-                                {ad.mobileImageUrl && <source media="(max-width: 767px)" srcSet={ad.mobileImageUrl} />}
-                                <img src={ad.imageUrl} alt={ad.title} className="w-full h-full object-contain" />
-                            </picture>
-                        </a>
-                    ) : (
-                        <picture>
-                            {ad.mobileImageUrl && <source media="(max-width: 767px)" srcSet={ad.mobileImageUrl} />}
-                            <img src={ad.imageUrl} alt={ad.title} className="w-full h-full object-contain" />
-                        </picture>
-                    )}
-                </div>
-            </div>
+            <AdBannerClient
+                ad={ad}
+                wrapperClass={wrapperClass}
+                innerClass={innerClass}
+            />
         );
     }
 

@@ -106,3 +106,14 @@ export async function updateAd(id: string, formData: FormData) {
         return { success: false, message: "Failed to update ad. Please try again." };
     }
 }
+
+export async function refreshAdsTelemetry() {
+    try {
+        revalidatePath("/dashboard/ads");
+        return { success: true };
+    } catch (error) {
+        console.error("refreshAdsTelemetry error:", error);
+        return { success: false };
+    }
+}
+

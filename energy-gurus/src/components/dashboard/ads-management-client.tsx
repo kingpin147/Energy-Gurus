@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect, useMemo, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Plus,
   Pencil,
@@ -19,6 +20,7 @@ import {
   Smartphone,
   Monitor,
   Sparkles,
+  RefreshCw,
   X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,7 +35,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { DeleteContentButton } from "@/components/dashboard/delete-content-button";
-import { deleteAd, toggleAdStatus } from "@/lib/actions/ads";
+import { deleteAd, toggleAdStatus, refreshAdsTelemetry } from "@/lib/actions/ads";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -52,6 +54,7 @@ export interface AdItem {
 
 interface AdsManagementClientProps {
   initialAds: AdItem[];
+  initialTelemetry?: Record<string, { impressions: number; clicks: number; ctr: string }>;
 }
 
 const PLACEMENT_CONFIG: Record<string, { label: string; dim: string; type: "horizontal" | "vertical" | "box" }> = {
@@ -73,29 +76,21 @@ const TARGET_PAGE_CONFIG: Record<string, string> = {
   podcast: "Podcasts & QA",
 };
 
-// Deterministic telemetry calculator for realistic ad reporting
-function getAdTelemetry(ad: AdItem) {
-  // Hash the ID to produce stable consistent stats
-  let hash = 0;
-  for (let i = 0; i < ad.id.length; i++) {
-    hash = (hash << 5) - hash + ad.id.charCodeAt(i);
-    hash |= 0;
+// Real-time telemetry getter from PostHog events
+function getAdTelemetry(
+  ad: AdItem,
+  telemetryMap?: Record<string, { impressions: number; clicks: number; ctr: string }>
+) {
+  if (telemetryMap && telemetryMap[ad.id]) {
+    return telemetryMap[ad.id];
   }
-  const posHash = Math.abs(hash);
-
-  const baseImpressions =
-    ad.placement.includes("leaderboard") ? 18500 :
-    ad.placement.includes("skyscraper") ? 13400 : 9200;
-
-  const impressions = Math.floor(baseImpressions + (posHash % 4200));
-  const clickMultiplier = 0.019 + ((posHash % 12) / 1000);
-  const clicks = Math.floor(impressions * clickMultiplier);
-  const ctr = ((clicks / impressions) * 100).toFixed(1);
-
-  return { impressions, clicks, ctr };
+  return { impressions: 0, clicks: 0, ctr: "0.0" };
 }
 
-export function AdsManagementClient({ initialAds }: AdsManagementClientProps) {
+export function AdsManagementClient({ initialAds, initialTelemetry }: AdsManagementClientProps) {
+  const router = useRouter();
+  const [isRefreshing, startTransition] = useTransition();
+  const [lastRefreshed, setLastRefreshed] = useState<string>("Live");
   const [adsList, setAdsList] = useState<AdItem[]>(initialAds);
   const [search, setSearch] = useState("");
   const [placementFilter, setPlacementFilter] = useState("all");
@@ -105,6 +100,26 @@ export function AdsManagementClient({ initialAds }: AdsManagementClientProps) {
   const [previewAd, setPreviewAd] = useState<AdItem | null>(null);
   const [previewVariant, setPreviewVariant] = useState<"desktop" | "mobile">("desktop");
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const handleRefresh = () => {
+    startTransition(async () => {
+      try {
+        await refreshAdsTelemetry();
+        router.refresh();
+        const now = new Date();
+        setLastRefreshed(
+          now.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          })
+        );
+        toast.success("Ad telemetry updated from PostHog");
+      } catch (err) {
+        console.error("Refresh error:", err);
+      }
+    });
+  };
 
   // Sync internal state when parent props change
   useEffect(() => {
@@ -151,7 +166,7 @@ export function AdsManagementClient({ initialAds }: AdsManagementClientProps) {
   const totalTelemetry = useMemo(() => {
     return adsList.reduce(
       (acc, curr) => {
-        const stats = getAdTelemetry(curr);
+        const stats = getAdTelemetry(curr, initialTelemetry);
         return {
           impressions: acc.impressions + stats.impressions,
           clicks: acc.clicks + stats.clicks,
@@ -159,7 +174,7 @@ export function AdsManagementClient({ initialAds }: AdsManagementClientProps) {
       },
       { impressions: 0, clicks: 0 }
     );
-  }, [adsList]);
+  }, [adsList, initialTelemetry]);
 
   const avgCtr =
     totalTelemetry.impressions > 0
@@ -364,6 +379,21 @@ export function AdsManagementClient({ initialAds }: AdsManagementClientProps) {
               Reset
             </Button>
           )}
+
+          {/* Real-time PostHog Refresh Button */}
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="h-9 px-3.5 rounded-xl bg-amber hover:bg-amber-deep text-navy-deep text-xs font-bold gap-1.5 shadow-2xs transition-all active:scale-98 inline-flex items-center cursor-pointer shrink-0 disabled:opacity-50"
+            title="Refresh ad telemetry directly from PostHog"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-navy-deep ${isRefreshing ? "animate-spin" : ""}`} />
+            <span>Refresh</span>
+            <span className="text-[10px] opacity-75 font-mono hidden xl:inline">
+              ({lastRefreshed})
+            </span>
+          </button>
         </div>
       </div>
 
@@ -376,7 +406,7 @@ export function AdsManagementClient({ initialAds }: AdsManagementClientProps) {
             type: "horizontal",
           };
           const pageLabel = TARGET_PAGE_CONFIG[ad.targetPage] || ad.targetPage;
-          const stats = getAdTelemetry(ad);
+          const stats = getAdTelemetry(ad, initialTelemetry);
 
           return (
             <Card
