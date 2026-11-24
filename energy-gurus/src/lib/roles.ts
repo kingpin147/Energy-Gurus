@@ -12,46 +12,92 @@ export const getUserRole = cache(async (): Promise<UserRole | null> => {
     // Hardcoded Super Admin Override for authorized administrator emails
     const whitelist = ["nomiking0072012@gmail.com", "energygurusonline@gmail.com"];
 
+    // 0. Extract Clerk-signed session claims role early
+    const claimRole = (sessionClaims?.metadata as { role?: UserRole })?.role;
+
+    // Fast check Clerk user email for whitelist
+    let user = null;
+    let emails: string[] = [];
+    try {
+      user = await getCurrentUser();
+      emails = (user?.emailAddresses?.map(e => e.emailAddress.toLowerCase().trim()) || []).filter(Boolean);
+    } catch (e) {
+      console.warn("Could not fetch current Clerk user in getUserRole:", e);
+    }
+
+    const whitelistedEmail = emails.find(e => whitelist.includes(e));
+    if (whitelistedEmail) {
+      // Whitelisted admin: Try to auto-sync to DB if online, but always return super-admin
+      try {
+        if (userId) {
+          await db.insert(users).values({
+            clerkId: userId,
+            email: whitelistedEmail,
+            name: user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : "Super Admin",
+            role: "super-admin",
+            isActive: true
+          }).onConflictDoUpdate({
+            target: users.email,
+            set: { role: "super-admin", clerkId: userId, isActive: true }
+          });
+        }
+      } catch (dbErr) {
+        console.warn("Database offline or quota exceeded during whitelist sync (proceeding as super-admin):", dbErr);
+      }
+      return "super-admin";
+    }
+
     // 1. Check database first as source of truth
     if (userId) {
-      const [dbUser] = await db
-        .select({
-          id: users.id,
-          role: users.role,
-          email: users.email
-        })
-        .from(users)
-        .where(eq(users.clerkId, userId))
-        .limit(1);
+      try {
+        const [dbUser] = await db
+          .select({
+            id: users.id,
+            role: users.role,
+            email: users.email
+          })
+          .from(users)
+          .where(eq(users.clerkId, userId))
+          .limit(1);
 
-      if (dbUser) {
-        if (dbUser.email && whitelist.includes(dbUser.email.toLowerCase())) {
-          // Auto-heal DB role if accidentally altered
-          if (dbUser.role !== "super-admin") {
-            await db.update(users).set({ role: "super-admin" }).where(eq(users.id, dbUser.id));
+        if (dbUser) {
+          if (dbUser.email && whitelist.includes(dbUser.email.toLowerCase())) {
+            // Auto-heal DB role if accidentally altered
+            try {
+              if (dbUser.role !== "super-admin") {
+                await db.update(users).set({ role: "super-admin" }).where(eq(users.id, dbUser.id));
+              }
+            } catch (e) {}
+            return "super-admin";
           }
-          return "super-admin";
-        }
 
-        // Clean up any lingering invitation for this user's email
-        if (dbUser.email) {
-          try {
-            const { invitations } = await import("@/db/schema");
-            await db.delete(invitations).where(
-              sql`LOWER(TRIM(${invitations.email})) = ${dbUser.email.toLowerCase().trim()}`
-            );
-          } catch (e) {
-            console.error("Failed to clean up consumed invitation in getUserRole:", e);
+          // Clean up any lingering invitation for this user's email
+          if (dbUser.email) {
+            try {
+              const { invitations } = await import("@/db/schema");
+              await db.delete(invitations).where(
+                sql`LOWER(TRIM(${invitations.email})) = ${dbUser.email.toLowerCase().trim()}`
+              );
+            } catch (e) {
+              console.error("Failed to clean up consumed invitation in getUserRole:", e);
+            }
           }
-        }
 
-        return dbUser.role as UserRole;
+          return dbUser.role as UserRole;
+        }
+      } catch (dbErr) {
+        console.error("Database query failed in getUserRole (checking fallback claims):", dbErr);
+        if (claimRole) return claimRole;
       }
     }
 
     // 2. Fallback to Clerk email(s) directly
-    const user = await getCurrentUser();
-    const emails = (user?.emailAddresses?.map(e => e.emailAddress.toLowerCase().trim()) || []).filter(Boolean);
+    if (!user) {
+      try {
+        user = await getCurrentUser();
+        emails = (user?.emailAddresses?.map(e => e.emailAddress.toLowerCase().trim()) || []).filter(Boolean);
+      } catch (e) {}
+    }
     const primaryEmail = (user?.emailAddresses?.find(e => e.id === user.primaryEmailAddressId)?.emailAddress || user?.emailAddresses?.[0]?.emailAddress)?.toLowerCase()?.trim();
     
     if (emails.length > 0) {
@@ -225,13 +271,17 @@ export const getUserRole = cache(async (): Promise<UserRole | null> => {
     }
 
     // 3. Fallback to session claims
-    const claimRole = (sessionClaims?.metadata as { role?: UserRole })?.role;
     if (claimRole) return claimRole;
 
     // 4. No role matched - return null (never blindly fallback to an operational role like epc)
     return null;
   } catch (error) {
     console.error("Error in getUserRole:", error);
+    try {
+      const { sessionClaims } = await auth();
+      const fallbackRole = (sessionClaims?.metadata as { role?: UserRole })?.role;
+      if (fallbackRole) return fallbackRole;
+    } catch {}
     return null;
   }
 });

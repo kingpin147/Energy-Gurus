@@ -88,7 +88,13 @@ export default async function PodcastListingPage({
 }) {
   const { sort } = await searchParams;
   const sortOrder = sort === "oldest" ? "asc" : "desc";
-  const episodes = await getPodcasts(sortOrder);
+  let episodes: any[] = [];
+  try {
+    episodes = await getPodcasts(sortOrder);
+  } catch (error) {
+    console.error("Failed to load podcasts from database:", error);
+    episodes = [];
+  }
 
   return (
     <div className="font-sans text-graphite bg-paper leading-relaxed selection:bg-amber/20 overflow-x-hidden min-h-screen">

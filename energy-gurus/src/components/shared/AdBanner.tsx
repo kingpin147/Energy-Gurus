@@ -20,27 +20,32 @@ interface AdBannerProps {
 
 const getActiveAd = unstable_cache(
     async (placement: string, targetPage: string = "global") => {
-        // Try to find a page-specific ad first
-        let activeAds = await db.select().from(ads).where(
-            and(
-                eq(ads.placement, placement),
-                eq(ads.targetPage, targetPage),
-                eq(ads.isActive, true)
-            )
-        ).limit(1);
-
-        // Fallback to global ad for this placement if no specific one exists
-        if (activeAds.length === 0 && targetPage !== "global") {
-            activeAds = await db.select().from(ads).where(
+        try {
+            // Try to find a page-specific ad first
+            let activeAds = await db.select().from(ads).where(
                 and(
                     eq(ads.placement, placement),
-                    eq(ads.targetPage, "global"),
+                    eq(ads.targetPage, targetPage),
                     eq(ads.isActive, true)
                 )
             ).limit(1);
-        }
 
-        return activeAds.length > 0 ? activeAds[0] : null;
+            // Fallback to global ad for this placement if no specific one exists
+            if (activeAds.length === 0 && targetPage !== "global") {
+                activeAds = await db.select().from(ads).where(
+                    and(
+                        eq(ads.placement, placement),
+                        eq(ads.targetPage, "global"),
+                        eq(ads.isActive, true)
+                    )
+                ).limit(1);
+            }
+
+            return activeAds.length > 0 ? activeAds[0] : null;
+        } catch (error) {
+            console.error("Failed to query active ad from database:", error);
+            return null;
+        }
     },
     ['active-ads-cache', 'placement', 'targetPage'],
     { revalidate: 300, tags: ['ads'] }
