@@ -3,7 +3,7 @@ import { Activity, BarChart3, Battery, Sun, AlertTriangle, Users, MessageSquare,
 import { getUserRole } from "@/lib/roles";
 import { db } from "@/db";
 import { users, inquiries, epcInstallers, brands, products, writerProfiles, news } from "@/db/schema";
-import { eq, sql, and } from "drizzle-orm";
+import { eq, sql, and, gte } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -149,7 +149,7 @@ export default async function Dashboard() {
         count: sql<number>`count(*)`
     })
         .from(inquiries)
-        .where(and(sql`${inquiries.createdAt} >= ${sevenDaysAgo}`, trendFilter))
+        .where(and(gte(inquiries.createdAt, sevenDaysAgo), trendFilter))
         .groupBy(sql`TO_CHAR(${inquiries.createdAt}, 'YYYY-MM-DD')`)
         .orderBy(sql`TO_CHAR(${inquiries.createdAt}, 'YYYY-MM-DD')`);
 

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { seedDummyData } from "../lib/seed";
 
 (async () => {
