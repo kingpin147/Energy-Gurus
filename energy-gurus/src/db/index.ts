@@ -9,7 +9,9 @@ if (!process.env.DATABASE_URL) {
 // Disable prepared statements for Supabase transaction pooler compatibility
 const client = postgres(process.env.DATABASE_URL, { 
   prepare: false,
-  ssl: 'require'
+  ssl: 'require',
+  max: 5,
+  idle_timeout: 10
 });
 
 export const db = drizzle(client, { 
