@@ -24,7 +24,8 @@ import {
   PenTool,
   Radio,
   Zap,
-  Filter
+  Filter,
+  ArrowUpDown
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +59,7 @@ export interface DashboardUser {
   clerkId: string;
   isActive: boolean;
   createdAt: Date | string;
+  updatedAt?: Date | string | null;
   lastSignInAt?: string | null;
   lastActiveAt?: string | null;
   avatarUrl?: string | null;
@@ -125,7 +127,7 @@ export function UserManagementClient({
   const [inviteModalMode, setInviteModalMode] = useState<"single" | "bulk">("single");
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
-  const [sortOrder, setSortOrder] = useState<"latest" | "oldest" | "alpha" | "recent_login">("latest");
+  const [sortOrder, setSortOrder] = useState<"recent_active" | "latest" | "oldest" | "alpha">("recent_active");
   const [currentPage, setCurrentPage] = useState(1);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -221,9 +223,22 @@ export function UserManagementClient({
       if (sortOrder === "oldest") {
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       }
-      if (sortOrder === "recent_login" || activeTab === "activity") {
-        const aTime = a.lastActiveAt || a.lastSignInAt ? new Date(a.lastActiveAt || a.lastSignInAt!).getTime() : 0;
-        const bTime = b.lastActiveAt || b.lastSignInAt ? new Date(b.lastActiveAt || b.lastSignInAt!).getTime() : 0;
+      if (sortOrder === "latest") {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+      // "recent_active" (default) or activeTab === "activity":
+      // Sort by latest activity (lastActiveAt -> lastSignInAt -> updatedAt -> createdAt) latest to oldest
+      const getActiveTime = (u: DashboardUser) => {
+        if (u.lastActiveAt) return new Date(u.lastActiveAt).getTime();
+        if (u.lastSignInAt) return new Date(u.lastSignInAt).getTime();
+        if (u.updatedAt) return new Date(u.updatedAt).getTime();
+        if (u.createdAt) return new Date(u.createdAt).getTime();
+        return 0;
+      };
+
+      const aTime = getActiveTime(a);
+      const bTime = getActiveTime(b);
+      if (bTime !== aTime) {
         return bTime - aTime;
       }
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -491,15 +506,15 @@ export function UserManagementClient({
               {/* Sort Order */}
               <Select
                 value={sortOrder}
-                onValueChange={(val: "latest" | "oldest" | "alpha" | "recent_login") => setSortOrder(val)}
+                onValueChange={(val: "recent_active" | "latest" | "oldest" | "alpha") => setSortOrder(val)}
               >
-                <SelectTrigger className="h-10 rounded-xl bg-white border border-slate-200/80 shadow-xs text-xs font-semibold text-navy-deep w-full sm:w-40 focus:ring-amber/20 focus:border-amber">
+                <SelectTrigger className="h-10 rounded-xl bg-white border border-slate-200/80 shadow-xs text-xs font-semibold text-navy-deep w-full sm:w-48 focus:ring-amber/20 focus:border-amber">
                   <SelectValue placeholder="Sort Order" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="recent_active">Recently Active</SelectItem>
                   <SelectItem value="latest">Latest Registered</SelectItem>
-                  <SelectItem value="recent_login">Recent Login</SelectItem>
-                  <SelectItem value="oldest">Oldest</SelectItem>
+                  <SelectItem value="oldest">Oldest Registered</SelectItem>
                   <SelectItem value="alpha">Name (A-Z)</SelectItem>
                 </SelectContent>
               </Select>
@@ -524,9 +539,16 @@ export function UserManagementClient({
                     <th className="py-3.5 px-5 font-bold text-navy-deep text-[11px] uppercase tracking-wider font-ibm-plex-mono">
                       Account Status
                     </th>
-                    {/* NEW COLUMN: Last Active / Registered */}
-                    <th className="py-3.5 px-5 font-bold text-navy-deep text-[11px] uppercase tracking-wider font-ibm-plex-mono">
-                      Last Active / Registered
+                    {/* Clickable Column: Last Active / Registered */}
+                    <th 
+                      onClick={() => setSortOrder(prev => prev === "recent_active" ? "latest" : "recent_active")}
+                      className="py-3.5 px-5 font-bold text-navy-deep text-[11px] uppercase tracking-wider font-ibm-plex-mono cursor-pointer hover:text-amber select-none transition-colors group"
+                      title="Click to toggle: Recently Active vs Latest Registered"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>Last Active / Registered</span>
+                        <ArrowUpDown className={`w-3.5 h-3.5 transition-colors ${sortOrder === "recent_active" ? "text-amber" : "text-slate-400 group-hover:text-amber"}`} />
+                      </div>
                     </th>
                     <th className="py-3.5 px-5 font-bold text-navy-deep text-[11px] uppercase tracking-wider font-ibm-plex-mono text-right">
                       Actions
