@@ -18,6 +18,7 @@ export interface GetLogsOptions {
   search?: string;
   page?: number;
   limit?: number;
+  cursor?: { createdAt: string; id: string } | null;
 }
 
 /**
@@ -198,16 +199,20 @@ export async function getDeveloperLogs(options: GetLogsOptions = {}) {
   }
 
   const whereClause = and(...conditions);
+  const cursorCondition = options.cursor
+    ? sql`(${developerLogs.createdAt}, ${developerLogs.id}) < (${options.cursor.createdAt}::timestamptz, ${options.cursor.id}::uuid)`
+    : undefined;
+  const paginatedWhere = cursorCondition ? and(whereClause, cursorCondition) : whereClause;
 
   // Query logs and total matching
   const [logs, countResult, statsResult] = await Promise.all([
     db
       .select()
       .from(developerLogs)
-      .where(whereClause)
-      .orderBy(desc(developerLogs.createdAt))
+      .where(paginatedWhere)
+      .orderBy(desc(developerLogs.createdAt), desc(developerLogs.id))
       .limit(limit)
-      .offset(offset),
+      .offset(options.cursor ? 0 : offset),
 
     db
       .select({ count: sql<number>`count(*)::int` })
@@ -300,12 +305,19 @@ export async function getDeveloperLogs(options: GetLogsOptions = {}) {
     };
   });
 
+  const lastLog = enrichedLogs[enrichedLogs.length - 1];
+  const nextCursor =
+    enrichedLogs.length === limit && lastLog
+      ? { createdAt: new Date(lastLog.createdAt).toISOString(), id: lastLog.id }
+      : null;
+
   return {
     logs: enrichedLogs,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit) || 1,
+    nextCursor,
     stats,
   };
 }

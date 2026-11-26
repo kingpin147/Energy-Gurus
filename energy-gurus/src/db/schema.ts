@@ -1,5 +1,5 @@
-import { pgTable, text, timestamp, uuid, jsonb, integer, boolean, index } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { pgTable, text, timestamp, uuid, jsonb, integer, boolean, index, check } from 'drizzle-orm/pg-core';
+import { relations, sql } from 'drizzle-orm';
 
 // ... (existing code) ...
 
@@ -19,7 +19,9 @@ export const users = pgTable('users', {
   updatedAt: timestamp('updated_at').defaultNow().notNull()
     }, (table) => ({
   isActiveIdx: index('users_is_active_idx').on(table.isActive),
-  createdAtIdx: index('users_created_at_idx').on(table.createdAt)
+  createdAtIdx: index('users_created_at_idx').on(table.createdAt),
+  activeRoleIdx: index('users_active_role_idx').on(table.role).where(sql`${table.isActive} = true`),
+  roleCheck: check('users_role_check', sql`${table.role} IN ('super-admin', 'admin', 'epc', 'brand', 'writer', 'user')`),
     }));
 
 export const epcInstallers = pgTable('epc_installers', {
@@ -79,7 +81,10 @@ export const epcInstallers = pgTable('epc_installers', {
     }, (table) => ({
   userIdIdx: index('epc_installers_user_id_idx').on(table.userId),
   slugIdx: index('epc_installers_slug_idx').on(table.slug),
-  createdAtIdx: index('epc_installers_created_at_idx').on(table.createdAt)
+  createdAtIdx: index('epc_installers_created_at_idx').on(table.createdAt),
+  liveCreatedIdx: index('epc_installers_live_created_idx').on(table.createdAt).where(sql`${table.status} = 'live'`),
+  statusCheck: check('epc_installers_status_check', sql`${table.status} IN ('draft', 'pending_review', 'changes_requested', 'approved', 'live', 'rejected')`),
+  tierCheck: check('epc_installers_tier_check', sql`${table.tier} IN ('unverified', 'bronze', 'silver', 'gold', 'diamond', 'platinum')`),
     }));
 
 export const epcOffices = pgTable('epc_offices', {
@@ -168,7 +173,9 @@ export const brands = pgTable('brands', {
   updatedAt: timestamp('updated_at').defaultNow().notNull()
     }, (table) => ({
   userIdIdx: index('brands_user_id_idx').on(table.userId),
-  createdAtIdx: index('brands_created_at_idx').on(table.createdAt)
+  createdAtIdx: index('brands_created_at_idx').on(table.createdAt),
+  liveCreatedIdx: index('brands_live_created_idx').on(table.createdAt).where(sql`${table.status} = 'live'`),
+  statusCheck: check('brands_status_check', sql`${table.status} IN ('draft', 'pending_review', 'changes_requested', 'approved', 'live', 'rejected')`),
     }));
 
 export const products = pgTable('products', {
@@ -494,7 +501,9 @@ export const news = pgTable('news', {
   authorIdIdx: index('news_author_id_idx').on(table.authorId),
   slugIdx: index('news_slug_idx').on(table.slug),
   statusIdx: index('news_status_idx').on(table.status),
-  createdAtIdx: index('news_created_at_idx').on(table.createdAt)
+  createdAtIdx: index('news_created_at_idx').on(table.createdAt),
+  publishedIdx: index('news_published_idx').on(table.publishedAt).where(sql`${table.isPublished} = true`),
+  statusCheck: check('news_status_check', sql`${table.status} IN ('draft', 'pending_review', 'changes_requested', 'published', 'rejected')`),
 }));
 
 export const newsRelations = relations(news, ({ one }) => ({
