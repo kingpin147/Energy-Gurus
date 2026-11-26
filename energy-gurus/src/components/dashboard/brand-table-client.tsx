@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Building2,
@@ -106,6 +106,10 @@ export interface BrandListItem {
 export function BrandTableClient({ initialBrands }: { initialBrands: BrandListItem[] }) {
   const router = useRouter();
   const [brands, setBrands] = useState<BrandListItem[]>(initialBrands);
+
+  useEffect(() => {
+    setBrands(initialBrands);
+  }, [initialBrands]);
   const [search, setSearch] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
 

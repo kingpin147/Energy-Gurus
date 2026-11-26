@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   UserCheck,
@@ -66,6 +66,10 @@ export interface WriterListItem {
 export function WriterTableClient({ initialWriters }: { initialWriters: WriterListItem[] }) {
   const router = useRouter();
   const [writers, setWriters] = useState<WriterListItem[]>(initialWriters);
+
+  useEffect(() => {
+    setWriters(initialWriters);
+  }, [initialWriters]);
   const [search, setSearch] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
 

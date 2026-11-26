@@ -101,30 +101,23 @@ export async function getBrandFullDetails(brandId: string) {
 
   if (!brand) return null;
 
-  const brandProducts = await db
-    .select()
-    .from(products)
-    .where(eq(products.brandId, brandId))
-    .orderBy(desc(products.createdAt));
-
-  const brandReviews = await db
-    .select({
-      id: reviews.id,
-      rating: reviews.rating,
-      comment: reviews.comment,
-      reply: reviews.reply,
-      createdAt: reviews.createdAt,
-      authorName: users.name,
-      authorEmail: users.email,
-    })
-    .from(reviews)
-    .leftJoin(users, eq(users.id, reviews.authorId))
-    .where(eq(reviews.targetId, brandId));
-
-  const [linkedUser] = await db
-    .select()
-    .from(users)
-    .where(eq(users.id, brand.userId));
+  const [brandProducts, brandReviews, [linkedUser]] = await Promise.all([
+    db.select().from(products).where(eq(products.brandId, brandId)).orderBy(desc(products.createdAt)),
+    db
+      .select({
+        id: reviews.id,
+        rating: reviews.rating,
+        comment: reviews.comment,
+        reply: reviews.reply,
+        createdAt: reviews.createdAt,
+        authorName: users.name,
+        authorEmail: users.email,
+      })
+      .from(reviews)
+      .leftJoin(users, eq(users.id, reviews.authorId))
+      .where(eq(reviews.targetId, brandId)),
+    db.select().from(users).where(eq(users.id, brand.userId)),
+  ]);
 
   return {
     ...brand,

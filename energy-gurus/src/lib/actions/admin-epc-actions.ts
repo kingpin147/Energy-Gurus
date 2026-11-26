@@ -100,35 +100,24 @@ export async function getEpcFullDetails(epcId: string) {
 
   if (!epc) return null;
 
-  const offices = await db
-    .select()
-    .from(epcOffices)
-    .where(eq(epcOffices.epcId, epcId));
-
-  const projects = await db
-    .select()
-    .from(epcProjects)
-    .where(eq(epcProjects.epcId, epcId))
-    .orderBy(desc(epcProjects.createdAt));
-
-  const epcReviews = await db
-    .select({
-      id: reviews.id,
-      rating: reviews.rating,
-      comment: reviews.comment,
-      reply: reviews.reply,
-      createdAt: reviews.createdAt,
-      authorName: users.name,
-      authorEmail: users.email,
-    })
-    .from(reviews)
-    .leftJoin(users, eq(users.id, reviews.authorId))
-    .where(eq(reviews.targetId, epcId));
-
-  const certs = await db
-    .select()
-    .from(installerCertifications)
-    .where(eq(installerCertifications.installerId, epcId));
+  const [offices, projects, epcReviews, certs] = await Promise.all([
+    db.select().from(epcOffices).where(eq(epcOffices.epcId, epcId)),
+    db.select().from(epcProjects).where(eq(epcProjects.epcId, epcId)).orderBy(desc(epcProjects.createdAt)),
+    db
+      .select({
+        id: reviews.id,
+        rating: reviews.rating,
+        comment: reviews.comment,
+        reply: reviews.reply,
+        createdAt: reviews.createdAt,
+        authorName: users.name,
+        authorEmail: users.email,
+      })
+      .from(reviews)
+      .leftJoin(users, eq(users.id, reviews.authorId))
+      .where(eq(reviews.targetId, epcId)),
+    db.select().from(installerCertifications).where(eq(installerCertifications.installerId, epcId)),
+  ]);
 
   return {
     ...epc,
@@ -289,6 +278,9 @@ export async function adminUpdateEpcInstaller(epcId: string, data: {
 
     revalidatePath("/dashboard/admin/onboard-epc");
     revalidatePath("/epcs");
+    revalidatePath("/installers");
+    revalidatePath(`/epcs/${epcId}`);
+    revalidatePath(`/installers/${epcId}`);
     revalidatePath("/", "layout");
 
     return { success: true, message: "EPC Installer updated successfully" };
@@ -359,6 +351,9 @@ export async function deleteEpcInstallerAction(epcId: string, userId: string) {
 
     revalidatePath("/dashboard/admin/onboard-epc");
     revalidatePath("/epcs");
+    revalidatePath("/installers");
+    revalidatePath(`/epcs/${epcId}`);
+    revalidatePath(`/installers/${epcId}`);
     revalidatePath("/", "layout");
 
     return { success: true, message: "EPC Installer profile deleted successfully" };

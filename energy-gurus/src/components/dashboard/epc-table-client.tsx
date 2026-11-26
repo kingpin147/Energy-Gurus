@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Eye,
   Pencil,
@@ -134,7 +135,12 @@ type ProjectInput = {
 };
 
 export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) {
+  const router = useRouter();
   const [epcs, setEpcs] = useState<EpcListItem[]>(initialEpcs);
+
+  useEffect(() => {
+    setEpcs(initialEpcs);
+  }, [initialEpcs]);
   const [search, setSearch] = useState("");
   const [tierFilter, setTierFilter] = useState<string>("all");
   const [verifiedFilter, setVerifiedFilter] = useState<string>("all");
@@ -338,6 +344,10 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editEpc) return;
+    if (!editFormData.companyName?.trim()) {
+      toast.error("Company name is required");
+      return;
+    }
 
     setIsUpdating(true);
     const sectorsArr = editFormData.sectors
@@ -438,30 +448,36 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
       })),
     };
 
-    const res = await adminUpdateEpcInstaller(editEpc.id, payload);
-    setIsUpdating(false);
+    try {
+      const res = await adminUpdateEpcInstaller(editEpc.id, payload);
 
-    if (res.success) {
-      toast.success("Installer updated successfully");
-      setEpcs((prev) =>
-        prev.map((item) =>
-          item.id === editEpc.id
-            ? {
-                ...item,
-                ...payload,
-                sectors: sectorsArr,
-                certifications: certsArr,
-                solarBrands: solarArr,
-                inverterBrands: inverterArr,
-                batteryBrands: batteryArr,
-                team: editTeam,
-              }
-            : item
-        )
-      );
-      setEditEpc(null);
-    } else {
-      toast.error(res.message || "Failed to update installer");
+      if (res.success) {
+        toast.success("Installer updated successfully");
+        setEpcs((prev) =>
+          prev.map((item) =>
+            item.id === editEpc.id
+              ? {
+                  ...item,
+                  ...payload,
+                  sectors: sectorsArr,
+                  certifications: certsArr,
+                  solarBrands: solarArr,
+                  inverterBrands: inverterArr,
+                  batteryBrands: batteryArr,
+                  team: editTeam,
+                }
+              : item
+          )
+        );
+        setEditEpc(null);
+        router.refresh();
+      } else {
+        toast.error(res.message || "Failed to update installer");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "An unexpected error occurred while saving");
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -1321,7 +1337,7 @@ export function EpcTableClient({ initialEpcs }: { initialEpcs: EpcListItem[] }) 
               <p className="text-xs font-medium text-slate-custom">Loading installer details for editing...</p>
             </div>
           ) : editEpc && (
-            <form onSubmit={handleSaveEdit} className="space-y-6 mt-4">
+            <form onSubmit={handleSaveEdit} noValidate className="space-y-6 mt-4">
               <Tabs defaultValue="general" className="w-full">
                 <TabsList className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl overflow-x-auto">
                   <TabsTrigger value="general" className="rounded-xl text-xs font-bold px-4 py-2">
